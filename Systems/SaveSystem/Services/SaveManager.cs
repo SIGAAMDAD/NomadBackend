@@ -42,7 +42,34 @@ namespace NomadCore.Systems.SaveSystem.Services {
 	public sealed class SaveManager : ISaveService {
 		private readonly List<Slot> Slots = new List<Slot>();
 
+		/*
+		===============
+		SaveManager
+		===============
+		*/
 		public SaveManager() {
+		}
+
+		/*
+		===============
+		Initialize
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		public void Initialize() {
+		}
+
+		/*
+		===============
+		Shutdown
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		public void Shutdown() {
 		}
 
 		/*
@@ -59,12 +86,40 @@ namespace NomadCore.Systems.SaveSystem.Services {
 			return current;
 		}
 
+		/*
+		===============
+		Load
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="slot"></param>
 		public void Load( int slot ) {
 		}
 
+		/*
+		===============
+		Save
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="slot"></param>
 		public void Save( int slot ) {
 		}
 
+		/*
+		===============
+		SlotExists
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="slot"></param>
+		/// <returns></returns>
 		public bool SlotExists( int slot ) {
 			return GetSlot( slot ) != null;
 		}
