@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.csproj" />
+    <ProjectReference Include="..\EventSystem\EventSystem.csproj" />
   </ItemGroup>
 
 </Project>

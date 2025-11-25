@@ -23,7 +23,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Systems.SaveSystem.Enums;
 using NomadCore.Systems.SaveSystem.Errors;
-using NomadCore.Systems.SaveSystem.Fields.Serializers;
+using NomadCore.Systems.SaveSystem.Infrastructure.Fields.Serializers;
 
 namespace NomadCore.Systems.SaveSystem.Infrastructure.Fields {
 	/*

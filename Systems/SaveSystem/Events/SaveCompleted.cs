@@ -22,7 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.Interfaces;
-using NomadCore.Systems.EventSystem;
+using NomadCore.Systems.EventSystem.Common;
 using System.Runtime.InteropServices;
 
 namespace NomadCore.Systems.SaveSystem.Events {

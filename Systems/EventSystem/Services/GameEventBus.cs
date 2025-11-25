@@ -99,20 +99,29 @@ namespace NomadCore.Systems.EventSystem.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		private readonly Func<IGameEvent, EventSubscriptionSet> SubscriptionSetFactory;
-
-		private readonly Func<object, HashSet<IGameEvent>> HashSetFactory;
-
-		private readonly ILoggerService? Logger = ServiceRegistry.Get<ILoggerService>();
+		private readonly Func<IGameEvent, EventSubscriptionSet> SubscriptionSetFactory = new Func<IGameEvent, EventSubscriptionSet>( ( e ) => new EventSubscriptionSet( e ) );
+		private readonly Func<object, HashSet<IGameEvent>> HashSetFactory = new Func<object, HashSet<IGameEvent>>( ( s ) => new HashSet<IGameEvent>() );
 
 		/*
 		===============
-		GameEventBus
+		Initialize
 		===============
 		*/
-		public GameEventBus() {
-			SubscriptionSetFactory = new Func<IGameEvent, EventSubscriptionSet>( ( e ) => new EventSubscriptionSet( e ) );
-			HashSetFactory = new Func<object, HashSet<IGameEvent>>( ( s ) => new HashSet<IGameEvent>() );
+		/// <summary>
+		/// 
+		/// </summary>
+		public void Initialize() {
+		}
+
+		/*
+		===============
+		Shutdown
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		public void Shutdown() {
 		}
 
 		/*
@@ -257,7 +266,7 @@ namespace NomadCore.Systems.EventSystem.Services {
 			EventSubscriptionSet? subscriptionSet = EventCache.GetOrAdd( eventHandler, SubscriptionSetFactory );
 			ArgumentNullException.ThrowIfNull( subscriptionSet );
 
-			Logger?.PrintLine( $"GameEventBus.Subscribe: subscribed to event '{eventHandler.Name}' with callback '{callback.Method.Name}'..." );
+			ServiceRegistry.Get<ILoggerService>()?.PrintLine( $"GameEventBus.Subscribe: subscribed to event '{eventHandler.Name}' with callback '{callback.Method.Name}'..." );
 			subscriptionSet.AddSubscription( subscriber, callback );
 
 			HashSet<IGameEvent>? events = SubscriberToEvents.GetOrAdd( subscriber, HashSetFactory );
@@ -439,11 +448,12 @@ namespace NomadCore.Systems.EventSystem.Services {
 		/// 
 		/// </summary>
 		/// <param name="obj"></param>
-		private static void DisconnectAllForGodotObject( GodotObject obj ) {
-			if ( Instance.GodotConnections.TryGetValue( obj, out List<ConnectionInfo>? connections ) ) {
+		private void DisconnectAllForGodotObject( GodotObject obj ) {
+			if ( GodotConnections.TryGetValue( obj, out List<ConnectionInfo>? connections ) ) {
+				var logger = ServiceRegistry.Get<ILoggerService>();
 				for ( int i = 0; i < connections.Count; i++ ) {
 					if ( connections[ i ].Source != null ) {
-						Instance.Console?.PrintDebug(
+						logger?.PrintDebug(
 							string.Format( "Disconnected signal {0} from GodotObject {1} to GodotObject {2}"
 								, connections[ i ].SignalName, connections[ i ].Source.GetType().FullName,
 								obj.GetType().FullName )
@@ -451,8 +461,8 @@ namespace NomadCore.Systems.EventSystem.Services {
 						connections[ i ].Source.Disconnect( connections[ i ].SignalName, connections[ i ].Callable );
 					}
 				}
-				if ( !Instance.GodotConnections.TryRemove( new KeyValuePair<GodotObject, List<ConnectionInfo>>( obj, connections ) ) ) {
-					Instance.Console?.PrintWarning( "GameEventBus.DisconnectAllForGodotObject: Connections.TryRemove failed!" );
+				if ( !GodotConnections.TryRemove( new KeyValuePair<GodotObject, List<ConnectionInfo>>( obj, connections ) ) ) {
+					logger?.PrintWarning( "GameEventBus.DisconnectAllForGodotObject: Connections.TryRemove failed!" );
 				}
 			}
 		}
@@ -471,8 +481,8 @@ namespace NomadCore.Systems.EventSystem.Services {
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static bool GetSubscriptionSet( IGameEvent eventHandler, out EventSubscriptionSet? subscriptionSet ) {
-			return Instance.EventCache.TryGetValue( eventHandler, out subscriptionSet );
+		private bool GetSubscriptionSet( IGameEvent eventHandler, out EventSubscriptionSet? subscriptionSet ) {
+			return EventCache.TryGetValue( eventHandler, out subscriptionSet );
 		}
 
 		/*
@@ -485,7 +495,7 @@ namespace NomadCore.Systems.EventSystem.Services {
 		/// </summary>
 		/// <param name="godotObject">The godot object to hook.</param>
 		/// <returns>True if the connection wasn't cached yet.</returns>
-		private static bool HookGodotObjectCleanup( GodotObject godotObject ) {
+		private bool HookGodotObjectCleanup( GodotObject godotObject ) {
 			if ( godotObject is Node node ) {
 				if ( !node.IsConnected( Node.SignalName.TreeExiting, Callable.From( () => CleanupSubscriber( godotObject ) ) ) ) {
 					node.Connect( Node.SignalName.TreeExiting, Callable.From( () => CleanupSubscriber( godotObject ) ) );

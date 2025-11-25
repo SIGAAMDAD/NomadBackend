@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using NomadCore.Infrastructure;
+using NomadCore.Systems.ConsoleSystem.CVars.Common;
 
 namespace NomadCore.Systems.ConsoleSystem {
 	/*
@@ -85,7 +86,7 @@ namespace NomadCore.Systems.ConsoleSystem {
 			events.HistoryNext.Subscribe( this, OnHistoryNext );
 
 			_historyPrev = eventBus.CreateEvent<HistoryPrevEventData>( nameof( HistoryPrev ) );
-			_historyNext = eventBus.CreateEvent<HistoryNextEventData>( nameof( HistoryNext) );
+			_historyNext = eventBus.CreateEvent<HistoryNextEventData>( nameof( HistoryNext ) );
 
 			HistoryPath = ProjectSettings.GlobalizePath( CONSOLE_HISTORY_FILE );
 

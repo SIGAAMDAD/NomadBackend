@@ -21,11 +21,13 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Systems.SaveSystem.Enums;
+using NomadCore.Systems.SaveSystem.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace NomadCore.Systems.SaveSystem.Fields.Serializers {
+namespace NomadCore.Systems.SaveSystem.Infrastructure.Fields.Serializers {
 	/*
 	===================================================================================
 	

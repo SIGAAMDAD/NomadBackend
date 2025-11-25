@@ -31,8 +31,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using NomadCore.Infrastructure;
+using NomadCore.Systems.ConsoleSystem.CVars.Common;
 
-namespace NomadCore.Systems.ConsoleSystem.CVars {
+namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 	/*
 	===================================================================================
 	
@@ -48,8 +49,8 @@ namespace NomadCore.Systems.ConsoleSystem.CVars {
 		private readonly ConcurrentDictionary<string, ICVar> Cvars = new ConcurrentDictionary<string, ICVar>( StringComparer.OrdinalIgnoreCase );
 		private readonly HashSet<CVarGroup> Groups = new HashSet<CVarGroup>();
 
-		private IGameEventBusService EventBus;
-		private ILoggerService Logger = ServiceRegistry.Get<ILoggerService>();
+		private readonly IGameEventBusService EventBus = ServiceRegistry.Get<IGameEventBusService>();
+		private readonly ILoggerService Logger = ServiceRegistry.Get<ILoggerService>();
 
 		/*
 		===============

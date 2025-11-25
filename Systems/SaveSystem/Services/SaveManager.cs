@@ -21,7 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Systems.EventSystem;
+using NomadCore.Abstractions.Services;
 using NomadCore.Systems.SaveSystem.Infrastructure;
 using NomadCore.Systems.SaveSystem.Interfaces;
 using System;
@@ -38,8 +38,8 @@ namespace NomadCore.Systems.SaveSystem.Services {
 	/// <summary>
 	/// 
 	/// </summary>
-	
-	public sealed class SaveManager {
+
+	public sealed class SaveManager : ISaveService {
 		private readonly List<Slot> Slots = new List<Slot>();
 
 		public SaveManager() {
@@ -57,6 +57,16 @@ namespace NomadCore.Systems.SaveSystem.Services {
 
 			ISaveSlot current = Slots[ slot ];
 			return current;
+		}
+
+		public void Load( int slot ) {
+		}
+
+		public void Save( int slot ) {
+		}
+
+		public bool SlotExists( int slot ) {
+			return GetSlot( slot ) != null;
 		}
 	};
 };

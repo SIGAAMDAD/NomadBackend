@@ -21,8 +21,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Abstractions.Services;
+using NomadCore.Infrastructure;
+using NomadCore.Systems.SaveSystem.Enums;
 using NomadCore.Systems.SaveSystem.Errors;
-using NomadCore.Systems.SaveSystem.Fields;
+using NomadCore.Systems.SaveSystem.Infrastructure.Fields;
 using NomadCore.Systems.SaveSystem.Interfaces;
 using System;
 using System.Collections.Concurrent;
@@ -50,6 +53,8 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 
 		public IReadOnlyDictionary<string, SaveField> Fields => _fields;
 		private readonly ConcurrentDictionary<string, SaveField> _fields = new ConcurrentDictionary<string, SaveField>();
+
+		private readonly ILoggerService? Logger = ServiceRegistry.Get<ILoggerService>();
 
 		public SaveField this[ string name ] => _fields[ name ];
 
@@ -94,8 +99,23 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		TryGetField
 		===============
 		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="name"></param>
+		/// <param name="value"></param>
+		/// <returns>True if the field exists, false if not found in cache.</returns>
 		public bool TryGetField<T>( string? name, out T? value ) {
-			SaveField
+			ArgumentException.ThrowIfNullOrEmpty( name );
+
+			FieldType type = FieldValue.GetFieldType<T>();
+			SaveField? field = LoadField( name, type );
+			if ( field.HasValue && field.Value.Type == type ) {
+				value = field.Value.Value.GetValue<T>();
+				return true;
+			}
+			value = default;
 			return false;
 		}
 
@@ -277,7 +297,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 			}
 
 			// not the end of the world, just a missing field, so apply the default value
-			Console.PrintError( $"...couldn't find save field {name}" );
+			Logger?.PrintError( $"...couldn't find save field {name}" );
 			return new SaveField();
 		}
 
@@ -295,9 +315,9 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		private void LoadFields( in Streams.SaveReaderStream reader, in SectionHeader header ) {
 			try {
 				for ( int i = 0; i < header.FieldCount; i++ ) {
-					var field = new SaveField( reader );
+					var field = SaveField.Read( Name, i, reader );
 					if ( !_fields.TryAdd( field.Name, field ) ) {
-						ConsoleSystem.Console.PrintError( $"Section.LoadFields: failed to add field {field.Name} to cache." );
+						Logger?.PrintError( $"Section.LoadFields: failed to add field {field.Name} to cache." );
 						throw new FailedSectionLoadException( Name, null );
 					}
 				}

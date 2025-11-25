@@ -22,7 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.Systems.SaveSystem.Interfaces;
-using NomadCore.Systems.SaveSystem.Sections;
+using NomadCore.Systems.SaveSystem.Infrastructure.Sections;
 using System;
 using System.Collections.Concurrent;
 

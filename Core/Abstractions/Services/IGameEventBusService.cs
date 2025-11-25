@@ -37,7 +37,7 @@ namespace NomadCore.Abstractions.Services {
 	/// 
 	/// </summary>
 	
-	public interface IGameEventBusService {
+	public interface IGameEventBusService : IGameService {
 		public void Subscribe( object? subscriber, IGameEvent? eventHandler, IGameEvent.EventCallback? callback );
 		public void Subscribe<TArgs>( object? subscriber, IGameEvent<TArgs>? eventHandler, IGameEvent<TArgs>.GenericEventCallback? callback ) where TArgs : IEventArgs;
 

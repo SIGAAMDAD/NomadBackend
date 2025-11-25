@@ -21,7 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Systems.SaveSystem.Streams;
+using NomadCore.Abstractions.Services;
+using NomadCore.Infrastructure;
+using NomadCore.Interfaces;
+using NomadCore.Systems.SaveSystem.Infrastructure.Streams;
 using System.Runtime.CompilerServices;
 
 namespace NomadCore.Systems.SaveSystem.Infrastructure {
@@ -64,7 +67,15 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure {
 		===============
 		*/
 		public static void Write( Slot slot, SaveStreamWriter stream ) {
-			stream.Write( Config.VersionMajor );
+			var cvarSystem = ServiceRegistry.Get<ICVarSystemService>();
+
+			ICVar<uint>? versionMajor = cvarSystem.GetCVar<uint>( "game.versionMajor" );
+			ICVar<uint>? versionMinor = cvarSystem.GetCVar<uint>( "game.versionMinor" );
+			ICVar<uint>? versionPatch = cvarSystem.GetCVar<uint>( "game.versionPatch" );
+
+			stream.Write( versionMajor.Value );
+			stream.Write( versionMinor.Value );
+			stream.Write( versionPatch.Value );
 		}
 	};
 };

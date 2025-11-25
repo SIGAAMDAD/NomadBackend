@@ -25,7 +25,6 @@ using NomadCore.Abstractions.Services;
 using NomadCore.Infrastructure;
 using NomadCore.Interfaces;
 using NomadCore.Systems.ConsoleSystem.Events;
-using NomadCore.Systems.ConsoleSystem.Infrastructure;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -47,6 +46,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		public int ArgumentCount => CommandBuilder.ArgumentCount;
 
 		private readonly ICommandBuilder CommandBuilder;
+		private readonly ILoggerService? Logger = ServiceRegistry.Get<ILoggerService>();
 
 		//
 		// autocomplete
@@ -163,11 +163,11 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 					consoleCommand.Callback.Invoke( new CommandExecutedEventData( consoleCommand, arguments ) );
 					TextEntered.Publish( new CommandExecutedEventData( consoleCommand, arguments ) );
 				} catch ( Exception ex ) {
-					Console.PrintError( $"Error executing command: {ex.Message}" );
+					Logger?.PrintError( $"Error executing command: {ex.Message}" );
 				}
 			} else if ( !string.IsNullOrEmpty( textCommand ) ) {
 				UnknownCommand.Publish( EmptyEventArgs.Args );
-				Console.PrintError( "Command not found." );
+				Logger?.PrintError( "Command not found." );
 			}
 		}
 

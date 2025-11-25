@@ -22,7 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.Systems.SaveSystem.Errors;
-using NomadCore.Systems.SaveSystem.Streams;
+using NomadCore.Systems.SaveSystem.Infrastructure.Streams;
 using System.IO;
 using System.Runtime.CompilerServices;
 

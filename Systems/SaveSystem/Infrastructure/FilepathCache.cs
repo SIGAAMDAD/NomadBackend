@@ -22,6 +22,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
+using NomadCore.Abstractions.Services;
+using NomadCore.Infrastructure;
+using NomadCore.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace NomadCore.Systems.SaveSystem {
@@ -33,7 +37,7 @@ namespace NomadCore.Systems.SaveSystem {
 	===================================================================================
 	*/
 	/// <summary>
-	/// Caches all filepaths to reduce string allocation overhead
+	/// Caches all filepaths to reduce string allocation overhead.
 	/// </summary>
 	
 	internal static class FilepathCache {
@@ -41,8 +45,18 @@ namespace NomadCore.Systems.SaveSystem {
 		private static readonly Dictionary<int, string> SlotPaths = new Dictionary<int, string>();
 		private static readonly Dictionary<KeyValuePair<int, int>, string> BackupPaths = new Dictionary<KeyValuePair<int, int>, string>();
 
+		/*
+		===============
+		FilepathCache
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
 		static FilepathCache() {
-			SavePath = ProjectSettings.GlobalizePath( $"{Config.SaveLocation}/" );
+			ICVar<string>? saveLocation = ServiceRegistry.Get<ICVarSystemService>().GetCVar<string>( "game.SaveLocation" );
+			ArgumentNullException.ThrowIfNull( saveLocation );
+			SavePath = ProjectSettings.GlobalizePath( $"{saveLocation.Value}/" );
 		}
 
 		/*

@@ -21,13 +21,16 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Abstractions.Services;
 using NomadCore.Enums;
+using NomadCore.Infrastructure;
 using NomadCore.Interfaces;
 using NomadCore.Systems.EventSystem.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -70,6 +73,8 @@ namespace NomadCore.Systems.EventSystem.Common {
 		private readonly string? _name;
 
 		public EventThreadingPolicy ThreadingPolicy => EventThreadingPolicy.MainThread;
+
+		private readonly IGameEventBusService EventBus = ServiceRegistry.Get<IGameEventBusService>();
 
 		/*
 		===============
@@ -123,7 +128,7 @@ namespace NomadCore.Systems.EventSystem.Common {
 		/// </summary>
 		/// <param name="eventArgs"></param>
 		public void Publish( IEventArgs eventArgs ) {
-			Publish( this, in eventArgs );
+			EventBus.Publish( this, in eventArgs );
 		}
 
 		/*
@@ -140,7 +145,7 @@ namespace NomadCore.Systems.EventSystem.Common {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public void Subscribe( object? subscriber, IGameEvent.EventCallback? callback ) {
 			ArgumentNullException.ThrowIfNull( callback );
-			GameEventBus.Subscribe( subscriber, this, callback );
+			EventBus.Subscribe( subscriber, this, callback );
 		}
 
 		/*
@@ -157,7 +162,7 @@ namespace NomadCore.Systems.EventSystem.Common {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public void Unsubscribe( object? subscriber, IGameEvent.EventCallback? callback ) {
 			ArgumentNullException.ThrowIfNull( callback );
-			GameEventBus.Unsubscribe( subscriber, this, callback );
+			EventBus.Unsubscribe( subscriber, this, callback );
 		}
 
 		public virtual EventThreadingPolicy GetDefaultThreadingPolicy() => EventThreadingPolicy.MainThread;

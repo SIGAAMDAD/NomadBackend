@@ -26,7 +26,6 @@ using NomadCore.Abstractions.Services;
 using NomadCore.Enums;
 using NomadCore.Infrastructure;
 using NomadCore.Interfaces;
-using NomadCore.Systems.ConsoleSystem.CVars.Services;
 using NomadCore.Systems.ConsoleSystem.Interfaces.Abstractions;
 using NomadCore.Utilities;
 using System;

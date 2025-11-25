@@ -22,9 +22,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using System;
-using NomadCore.Systems.SaveSystem.Streams;
+using NomadCore.Systems.SaveSystem.Enums;
+using NomadCore.Systems.SaveSystem.Interfaces;
+using NomadCore.Systems.SaveSystem.Infrastructure.Streams;
 
-namespace NomadCore.Systems.SaveSystem.Fields.Serializers {
+namespace NomadCore.Systems.SaveSystem.Infrastructure.Fields.Serializers {
 	/*
 	===================================================================================
 

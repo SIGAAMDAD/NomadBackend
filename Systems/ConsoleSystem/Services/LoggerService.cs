@@ -25,6 +25,7 @@ using NomadCore.Abstractions.Services;
 using NomadCore.Enums;
 using NomadCore.Infrastructure;
 using NomadCore.Interfaces;
+using NomadCore.Systems.ConsoleSystem.CVars.Common;
 using NomadCore.Systems.ConsoleSystem.Events;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using System;
@@ -44,7 +45,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 
 	public sealed class LoggerService : ILoggerService {
 		private readonly ILoggerSink[] Sinks;
-		
+		private readonly CVar<LogLevel>? LogDepth;
 
 		/*
 		===============
@@ -62,6 +63,8 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 
 			commandLine.TextEntered.Subscribe( this, OnTextEntered );
 			Sinks = sinks;
+
+			LogDepth = (CVar<LogLevel>?)ServiceRegistry.Get<ICVarSystemService>().GetCVar<LogLevel>( "console.LogLevel" );
 		}
 
 		/*
@@ -99,7 +102,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// <param name="message"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private void PrintMessage( LogLevel level, string message ) {
-			if ( level > Config.LogDepth ) {
+			if ( level > LogDepth ) {
 				return;
 			}
 			for ( int i = 0; i < Sinks.Length; i++ ) {
