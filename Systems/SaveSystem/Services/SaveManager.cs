@@ -24,6 +24,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Abstractions.Services;
 using NomadCore.Systems.SaveSystem.Infrastructure;
 using NomadCore.Systems.SaveSystem.Interfaces;
+using NomadCore.Utilities;
 using System;
 using System.Collections.Generic;
 
@@ -59,6 +60,7 @@ namespace NomadCore.Systems.SaveSystem.Services {
 		/// 
 		/// </summary>
 		public void Initialize() {
+			var files = System.IO.Directory.GetFiles();
 		}
 
 		/*

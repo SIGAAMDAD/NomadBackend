@@ -22,6 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
+using NomadCore.Enums;
 using System;
 
 namespace NomadCore.Utilities {
@@ -33,7 +34,7 @@ namespace NomadCore.Utilities {
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	/// Handles the conversion from a native OS path to a localized godot path and vice versa.
 	/// </summary>
 	
 	public sealed class FilePath {
@@ -43,11 +44,30 @@ namespace NomadCore.Utilities {
 		public string GodotPath => _godotPath;
 		private readonly string _godotPath;
 
-		public FilePath( string? filePath ) {
+		public readonly PathType Type;
+
+		/*
+		===============
+		FilePath
+		===============
+		*/
+		public FilePath( string? filePath, PathType type ) {
 			ArgumentException.ThrowIfNullOrEmpty( filePath );
 
-			_osPath = ProjectSettings.GlobalizePath( filePath );
-			_godotPath = filePath;
+			switch ( type ) {
+				case PathType.Native:
+					_osPath = filePath;
+					_godotPath = ProjectSettings.LocalizePath( _osPath );
+					break;
+				case PathType.User:
+				case PathType.Resource:
+					_godotPath = filePath;
+					_osPath = ProjectSettings.GlobalizePath( _osPath );
+					break;
+				default:
+					throw new ArgumentOutOfRangeException( $"Path type '{type}' isn't a valid PathType" );
+			}
+			Type = type;
 		}
 	};
 };
