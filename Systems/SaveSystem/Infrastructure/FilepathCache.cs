@@ -26,6 +26,7 @@ using NomadCore.Abstractions.Services;
 using NomadCore.Infrastructure;
 using NomadCore.Interfaces;
 using NomadCore.Utilities;
+using NomadCore.Enums;
 using System;
 using System.Collections.Generic;
 
@@ -57,7 +58,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure {
 		static FilepathCache() {
 			ICVar<string>? saveLocation = ServiceRegistry.Get<ICVarSystemService>().GetCVar<string>( "game.SaveLocation" );
 			ArgumentNullException.ThrowIfNull( saveLocation );
-			SavePath = new FilePath( $"{saveLocation.Value}/" );
+			SavePath = new FilePath( $"{saveLocation.Value}/", PathType.User );
 		}
 
 		/*
