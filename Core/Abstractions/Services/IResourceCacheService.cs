@@ -40,7 +40,7 @@ namespace NomadCore.Abstractions.Services {
 	/// 
 	/// </summary>
 	
-	public interface IResourceCacheService<TResource> where TResource : Godot.Resource, IGameService {
+	public interface IResourceCacheService<TResource> : IGameService where TResource : Godot.Resource {
 		public IGameEvent<ResourceLoadedEventData<TResource>> ResourceLoaded { get; }
 		public IGameEvent<ResourceUnloadedEventData<TResource>> ResourceUnloaded { get; }
 
