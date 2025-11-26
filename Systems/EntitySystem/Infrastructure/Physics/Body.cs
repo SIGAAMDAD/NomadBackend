@@ -139,7 +139,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 			Rid bodyRid = PhysicsServer2D.BodyCreate();
 
 			PhysicsServer2D.BodySetSpace( bodyRid, characterBody2D.GetWorld2D().Space );
-			PhysicsServer2D.BodySetCollisionLayer( bodyRid, characterBody2D.CollisionLayer; );
+			PhysicsServer2D.BodySetCollisionLayer( bodyRid, characterBody2D.CollisionLayer );
 			PhysicsServer2D.BodySetCollisionMask( bodyRid, characterBody2D.CollisionMask );
 			PhysicsServer2D.BodySetMode( bodyRid, PhysicsServer2D.BodyMode.Kinematic );
 
