@@ -57,7 +57,8 @@ namespace NomadCore.Systems.EntitySystem.Common {
 		public Node2D Node => _node;
 		private readonly Node2D _node;
 
-		public readonly IPhysicsBody PhysicsBody;
+		public IPhysicsBody PhysicsBody => _physicsBody;
+		private readonly IPhysicsBody _physicsBody;
 
 		public readonly IAudioSource AudioPlayer;
 
@@ -88,7 +89,7 @@ namespace NomadCore.Systems.EntitySystem.Common {
 		internal Entity( Node2D entityNode, Area2D area )
 			: this( entityNode, area.GetPath().GetHashCode() )
 		{
-			PhysicsBody = Area.Convert( area );
+			_physicsBody = Area.Convert( area );
 		}
 
 		/*
@@ -99,7 +100,7 @@ namespace NomadCore.Systems.EntitySystem.Common {
 		internal Entity( Node2D entityNode, CharacterBody2D characterBody2D )
 			: this( entityNode, characterBody2D.GetPath().GetHashCode() )
 		{
-			PhysicsBody = Body.Convert( this, characterBody2D );
+			_physicsBody = Body.Convert( this, characterBody2D );
 		}
 
 		/*
@@ -176,12 +177,12 @@ namespace NomadCore.Systems.EntitySystem.Common {
 		===============
 		*/
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public bool TryGetComponent<T>( out T? component ) where T : struct, IComponent {
+		public bool TryGetComponent<T>( out T? component ) where T : IComponent, new() {
 			if ( Components.TryGetValue( typeof( T ), out var value ) ) {
 				component = (T)value;
 				return true;
 			}
-			component = null;
+			component = default;
 			return false;
 		}
 
