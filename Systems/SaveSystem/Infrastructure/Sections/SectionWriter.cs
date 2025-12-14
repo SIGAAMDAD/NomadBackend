@@ -21,11 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
-using NomadCore.Infrastructure;
+using NomadCore.GameServices;
 using NomadCore.Interfaces.SaveSystem;
 using NomadCore.Systems.SaveSystem.Infrastructure.Fields;
-using NomadCore.Systems.SaveSystem.Infrastructure.Streams;
+using NomadCore.Systems.SaveSystem.Infrastructure.Serialization.Streams;
 using System;
 using System.Collections.Generic;
 
@@ -41,16 +40,16 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 	/// 
 	/// </summary>
 	
-	internal sealed class SectionWriter( ISaveFileStream fileStream, string name ) : ISectionWriter {
-		public string? Name => name;
+	internal sealed class SectionWriter( ISaveFileStream fileStream, ILoggerService logger, string name ) : ISectionSerializer {
+		public string Name => name;
 
 		public int FieldCount => _fields.Count;
 
 		public HashSet<string> Fields => _fields;
 		private readonly HashSet<string> _fields = new HashSet<string>();
 
-		private readonly ILoggerService? Logger = ServiceRegistry.Get<ILoggerService>();
-		private readonly SaveStreamWriter Writer = (SaveStreamWriter)fileStream;
+		private readonly ILoggerService? _logger = logger;
+		private readonly SaveStreamWriter _writer = fileStream as SaveStreamWriter ?? throw new Exception( "ISaveFileStream must be writable!" );
 
 		/*
 		===============
@@ -62,7 +61,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public bool FieldExists( string? name ) {
+		public bool FieldExists( string name ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 			return _fields.Contains( name );
 		}
@@ -78,12 +77,12 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="name"></param>
 		/// <param name="value"></param>
-		public void SetField<T>( string? name, T value ) {
+		public void SetField<T>( string name, T value ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 			if ( !_fields.Contains( name ) ) {
-				SaveField.Write( Name, name, value, Writer );
+				SaveField.Write( Name, name, value, _writer );
 			} else {
-				Logger?.PrintWarning( $"SectionWriter.SetField: field '{name}' already exists!" );
+				_logger?.PrintWarning( $"SectionWriter.SetField: field '{name}' already exists!" );
 			}
 		}
 	};

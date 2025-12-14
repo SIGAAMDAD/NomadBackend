@@ -22,6 +22,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.GameServices;
+using NomadCore.Systems.ResourceCache.Application.Interfaces;
 
 namespace NomadCore.Systems.ResourceCache.Common {
 	/*
@@ -35,7 +38,7 @@ namespace NomadCore.Systems.ResourceCache.Common {
 	/// 
 	/// </summary>
 	
-	public sealed class SceneCache : BaseCache<PackedScene> {
+	public sealed class SceneCache( ILoggerService logger, IGameEventRegistryService eventFactory, IResourceLoader<PackedScene, FilePath> loader ) : BaseCache<PackedScene, FilePath>( logger, eventFactory, loader ) {
 		/*
 		===============
 		CalculateMemorySize
@@ -46,7 +49,7 @@ namespace NomadCore.Systems.ResourceCache.Common {
 		/// </summary>
 		/// <param name="resource"></param>
 		/// <returns></returns>
-		protected override long CalculateMemorySize( PackedScene resource ) {
+		protected override int CalculateMemorySize( PackedScene resource ) {
 			// FIXME: is this the best way of doing this?
 
 			double memoryUsage = Performance.GetMonitor( Performance.Monitor.MemoryStatic );
@@ -54,7 +57,7 @@ namespace NomadCore.Systems.ResourceCache.Common {
 			double newUsage = Performance.GetMonitor( Performance.Monitor.MemoryStatic );
 			scene.Free();
 
-			return (long)( newUsage - memoryUsage );
+			return (int)( newUsage - memoryUsage );
 		}
 	};
 };

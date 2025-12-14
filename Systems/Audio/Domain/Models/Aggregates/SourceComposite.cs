@@ -21,10 +21,23 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.Systems.Audio.Domain.Interfaces;
+using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
+using Godot;
 
-namespace NomadCore.Domain.Events {
-	public readonly record struct AudioStreamFinishedEventData(
-		IAudioSource Source
-	) : IEventArgs { };
+namespace NomadCore.Systems.Audio.Domain.Models.Aggregates {
+	public sealed class SourceComposite : IAudioSource {
+		public Vector2 Positon {
+			get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+		private Vector2 _position;
+
+		public float Volume { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
+		public AudioSourceStatus Status => throw new System.NotImplementedException();
+
+		public void PlaySound( EventId id ) {
+			throw new System.NotImplementedException();
+		}
+	};
 };

@@ -37,12 +37,12 @@ namespace NomadCore.Infrastructure.ServiceRegistry.Services {
 	/// 
 	/// </summary>
 	
-	public sealed class ServiceDescriptor( Type serviceType, Type implementationType, ServiceLifetime lifetime, Func<IServiceLocator, object>? factory ) : IEquatable<ServiceDescriptor> {
+	public class ServiceDescriptor( Type serviceType, Type? implementationType, ServiceLifetime lifetime, Func<IServiceLocator, object>? factory, object? instance = null ) : IEquatable<ServiceDescriptor> {
 		public Type ServiceType { get; } = serviceType;
-		public Type ImplementationType { get; } = implementationType;
+		public Type? ImplementationType { get; } = implementationType;
 		public ServiceLifetime Lifetime { get; } = lifetime;
 		public Func<IServiceLocator, object>? Factory { get; } = factory;
-		public object Instance { get; set; }
+		public readonly object? Instance = instance;
 
 		/*
 		===============
@@ -66,9 +66,7 @@ namespace NomadCore.Infrastructure.ServiceRegistry.Services {
 		public static ServiceDescriptor CreateSingleton<TService>( TService instance )
 			where TService : class
 		{
-			return new ServiceDescriptor( typeof( TService ), instance.GetType(), ServiceLifetime.Singleton, null ) {
-				Instance = instance
-			};
+			return new ServiceDescriptor( typeof( TService ), instance.GetType(), ServiceLifetime.Singleton, null, instance );
 		}
 
 		/*
@@ -115,7 +113,8 @@ namespace NomadCore.Infrastructure.ServiceRegistry.Services {
 		*/
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public static ServiceDescriptor CreateScoped<TService, TImplementation>()
-			where TImplementation : TService
+			where TService : class
+			where TImplementation : class, TService
 		{
 			return new ServiceDescriptor( typeof( TService ), typeof( TImplementation ), ServiceLifetime.Scoped, null );
 		}
@@ -126,7 +125,7 @@ namespace NomadCore.Infrastructure.ServiceRegistry.Services {
 		===============
 		*/
 		public bool Equals( ServiceDescriptor? other ) {
-			return ServiceType == other?.ServiceType;
+			return other is not null && other.ServiceType == ServiceType && other.ImplementationType == ImplementationType && other.Lifetime == Lifetime;
 		}
 	};
 };

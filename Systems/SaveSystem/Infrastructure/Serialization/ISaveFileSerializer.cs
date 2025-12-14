@@ -24,7 +24,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Systems.SaveSystem.Domain.Models.Aggregates;
 
 namespace NomadCore.Systems.SaveSystem.Infrastructure.Serialization {
-	public interface ISaveFileSerializer {
+	internal interface ISaveFileSerializer {
 		public void Serialize( SaveFile file );
 		public void Deserialize( SaveFile file );
 	};

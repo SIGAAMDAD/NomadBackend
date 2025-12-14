@@ -21,10 +21,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.SaveSystem;
-using NomadCore.Systems.SaveSystem.Interfaces;
+using NomadCore.Systems.SaveSystem.Domain.Models.Aggregates;
+using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,17 +53,17 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure {
 		GetByIdAsync
 		===============
 		*/
-		public async ValueTask<ISaveSlot?> GetByIdAsync( int id, CancellationToken cs = default ) {
+		public async ValueTask<ISaveSlot?> GetByIdAsync( SaveFileId id, CancellationToken ct = default ) {
 			ISaveSlot? slot = null;
 
 			_lock.EnterUpgradeableReadLock();
 			try {
-				ArgumentOutOfRangeException.ThrowIfNegative( id );
+				ArgumentOutOfRangeException.ThrowIfNegative( id.Value );
 
-				if ( id >= _slots.Count ) {
+				if ( id.Value >= _slots.Count ) {
 					await LoadSlotAsync( id );
 				}
-				slot = _slots[ id ];
+				slot = _slots[ id.Value ];
 			}
 			finally {
 				_lock.ExitUpgradeableReadLock();
@@ -77,9 +76,11 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure {
 		LoadSlotAsync
 		===============
 		*/
-		private async Task LoadSlotAsync( int slot ) {
-			ArgumentOutOfRangeException.ThrowIfNegative( slot );
-			_slots.Add( new Slot( slot ) );
+		private async Task LoadSlotAsync( SaveFileId slot ) {
+			ArgumentOutOfRangeException.ThrowIfNegative( slot.Value );
+
+			
+//			_slots.Add( new SaveFile( slot ) );
 		}
 
 		/*
@@ -87,7 +88,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure {
 		LoadSlot
 		===============
 		*/
-		private void LoadSlot( int slot ) {
+		private void LoadSlot( SaveFileId slot ) {
 			
 		}
 

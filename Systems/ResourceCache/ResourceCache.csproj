@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\..\Core\NomadCore.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EventSystem\EventSystem\EventSystem.csproj" />

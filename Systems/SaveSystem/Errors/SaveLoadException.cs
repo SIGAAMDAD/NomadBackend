@@ -21,6 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 using System;
 
 namespace NomadCore.Systems.SaveSystem.Errors {
@@ -35,8 +36,8 @@ namespace NomadCore.Systems.SaveSystem.Errors {
 	/// 
 	/// </summary>
 
-	internal sealed class SaveLoadException( int slot, Exception exception ) : Exception {
-		public readonly int Slot = slot;
+	internal sealed class SaveLoadException( SaveFileId slot, Exception exception ) : Exception {
+		public readonly SaveFileId Slot = slot;
 		public readonly Exception Error = exception;
 	};
 };

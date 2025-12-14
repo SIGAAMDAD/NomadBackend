@@ -21,6 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.GameServices;
+using NomadCore.Systems.ResourceCache.Application.Interfaces;
+
 namespace NomadCore.Systems.ResourceCache.Common {
 	/*
 	===================================================================================
@@ -33,7 +37,7 @@ namespace NomadCore.Systems.ResourceCache.Common {
 	/// 
 	/// </summary>
 	
-	public sealed class AudioCache : BaseCache<Godot.AudioStream> {
+	public sealed class AudioCache( ILoggerService logger, IGameEventRegistryService eventFactory, IResourceLoader<Godot.AudioStream, FilePath> loader ) : BaseCache<Godot.AudioStream, FilePath>( logger, eventFactory, loader ) {
 		/*
 		===============
 		CalculateMemorySize
@@ -44,8 +48,8 @@ namespace NomadCore.Systems.ResourceCache.Common {
 		/// </summary>
 		/// <param name="resource"></param>
 		/// <returns></returns>
-		protected override long CalculateMemorySize( Godot.AudioStream resource ) {
-			return (long)resource.GetLength() * ( resource.IsMonophonic() ? 1 : 2 );
+		protected override int CalculateMemorySize( Godot.AudioStream resource ) {
+			return (int)resource.GetLength() * ( resource.IsMonophonic() ? 1 : 2 );
 		}
 	};
 };

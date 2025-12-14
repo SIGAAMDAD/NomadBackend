@@ -35,8 +35,8 @@ namespace NomadCore.Interfaces.SaveSystem {
 	/// 
 	/// </summary>
 
-	public interface ISectionDeserializer : ISaveSection {
-		public ValueTask<T?> GetField<T>( string name );
+	public interface ISectionDeserializer {
+		public ValueTask<T?> GetFieldAsync<T>( string name );
 		public bool TryGetField<T>( string name, out T? value );
 	};
 };

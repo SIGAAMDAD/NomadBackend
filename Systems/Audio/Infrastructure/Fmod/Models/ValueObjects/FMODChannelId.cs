@@ -21,19 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using Godot;
-using NomadCore.Domain.Events;
-using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.Interfaces.Common;
 
-namespace NomadCore.Domain.Models.Interfaces {
-	public interface IAudioSource {
-		public float Volume { get; }
-		public AudioSourceStatus Status { get; }
-		public IAudioStream Stream { get; }
-
-		public IGameEvent<AudioStreamFinishedEventData> Finished { get; }
-
-		public void PlaySound( IAudioStream stream, bool looping = false );
-		public void Stop();
-	};
+namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects {
+	internal readonly record struct FMODChannelId(
+		int SourceId
+	) : IValueObject<FMODChannelId>;
 };

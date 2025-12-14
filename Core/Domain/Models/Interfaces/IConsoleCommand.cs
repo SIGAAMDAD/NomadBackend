@@ -21,10 +21,12 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Infrastructure.Collections;
+
 namespace NomadCore.Domain.Models.Interfaces {
 	public interface IConsoleCommand {
-		public string Name { get; }
-		public string Description { get; }
+		public InternString Name { get; }
+		public InternString Description { get; }
 		public IGameEvent<ICommandExecutedEventData>.EventCallback Callback { get; }
 	};
 };

@@ -23,6 +23,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using Microsoft.Extensions.Configuration.Ini;
 using NomadCore.Abstractions.Services;
+using NomadCore.GameServices;
 using NomadCore.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 	/// </summary>
 
 	internal sealed class IniLoader {
-		private readonly IDictionary<string, string?>? IniData;
+		private readonly IDictionary<string, string?> IniData;
 
 		/*
 		===============
@@ -53,7 +54,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 		/// </summary>
 		/// <param name="configFile"></param>
 		/// <param name="logger"></param>
-		public IniLoader( string? configFile, ILoggerService logger ) {
+		public IniLoader( string configFile, ILoggerService logger ) {
 			ArgumentException.ThrowIfNullOrEmpty( configFile );
 
 			try {
@@ -61,10 +62,10 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 
 				IniData = IniStreamConfigurationProvider.Read( fileStream );
 				if ( IniData == null ) {
-					logger?.PrintError( $"IniLoader: error parsing ini data from configuration file '{configFile}'" );
+					logger.PrintError( $"IniLoader: error parsing ini data from configuration file '{configFile}'" );
 				}
 			} catch ( Exception e ) {
-				logger?.PrintError( $"IniLoader: Error opening configuration file '{configFile}: {e.Message}" );
+				logger.PrintError( $"IniLoader: Error opening configuration file '{configFile}: {e.Message}" );
 			}
 		}
 
@@ -78,13 +79,12 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 		/// </summary>
 		/// <param name="name">The name of the key of the configuration value</param>
 		/// <param name="value">The output value</param>
-		public bool LoadConfigValue( string? name, out int value ) {
+		public bool LoadConfigValue( string name, out int value ) {
 			ArgumentNullException.ThrowIfNull( IniData );
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			if ( IniData.TryGetValue( name, out string? data ) ) {
 				ArgumentException.ThrowIfNullOrEmpty( data );
-
 				value = Convert.ToInt32( data );
 				return true;
 			}
@@ -102,13 +102,12 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 		/// </summary>
 		/// <param name="name">The name of the key of the configuration value</param>
 		/// <param name="value">The output value</param>
-		public bool LoadConfigValue( string? name, out float value ) {
+		public bool LoadConfigValue( string name, out float value ) {
 			ArgumentNullException.ThrowIfNull( IniData );
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			if ( IniData.TryGetValue( name, out string? data ) ) {
 				ArgumentException.ThrowIfNullOrEmpty( data );
-
 				value = Convert.ToSingle( data );
 				return true;
 			}
@@ -126,7 +125,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 		/// </summary>
 		/// <param name="name">The name of the key of the configuration value</param>
 		/// <param name="value">The output value</param>
-		public bool LoadConfigValue( string? name, out bool value ) {
+		public bool LoadConfigValue( string name, out bool value ) {
 			ArgumentNullException.ThrowIfNull( IniData );
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
@@ -153,13 +152,12 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 		/// </summary>
 		/// <param name="name">The name of the key of the configuration value</param>
 		/// <param name="value">The output value</param>
-		public bool LoadConfigValue( string? name, out string value ) {
+		public bool LoadConfigValue( string name, out string value ) {
 			ArgumentNullException.ThrowIfNull( IniData );
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			if ( IniData.TryGetValue( name, out string? data ) ) {
 				ArgumentException.ThrowIfNullOrEmpty( data );
-
 				value = data;
 				return true;
 			}

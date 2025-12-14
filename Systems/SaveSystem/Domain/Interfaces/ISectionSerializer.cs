@@ -33,7 +33,7 @@ namespace NomadCore.Interfaces.SaveSystem {
 	/// 
 	/// </summary>
 
-	public interface ISectionSerializer : ISaveSection {
+	public interface ISectionSerializer {
 		public void SetField<T>( string name, T value );
 		public bool FieldExists( string name );
 	};

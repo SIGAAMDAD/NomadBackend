@@ -21,6 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+#if false
 using Godot;
 using NomadCore.Abstractions.Services;
 using NomadCore.Enums.Audio;
@@ -131,3 +132,4 @@ namespace NomadCore.Systems.Audio.Infrastructure.Godot {
 		}
 	};
 };
+#endif

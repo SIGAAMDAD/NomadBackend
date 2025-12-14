@@ -22,40 +22,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.Interfaces.Common;
-using NomadCore.Systems.Audio.Domain.Interfaces;
-using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
-using System;
+using NomadCore.Systems.SaveSystem.Domain.Models.Aggregates;
+using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 
-namespace NomadCore.Systems.Audio.Domain.Models.Aggregates {
-	public sealed class EventComposite( IEventMetadata metadata, IEventResource resource ) : IAudioEvent {
-		public bool IsPlaying => throw new NotImplementedException();
-
-		public EventId Id => throw new NotImplementedException();
-
-		public DateTime CreatedAt => throw new NotImplementedException();
-
-		public DateTime? ModifiedAt => throw new NotImplementedException();
-
-		public int Version => throw new NotImplementedException();
-
-		private readonly IEventMetadata _metadata = metadata;
-		private readonly IEventResource _resource = resource;
-
-		public bool Equals( IEntity<EventId>? other ) {
-			return other?.Id == Id;
-		}
-		
-		/*
-		===============
-		Dispose
-		===============
-		*/
-		public void Dispose() {
-			_resource.Dispose();
-		}
-
-		public IAudioParameter GetAudioParameter( ParameterId id ) {
-			
-		}
+namespace NomadCore.Systems.SaveSystem.Infrastructure {
+	public interface ISlotRepository : IAsyncReadRepository<ISaveSlot, SaveFileId> {
+		public int SlotCount { get; }
 	};
 };

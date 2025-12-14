@@ -21,23 +21,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.EventSystem;
-using NomadCore.Systems.EventSystem.Common;
+using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 
 namespace NomadCore.Systems.SaveSystem.Domain.Events {
-	/*
-	===================================================================================
-	
-	LoadStarted
-	
-	===================================================================================
-	*/
-	/// <summary>
-	/// 
-	/// </summary>
-		
-	public sealed class LoadStarted() : GameEvent<LoadStarted.EventData>( nameof( LoadStarted ) ) {
-		public readonly record struct EventData( SaveFileId Id ) : IEventArgs { };
-	};
+	public readonly record struct LoadStartedEventData(
+		SaveFileId Id
+	) : IEventArgs;
 };

@@ -35,7 +35,7 @@ namespace NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects {
 			writer.Write( SectionCount );
 			writer.Write( Checksum.Value );
 		}
-		internal static SaveHeader Deserialize( SaveReaderStream reader ) {;
+		internal static SaveHeader Deserialize( SaveStreamReader reader ) {;
 			GameVersion version = GameVersion.Deserialize( reader );
 			int sectionCount = reader.Read<int>();
 			uint checksum = reader.Read<uint>();

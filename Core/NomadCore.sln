@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core.csproj", "{952EA82F-4150-BFB1-CBBC-EE5A820E822B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NomadCore", "NomadCore.csproj", "{952EA82F-4150-BFB1-CBBC-EE5A820E822B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

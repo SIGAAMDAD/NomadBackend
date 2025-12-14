@@ -23,8 +23,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using System.Collections.Generic;
 using System;
-using NomadCore.Abstractions.Services;
-using NomadCore.Infrastructure;
+using NomadCore.GameServices;
 
 namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 	/*
@@ -38,12 +37,12 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 	/// 
 	/// </summary>
 	
-	public sealed class CVarGroup( string? name ) {
+	public sealed class CVarGroup( string name, ILoggerService logger, ICVarSystemService cvarSystem ) {
 		public readonly string Name = name;
 		public readonly HashSet<string> Cvars = new HashSet<string>();
 
-		private readonly ILoggerService _logger = ServiceRegistry.Get<ILoggerService>();
-		private readonly ICVarSystemService _cvarSystem = ServiceRegistry.Get<ICVarSystemService>();
+		private readonly ILoggerService _logger = logger;
+		private readonly ICVarSystemService _cvarSystem = cvarSystem;
 
 		/*
 		===============
@@ -54,13 +53,13 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 		/// 
 		/// </summary>
 		/// <param name="name"></param>
-		public void Add( string? name ) {
+		public void Add( string name ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			if ( !_cvarSystem.CVarExists( name ) ) {
-				_logger.PrintError( $"CVarGroup.Add: cvar '{name}' doesn't exist" );
+				_logger.PrintError( $"CVarGroup.Add: cvar '{name}' doesn't exist!" );
 			} else if ( !Cvars.Add( name ) ) {
-				_logger.PrintError( $"CVarGroup.Add: cvar '{name}' already added to group '{Name}'" );
+				_logger.PrintError( $"CVarGroup.Add: cvar '{name}' already added to group '{Name}'!" );
 			}
 		}
 	};

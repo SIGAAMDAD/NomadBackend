@@ -27,13 +27,5 @@ using System.Collections.Concurrent;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Godot.Repositories {
 	internal sealed class GodotParameterRepository {
-		private readonly ConcurrentDictionary<ParameterId, IAudioParameter> _parameterCache = new ConcurrentDictionary<ParameterId, IAudioParameter>();
-		
-		public GodotParameterRepository() {
-		}
-
-		public IAudioParameter GetParameter( ParameterId id ) {
-			
-		}
 	};
 };

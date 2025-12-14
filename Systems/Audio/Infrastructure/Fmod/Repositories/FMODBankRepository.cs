@@ -21,15 +21,12 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
-using NomadCore.Systems.Audio.Domain.Interfaces;
 using NomadCore.Systems.Audio.Domain.Models.Aggregates;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories.Loaders;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Services;
 using NomadCore.Systems.ResourceCache.Common;
-using System.Collections.Generic;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 	/*
@@ -43,20 +40,6 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 	/// 
 	/// </summary>
 	
-	internal sealed class FMODBankRepository : BaseCache<BankComposite, FilePath>, IBankCompositeFactory {
-		private readonly ILoggerService _logger;
-		private readonly Dictionary<FilePath, BankId> _bankCache;
-
-		public FMODBankRepository( ILoggerService logger, IGameEventRegistryService eventFactory, FMODSystemService fmodSystem )
-			: base( logger, eventFactory, new FMODBankLoader( fmodSystem ) )
-		{
-			_logger = logger;
-
-			var files = System.IO.Directory.GetFiles( FilePath.FromResourcePath( "res://Assets/Audio/Banks" ) );
-		}
-
-		public IAudioBank Create( BankId id ) {
-			if ( TryGetById( ) )
-		}
+	internal sealed class FMODBankRepository( ILoggerService logger, IGameEventRegistryService eventFactory, FMODSystemService fmodSystem ) : BaseCache<BankComposite, BankId>( logger, eventFactory, new FMODBankLoader( fmodSystem ) ) {
 	};
 };

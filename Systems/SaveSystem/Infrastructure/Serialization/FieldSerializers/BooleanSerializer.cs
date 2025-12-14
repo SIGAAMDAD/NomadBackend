@@ -42,6 +42,6 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Serialization.FieldSeriali
 		public Type DataType => typeof( bool );
 
 		public void Serialize( SaveStreamWriter stream, bool value ) => stream.Write( value );
-		public FieldValue Deserialize( SaveReaderStream stream ) => new FieldValue( stream.Read<bool>() );
+		public FieldValue Deserialize( SaveStreamReader stream ) => new FieldValue( stream.Read<bool>() );
 	};
 };

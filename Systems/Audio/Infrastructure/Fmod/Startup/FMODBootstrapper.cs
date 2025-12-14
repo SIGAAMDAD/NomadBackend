@@ -23,21 +23,22 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.GameServices;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
-using NomadCore.Infrastructure.ServiceRegistry.Services;
-using NomadCore.Systems.Audio.Domain.Interfaces;
+using NomadCore.Systems.Audio.Application.Interfaces;
+using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
+using NomadCore.Systems.Audio.Infrastructure.Fmod.Services;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Startup {
 	internal static class FMODBootstrapper {
-		public static IServiceRegistry Initialize( IServiceLocator locator ) {
-			var services = new ServiceCollection();
-
+		public static void Initialize( IServiceLocator locator, IServiceRegistry registry ) {
 			var logger = locator.GetService<ILoggerService>();
 			var eventFactory = locator.GetService<IGameEventRegistryService>();
+			var cvarSystem = locator.GetService<ICVarSystemService>();
 
-			services.RegisterSingleton<IBankCompositeFactory>( new FMODBankRepository( logger, eventFactory,  ) );
-
-			return services;
+			var systemService = (FMODSystemService)registry.RegisterSingleton<IAudioSystemService>( new FMODSystemService( logger, eventFactory, cvarSystem ) );
+			var channelRepository = new FMODChannelRepository( cvarSystem );
+			var sourceFactory = registry.RegisterSingleton<IAudioSourceFactory>( new FMODAudioSourceFactory( channelRepository ) );
+			registry.RegisterSingleton<IResourceCacheService<BankId>>( new FMODBankRepository( logger, eventFactory, systemService ) );
 		}
 	};
 };

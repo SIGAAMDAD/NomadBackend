@@ -21,8 +21,8 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
-using NomadCore.Utilities;
 using System;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;

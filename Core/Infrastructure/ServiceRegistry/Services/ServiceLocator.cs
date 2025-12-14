@@ -41,7 +41,9 @@ namespace NomadCore.Infrastructure.ServiceRegistry.Services {
 	/// </summary>
 	
 	public sealed class ServiceLocator( ServiceCollection collection ) : IServiceLocator {
+		public IServiceRegistry Collection => _collection;
 		private readonly ServiceCollection _collection = collection;
+		
 		private readonly ConcurrentDictionary<Type, object> _singletonCache = new();
 		private readonly ConcurrentDictionary<Type, Func<IServiceLocator, object>> _factoryCache = new();
 		private readonly ConcurrentDictionary<Type, object> _scopedInstances = new();

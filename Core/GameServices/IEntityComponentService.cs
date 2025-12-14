@@ -28,20 +28,20 @@ using System;
 
 namespace NomadCore.Abstractions.Services {
 	public interface IEntityComponentService : IGameService {
-		public IEntity CreateEntity( string name, Area2D area, Sprite2D sprite );
-		public IEntity CreateEntity( string name, CharacterBody2D body, AnimatedSprite2D animatedSprite );
-		public void DestroyEntity( IEntity entity, bool immediate = false );
-		public IEntity FindEntityByName( string name );
+		public IGameEntity CreateEntity( string name, Area2D area, Sprite2D sprite );
+		public IGameEntity CreateEntity( string name, CharacterBody2D body, AnimatedSprite2D animatedSprite );
+		public void DestroyEntity( IGameEntity entity, bool immediate = false );
+		public IGameEntity FindEntityByName( string name );
 
-		public bool HasComponent<T>( IEntity entity ) where T : struct, IComponent;
-		public ref T AddComponent<T>( IEntity entity ) where T : struct, IComponent;
-		public ref T AddComponent<T>( IEntity entity, T defaultValue ) where T : struct, IComponent;
-		public ref T GetOrAddComponent<T>( IEntity entity ) where T : struct, IComponent;
-		public ref T GetOrAddComponent<T>( IEntity entity, T defaultValue ) where T : struct, IComponent;
-		public ref T GetComponent<T>( IEntity entity ) where T : struct, IComponent;
-		public bool TryGetComponent<T>( IEntity entity, out T component ) where T : struct, IComponent;
+		public bool HasComponent<T>( IGameEntity entity ) where T : struct, IComponent;
+		public ref T AddComponent<T>( IGameEntity entity ) where T : struct, IComponent;
+		public ref T AddComponent<T>( IGameEntity entity, T defaultValue ) where T : struct, IComponent;
+		public ref T GetOrAddComponent<T>( IGameEntity entity ) where T : struct, IComponent;
+		public ref T GetOrAddComponent<T>( IGameEntity entity, T defaultValue ) where T : struct, IComponent;
+		public ref T GetComponent<T>( IGameEntity entity ) where T : struct, IComponent;
+		public bool TryGetComponent<T>( IGameEntity entity, out T component ) where T : struct, IComponent;
 
-		public void AddComponents( IEntity entity, Span<IComponent> components );
+		public void AddComponents( IGameEntity entity, Span<IComponent> components );
 
 		public void Initialize();
 		public void Update( float deltaTime );

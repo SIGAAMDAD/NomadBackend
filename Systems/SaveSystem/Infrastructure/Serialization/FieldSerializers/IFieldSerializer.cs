@@ -30,7 +30,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Serialization.FieldSeriali
 		public FieldType FieldType { get; }
 		public Type DataType { get; }
 
-		public FieldValue Deserialize( SaveReaderStream stream );
+		public FieldValue Deserialize( SaveStreamReader stream );
 	};
 	internal interface IFieldSerializer<T> : IFieldSerializer {
 		public void Serialize( SaveStreamWriter stream, T value );

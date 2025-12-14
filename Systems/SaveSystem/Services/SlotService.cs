@@ -21,13 +21,12 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.SaveSystem;
-using NomadCore.Systems.EventSystem.Common;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Systems.SaveSystem.Domain.Events;
+using NomadCore.Systems.SaveSystem.Domain.Models.Aggregates;
+using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 using NomadCore.Systems.SaveSystem.Errors;
-using NomadCore.Systems.SaveSystem.Events;
 using NomadCore.Systems.SaveSystem.Infrastructure;
-using NomadCore.Systems.SaveSystem.Interfaces;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,7 +42,7 @@ namespace NomadCore.Systems.SaveSystem.Services {
 	/// 
 	/// </summary>
 	
-	public sealed class SlotService : ISlotService {
+	public sealed class SlotService {
 		public int CurrentSlot => _activeSlot;
 		private int _activeSlot = 0;
 
@@ -51,9 +50,9 @@ namespace NomadCore.Systems.SaveSystem.Services {
 
 		private readonly ISlotRepository _slotRepository;
 
-		public static readonly SaveStarted SaveStarted = new SaveStarted();
-		public static readonly SaveCompleted SaveCompleted = new SaveCompleted();
-		public static readonly LoadStarted LoadStarted = new LoadStarted();
+		public static readonly IGameEvent<SaveStartedEventData> SaveStarted;
+		public static readonly IGameEvent<SaveCompletedEventData> SaveCompleted;
+		public static readonly IGameEvent<LoadStartedEventData> LoadStarted;
 
 		public SlotService() {
 			_slotRepository = new SlotRepository();
@@ -64,7 +63,7 @@ namespace NomadCore.Systems.SaveSystem.Services {
 		GetSlot
 		===============
 		*/
-		public async ValueTask<ISaveSlot> GetSlot( int slot, CancellationToken ct = default ) {
+		public async ValueTask<ISaveSlot> GetSlot( SaveFileId slot, CancellationToken ct = default ) {
 			ct.ThrowIfCancellationRequested();
 			var entity = await _slotRepository.GetByIdAsync( slot, ct ) ?? throw new SaveLoadException( slot, new System.Exception( $"Failed to load save slot {slot}" ) );
 			return entity;
@@ -75,11 +74,11 @@ namespace NomadCore.Systems.SaveSystem.Services {
 		SaveSlot
 		===============
 		*/
-		public async ValueTask SaveSlot( int slot, CancellationToken ct = default ) {
+		public async ValueTask SaveSlot( SaveFileId slot, CancellationToken ct = default ) {
 			ct.ThrowIfCancellationRequested();
 
 			var entity = await _slotRepository.GetByIdAsync( slot, ct );
-			if ( entity == null || entity is not Slot slotData ) {
+			if ( entity == null || entity is not SaveFile slotData ) {
 				return;
 			}
 			slotData.Save();

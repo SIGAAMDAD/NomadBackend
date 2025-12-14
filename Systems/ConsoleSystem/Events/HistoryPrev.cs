@@ -21,12 +21,12 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.EventSystem;
-using System.Runtime.InteropServices;
+
+
+using NomadCore.Domain.Models.Interfaces;
 
 namespace NomadCore.Systems.ConsoleSystem.Events {
-	[StructLayout( LayoutKind.Sequential, Pack = 1 )]
-	public readonly struct HistoryPrevEventData( string text ) : IEventArgs {
-		public readonly string Text = text;
-	};
+	public readonly record struct HistoryPrevEventData(
+		string Text
+	) : IEventArgs;
 };

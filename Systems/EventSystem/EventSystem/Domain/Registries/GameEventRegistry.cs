@@ -102,7 +102,9 @@ namespace NomadCore.Systems.EventSystem.Domain.Registries {
 		/// <param name="nameSpace"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public bool TryRemoveEvent<TArgs>( string name, string? nameSpace = null ) where TArgs : IEventArgs {
+		public bool TryRemoveEvent<TArgs>( string name, string? nameSpace = null )
+			where TArgs : IEventArgs
+		{
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			var key = new EventKey(

@@ -21,17 +21,15 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.ConsoleSystem;
-using NomadCore.Utilities;
 using NomadCore.Systems.ConsoleSystem.CVars.Infrastructure;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using NomadCore.Infrastructure;
 using NomadCore.Systems.ConsoleSystem.CVars.Common;
-using System.Diagnostics;
+using NomadCore.GameServices;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Domain.Models.ValueObjects;
 
 namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 	/*
@@ -45,16 +43,21 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 	/// Global manager for CVars
 	/// </summary>
 
-	public sealed class CVarSystem : ICVarSystemService {
+	public sealed class CVarSystem( IGameEventRegistryService eventFactory, ILoggerService logger ) : ICVarSystemService {
 		private readonly ConcurrentDictionary<string, ICVar> _cvars = new ConcurrentDictionary<string, ICVar>( StringComparer.OrdinalIgnoreCase );
 		private readonly HashSet<CVarGroup> _groups = new HashSet<CVarGroup>();
 
-		private readonly IGameEventBusService _eventBus;
-		private readonly ILoggerService _logger;
+		private readonly IGameEventRegistryService _eventFactory = eventFactory;
+		private readonly ILoggerService _logger = logger;
 
-		public CVarSystem( IGameEventBusService eventBus, ILoggerService logger ) {
-			_eventBus = eventBus;
-			_logger = logger;
+		/*
+		===============
+		Dispose
+		===============
+		*/
+		public void Dispose() {
+			_cvars.Clear();
+			_groups.Clear();
 		}
 
 		/*
@@ -94,7 +97,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 				throw new InvalidOperationException( $"CVar {createInfo.Name} found in CVarSystem cache isn't a valid CVar object!" );
 			}
 
-			ICVar<T> cvar = new CVar<T>( _eventBus, in createInfo );
+			ICVar<T> cvar = new CVar<T>( _eventFactory, in createInfo );
 			_cvars.TryAdd( createInfo.Name, cvar );
 
 			_logger.PrintLine( $"CVarSystem.Register: registered CVar '{createInfo.Name}' with default value {createInfo.DefaultValue} and flags {createInfo.Flags}." );
@@ -131,7 +134,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 		/// </summary>
 		/// <param name="group"></param>
 		/// <exception cref="InvalidOperationException"></exception>
-		public void AddGroup( in CVarGroup? group ) {
+		public void AddGroup( in CVarGroup group ) {
 			ArgumentNullException.ThrowIfNull( group );
 
 			if ( _groups.Contains( group ) ) {
@@ -152,9 +155,8 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public ICVar? Find( string? name ) {
+		public ICVar? Find( string name ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
-
 			return _cvars.TryGetValue( name, out ICVar? cvar ) ? cvar : null;
 		}
 
@@ -170,7 +172,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 		/// <param name="name"></param>
 		/// <param name="cvar"></param>
 		/// <returns></returns>
-		public bool TryFind<T>( string? name, out CVar<T>? cvar ) {
+		public bool TryFind<T>( string name, out CVar<T>? cvar ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			if ( _cvars.TryGetValue( name, out ICVar? var ) && var is CVar<T> typedVar ) {
@@ -191,13 +193,13 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 		/// Writes all CVars and their corresponding groups to the provided configuration file in .ini format
 		/// </summary>
 		/// <param name="configFile">The file to write .ini values tos</param>
-		public void Save( string? configFile ) {
+		public void Save( string configFile ) {
 			ArgumentException.ThrowIfNullOrEmpty( configFile );
 			ArgumentNullException.ThrowIfNull( _cvars );
 
 			// ensure we block all access
 			lock ( _cvars ) {
-				ConfigFileWriter writer = new ConfigFileWriter( configFile, _groups );
+				ConfigFileWriter writer = new ConfigFileWriter( configFile, _logger, this, _groups );
 			}
 		}
 
@@ -207,10 +209,10 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 		===============
 		*/
 		/// <summary>
-		/// Loads cvar values from the provided configuration file
+		/// Loads cvar values from the provided configuration file.
 		/// </summary>
 		/// <param name="configFile">The file to load .ini values from</param>
-		public void Load( string? configFile ) {
+		public void Load( string configFile ) {
 			ArgumentException.ThrowIfNullOrEmpty( configFile );
 
 			// make sure we actually have something to load

@@ -21,18 +21,15 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.EventSystem;
 using NomadCore.Systems.ConsoleSystem.Events;
 using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
-using NomadCore.Infrastructure;
-using NomadCore.Systems.ConsoleSystem.CVars.Common;
-using NomadCore.Utilities;
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.GameServices;
 
 namespace NomadCore.Systems.ConsoleSystem {
 	/*
@@ -72,25 +69,24 @@ namespace NomadCore.Systems.ConsoleSystem {
 		/// </summary>
 		/// <param name="builder"></param>
 		/// <param name="logger"></param>
-		/// <param name="eventBus"></param>
+		/// <param name="eventFactory"></param>
 		/// <param name="events"></param>
-		public History( ICommandBuilder builder, ILoggerService logger, IGameEventBusService eventBus, IConsoleEvents events ) {
+		public History( ICommandBuilder builder, ILoggerService logger, IGameEventRegistryService eventFactory ) {
 			ArgumentNullException.ThrowIfNull( builder );
-			ArgumentNullException.ThrowIfNull( eventBus );
-			ArgumentNullException.ThrowIfNull( events );
+			ArgumentNullException.ThrowIfNull( eventFactory );
 			ArgumentNullException.ThrowIfNull( logger );
 
 			_logger = logger;
 
 			builder.TextEntered.Subscribe( this, OnTextEntered );
 
-			events.HistoryPrev.Subscribe( this, OnHistoryPrev );
-			events.HistoryNext.Subscribe( this, OnHistoryNext );
+			eventFactory.GetEvent<IEventArgs>( nameof( HistoryPrev ) ).Subscribe( this, OnHistoryPrev );
+			eventFactory.GetEvent<IEventArgs>( nameof( HistoryNext ) ).Subscribe( this, OnHistoryNext );
 
-			_historyPrev = eventBus.CreateEvent<HistoryPrevEventData>( nameof( HistoryPrev ) );
-			_historyNext = eventBus.CreateEvent<HistoryNextEventData>( nameof( HistoryNext ) );
+			_historyPrev = eventFactory.GetEvent<HistoryPrevEventData>( nameof( HistoryPrev ) );
+			_historyNext = eventFactory.GetEvent<HistoryNextEventData>( nameof( HistoryNext ) );
 
-			_historyPath = new FilePath( CONSOLE_HISTORY_FILE, NomadCore.Enums.PathType.User );
+			_historyPath = new FilePath( CONSOLE_HISTORY_FILE, PathType.User );
 
 			LoadHistory();
 		}
@@ -152,7 +148,7 @@ namespace NomadCore.Systems.ConsoleSystem {
 		/// <summary>
 		/// 
 		/// </summary>
-		private void OnHistoryPrev( in IGameEvent eventData, in IEventArgs args ) {
+		private void OnHistoryPrev( in IEventArgs args ) {
 			if ( _historyIndex > 0 ) {
 				_historyIndex--;
 				if ( _historyIndex >= 0 ) {
@@ -169,7 +165,7 @@ namespace NomadCore.Systems.ConsoleSystem {
 		/// <summary>
 		/// 
 		/// </summary>
-		private void OnHistoryNext( in IGameEvent eventData, in IEventArgs args ) {
+		private void OnHistoryNext( in IEventArgs args ) {
 			if ( _historyIndex < _consoleHistory.Count ) {
 				_historyIndex++;
 				HistoryNext.Publish( new HistoryNextEventData( _historyIndex < _consoleHistory.Count, _consoleHistory.ElementAt( _historyIndex ) ) );

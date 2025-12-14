@@ -21,44 +21,68 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Systems.Audio.Domain.Interfaces;
+using Godot;
+using NomadCore.Interfaces.Common;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
-using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
-using System.Collections.Generic;
+using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
+using System;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	/*
 	===================================================================================
 	
-	FMODEventCollection
+	FMODChannel
 	
 	===================================================================================
 	*/
 	/// <summary>
-	/// Contains a collection of <see cref="FMODEvent"/> objects, most usually for a bank.
+	/// 
 	/// </summary>
 	
-	internal record FMODEventCollection : IEventCollection {
-		public int EventCount => _events.Length;
+	internal sealed class FMODChannel : IEntity<FMODChannelId> {
+		public FMODChannelId Id => throw new NotImplementedException();
 
-		private readonly FMOD.Studio.EventDescription[] _events;
-		private readonly HashSet<EventId> _eventIds;
+		public DateTime CreatedAt => _createdAt;
+		private readonly DateTime _createdAt = DateTime.UtcNow;
 
-		public FMODEventCollection( FMOD.Studio.EventDescription[] events, FMODGuidRepository guidRepository ) {
-			_events = events;
-			_eventIds = new HashSet<EventId>( _events.Length );
-			for ( int i = 0; i < _events.Length; i++ ) {
-				FMODValidator.ValidateCall( _events[ i ].getID( out var guid ) );
-				_events[ i ].getPath()
-				guidRepository.
+		public DateTime? ModifiedAt => _timestamp;
+		private DateTime _timestamp;
+
+		public int Version => _version;
+		private int _version;
+
+		public FMODChannelResource? Resource {
+			get => _event;
+			set => _event = value;
+		}
+		private FMODChannelResource? _event;
+
+		public FMODChannel() {
+		}
+
+		public bool AllocateChannel( FMOD.Studio.EventDescription eventDescription, in DateTime timestamp ) {
+			if ( _event == null ) {
+				FMODValidator.ValidateCall( eventDescription.createInstance( out var instance ) );
+				_event = new FMODChannelResource( instance );
 			}
 		}
 
-		public bool ContainsEvent( EventId eventId ) {
-			return _eventIds.Contains( eventId );
+		public void SetVolume( float volume ) {
+			if ( !_event.HasValue ) {
+				return;
+			}
+			_event.Value.SetVolume( volume );
 		}
-		public HashSet<EventId> GetEventIds() {
-			return _eventIds;
+
+		public void SetPosition( Vector2 position ) {
+			if ( !_event.HasValue ) {
+				return;
+			}
+			_event.Value.SetPosition( position );
+		}
+
+		public bool Equals( IEntity<FMODChannelId>? other ) {
+			return other?.Id == Id;
 		}
 	};
 };

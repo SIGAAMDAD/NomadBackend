@@ -22,12 +22,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Enums.ConsoleSystem;
-using NomadCore.Infrastructure;
-using NomadCore.Interfaces.ConsoleSystem;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.GameServices;
 using NomadCore.Systems.ConsoleSystem.Interfaces.Abstractions;
-using NomadCore.Utilities;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -54,11 +52,11 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure.Sinks {
 		public FileSink( ICVarSystemService cvarSystem ) {
 			ICVar<string> logfile = cvarSystem.Register(
 				new CVarCreateInfo<string>(
-					name: "console.LogFile",
-					defaultValue: "user://debug.log",
-					description: "The path to the console's logging file.",
-					flags: CVarFlags.Archive | CVarFlags.Developer,
-					validator: ( file ) => file.Length > 0
+					Name: "console.LogFile",
+					DefaultValue: "user://debug.log",
+					Description: "The path to the console's logging file.",
+					Flags: CVarFlags.Archive | CVarFlags.Developer,
+					Validator: ( file ) => file.Length > 0
 				)
 			);
 

@@ -22,7 +22,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Interfaces.EventSystem;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.GameServices;
+using NomadCore.Systems.ConsoleSystem.Events;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using NomadCore.Systems.ConsoleSystem.Interfaces.Abstractions;
 using System;
@@ -40,7 +42,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 	/// 
 	/// </summary>
 
-	public sealed class InGameSink : SinkBase {
+	internal sealed class InGameSink : SinkBase {
 		private readonly RichTextLabel _richLabel;
 
 		/*
@@ -53,11 +55,11 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// </summary>
 		/// <param name="node"></param>
 		/// <param name="builder"></param>
-		/// <param name="events"></param>
-		public InGameSink( Node? node, ICommandBuilder? builder, IConsoleEvents? events ) {
+		/// <param name="eventRegistry"></param>
+		public InGameSink( Node? node, ICommandBuilder? builder, IGameEventRegistryService eventRegistry ) {
 			ArgumentNullException.ThrowIfNull( node );
 			ArgumentNullException.ThrowIfNull( builder );
-			ArgumentNullException.ThrowIfNull( events );
+			ArgumentNullException.ThrowIfNull( eventRegistry );
 
 			_richLabel = new RichTextLabel() {
 				Name = nameof( _richLabel ),
@@ -72,9 +74,9 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 			node.CallDeferred( Control.MethodName.AddChild, _richLabel );
 
 			builder.TextEntered.Subscribe( this, OnScrollToBottom );
-			events.ConsoleOpened.Subscribe( this, OnScrollToBottom );
-			events.PageUp.Subscribe( this, OnPageUp );
-			events.PageDown.Subscribe( this, OnPageDown );
+			eventRegistry.GetEvent<IEventArgs>( "ConsoleOpened" ).Subscribe( this, OnConsoleOpened );
+			eventRegistry.GetEvent<IEventArgs>( "PageUp" ).Subscribe( this, OnPageUp );
+			eventRegistry.GetEvent<IEventArgs>( "PageDown" ).Subscribe( this, OnPageDown );
 		}
 
 		/*
@@ -126,9 +128,22 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// </summary>
 		/// <param name="eventData"></param>
 		/// <param name="args"></param>
-		private void OnScrollToBottom( in IGameEvent eventData, in IEventArgs args ) {
+		private void OnScrollToBottom( in TextEnteredEventData args ) {
 			VScrollBar scroll = _richLabel.GetVScrollBar();
 			scroll.Value = scroll.MaxValue - scroll.Page;
+		}
+
+		/*
+		===============
+		OnConsoleOpened
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="args"></param>
+		private void OnConsoleOpened( in IEventArgs args ) {
+			OnScrollToBottom( new TextEnteredEventData() );
 		}
 
 		/*
@@ -141,7 +156,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// </summary>
 		/// <param name="eventData"></param>
 		/// <param name="args"></param>
-		private void OnPageUp( in IGameEvent eventData, in IEventArgs args ) {
+		private void OnPageUp( in IEventArgs args ) {
 			VScrollBar scroll = _richLabel.GetVScrollBar();
 			Tween tween = _richLabel.CreateTween();
 			tween.TweenProperty( scroll, "value", scroll.Value - ( scroll.Page - scroll.Page * 0.1f ), 0.1f );
@@ -158,7 +173,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// </summary>
 		/// <param name="eventData"></param>
 		/// <param name="args"></param>
-		private void OnPageDown( in IGameEvent eventData, in IEventArgs args ) {
+		private void OnPageDown( in IEventArgs args ) {
 			VScrollBar scroll = _richLabel.GetVScrollBar();
 			Tween tween = _richLabel.CreateTween();
 			tween.TweenProperty( scroll, "value", scroll.Value + ( scroll.Page - scroll.Page * 0.1f ), 0.1f );

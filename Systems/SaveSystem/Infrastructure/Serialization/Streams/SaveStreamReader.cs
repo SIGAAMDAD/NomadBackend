@@ -21,7 +21,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
@@ -43,7 +42,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Serialization.Streams {
 	/// Reads strings in <see cref="Encoding.UTF8"/> format.
 	/// </remarks>
 
-	internal sealed class SaveReaderStream : ISaveFileStream {
+	internal sealed class SaveStreamReader : ISaveFileStream {
 		/// <summary>
 		/// The length of the stream (the file's size).
 		/// </summary>
@@ -64,7 +63,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Serialization.Streams {
 
 		/*
 		===============
-		SaveReaderStream
+		SaveStreamReader
 		===============
 		*/
 		/// <summary>
@@ -74,7 +73,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Serialization.Streams {
 		/// Exceptions such as IO or FileNotFound should be handled outside of this class.
 		/// </remarks>
 		/// <param name="filepath"></param>
-		public SaveReaderStream( string filepath ) {
+		public SaveStreamReader( string filepath ) {
 			using System.IO.FileStream stream = new System.IO.FileStream( filepath, System.IO.FileMode.Open, System.IO.FileAccess.Read );
 			
 			_length = (int)( stream.Length - stream.Position );

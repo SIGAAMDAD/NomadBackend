@@ -21,17 +21,17 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces;
-using NomadCore.Systems.SaveSystem.Events;
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
+using Godot;
 
-namespace NomadCore.Systems.SaveSystem.Interfaces {
-	public interface ISaveEvents : IGameService {
-		public LoadFailed LoadFailed { get; }
-		public LoadStarted LoadStarted { get; }
-		public SaveCompleted SaveCompleted { get; }
-		public SaveFailed SaveFailed { get; }
-		public SaveStarted SaveStarted { get; }
-		public SlotCreated SlotCreated { get; }
-		public SlotDeleted SlotDeleted { get; }
+namespace NomadCore.Systems.Audio.Domain.Interfaces {
+	public interface IAudioSource {
+		public Vector2 Positon { get; set; }
+		public float Volume { get; set; }
+
+		public AudioSourceStatus Status { get; }
+
+		public void PlaySound( EventId id );
 	};
 };

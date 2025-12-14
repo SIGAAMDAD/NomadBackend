@@ -44,11 +44,15 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories.Loaders {
 	/// Loads FMOD banks from disk.
 	/// </summary>
 	
-	internal sealed class FMODBankLoader( FMODSystemService fmodSystem ) : IResourceLoader<BankComposite, FilePath> {
-		public IResourceLoader<BankComposite, FilePath>.LoadCallback Load => LoadBank;
-		public IResourceLoader<BankComposite, FilePath>.LoadAsyncCallback LoadAsync => LoadBankAsync;
+	internal sealed class FMODBankLoader : IResourceLoader<BankComposite, BankId> {
+		public IResourceLoader<BankComposite, BankId>.LoadCallback Load => LoadBank;
+		public IResourceLoader<BankComposite, BankId>.LoadAsyncCallback LoadAsync => LoadBankAsync;
 
-		private readonly FMODSystemService _fmodSystem = fmodSystem;
+		private readonly FMODSystemService _fmodSystem;
+
+		public FMODBankLoader( FMODSystemService fmodSystem ) {
+			_fmodSystem = fmodSystem;
+		}
 
 		/*
 		===============
@@ -60,13 +64,15 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories.Loaders {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		private Result<BankComposite> LoadBank( FilePath id ) {
-			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.loadBankFile( id, FMOD.Studio.LOAD_BANK_FLAGS.NORMAL, out var bank ) );
+		private Result<BankComposite> LoadBank( BankId id ) {
+			var path = FilePath.FromResourcePath( $"res://Assets/Audio/{SceneStringPool.FromInterned( id.Name )}" );
+
+			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.loadBankFile( path.OSPath, FMOD.Studio.LOAD_BANK_FLAGS.NORMAL, out var bank ) );
 			FMODValidator.ValidateCall( bank.getEventList( out var events ) );
 
 			var eventCollection = new FMODEventCollection( events );
 			var resource = new FMODBankResource( bank );
-			var metadata = new FMODBankMetadata( new BankId( SceneStringPool.Intern( id.GetFileName() ) ) );
+			var metadata = new FMODBankMetadata( id );
 
 			return Result<BankComposite>.Success( new BankComposite( eventCollection, resource, metadata ) );
 		}
@@ -82,15 +88,17 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories.Loaders {
 		/// <param name="id"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		private async Task<Result<BankComposite>> LoadBankAsync( FilePath id, CancellationToken ct = default ) {
+		private async Task<Result<BankComposite>> LoadBankAsync( BankId id, CancellationToken ct = default ) {
 			ct.ThrowIfCancellationRequested();
 
-			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.loadBankFile( id, FMOD.Studio.LOAD_BANK_FLAGS.NONBLOCKING, out var bank ) );
+			var path = FilePath.FromResourcePath( $"res://Assets/Audio/{SceneStringPool.FromInterned( id.Name )}" );
+
+			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.loadBankFile( path.OSPath, FMOD.Studio.LOAD_BANK_FLAGS.NONBLOCKING, out var bank ) );
 			FMODValidator.ValidateCall( bank.getEventList( out var events ) );
 
 			var eventCollection = new FMODEventCollection( events );
 			var resource = new FMODBankResource( bank );
-			var metadata = new FMODBankMetadata( new BankId( SceneStringPool.Intern( id.GetFileName() ) ) );
+			var metadata = new FMODBankMetadata( id );
 
 			return Result<BankComposite>.Success( new BankComposite( eventCollection, resource, metadata ) );
 		}

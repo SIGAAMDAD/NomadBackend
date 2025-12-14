@@ -21,7 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
+using NomadCore.GameServices;
 using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
@@ -40,7 +40,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Serialization.Streams {
 	/// An abstracted interface to manage writing a save file to a filestream.
 	/// </summary>
 	
-	internal ref struct SaveStreamWriter( string filepath, ILoggerService? logger ) : ISaveFileStream {
+	internal sealed class SaveStreamWriter( string filepath, ILoggerService? logger ) : ISaveFileStream {
 		// hard limit of 128 MiB
 		private const int MAX_CAPACITY = 128 * 1024 * 1024;
 

@@ -21,45 +21,59 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.Systems.Audio.Domain.Interfaces;
+using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using Godot;
-using NomadCore.Enums.Audio;
-using NomadCore.Interfaces.EntitySystem;
-using System.Runtime.CompilerServices;
+using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
+using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
 
-namespace NomadCore.Systems.Audio.Infrastructure.Godot {
+namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	/*
 	===================================================================================
 	
-	GodotWorldAudioSource
+	FMODAudioSource
 	
 	===================================================================================
 	*/
 	/// <summary>
-	/// Handles 2D spatial audio sources.
+	/// A source of audio, an "emitter" in a sense.
 	/// </summary>
 	
-	internal sealed class GodotWorldAudioSource : AudioSourceBase {
-		private readonly AudioStreamPlayer2D _streamNode;
-
-		public GodotWorldAudioSource( SourceType type )
-			: base( type )
-		{
-			_streamNode = new AudioStreamPlayer2D() {
-				Name = nameof( GodotWorldAudioSource ),
-				VolumeDb = _volume
-			};
+	internal sealed class FMODAudioSource( FMODChannelRepository channelRepository ) : IAudioSource {
+		public Vector2 Positon {
+			get => _position;
+			set {
+				if ( _channel == null || _position == value ) {
+					return;
+				}
+				_position = value;
+				_channel.SetPosition( value );
+			}
 		}
+		private Vector2 _position = Vector2.Zero;
 
-		/*
-		===============
-		GetStreamNode
-		===============
-		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		protected override Node GetStreamNode() => StreamNode;
+		public float Volume {
+			get => _volume;
+			set {
+				if ( _channel == null || _volume == value ) {
+					return;
+				}
+				_volume = value;
+				_channel.SetVolume( value );
+			}
+		}
+		private float _volume = 0.0f;
+
+		public AudioSourceStatus Status => _status;
+		private AudioSourceStatus _status = AudioSourceStatus.Stopped;
+
+		private readonly FMODChannelRepository _channelRepository = channelRepository;
+
+		private FMODChannel? _channel;
+
+		public void PlaySound( EventId id ) {
+			
+		}
 	};
 };

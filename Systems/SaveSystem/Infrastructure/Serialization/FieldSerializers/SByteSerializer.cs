@@ -42,6 +42,6 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Serialization.FieldSeriali
 		public Type DataType => typeof( sbyte );
 
 		public void Serialize( SaveStreamWriter stream, sbyte value ) => stream.Write( value );
-		public FieldValue Deserialize( SaveReaderStream stream ) => new FieldValue( stream.Read<sbyte>() );
+		public FieldValue Deserialize( SaveStreamReader stream ) => new FieldValue( stream.Read<sbyte>() );
 	};
 };

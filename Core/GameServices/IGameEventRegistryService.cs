@@ -25,7 +25,7 @@ using NomadCore.Domain.Models.Interfaces;
 
 namespace NomadCore.GameServices {
 	public interface IGameEventRegistryService {
-		public IGameEvent<TArgs> GetEvent<TArgs>( string name )
+		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string? nameSpace = null )
 			where TArgs : IEventArgs;
 	};
 };

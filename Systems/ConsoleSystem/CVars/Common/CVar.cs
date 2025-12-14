@@ -23,14 +23,12 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using Godot;
 using NomadCore.Domain.Events;
+using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
-using NomadCore.Interfaces.ConsoleSystem;
-using NomadCore.Interfaces.EventSystem;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 	/*
@@ -56,7 +54,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 					return;
 				}
 				_value = value;
-				_valueChanged.Publish( new CVarValueChangedEventData( this, _value ) );
+				_valueChanged.Publish( new CVarValueChangedEventData<T>( this, _value ) );
 			}
 		}
 		private T _value;
@@ -130,7 +128,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		/// <param name="createInfo"></param>
 		/// <exception cref="ArgumentException">Thrown if <paramref name="name"/> is invalid as a CVar name</exception>
 		/// <exception cref="InvalidOperationException">Thrown if <paramref name="defaultValue"/> is an invalid CVar value type</exception>
-		internal CVar( IGameEventBusService eventBus, in CVarCreateInfo<T> createInfo ) {
+		internal CVar( IGameEventRegistryService eventFactory, in CVarCreateInfo<T> createInfo ) {
 			if ( !IsValidCVarType( typeof( T ) ) ) {
 				throw new InvalidCastException( nameof( T ) );
 			}
@@ -148,7 +146,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 			_defaultValue = createInfo.DefaultValue;
 			_value = createInfo.DefaultValue;
 			_type = DetermineType( Value );
-			_valueChanged = eventBus.CreateEvent<ICVarValueChangedEventData<T>>( nameof( ValueChanged ) );
+			_valueChanged = eventFactory.GetEvent<CVarValueChangedEventData<T>>( nameof( ValueChanged ) );
 
 			_validator = createInfo.Validator;
 			Description = createInfo.Description ?? String.Empty;

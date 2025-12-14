@@ -26,6 +26,6 @@ using NomadCore.Systems.SaveSystem.Domain.Models.Aggregates;
 using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 
 namespace NomadCore.Systems.SaveSystem.Infrastructure.Storage {
-	public interface ISaveFileRepository : IAsyncReadRepository<SaveFile, SaveFileId>, IAsyncWriteRepository<SaveFile, SaveFileId> {
+	internal interface ISaveFileRepository : IAsyncReadRepository<SaveFile, SaveFileId>, IAsyncWriteRepository<SaveFile, SaveFileId> {
 	};
 };

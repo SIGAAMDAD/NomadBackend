@@ -30,6 +30,5 @@ namespace NomadCore.Systems.Audio.Domain.Interfaces {
 
 		public bool ContainsEvent( EventId eventId );
 		public HashSet<EventId> GetEventIds();
-		public IAudioEvent[] GetEvents();
 	};
 };

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
+    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net10.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
@@ -16,7 +16,7 @@
     <PackageReference Include="Godot.NET.Sdk" Version="4.5.1" />
     <PackageReference Include="Godot.SourceGenerators" Version="4.5.1" />
     <PackageReference Include="GodotSharp" Version="4.5.1" />
-    <PackageReference Include="System.IO.Hashing" Version="9.0.10" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ConsoleSystem\ConsoleSystem.csproj" />
-    <ProjectReference Include="..\..\Core\Core.csproj" />
+    <ProjectReference Include="..\..\Core\NomadCore.csproj" />
     <ProjectReference Include="..\EventSystem\EventSystem\EventSystem.csproj" />
   </ItemGroup>
 

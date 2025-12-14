@@ -15,12 +15,11 @@
     <PackageReference Include="Godot.NET.Sdk" Version="4.5.1" />
     <PackageReference Include="Godot.SourceGenerators" Version="4.5.1" />
     <PackageReference Include="GodotSharp" Version="4.5.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.0" />
     <PackageReference Include="OpenTK.Audio.OpenAL" Version="4.9.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\Core.csproj" />
+    <ProjectReference Include="..\..\Core\NomadCore.csproj" />
     <ProjectReference Include="..\EventSystem\EventSystem\EventSystem.csproj" />
     <ProjectReference Include="..\EntitySystem\EntitySystem.csproj" />
     <ProjectReference Include="..\ResourceCache\ResourceCache.csproj" />

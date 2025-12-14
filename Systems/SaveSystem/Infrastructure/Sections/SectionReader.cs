@@ -21,16 +21,17 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
-using NomadCore.Infrastructure;
+using NomadCore.GameServices;
 using NomadCore.Interfaces.SaveSystem;
-using NomadCore.Systems.SaveSystem.Enums;
+using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 using NomadCore.Systems.SaveSystem.Errors;
 using NomadCore.Systems.SaveSystem.Infrastructure.Fields;
+using NomadCore.Systems.SaveSystem.Infrastructure.Serialization.Streams;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 	/*
@@ -44,7 +45,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 	/// 
 	/// </summary>
 	
-	internal sealed class SectionReader : ISectionReader {
+	internal sealed class SectionReader : ISectionDeserializer {
 		public string Name => _name;
 		private readonly string _name;
 
@@ -54,7 +55,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		public IReadOnlyDictionary<string, SaveField> Fields => _fields;
 		private readonly ConcurrentDictionary<string, SaveField> _fields = new ConcurrentDictionary<string, SaveField>();
 
-		private readonly ILoggerService? Logger = ServiceRegistry.Get<ILoggerService>();
+		private readonly ILoggerService? _logger;
 
 		public SaveField this[ string name ] => _fields[ name ];
 
@@ -63,10 +64,12 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		SectionReader
 		===============
 		*/
-		public SectionReader( Streams.SaveReaderStream stream ) {
+		public SectionReader( SaveStreamReader stream, ILoggerService logger ) {
 			var header = SectionHeader.Load( stream );
 			_name = header.Name;
 			_fieldCount = header.FieldCount;
+
+			_logger = logger;
 
 			LoadFields( stream );
 		}
@@ -82,7 +85,18 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public T? GetField<T>( string? name ) {
+		public T? GetField<T>( string name ) {
+			ArgumentException.ThrowIfNullOrEmpty( name );
+
+			SaveField? field = LoadField( name, FieldValue.GetFieldType<T>() );
+			if ( field != null && field.Value is T value ) {
+				return value;
+			}
+
+			return default;
+		}
+
+		public async ValueTask<T?> GetFieldAsync<T>( string name ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			SaveField? field = LoadField( name, FieldValue.GetFieldType<T>() );
@@ -105,7 +119,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <param name="value"></param>
 		/// <returns>True if the field exists, false if not found in cache.</returns>
-		public bool TryGetField<T>( string? name, out T? value ) {
+		public bool TryGetField<T>( string name, out T? value ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			FieldType type = FieldValue.GetFieldType<T>();
@@ -129,7 +143,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public sbyte LoadSByte( string? name ) => GetField<sbyte>( name );
+		public sbyte LoadSByte( string name ) => GetField<sbyte>( name );
 
 		/*
 		===============
@@ -142,7 +156,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public short LoadShort( string? name ) => GetField<short>( name );
+		public short LoadShort( string name ) => GetField<short>( name );
 
 		/*
 		===============
@@ -155,7 +169,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public int LoadInt( string? name ) => GetField<int>( name );
+		public int LoadInt( string name ) => GetField<int>( name );
 
 		/*
 		===============
@@ -168,7 +182,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public long LoadLong( string? name ) => GetField<long>( name );
+		public long LoadLong( string name ) => GetField<long>( name );
 
 		/*
 		===============
@@ -181,7 +195,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public byte LoadByte( string? name ) => GetField<byte>( name );
+		public byte LoadByte( string name ) => GetField<byte>( name );
 
 		/*
 		===============
@@ -194,7 +208,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public ushort LoadUShort( string? name ) => GetField<ushort>( name );
+		public ushort LoadUShort( string name ) => GetField<ushort>( name );
 
 		/*
 		===============
@@ -207,7 +221,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public uint LoadUInt( string? name ) => GetField<uint>( name );
+		public uint LoadUInt( string name ) => GetField<uint>( name );
 
 		/*
 		===============
@@ -220,7 +234,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public ulong LoadULong( string? name ) => GetField<ulong>( name );
+		public ulong LoadULong( string name ) => GetField<ulong>( name );
 
 		/*
 		===============
@@ -233,7 +247,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public float LoadFLoat( string? name ) => GetField<float>( name );
+		public float LoadFLoat( string name ) => GetField<float>( name );
 
 		/*
 		===============
@@ -246,7 +260,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public double LoadDouble( string? name ) => GetField<double>( name );
+		public double LoadDouble( string name ) => GetField<double>( name );
 
 		/*
 		===============
@@ -259,7 +273,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public string LoadString( string? name ) => GetField<string>( name );
+		public string LoadString( string name ) => GetField<string>( name );
 
 		/*
 		===============
@@ -272,7 +286,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public bool LoadBoolean( string? name ) => GetField<bool>( name );
+		public bool LoadBoolean( string name ) => GetField<bool>( name );
 
 		/*
 		===============
@@ -296,7 +310,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 			}
 
 			// not the end of the world, just a missing field, so apply the default value
-			Logger?.PrintError( $"...couldn't find save field {name}" );
+			_logger?.PrintError( $"...couldn't find save field {name}" );
 			return new SaveField();
 		}
 
@@ -310,12 +324,12 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// </summary>
 		/// <param name="reader"></param>
 		/// <exception cref="FailedSectionLoadException">Throws if the section failed to load.</exception>
-		private void LoadFields( in Streams.SaveReaderStream reader ) {
+		private void LoadFields( in SaveStreamReader reader ) {
 			try {
 				for ( int i = 0; i < _fieldCount; i++ ) {
 					var field = SaveField.Read( Name, i, reader );
 					if ( !_fields.TryAdd( field.Name, field ) ) {
-						Logger?.PrintError( $"Section.LoadFields: failed to add field {field.Name} to cache." );
+						_logger?.PrintError( $"Section.LoadFields: failed to add field {field.Name} to cache." );
 						throw new FailedSectionLoadException( Name, null );
 					}
 				}

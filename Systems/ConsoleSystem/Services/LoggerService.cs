@@ -21,14 +21,13 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
-using NomadCore.Enums.ConsoleSystem;
-using NomadCore.Infrastructure;
-using NomadCore.Interfaces.ConsoleSystem;
-using NomadCore.Interfaces.EventSystem;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.GameServices;
 using NomadCore.Systems.ConsoleSystem.Events;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
@@ -44,8 +43,9 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 	/// </summary>
 
 	internal sealed class LoggerService : IDisposable, ILoggerService {
-		private readonly ILoggerSink[] _sinks;
+		private readonly List<ILoggerSink> _sinks;
 		private readonly ICVar<LogLevel> _logDepth;
+		private readonly ICommandLine _commandLine;
 
 		/*
 		===============
@@ -56,15 +56,19 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// 
 		/// </summary>
 		/// <param name="commandLine"></param>
+		/// <param name="commandService"></param>
+		/// <param name="cvarSystem"></param>
 		/// <param name="sinks"></param>
-		public LoggerService( ICommandLine commandLine, ICommandService commandService, ICVarSystemService cvarSystem, ILoggerSink[] sinks ) {
+		/// <exception cref="Exception"></exception>
+		public LoggerService( ICommandLine commandLine, ICommandService commandService, ICVarSystemService cvarSystem ) {
 			ArgumentNullException.ThrowIfNull( commandLine );
-			ArgumentNullException.ThrowIfNull( sinks );
 
 			commandLine.TextEntered.Subscribe( this, OnTextEntered );
-			_sinks = sinks;
+			
+			_commandLine = commandLine;
+			_sinks = new List<ILoggerSink>();
 
-			_logDepth = cvarSystem.GetCVar<LogLevel>( "console.LogLevel" );
+			_logDepth = cvarSystem.GetCVar<LogLevel>( "console.LogLevel" ) ?? throw new Exception( "Missing CVar 'console.LogLevel'" );
 
 			commandService.RegisterCommand( new ConsoleCommand( "clear", OnClear, "Clears the console." ) );
 			commandService.RegisterCommand( new ConsoleCommand( "echo", OnEcho, "Prints a string to the console." ) );
@@ -76,9 +80,23 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		===============
 		*/
 		public void Dispose() {
-			for ( int i = 0; i < _sinks.Length; i++ ) {
+			for ( int i = 0; i < _sinks.Count; i++ ) {
 				_sinks[ i ].Dispose();
 			}
+		}
+
+		/*
+		===============
+		AddSink
+		===============
+		*/
+		/// <summary>
+		/// Adds a sink stream to the global logger service.
+		/// </summary>
+		/// <param name="sink"></param>
+		public void AddSink( ILoggerSink sink ) {
+			ArgumentNullException.ThrowIfNull( sink );
+			_sinks.Add( sink );
 		}
 
 		/*
@@ -95,7 +113,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 			if ( level > _logDepth.Value ) {
 				return;
 			}
-			for ( int i = 0; i < _sinks.Length; i++ ) {
+			for ( int i = 0; i < _sinks.Count; i++ ) {
 				_sinks[ i ].Print( message );
 			}
 		}
@@ -109,9 +127,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// 
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintLine( string? message ) {
-			ArgumentException.ThrowIfNullOrEmpty( message );
-
+		public void PrintLine( string message ) {
 			PrintMessage( LogLevel.Info, message );
 		}
 
@@ -124,9 +140,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// 
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintDebug( string? message ) {
-			ArgumentException.ThrowIfNullOrEmpty( message );
-
+		public void PrintDebug( string message ) {
 			PrintMessage( LogLevel.Debug, $"[color=light_blue]DEBUG: {message}[/color]\n" );
 		}
 
@@ -139,9 +153,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// 
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintWarning( string? message ) {
-			ArgumentException.ThrowIfNullOrEmpty( message );
-
+		public void PrintWarning( string message ) {
 			PrintMessage( LogLevel.Warning, $"[color=gold]WARNING: {message}[/color]\n" );
 		}
 
@@ -154,9 +166,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// 
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintError( string? message ) {
-			ArgumentException.ThrowIfNullOrEmpty( message );
-
+		public void PrintError( string message ) {
 			PrintMessage( LogLevel.Error, $"[color=red]ERROR: {message}[/color]\n" );
 		}
 
@@ -170,7 +180,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnClear( in ICommandExecutedEventData args ) {
-			for ( int i = 0; i < _sinks.Length; i++ ) {
+			for ( int i = 0; i < _sinks.Count; i++ ) {
 				_sinks[ i ].Clear();
 			}
 		}
@@ -185,7 +195,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnEcho( in ICommandExecutedEventData args ) {
-			PrintLine( ServiceRegistry.Get<ICommandLine>().GetArgumentAt( 0 ) );
+			PrintLine( _commandLine.GetArgumentAt( 0 ) );
 		}
 
 		/*
@@ -196,15 +206,10 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="eventData"></param>
 		/// <param name="args"></param>
 		/// <exception cref="InvalidCastException"></exception>
-		private void OnTextEntered( in IGameEvent eventData, in IEventArgs args ) {
-			if ( args is TextEnteredEventData textEntered ) {
-				PrintLine( $"> {textEntered.Text}" );
-			} else {
-				throw new InvalidCastException( nameof( args ) );
-			}
+		private void OnTextEntered( in TextEnteredEventData args ) {
+			PrintLine( $"> {args.Text}" );
 		}
 	};
 };

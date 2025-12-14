@@ -21,6 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.GameServices;
+using NomadCore.Systems.ResourceCache.Application.Interfaces;
+
 namespace NomadCore.Systems.ResourceCache.Common {
 	/*
 	===================================================================================
@@ -33,7 +37,7 @@ namespace NomadCore.Systems.ResourceCache.Common {
 	/// 
 	/// </summary>
 	
-	public sealed class TextureCache : BaseCache<Godot.Texture> {
+	public sealed class TextureCache( ILoggerService logger, IGameEventRegistryService eventFactory, IResourceLoader<Godot.Texture, FilePath> loader ) : BaseCache<Godot.Texture, FilePath>( logger, eventFactory, loader ) {
 		/*
 		===============
 		CalculateMemorySize
@@ -44,7 +48,7 @@ namespace NomadCore.Systems.ResourceCache.Common {
 		/// </summary>
 		/// <param name="resource"></param>
 		/// <returns></returns>
-		protected override long CalculateMemorySize( Godot.Texture resource ) {
+		protected override int CalculateMemorySize( Godot.Texture resource ) {
 			if ( resource is Godot.Texture2D texture2D ) {
 				return texture2D.GetWidth() * texture2D.GetHeight() * ( texture2D.HasAlpha() ? 4 : 3 );
 			} else if ( resource is Godot.GradientTexture1D gradient1D ) {

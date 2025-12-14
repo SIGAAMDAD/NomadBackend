@@ -40,7 +40,7 @@ namespace NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects {
 			writer.Write( Patch );
 		}
 
-		internal static GameVersion Deserialize( SaveReaderStream reader ) {
+		internal static GameVersion Deserialize( SaveStreamReader reader ) {
 			int major = reader.Read<int>();
 			int minor = reader.Read<int>();
 			int patch = reader.Read<int>();

@@ -21,15 +21,13 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
-using NomadCore.Infrastructure;
-using NomadCore.Interfaces.EventSystem;
-using NomadCore.Interfaces.ConsoleSystem;
 using NomadCore.Systems.ConsoleSystem.Events;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using NomadCore.GameServices;
+using NomadCore.Domain.Models.Interfaces;
 
 namespace NomadCore.Systems.ConsoleSystem.Services {
 	/*
@@ -55,6 +53,9 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		private int _currentSuggest = 0;
 		private bool _suggesting = false;
 
+		private readonly ICommandService _commandService;
+		private readonly ILoggerService _logger;
+
 		public IGameEvent<TextEnteredEventData> TextEntered => _textEntered;
 		private readonly IGameEvent<TextEnteredEventData> _textEntered;
 
@@ -69,20 +70,32 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		CommandLine
 		===============
 		*/
-		public CommandLine( ICommandBuilder builder, IConsoleEvents events, IGameEventBusService eventBus ) {
+		public CommandLine( ICommandBuilder builder, ICommandService commandService, ILoggerService logger, IGameEventRegistryService eventFactory ) {
 			ArgumentNullException.ThrowIfNull( builder );
-			ArgumentNullException.ThrowIfNull( events );
-			ArgumentNullException.ThrowIfNull( eventBus );
+			ArgumentNullException.ThrowIfNull( eventFactory );
 
 			_commandBuilder = builder;
+			_commandService = commandService;
+			_logger = logger;
 
-			_textEntered = eventBus.CreateEvent<TextEnteredEventData>( nameof( TextEntered ) );
-			_unknownCommand = eventBus.CreateEvent<CommandExecutedEventData>( nameof( UnknownCommand ) );
-			_commandExecuted = eventBus.CreateEvent<CommandExecutedEventData>( nameof( CommandExecuted ) );
+			_textEntered = eventFactory.GetEvent<TextEnteredEventData>( nameof( TextEntered ) );
+			_unknownCommand = eventFactory.GetEvent<CommandExecutedEventData>( nameof( UnknownCommand ) );
+			_commandExecuted = eventFactory.GetEvent<CommandExecutedEventData>( nameof( CommandExecuted ) );
 
-			events.ConsoleClosed.Subscribe( this, OnConsoleClosed );
+			eventFactory.GetEvent<IEventArgs>( "ConsoleClosed" ).Subscribe( this, OnConsoleClosed );
 
 			builder.TextEntered.Subscribe( this, OnCommandExecuted );
+		}
+
+		/*
+		===============
+		Dispose
+		===============
+		*/
+		public void Dispose() {
+			_textEntered?.Dispose();
+			_unknownCommand?.Dispose();
+			_commandExecuted?.Dispose();
 		}
 
 		/*
@@ -139,25 +152,19 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		private void OnCommandExecuted( in TextEnteredEventData textEntered ) {
 			string textCommand = _commandBuilder.ArgumentCount > 0 ? _commandBuilder.GetArgumentAt( 0 ) : String.Empty;
 
-			var commandCache = ServiceRegistry.Get<ICommandService>();
-			ArgumentNullException.ThrowIfNull( commandCache );
-
-			var logger = ServiceRegistry.Get<ILoggerService>();
-			ArgumentNullException.ThrowIfNull( logger );
-
-			if ( !string.IsNullOrEmpty( textCommand ) && commandCache.TryGetCommand( textCommand, out IConsoleCommand consoleCommand ) ) {
+			if ( !string.IsNullOrEmpty( textCommand ) && _commandService.TryGetCommand( textCommand, out IConsoleCommand consoleCommand ) ) {
 				var arguments = _commandBuilder.GetArgs();
 
 				try {
 					consoleCommand.Callback.Invoke( new CommandExecutedEventData( consoleCommand, arguments ) );
-					_textEntered.Publish( new CommandExecutedEventData( consoleCommand, arguments ) );
+					_commandExecuted.Publish( new CommandExecutedEventData( consoleCommand, arguments ) );
 				} catch ( Exception ex ) {
-					logger.PrintError( $"CommandLine.OnCommandExecuted: error executing command - {ex.Message}" );
+					_logger.PrintError( $"CommandLine.OnCommandExecuted: error executing command - {ex.Message}" );
 					throw;
 				}
 			} else if ( !string.IsNullOrEmpty( textCommand ) ) {
-				_unknownCommand.Publish( EmptyEventArgs.Args );
-				logger.PrintWarning( $"CommandLine.OnCommandExecuted: command '{textCommand}' not found." );
+				_unknownCommand.Publish( new CommandExecutedEventData() );
+				_logger.PrintWarning( $"CommandLine.OnCommandExecuted: command '{textCommand}' not found." );
 			}
 		}
 
@@ -171,7 +178,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		/// </summary>
 		/// <param name="eventData"></param>
 		/// <param name="args"></param>
-		private void OnConsoleClosed( in IGameEvent eventData, in IEventArgs args ) {
+		private void OnConsoleClosed( in IEventArgs args ) {
 			//ResetAutocomplete();
 		}
 

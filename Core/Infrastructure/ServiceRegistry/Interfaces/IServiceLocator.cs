@@ -26,6 +26,8 @@ using System.Collections.Generic;
 
 namespace NomadCore.Infrastructure.ServiceRegistry.Interfaces {
 	public interface IServiceLocator : IDisposable {
+		public IServiceRegistry Collection { get; }
+
 		public TService GetService<TService>() where TService : class;
 		public bool TryGetService<TService>( out TService service ) where TService : class;
 		public IEnumerable<TService> GetServices<TService>() where TService : class;

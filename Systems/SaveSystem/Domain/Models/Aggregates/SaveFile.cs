@@ -40,7 +40,7 @@ namespace NomadCore.Systems.SaveSystem.Domain.Models.Aggregates {
 	/// 
 	/// </summary>
 	
-	public sealed class SaveFile : IAggregateRoot<SaveFileId> {
+	internal sealed class SaveFile : ISaveSlot {
 		public SaveFileId Id => _id;
 		private readonly SaveFileId _id;
 

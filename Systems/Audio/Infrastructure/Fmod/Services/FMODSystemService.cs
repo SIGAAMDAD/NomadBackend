@@ -28,7 +28,6 @@ using NomadCore.Systems.Audio.Infrastructure.Fmod.Registries;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 	/*
@@ -55,7 +54,12 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 		private int _audioDriver;
 
 		public string OutputDevice {
+			get => "Unknown";
+			set => _outputDevice = value;
 		}
+		private string _outputDevice;
+
+		public bool CanSetAudioDriver => true;
 
 		private readonly List<string> _drivers;
 
@@ -88,7 +92,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 			FMODValidator.ValidateCall( FMOD.Debug.Initialize( debugFlags, FMOD.DEBUG_MODE.CALLBACK, DebugCallback ) );
 #endif
 
-			_system.setCallback( OnAudioOutputDeviceListChanged, FMOD.SYSTEM_CALLBACK_TYPE.DEVICELISTCHANGED );
+			_system.System.setCallback( OnAudioOutputDeviceListChanged, FMOD.SYSTEM_CALLBACK_TYPE.DEVICELISTCHANGED );
 
 			FMODCVarRegistry.Register( cvarSystem );
 
@@ -117,6 +121,10 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 			_system.Update();
 		}
 
+		public IReadOnlyList<string> GetAudioDrivers() {
+			return _drivers;
+		}
+
 		/*
 		===============
 		OnAudioOutputDeviceListChanged
@@ -132,13 +140,14 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 		/// <param name="userdata"></param>
 		/// <returns></returns>
 		private FMOD.RESULT OnAudioOutputDeviceListChanged( nint system, FMOD.SYSTEM_CALLBACK_TYPE type, nint commanddata1, nint commanddata2, nint userdata ) {
-			_system.getNumDrivers( out int numDrivers );
+			_system.System.getNumDrivers( out int numDrivers );
 			_drivers.Clear();
 			_drivers.EnsureCapacity( numDrivers );
 
 			for ( int i = 0; i < numDrivers; i++ ) {
-				_system.getDriverInfo( i, out string name, 256, out _, out _, out FMOD.SPEAKERMODE speakerMode, out int speakerChannels );
+				_system.System.getDriverInfo( i, out string name, 256, out _, out _, out FMOD.SPEAKERMODE speakerMode, out int speakerChannels );
 			}
+			_system.System.getDriver( out _audioDriver );
 
 			return FMOD.RESULT.OK;
 		}
@@ -165,7 +174,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 			}
 
 			_logger.PrintLine( $"FMODSystemService.SetAudioDriver: setting audio driver to '{driverName}'..." );
-			FMODValidator.ValidateCall( _system.setDriver( driverIndex ) );
+			FMODValidator.ValidateCall( _system.System.setDriver( driverIndex ) );
 			_audioDriver = driverIndex;
 		}
 
@@ -188,8 +197,8 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 
 			var flags = FMOD.INITFLAGS.CHANNEL_DISTANCEFILTER | FMOD.INITFLAGS.CHANNEL_LOWPASS | FMOD.INITFLAGS.VOL0_BECOMES_VIRTUAL;
 
-			FMODValidator.ValidateCall( _system.setStreamBufferSize( (uint)streamBufferSize.Value * 1024, FMOD.TIMEUNIT.RAWBYTES ) );
-			FMODValidator.ValidateCall( _studioSystem.initialize( maxChannels.Value, FMOD.Studio.INITFLAGS.LIVEUPDATE | FMOD.Studio.INITFLAGS.SYNCHRONOUS_UPDATE, flags, 0 ) );
+			FMODValidator.ValidateCall( _system.System.setStreamBufferSize( (uint)streamBufferSize.Value * 1024, FMOD.TIMEUNIT.RAWBYTES ) );
+			FMODValidator.ValidateCall( _system.StudioSystem.initialize( maxChannels.Value, FMOD.Studio.INITFLAGS.LIVEUPDATE | FMOD.Studio.INITFLAGS.SYNCHRONOUS_UPDATE, flags, 0 ) );
 		}
 
 		/*

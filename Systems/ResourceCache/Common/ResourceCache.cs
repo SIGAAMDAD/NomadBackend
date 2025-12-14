@@ -22,6 +22,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.GameServices;
+using NomadCore.Systems.ResourceCache.Application.Interfaces;
 
 namespace NomadCore.Systems.ResourceCache.Common {
 	/*
@@ -35,6 +38,6 @@ namespace NomadCore.Systems.ResourceCache.Common {
 	/// 
 	/// </summary>
 	
-	public sealed class ResourceCache : BaseCache<Resource> {
+	public sealed class ResourceCache( ILoggerService logger, IGameEventRegistryService eventFactory, IResourceLoader<Resource, FilePath> loader ) : BaseCache<Resource, FilePath>( logger, eventFactory, loader ) {
 	};
 };

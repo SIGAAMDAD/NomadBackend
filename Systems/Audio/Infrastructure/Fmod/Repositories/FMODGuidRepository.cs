@@ -21,26 +21,27 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
-using NomadCore.Systems.Audio.Infrastructure.Fmod.Services;
 using System.Collections.Concurrent;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 	internal sealed class FMODGuidRepository {
-		private readonly ConcurrentDictionary<BankId, FMODBankId> _bankGuids = new ConcurrentDictionary<BankId, FMODBankId>();
-		private readonly ConcurrentDictionary<EventId, FMODEventId> _eventGuids = new ConcurrentDictionary<EventId, FMODEventId>();
+		private readonly ConcurrentDictionary<FMODBankId, BankId> _bankGuids = new ConcurrentDictionary<FMODBankId, BankId>();
 
-		public FMODGuidRepository( FMODSystemService fmodSystem ) {
-			FMODValidator.ValidateCall( fmodSystem.StudioSystem.getBankCount( out int bankCount ) );
-			FMODValidator.ValidateCall( fmodSystem.StudioSystem.getBankList( out FMOD.Studio.Bank[] banks ) );
-			for ( int i = 0; i < bankCount; i++ ) {
-			}
+		private readonly ConcurrentDictionary<FMODEventId, EventId> _eventGuids = new ConcurrentDictionary<FMODEventId, EventId>();
+
+		public EventId GetEventID( string path, FMOD.GUID guid ) {
+			var eventId = new EventId( SceneStringPool.Intern( path ) );
+			_eventGuids[ new FMODEventId( guid ) ] = eventId;
+			return eventId;
 		}
 
-		public FMODEventId IdToFMOD( EventId id ) {
-			return _eventGuids[ id ];
+		public BankId GetBankID( string path, FMOD.GUID guid ) {
+			var bankId = new BankId( SceneStringPool.Intern( path ) );
+			_bankGuids[ new FMODBankId( guid ) ] = bankId;
+			return bankId;
 		}
 	};
 };

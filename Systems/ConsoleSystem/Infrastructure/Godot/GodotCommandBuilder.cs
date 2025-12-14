@@ -22,8 +22,8 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.EventSystem;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.GameServices;
 using NomadCore.Systems.ConsoleSystem.Events;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using NomadCore.Systems.ConsoleSystem.Services;
@@ -51,7 +51,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		private readonly IGameEventBusService EventBus;
 
 		private readonly List<string> Arguments = new List<string>();
-		private readonly StringBuilder CommandBuilder = new StringBuilder();
+		private readonly StringBuilder _commandBuilder = new StringBuilder();
 
 		public IGameEvent<TextEnteredEventData> TextEntered => _textEntered;
 		private readonly IGameEvent<TextEnteredEventData> _textEntered;
@@ -61,15 +61,15 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		GodotCommandBuilder
 		===============
 		*/
-		public GodotCommandBuilder( IGameEventBusService? eventBus, IConsoleEvents? events ) {
+		public GodotCommandBuilder( IGameEventBusService eventBus, IGameEventRegistryService eventFactory ) {
 			ArgumentNullException.ThrowIfNull( eventBus );
-			ArgumentNullException.ThrowIfNull( events );
+			ArgumentNullException.ThrowIfNull( eventFactory );
 
 			EventBus = eventBus;
 
-			_textEntered = eventBus.CreateEvent<TextEnteredEventData>( nameof( TextEntered ) );
+			_textEntered = eventFactory.GetEvent<TextEnteredEventData>( nameof( TextEntered ) );
 
-			events.ConsoleOpened.Subscribe( this, OnConsoleOpened );
+			eventFactory.GetEvent<IEventArgs>( "ConsoleOpened" ).Subscribe( this, OnConsoleOpened );
 		}
 
 		/*
@@ -162,7 +162,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 				char c = text[ i ];
 
 				if ( escaped ) {
-					CommandBuilder.Append( c );
+					_commandBuilder.Append( c );
 					escaped = false;
 					continue;
 				}
@@ -176,20 +176,20 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 						continue;
 					default:
 						if ( char.IsWhiteSpace( c ) && !inQuotes ) {
-							if ( CommandBuilder.Length > 0 ) {
-								Arguments.Add( CommandBuilder.ToString() );
-								CommandBuilder.Clear();
+							if ( _commandBuilder.Length > 0 ) {
+								Arguments.Add( _commandBuilder.ToString() );
+								_commandBuilder.Clear();
 							}
 							continue;
 						}
 						break;
 				}
 
-				CommandBuilder.Append( c );
+				_commandBuilder.Append( c );
 			}
 
-			if ( CommandBuilder.Length > 0 ) {
-				Arguments.Add( CommandBuilder.ToString() );
+			if ( _commandBuilder.Length > 0 ) {
+				Arguments.Add( _commandBuilder.ToString() );
 			}
 		}
 
@@ -203,7 +203,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// </summary>
 		/// <param name="eventData"></param>
 		/// <param name="args"></param>
-		private void OnConsoleOpened( in IGameEvent eventData, in IEventArgs args ) {
+		private void OnConsoleOpened( in IEventArgs args ) {
 			GrabFocus();
 		}
 

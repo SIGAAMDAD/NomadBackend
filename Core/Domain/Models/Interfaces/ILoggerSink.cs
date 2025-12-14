@@ -21,8 +21,12 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using System;
+
 namespace NomadCore.Domain.Models.Interfaces {
-	public interface IAudioWorldSource : IAudioSource {
-		public IEntity Entity { get; }
+	public interface ILoggerSink : IDisposable {
+		public void Print( string message );
+		public void Clear();
+		public void Flush();
 	};
 };

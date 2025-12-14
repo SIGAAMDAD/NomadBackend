@@ -21,6 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Domain.Models.Interfaces;
 using System;
 
 namespace NomadCore.Systems.ConsoleSystem.Interfaces.Abstractions {
@@ -35,7 +36,7 @@ namespace NomadCore.Systems.ConsoleSystem.Interfaces.Abstractions {
 	/// 
 	/// </summary>
 	
-	public abstract class SinkBase : ILoggerSink {
+	internal abstract class SinkBase : ILoggerSink {
 		public abstract void Print( string message );
 		public abstract void Clear();
 		public abstract void Flush();

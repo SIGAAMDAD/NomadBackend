@@ -21,12 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using System;
+using NomadCore.Systems.Audio.Domain.Interfaces;
 
-namespace NomadCore.Systems.ConsoleSystem.Interfaces {
-	internal interface ILoggerSink : IDisposable {
-		public void Print( string message );
-		public void Clear();
-		public void Flush();
+namespace NomadCore.Systems.Audio.Application.Interfaces {
+	public interface IAudioSourceFactory {
+		public IAudioSource CreateSource();
 	};
 };

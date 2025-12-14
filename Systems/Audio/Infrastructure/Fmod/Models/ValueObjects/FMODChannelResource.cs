@@ -21,62 +21,60 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
-using NomadCore.Infrastructure;
-using NomadCore.Interfaces.ConsoleSystem;
-using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
-using NomadCore.Systems.SaveSystem.Infrastructure.Serialization.Streams;
+using NomadCore.Interfaces.Common;
+using System;
+using Godot;
 using System.Runtime.CompilerServices;
 
-namespace NomadCore.Systems.SaveSystem.Infrastructure {
+namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects {
 	/*
 	===================================================================================
 	
-	SaveHeader
+	FMODChannelResource
 	
 	===================================================================================
 	*/
 	/// <summary>
-	/// Represents a save section's header containing the metadata.
+	/// 
 	/// </summary>
 	
-	internal readonly ref struct SaveHeader( uint versionMajor, uint versionMinor, uint versionPatch, int sectionCount, ulong checksum ) {
-		public readonly uint VersionMajor = versionMajor;
-		public readonly uint VersionMinor = versionMinor;
-		public readonly uint VersionPatch = versionPatch;
-		public readonly int SectionCount = sectionCount;
-		public readonly ulong Checksum = checksum;
+	internal readonly record struct FMODChannelResource : IDisposable, IValueObject<FMODChannelResource> {
+		private readonly FMOD.Studio.EventInstance _instance;
 
-		/*
-		===============
-		Load
-		===============
-		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="stream"></param>
-		/// <returns></returns>
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static SaveHeader Load( in SaveReaderStream stream ) {
-			return new SaveHeader(
-				stream.Read<uint>(),
-				stream.Read<uint>(),
-				stream.Read<uint>(),
-				stream.Read<int>(),
-				stream.Read<ulong>()
-			);
+		public FMODChannelResource( FMOD.Studio.EventInstance instance ) {
+			_instance = instance;
 		}
 
 		/*
 		===============
-		Write
+		Dispose
 		===============
 		*/
-		public static void Write( Slot slot, SaveStreamWriter stream, GameVersion version ) {
-			stream.Write( version.Major );
-			stream.Write( version.Minor );
-			stream.Write( version.Patch );
+		public void Dispose() {
+			if ( _instance.isValid() ) {
+				_instance.release();
+				_instance.clearHandle();
+			}
+		}
+
+		/*
+		===============
+		SetPosition
+		===============
+		*/
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public void SetPosition( Vector2 position ) {
+			_instance.set3DAttributes( new FMOD.ATTRIBUTES_3D{ position = new FMOD.VECTOR{ x = position.X, y = position.Y, z = 0.0f } } );
+		}
+
+		/*
+		===============
+		SetVolume
+		===============
+		*/
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public void SetVolume( float volume ) {
+			_instance.setVolume( volume );
 		}
 	};
 };

@@ -21,9 +21,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.ConsoleSystem;
-using NomadCore.Utilities;
-using NomadCore.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
@@ -33,6 +30,7 @@ using System.Threading;
 using System.IO.MemoryMappedFiles;
 using NomadCore.GameServices;
 using System.Linq;
+using NomadCore.Domain.Models.ValueObjects;
 
 namespace NomadCore.Systems.SaveSystem.Infrastructure.Storage.FileSystem {
 	/*
@@ -68,8 +66,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Storage.FileSystem {
 		/// 
 		/// </summary>
 		public FilepathCacheService( ICVarSystemService cvarSystem ) {
-			ICVar<string>? saveLocation = cvarSystem.GetCVar<string>( "save.BasePath" );
-			ArgumentNullException.ThrowIfNull( saveLocation );
+			var saveLocation = cvarSystem.GetCVar<string>( "save.BasePath" ) ?? throw new Exception( "Missing CVar 'save.BasePath" );
 
 			_pathCache = new ConcurrentDictionary<SaveFileId, CachedFilePath>();
 			_reverseLookup = new ConcurrentDictionary<string, SaveFileId>();

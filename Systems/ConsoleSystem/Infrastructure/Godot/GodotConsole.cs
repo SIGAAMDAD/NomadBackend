@@ -22,9 +22,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Infrastructure;
-using NomadCore.Interfaces.ConsoleSystem;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.GameServices;
+using NomadCore.Systems.ConsoleSystem.Events;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using System;
 using System.Runtime.CompilerServices;
@@ -49,25 +50,34 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		[Export]
 		public bool PauseEnabled { get; private set; } = false;
 
-		private readonly IConsoleEvents Events;
-		private readonly GodotCommandBuilder CommandBuilder;
+		private readonly GodotCommandBuilder _commandBuilder;
+		private readonly IGameEvent<IEventArgs> _consoleOpened;
+		private readonly IGameEvent<IEventArgs> _consoleClosed;
+		private readonly IGameEvent<HistoryPrevEventData> _historyPrev;
+		private readonly IGameEvent<HistoryNextEventData> _historyNext;
+		private readonly IGameEvent<IEventArgs> _pageDown;
+		private readonly IGameEvent<IEventArgs> _pageUp;
 
-		private bool WasPausedAlready = false;
+		private bool _wasPausedAlready = false;
 
 		/*
 		===============
 		GodotConsole
 		===============
 		*/
-		public GodotConsole( ICommandBuilder? builder, IConsoleEvents? events ) {
+		public GodotConsole( ICommandBuilder builder, ICommandService commands, IGameEventRegistryService eventRegistry ) {
 			ArgumentNullException.ThrowIfNull( builder );
-			ArgumentNullException.ThrowIfNull( events );
 
-			Events = events;
-			CommandBuilder = (GodotCommandBuilder)builder;
+			_consoleClosed = eventRegistry.GetEvent<IEventArgs>( "ConsoleClosed", "Console" );
+			_consoleOpened = eventRegistry.GetEvent<IEventArgs>( "ConsoleOpened", "Console" );
+			_historyNext = eventRegistry.GetEvent<HistoryNextEventData>( "HistoryNext", "Console" );
+			_historyPrev = eventRegistry.GetEvent<HistoryPrevEventData>( "HistoryPrev", "Console" );
+			_pageDown = eventRegistry.GetEvent<IEventArgs>( "PageDown", "Console" );
+			_pageUp = eventRegistry.GetEvent<IEventArgs>( "PageUp", "Console" );
+			_commandBuilder = builder as GodotCommandBuilder ?? throw new InvalidOperationException( "Cannot create a GodotConsole without a GodotCommandBuilder!" );
 
-			ServiceRegistry.Get<ICommandService>().RegisterCommand( new ConsoleCommand( "quit", OnQuit, "Closes the game application." ) );
-			ServiceRegistry.Get<ICommandService>().RegisterCommand( new ConsoleCommand( "exit", OnQuit, "Exits the running application." ) );
+			commands.RegisterCommand( new ConsoleCommand( "quit", OnQuit, "Closes the game application." ) );
+			commands.RegisterCommand( new ConsoleCommand( "exit", OnQuit, "Exits the running application." ) );
 		}
 
 		/*
@@ -86,15 +96,15 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 			}
 
 			if ( Visible ) {
-				WasPausedAlready = GetTree().Paused;
-				GetTree().Paused = WasPausedAlready || PauseEnabled;
-				Events.ConsoleOpened.Publish( EmptyEventArgs.Args );
+				_wasPausedAlready = GetTree().Paused;
+				GetTree().Paused = _wasPausedAlready || PauseEnabled;
+				_consoleOpened.Publish( EmptyEventArgs.Args );
 			} else {
 				AnchorBottom = 1.0f;
-				if ( PauseEnabled && !WasPausedAlready ) {
+				if ( PauseEnabled && !_wasPausedAlready ) {
 					GetTree().Paused = false;
 				}
-				Events.ConsoleClosed.Publish( EmptyEventArgs.Args );
+				_consoleClosed.Publish( EmptyEventArgs.Args );
 			}
 		}
 
@@ -169,7 +179,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 
 			ProcessMode = ProcessModeEnum.Always;
 
-			AddChild( CommandBuilder );
+			AddChild( _commandBuilder );
 		}
 
 		/*
@@ -189,16 +199,16 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 				if ( Visible ) {
 					if ( keyEvent.GetPhysicalKeycodeWithModifiers() == Key.Up ) {
 						GetViewport().SetInputAsHandled();
-						Events.HistoryPrev.Publish( EmptyEventArgs.Args );
+						_historyPrev.Publish( new HistoryPrevEventData() );
 					} else if ( keyEvent.GetPhysicalKeycodeWithModifiers() == Key.Down ) {
 						GetViewport().SetInputAsHandled();
-						Events.HistoryNext.Publish( EmptyEventArgs.Args );
+						_historyNext.Publish( new HistoryNextEventData() );
 					} else if ( keyEvent.GetPhysicalKeycodeWithModifiers() == Key.Pageup ) {
 						GetViewport().SetInputAsHandled();
-						Events.PageUp.Publish( EmptyEventArgs.Args );
+						_pageUp.Publish( EmptyEventArgs.Args );
 					} else if ( keyEvent.GetPhysicalKeycodeWithModifiers() == Key.Pagedown ) {
 						GetViewport().SetInputAsHandled();
-						Events.PageDown.Publish( EmptyEventArgs.Args );
+						_pageDown.Publish( EmptyEventArgs.Args );
 					} else if ( keyEvent.GetPhysicalKeycodeWithModifiers() == Key.Tab ) {
 						GetViewport().SetInputAsHandled();
 						//Events.AutoComplete.Publish( EmptyEventArgs.Args );

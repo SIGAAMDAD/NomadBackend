@@ -21,9 +21,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
-using NomadCore.Infrastructure;
-using NomadCore.Interfaces.ConsoleSystem;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Systems.ConsoleSystem.Infrastructure;
 using System;
 using System.Collections.Concurrent;
@@ -41,20 +41,32 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 	/// 
 	/// </summary>
 	
-	public sealed class CommandCacheService : ICommandService {
-		private readonly ConcurrentDictionary<string, IConsoleCommand> _commands = new ConcurrentDictionary<string, IConsoleCommand>();
+	internal sealed class CommandCacheService : ICommandService {
+		private readonly ConcurrentDictionary<InternString, IConsoleCommand> _commands = new ConcurrentDictionary<InternString, IConsoleCommand>();
+		private readonly ILoggerService _logger;
 
 		/*
 		===============
 		CommandCacheServices
 		===============
 		*/
-		public CommandCacheService() {
+		public CommandCacheService( ILoggerService logger ) {
+			_logger = logger;
+
 			RegisterCommand( new ConsoleCommand(
 				name: "cmdlist",
 				callback: OnListCommands,
 				description: "Prints all available _commands to the console."
 			) );
+		}
+		
+		/*
+		===============
+		Dispose
+		===============
+		*/
+		public void Dispose() {
+			_commands.Clear();
 		}
 
 		/*
@@ -84,7 +96,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public IConsoleCommand GetCommand( string command ) {
 			ArgumentException.ThrowIfNullOrEmpty( command );
-			return _commands[ command ];
+			return _commands[ SceneStringPool.Intern( command ) ];
 		}
 
 		/*
@@ -101,7 +113,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public bool TryGetCommand( string name, out IConsoleCommand command ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
-			return _commands.TryGetValue( name, out command );
+			return _commands.TryGetValue( SceneStringPool.Intern( name ), out command );
 		}
 
 		/*
@@ -117,7 +129,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public bool CommandExists( string command ) {
 			ArgumentException.ThrowIfNullOrEmpty( command );
-			return _commands.ContainsKey( command );
+			return _commands.ContainsKey( SceneStringPool.Intern( command ) );
 		}
 
 		/*
@@ -132,9 +144,8 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		private void OnListCommands( in ICommandExecutedEventData args ) {
 			IConsoleCommand[] commandList = [ .. _commands.Values ];
 			
-			var logger = ServiceRegistry.Get<ILoggerService>() ?? throw new ArgumentNullException( "Logger service hasn't been instantiated!" );
 			for ( int i = 0; i < commandList.Length; i++ ) {
-				logger.PrintLine( $"{commandList[ i ].Name}: {commandList[ i ].Description}" );
+				_logger.PrintLine( $"{commandList[ i ].Name}: {commandList[ i ].Description}" );
 			}
 		}
 	};

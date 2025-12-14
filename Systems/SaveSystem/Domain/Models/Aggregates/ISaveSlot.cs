@@ -21,29 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models.Interfaces;
-using NomadCore.Domain.Models.ValueObjects;
-using NomadCore.Interfaces;
+using NomadCore.Interfaces.Common;
+using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 
-namespace NomadCore.GameServices {
-	/*
-	===================================================================================
-	
-	IAudioService
-	
-	===================================================================================
-	*/
-	/// <summary>
-	/// 
-	/// </summary>
-
-	public interface IAudioService : IGameService {
-		public ICVar<float> SoundVolume { get; }
-		public ICVar<float> MusicVolume { get; }
-
-		public IAudioSource CreateSource( SourceType type );
-
-		public void StartMenuMusic( IAudioStream stream, IAudioStream? intro = null );
-		public void StopMenuMusic();
+namespace NomadCore.Systems.SaveSystem.Domain.Models.Aggregates {
+	public interface ISaveSlot : IAggregateRoot<SaveFileId> {
 	};
 };

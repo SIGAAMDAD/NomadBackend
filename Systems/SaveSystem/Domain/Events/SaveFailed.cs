@@ -21,23 +21,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.EventSystem;
-using NomadCore.Systems.EventSystem.Common;
+using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 
-namespace NomadCore.Systems.SaveSystem.Events {
-	/*
-	===================================================================================
-	
-	SaveFailed
-	
-	===================================================================================
-	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public sealed class SaveFailed() : GameEvent<SaveFailed.EventData>( nameof( SaveFailed ) ) {
-		public readonly record struct EventData( SaveFileId Id ) : IEventArgs { };
-	};
+namespace NomadCore.Systems.SaveSystem.Domain.Events {
+	public readonly record struct SaveFailedEventData(
+		SaveFileId Id
+	) : IEventArgs;
 };

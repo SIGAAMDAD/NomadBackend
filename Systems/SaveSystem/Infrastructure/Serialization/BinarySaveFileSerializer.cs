@@ -26,11 +26,9 @@ using NomadCore.Systems.SaveSystem.Domain.Models.Aggregates;
 namespace NomadCore.Systems.SaveSystem.Infrastructure.Serialization {
 	internal sealed class BinarySaveFileSerializer : ISaveFileSerializer {
 		public void Deserialize( SaveFile file ) {
-			using var reader = new Streams.SaveReaderStream( file. );
 		}
 
 		public void Serialize( SaveFile file ) {
-			throw new System.NotImplementedException();
 		}
 	};
 };

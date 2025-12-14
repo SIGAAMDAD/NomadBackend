@@ -21,13 +21,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.ConsoleSystem;
-using System.Runtime.InteropServices;
+
+using NomadCore.Domain.Models.Interfaces;
 
 namespace NomadCore.Systems.ConsoleSystem.Events {
-	[StructLayout( LayoutKind.Sequential, Pack = 1 )]
-	public readonly struct CommandExecutedEventData( IConsoleCommand command, string[] args ) : ICommandExecutedEventData {
-		public readonly IConsoleCommand Command = command;
-		public readonly string[] Arguments = args;
-	};
+	public readonly record struct CommandExecutedEventData(
+		IConsoleCommand Command, string[] Args
+	) : ICommandExecutedEventData;
 };

@@ -21,8 +21,37 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.Common;
+using NomadCore.Domain.Events;
+using NomadCore.GameServices;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities;
+using System;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
+	internal sealed class FMODChannelRepository {
+		private readonly FMODChannel[] _channels;
+		private int _maxChannels;
+
+		public FMODChannelRepository( ICVarSystemService cvarSystem ) {
+			var maxActiveChannels = cvarSystem.GetCVar<int>( "audio.MaxActiveChannels" ) ?? throw new Exception( "Missing CVar 'audio.MaxActiveChannels'" );
+			var maxChannels = cvarSystem.GetCVar<int>( "audio.MaxChannels" ) ?? throw new Exception( "Missing CVar 'audio.MaxChannels'" );
+
+			_maxChannels = maxActiveChannels.Value;
+			_channels = new FMODChannel[ maxChannels.Value ];
+
+			maxActiveChannels.ValueChanged.Subscribe( this, OnMaxChannelsValueChanged );
+		}
+
+		private FMODChannel AllocateChannel( FMODAudioSource source ) {
+			DateTime current = DateTime.UtcNow;
+			FMODChannel? oldest = null;
+
+			for ( int i = 0; i < _maxChannels; i++ ) {
+				_channels[ i ].CreateResource( source, in current );
+			}
+		}
+
+		private void OnMaxChannelsValueChanged( in CVarValueChangedEventData<int> args ) {
+			_maxChannels = args.Value;
+		}
+	};
 };

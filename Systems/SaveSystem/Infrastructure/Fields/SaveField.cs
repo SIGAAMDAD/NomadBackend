@@ -21,9 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Systems.SaveSystem.Enums;
+using NomadCore.Systems.SaveSystem.Domain.Models.ValueObjects;
 using NomadCore.Systems.SaveSystem.Errors;
-using NomadCore.Systems.SaveSystem.Infrastructure.Fields.Serializers;
+using NomadCore.Systems.SaveSystem.Infrastructure.Serialization.FieldSerializers;
+using NomadCore.Systems.SaveSystem.Infrastructure.Serialization.Streams;
 
 namespace NomadCore.Systems.SaveSystem.Infrastructure.Fields {
 	/*
@@ -64,7 +65,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Fields {
 		/// <param name="name"></param>
 		/// <param name="value"></param>
 		/// <param name="stream"></param>
-		public static void Write<T>( string section, string name, T value, Streams.SaveStreamWriter stream ) {
+		public static void Write<T>( string section, string name, T value, SaveStreamWriter stream ) {
 			stream.Write( name );
 			stream.Write( FieldValue.GetFieldType<T>() );
 			FieldSerializerRegistry.GetSerializer<T>().Serialize( stream, value );
@@ -83,7 +84,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Fields {
 		/// <param name="stream">The file stream to read from.</param>
 		/// <returns>A new SaveField object.</returns>
 		/// <exception cref="FieldCorruptException">Thrown if the field's data is invalid.</exception>
-		public static SaveField Read( string section, int index, Streams.SaveReaderStream stream ) {
+		public static SaveField Read( string section, int index, SaveStreamReader stream ) {
 			string name = stream.ReadString();
 			if ( name.Length <= 0 || name.Length > MAX_FIELD_NAME_LENGTH ) {
 				throw new FieldCorruptException( section, index, stream.Position, $"Field name length corrupted (0 or string overflow, {name.Length} bytes)" );

@@ -21,8 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
-using NomadCore.Infrastructure;
+using NomadCore.GameServices;
 using System;
 
 namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
@@ -37,7 +36,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 	/// Loads configuration values from the provided .ini file
 	/// </summary>
 
-	internal readonly struct ConfigFileReader {
+	internal readonly ref struct ConfigFileReader {
 		private readonly IniLoader? Loader = null;
 
 		/*
@@ -50,10 +49,10 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 		/// </summary>
 		/// <param name="logger"></param>
 		/// <param name="configFile"></param>
-		public ConfigFileReader( ILoggerService logger, string? configFile ) {
+		public ConfigFileReader( ILoggerService logger, string configFile ) {
 			ArgumentException.ThrowIfNullOrEmpty( configFile );
 
-			ServiceRegistry.Get<ILoggerService>()?.PrintLine( $"Loading configuration file {configFile}..." );
+			logger.PrintLine( $"Loading configuration file {configFile}..." );
 
 			Loader = new IniLoader( configFile, logger );
 		}
@@ -69,7 +68,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 		/// <param name="name"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public bool TryGetValue( string? name, out string value ) {
+		public bool TryGetValue( string name, out string value ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 			ArgumentNullException.ThrowIfNull( Loader );
 

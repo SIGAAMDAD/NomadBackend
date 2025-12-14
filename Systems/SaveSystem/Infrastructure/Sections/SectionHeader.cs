@@ -22,7 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.Systems.SaveSystem.Errors;
-using NomadCore.Systems.SaveSystem.Infrastructure.Streams;
+using NomadCore.Systems.SaveSystem.Infrastructure.Serialization.Streams;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -56,7 +56,7 @@ namespace NomadCore.Systems.SaveSystem.Infrastructure.Sections {
 		/// <param name="stream"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static SectionHeader Load( in SaveReaderStream stream ) {
+		public static SectionHeader Load( in SaveStreamReader stream ) {
 			string name = stream.ReadString();
 			if ( name.Length <= 0 || name.Length > SECTION_NAME_MAX_LENGTH ) {
 				throw new IOException( $"Section name corrupt or too long ({name.Length})" );

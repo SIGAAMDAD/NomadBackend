@@ -22,7 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
+using NomadCore.GameServices;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Godot {
 	public sealed class GodotAudioConfig {
@@ -47,7 +47,6 @@ namespace NomadCore.Systems.Audio.Infrastructure.Godot {
 				int effectCount = AudioServer.GetBusEffectCount( Index );
 				Effects = new AudioEffect[ effectCount ];
 				for ( int i = 0; i < effectCount; i++ ) {
-					AudioServer.SetBusEffectEnabled();
 				}
 			}
 		};

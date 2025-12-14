@@ -21,8 +21,8 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.ConsoleSystem;
-using NomadCore.Interfaces.EventSystem;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Infrastructure.Collections;
 using System;
 
 namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
@@ -37,15 +37,15 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 	/// 
 	/// </summary>
 
-	public readonly struct ConsoleCommand : IConsoleCommand {
-		public string Name => _name;
-		private readonly string _name;
+	public record ConsoleCommand : IConsoleCommand {
+		public InternString Name => _name;
+		private readonly InternString _name;
 
-		public string Description => _description;
-		private readonly string _description;
+		public InternString Description => _description;
+		private readonly InternString _description;
 
-		public IGameEvent<ICommandExecutedEventData>.GenericEventCallback Callback => _callback;
-		private readonly IGameEvent<ICommandExecutedEventData>.GenericEventCallback _callback;
+		public IGameEvent<ICommandExecutedEventData>.EventCallback Callback => _callback;
+		private readonly IGameEvent<ICommandExecutedEventData>.EventCallback _callback;
 
 		/*
 		===============
@@ -57,13 +57,13 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="callback"></param>
-		public ConsoleCommand( string? name, IGameEvent<ICommandExecutedEventData>.GenericEventCallback? callback ) {
+		public ConsoleCommand( string name, IGameEvent<ICommandExecutedEventData>.EventCallback callback ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 			ArgumentNullException.ThrowIfNull( callback );
 
-			_name = name;
+			_name = SceneStringPool.Intern( name );
 			_callback = callback;
-			_description = String.Empty;
+			_description = SceneStringPool.Intern( String.Empty );
 		}
 
 		/*
@@ -77,11 +77,11 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// <param name="name"></param>
 		/// <param name="callback"></param>
 		/// <param name="description"></param>
-		public ConsoleCommand( string? name, IGameEvent<ICommandExecutedEventData>.GenericEventCallback? callback, string? description )
+		public ConsoleCommand( string name, IGameEvent<ICommandExecutedEventData>.EventCallback callback, string description )
 			: this( name, callback )
 		{
 			ArgumentException.ThrowIfNullOrEmpty( description );
-			_description = description;
+			_description = SceneStringPool.Intern( description );
 		}
 	};
 };
