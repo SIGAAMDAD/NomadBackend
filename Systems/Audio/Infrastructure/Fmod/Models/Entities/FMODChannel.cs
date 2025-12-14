@@ -22,9 +22,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Interfaces.Common;
-using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
-using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using System;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
@@ -39,50 +36,72 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	/// 
 	/// </summary>
 	
-	internal sealed class FMODChannel : IEntity<FMODChannelId> {
-		public FMODChannelId Id => throw new NotImplementedException();
+	internal sealed class FMODChannel {
+		public int Timestamp { get; set; }
 
-		public DateTime CreatedAt => _createdAt;
-		private readonly DateTime _createdAt = DateTime.UtcNow;
+		private FMOD.Studio.EventInstance _instance;
 
-		public DateTime? ModifiedAt => _timestamp;
-		private DateTime _timestamp;
-
-		public int Version => _version;
-		private int _version;
-
-		public FMODChannelResource? Resource {
-			get => _event;
-			set => _event = value;
-		}
-		private FMODChannelResource? _event;
-
-		public FMODChannel() {
+		/*
+		===============
+		HasInstance
+		===============
+		*/
+		public bool HasInstance() {
+			return _instance.hasHandle();
 		}
 
-		public bool AllocateChannel( FMOD.Studio.EventDescription eventDescription, in DateTime timestamp ) {
-			if ( _event == null ) {
-				FMODValidator.ValidateCall( eventDescription.createInstance( out var instance ) );
-				_event = new FMODChannelResource( instance );
+		/*
+		===============
+		ReleaseInstance
+		===============
+		*/
+		public void ReleaseInstance() {
+			if ( _instance.hasHandle() ) {
+				FMODValidator.ValidateCall( _instance.release() );
+				Timestamp = DateTime.UtcNow.Millisecond;
 			}
 		}
 
+		/*
+		===============
+		GetPlaybackState
+		===============
+		*/
+		public FMOD.Studio.PLAYBACK_STATE GetPlaybackState() {
+			FMODValidator.ValidateCall( _instance.getPlaybackState( out var state ) );
+			return state;
+		}
+
+		/*
+		===============
+		AllocateInstance
+		===============
+		*/
+		public void AllocateInstance( FMOD.Studio.EventDescription description ) {
+			FMODValidator.ValidateCall( description.createInstance( out _instance ) );
+			Timestamp = DateTime.UtcNow.Millisecond;
+		}
+
+		/*
+		===============
+		SetVolume
+		===============
+		*/
 		public void SetVolume( float volume ) {
-			if ( !_event.HasValue ) {
-				return;
+			if ( _instance.hasHandle() ) {
+				FMODValidator.ValidateCall(_instance.setVolume( volume ) );
 			}
-			_event.Value.SetVolume( volume );
 		}
 
+		/*
+		===============
+		SetPosition
+		===============
+		*/
 		public void SetPosition( Vector2 position ) {
-			if ( !_event.HasValue ) {
-				return;
+			if ( _instance.hasHandle() ) {
+				FMODValidator.ValidateCall( _instance.set3DAttributes( new FMOD.ATTRIBUTES_3D{ position = new FMOD.VECTOR{ x = position.X, y = position.Y, z = 0.0f } } ) );
 			}
-			_event.Value.SetPosition( position );
-		}
-
-		public bool Equals( IEntity<FMODChannelId>? other ) {
-			return other?.Id == Id;
 		}
 	};
 };

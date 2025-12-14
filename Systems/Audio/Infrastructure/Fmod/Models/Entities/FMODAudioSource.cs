@@ -73,6 +73,10 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 		private FMODChannel? _channel;
 
 		public void PlaySound( EventId id ) {
+			_channel = _channelRepository.AllocateChannel( this, id );
+		}
+
+		internal FMOD.Studio.EventInstance CreateInstance( EventId id ) {
 			
 		}
 	};

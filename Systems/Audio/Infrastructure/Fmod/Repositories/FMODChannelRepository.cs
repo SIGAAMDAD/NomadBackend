@@ -23,6 +23,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Events;
 using NomadCore.GameServices;
+using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities;
 using System;
 
@@ -41,13 +42,32 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 			maxActiveChannels.ValueChanged.Subscribe( this, OnMaxChannelsValueChanged );
 		}
 
-		private FMODChannel AllocateChannel( FMODAudioSource source ) {
-			DateTime current = DateTime.UtcNow;
+		public FMODChannel AllocateChannel( FMODAudioSource source, EventId id ) {
+			int current = DateTime.UtcNow.Millisecond;
 			FMODChannel? oldest = null;
 
 			for ( int i = 0; i < _maxChannels; i++ ) {
-				_channels[ i ].CreateResource( source, in current );
+				var channel = _channels[ i ];
+				if ( !channel.HasInstance() ) {
+					channel.AllocateInstance();
+					return channel;
+				}
+				if ( channel.GetPlaybackState() != FMOD.Studio.PLAYBACK_STATE.STOPPED ) {
+					if ( oldest == null ) {
+						oldest = channel;
+					} else if ( current - oldest.Timestamp > channel.Timestamp ) {
+						oldest = channel;
+					}
+				} else {
+					// we have a free event, take it
+					channel.AllocateInstance();
+					return channel;
+				}
 			}
+
+			oldest?.ReleaseInstance();
+			oldest.AllocateInstance();
+			return oldest;
 		}
 
 		private void OnMaxChannelsValueChanged( in CVarValueChangedEventData<int> args ) {

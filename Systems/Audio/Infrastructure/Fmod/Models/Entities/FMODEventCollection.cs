@@ -49,8 +49,6 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 			_eventIds = new HashSet<EventId>( _events.Length );
 			for ( int i = 0; i < _events.Length; i++ ) {
 				FMODValidator.ValidateCall( _events[ i ].getID( out var guid ) );
-				_events[ i ].getPath()
-				guidRepository.
 			}
 		}
 
