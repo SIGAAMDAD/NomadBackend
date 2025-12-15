@@ -24,6 +24,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using System.Collections.Generic;
 using System;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 	/*
@@ -37,9 +38,9 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 	/// 
 	/// </summary>
 	
-	public sealed class CVarGroup( string name, ILoggerService logger, ICVarSystemService cvarSystem ) {
-		public readonly string Name = name;
-		public readonly HashSet<string> Cvars = new HashSet<string>();
+	public sealed class CVarGroup( InternString name, ILoggerService logger, ICVarSystemService cvarSystem ) {
+		public readonly InternString Name = name;
+		public readonly HashSet<InternString> Cvars = new HashSet<InternString>();
 
 		private readonly ILoggerService _logger = logger;
 		private readonly ICVarSystemService _cvarSystem = cvarSystem;
@@ -53,7 +54,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 		/// 
 		/// </summary>
 		/// <param name="name"></param>
-		public void Add( string name ) {
+		public void Add( InternString name ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			if ( !_cvarSystem.CVarExists( name ) ) {

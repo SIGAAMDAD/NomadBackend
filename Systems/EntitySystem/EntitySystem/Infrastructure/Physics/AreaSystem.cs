@@ -22,13 +22,12 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Systems.EntitySystem.Common;
-using NomadCore.Systems.EntitySystem.Events;
-using NomadCore.Systems.EntitySystem.Services;
-using NomadCore.Utilities;
 using System.Collections.Generic;
 using System;
-using NomadCore.Systems.EntitySystem.Interfaces;
+using NomadCore.Systems.EntitySystem.Domain;
+using NomadCore.Utilities;
+using NomadCore.GameServices;
+using NomadCore.Systems.EntitySystem.Domain.Events;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 	/*
@@ -42,7 +41,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 	/// 
 	/// </summary>
 	
-	internal sealed class AreaSystem( Rid space, EntityComponentSystem system ) : PhysicsSubSystem( space, system ) {
+	internal sealed class AreaSystem( Rid space ) : PhysicsSubSystem( space ) {
 		private sealed class OverlapSet : PoolableObject {
 			public readonly HashSet<Entity> Data = new HashSet<Entity>();
 
@@ -54,43 +53,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 
 		private readonly Dictionary<Entity, OverlapSet> _currentOverlaps = new Dictionary<Entity, OverlapSet>();
 		private readonly ObjectPool<OverlapSet> _overlapPool = new ObjectPool<OverlapSet>( () => new OverlapSet() );
-
-		/*
-		===============
-		Convert
-		===============
-		*/
-		public IPhysicsBody Convert( Entity entity, Area2D area ) {
-			if ( _areas.TryGetValue( entity, out var areaData ) ) {
-				return areaData;
-			}
-
-			var areaRid = PhysicsServer2D.AreaCreate();
-
-			PhysicsServer2D.AreaSetSpace( areaRid, area.GetWorld2D().Space );
-			PhysicsServer2D.AreaSetCollisionLayer( areaRid, area.CollisionLayer );
-			PhysicsServer2D.AreaSetCollisionMask( areaRid, area.CollisionMask );
-			PhysicsServer2D.AreaSetParam( areaRid, PhysicsServer2D.AreaParameter.AngularDamp, area.AngularDamp );
-			PhysicsServer2D.AreaSetParam( areaRid, PhysicsServer2D.AreaParameter.AngularDampOverrideMode, (long)area.AngularDampSpaceOverride );
-			PhysicsServer2D.AreaSetParam( areaRid, PhysicsServer2D.AreaParameter.Gravity, area.Gravity );
-			PhysicsServer2D.AreaSetParam( areaRid, PhysicsServer2D.AreaParameter.GravityIsPoint, area.GravityPoint );
-			PhysicsServer2D.AreaSetParam( areaRid, PhysicsServer2D.AreaParameter.GravityOverrideMode, (long)area.GravitySpaceOverride );
-			PhysicsServer2D.AreaSetParam( areaRid, PhysicsServer2D.AreaParameter.GravityPointUnitDistance, area.GravityPointUnitDistance );
-			PhysicsServer2D.AreaSetParam( areaRid, PhysicsServer2D.AreaParameter.GravityVector, area.GravityDirection );
-			PhysicsServer2D.AreaSetParam( areaRid, PhysicsServer2D.AreaParameter.LinearDamp, area.LinearDamp );
-			PhysicsServer2D.AreaSetParam( areaRid, PhysicsServer2D.AreaParameter.LinearDampOverrideMode, (long)area.LinearDampSpaceOverride );
-			PhysicsServer2D.AreaSetParam( areaRid, PhysicsServer2D.AreaParameter.Priority, area.CollisionPriority );
-			PhysicsServer2D.AreaSetMonitorable( areaRid, area.Monitorable );
-			PhysicsServer2D.AreaSetTransform( areaRid, area.Transform );
-
-			Godot.Collections.Array<Node> children = area.GetChildren();
-			AddShapesToArea( areaRid, children );
-
-			area.CallDeferred( Area2D.MethodName.QueueFree );
-
-			return new Area( areaRid, GetAreaShapes( areaRid ) );
-		}
-
+		
 		/*
 		===============
 		Update
@@ -110,7 +73,8 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 		===============
 		*/
 		private void CheckAreaOverlaps() {
-			PhysicsDirectSpaceState2D spaceState = PhysicsServer2D.SpaceGetDirectState( PhysicsSpace );
+			//FIXME: maybe just cache this?
+			PhysicsDirectSpaceState2D spaceState = PhysicsServer2D.SpaceGetDirectState( _physicsSpace );
 
 			foreach ( var ( entity, area ) in _areas ) {
 				OverlapSet newOverlaps = QueryAreaOverlaps( spaceState, entity, area );
@@ -161,7 +125,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 				Variant rid;
 
 				foreach ( var result in results ) {
-					if ( result.TryGetValue( nameof( rid ), out rid ) && RidToEntity.TryGetValue( rid.AsRid(), out var bodyEntity ) ) {
+					if ( result.TryGetValue( nameof( rid ), out rid ) && _ridToEntity.TryGetValue( rid.AsRid(), out var bodyEntity ) ) {
 						overlaps.Add( bodyEntity );
 					}
 				}

@@ -21,7 +21,8 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.EntitySystem;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Interfaces.Common;
 using NomadCore.Systems.EntitySystem.Interfaces;
 using System;
 using System.Collections.Concurrent;
@@ -41,24 +42,67 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 	internal sealed class ComponentManager {
 		private readonly ConcurrentDictionary<Type, IComponentStore> _stores = new ConcurrentDictionary<Type, IComponentStore>();
 
-		public ref T GetComponent<T>( IEntity entity ) where T : struct, IComponent {
+		/*
+		===============
+		GetComponent
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="entity"></param>
+		/// <returns></returns>
+		public ref T GetComponent<T>( IGameEntity entity ) where T : struct, IComponent, IValueObject<T> {
 			var store = GetStore<T>();
 			return ref store.GetComponent( entity.Id );
 		}
 
-		public void AddComponent<T>( IEntity entity, T component ) where T : struct, IComponent {
+		/*
+		===============
+		AddComponent
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="entity"></param>
+		/// <param name="component"></param>
+		public void AddComponent<T>( IGameEntity entity, T component ) where T : struct, IComponent, IValueObject<T> {
 			var store = GetStore<T>();
 			store.AddComponent( entity.Id, component );
 		}
 
-		public bool HasComponent<T>( IEntity entity ) where T : struct, IComponent {
+		/*
+		===============
+		HasComponent
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="entity"></param>
+		/// <returns></returns>
+		public bool HasComponent<T>( IGameEntity entity ) where T : struct, IComponent, IValueObject<T> {
 			if ( _stores.TryGetValue( typeof( T ), out var store ) ) {
 				return ( (ComponentStore<T>)store ).HasComponent( entity.Id );
 			}
 			return false;
 		}
 
-		private ComponentStore<T> GetStore<T>() where T : struct, IComponent {
+		/*
+		===============
+		GetStore
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		private ComponentStore<T> GetStore<T>() where T : struct, IComponent, IValueObject<T> {
 			Type type = typeof( T );
 			if ( _stores.TryGetValue( type, out var store ) ) {
 				store = new ComponentStore<T>();

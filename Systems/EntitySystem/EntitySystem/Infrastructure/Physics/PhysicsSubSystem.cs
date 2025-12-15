@@ -22,11 +22,8 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.EntitySystem;
-using NomadCore.Systems.EntitySystem.Common;
+using NomadCore.Systems.EntitySystem.Domain;
 using NomadCore.Systems.EntitySystem.Interfaces;
-using NomadCore.Systems.EntitySystem.Services;
 using System.Collections.Generic;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
@@ -41,21 +38,10 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 	/// 
 	/// </summary>
 	
-	internal abstract class PhysicsSubSystem : IPhysicsSubSystem {
-		protected readonly Rid _physicsSpace;
-		protected readonly IEntityComponentSystemService _ecs;
+	internal abstract class PhysicsSubSystem( Rid space ) : IPhysicsSubSystem {
+		protected readonly Rid _physicsSpace = space;
 		protected readonly Dictionary<Entity, Rid> _entityToRid = new Dictionary<Entity, Rid>();
 		protected readonly Dictionary<Rid, Entity> _ridToEntity = new Dictionary<Rid, Entity>();
-
-		/*
-		===============
-		PhysicsSubSystem
-		===============
-		*/
-		public PhysicsSubSystem( Rid space, IEntityComponentSystemService ecs ) {
-			_physicsSpace = space;
-			_ecs = ecs;
-		}
 
 		/*
 		===============

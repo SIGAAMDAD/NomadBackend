@@ -21,11 +21,8 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.Common;
 using NomadCore.Systems.Audio.Domain.Interfaces;
-using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
-using System;
-using System.Numerics;
+using Godot;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	/*

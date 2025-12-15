@@ -22,10 +22,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.EntitySystem;
-using NomadCore.Systems.EntitySystem.Common.Events;
-using NomadCore.Systems.EntitySystem.Common.Models.Components;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.GameServices;
+using NomadCore.Systems.EntitySystem.Domain.Events;
+using NomadCore.Systems.EntitySystem.Domain.Models.ValueObjects.Components;
+using System;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Navigation {
 	/*
@@ -39,7 +40,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Navigation {
 	/// 
 	/// </summary>
 	
-	public sealed class Agent {
+	internal sealed class Agent {
 		public Rid AgentRid => _agentRid;
 		private readonly Rid _agentRid;
 
@@ -127,15 +128,20 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Navigation {
 		}
 		private float _maxSpeed;
 
-		private readonly IEntity _owner;
-		private readonly IEntityComponentSystemService _ecs;
+		private readonly WeakReference<IGameEntity> _owner;
 
-		public NavigationDestinationReached NavigationDestinationReached => _navigationDestinationReached;
-		private readonly NavigationDestinationReached _navigationDestinationReached = new NavigationDestinationReached();
+		public IGameEvent<NavigationDestinationReachedEventData> NavigationDestinationReached => _navigationDestinationReached;
+		private readonly IGameEvent<NavigationDestinationReachedEventData> _navigationDestinationReached;
 
-		public Agent( IEntityComponentSystemService ecs, IEntity owner, NavigationAgent2D agent ) {
-			_ecs = ecs;
-			_owner = owner;
+		/*
+		===============
+		Agent
+		===============
+		*/
+		public Agent( IGameEventRegistryService eventFactory, IGameEntity owner, NavigationAgent2D agent ) {
+			_owner = new WeakReference<IGameEntity>( owner );
+
+			_navigationDestinationReached = eventFactory.GetEvent<NavigationDestinationReachedEventData>( nameof( NavigationDestinationReachedEventData ) );
 
 			_agentRid = NavigationServer2D.AgentCreate();
 
@@ -159,7 +165,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Navigation {
 			NavigationServer2D.AgentSetTimeHorizonObstacles( _agentRid, agent.TimeHorizonObstacles );
 			NavigationServer2D.AgentSetMaxNeighbors( _agentRid, agent.MaxNeighbors );
 
-			ecs.AddComponent( owner, new NavigationComponent {
+			owner.AddComponent( new NavigationComponent {
 				Destination = agent.TargetPosition,
 				Radius = agent.Radius,
 				MaxPathDistance = agent.PathMaxDistance,
@@ -190,9 +196,13 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Navigation {
 		/// </summary>
 		/// <param name="deltaTime"></param>
 		public void Update( float deltaTime ) {
-			ref var navigationComponent = ref _ecs.GetOrAddComponent<NavigationComponent>( _owner );
-			ref var transformComponent = ref _ecs.GetOrAddComponent<TransformComponent>( _owner );
-			ref var velocityComponent = ref _ecs.GetOrAddComponent<VelocityComponent>( _owner );
+			if ( !_owner.TryGetTarget( out var owner ) ) {
+				return;
+			}
+
+			ref var navigationComponent = ref owner.GetOrAddComponent<NavigationComponent>();
+			ref var transformComponent = ref owner.GetOrAddComponent<TransformComponent>();
+			ref var velocityComponent = ref owner.GetOrAddComponent<VelocityComponent>();
 
 			if ( transformComponent.Position.DistanceTo( navigationComponent.Destination ) < navigationComponent.MaxPathDistance ) {
 				NavigationDestinationReached.Publish( new NavigationDestinationReachedEventData() );

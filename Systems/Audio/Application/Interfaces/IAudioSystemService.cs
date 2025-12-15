@@ -30,6 +30,8 @@ namespace NomadCore.Systems.Audio.Application.Interfaces {
 
 		public bool CanSetAudioDriver { get; }
 
-		public IReadOnlyList<string> GetAudioDrivers();
+		public IReadOnlyList<string> GetAudioDriverNames();
+
+		public void Update( float deltaTime );
 	};
 };

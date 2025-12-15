@@ -24,14 +24,16 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using Godot;
+using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Systems.Audio.Domain.Interfaces {
 	public interface IAudioSource {
 		public Vector2 Positon { get; set; }
 		public float Volume { get; set; }
+		public InternString Category { get; }
 
 		public AudioSourceStatus Status { get; }
 
-		public void PlaySound( EventId id );
+		public void PlaySound( EventId id, float priority = 0.5f );
 	};
 };

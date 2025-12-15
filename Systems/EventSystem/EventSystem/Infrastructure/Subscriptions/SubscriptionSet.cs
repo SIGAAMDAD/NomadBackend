@@ -21,6 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using Godot;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
 using NomadCore.Systems.EventSystem.Errors;
@@ -101,19 +102,37 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		/// <param name="subscriber"></param>
 		/// <param name="callback">The method that is called whenever the event triggers.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
-		public void AddSubscription<TCaller>( object subscriber, TCaller callback ) where TCaller : Delegate {
+		public void AddSubscription( object subscriber, IGameEvent<TArgs>.EventCallback callback ) {
 			ArgumentNullException.ThrowIfNull( subscriber );
 			ArgumentNullException.ThrowIfNull( callback );
 
 			_pumpLock.EnterWriteLock();
 			try {
-				if ( callback is IGameEvent<TArgs>.EventCallback genericCallback ) {
-					_genericSubscriptions.AddSubscription( subscriber, genericCallback );
-				} else if ( callback is IGameEvent<TArgs>.AsyncCallback asyncCallback ) {
-					_asyncSubscriptions.AddSubscription( subscriber, asyncCallback );
-				} else {
-					throw new InvalidCastException( $"EventSubscriptionSet.AddSubscription: invalid delegate type '{typeof( TCaller )}'" );
-				}
+				_genericSubscriptions.AddSubscription( subscriber, callback );
+			}
+			finally {
+				_pumpLock.ExitWriteLock();
+			}
+		}
+
+		/*
+		===============
+		AddSubscriptionAsync
+		===============
+		*/
+		/// <summary>
+		/// Adds a callback method to the <see cref="Subscriptions"/> list.
+		/// </summary>
+		/// <param name="subscriber"></param>
+		/// <param name="callback">The method that is called whenever the event triggers.</param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
+		public void AddSubscriptionAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback ) {
+			ArgumentNullException.ThrowIfNull( subscriber );
+			ArgumentNullException.ThrowIfNull( callback );
+
+			_pumpLock.EnterWriteLock();
+			try {
+				_asyncSubscriptions.AddSubscription( subscriber, callback );
 			}
 			finally {
 				_pumpLock.ExitWriteLock();
@@ -132,7 +151,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		/// <param name="callback">The callback to remove from the subscription list.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the returned index from <see cref="ContainsCallback"/> is invalid.</exception>
-		public void RemoveSubscription<TCaller>( object subscriber, TCaller callback ) where TCaller : Delegate {
+		public void RemoveSubscription<TCaller>( object subscriber, TCaller callback ) {
 			ArgumentNullException.ThrowIfNull( subscriber );
 			ArgumentNullException.ThrowIfNull( callback );
 
@@ -177,6 +196,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		/// </summary>
 		/// <param name="args"></param>
 		public void Pump( in TArgs args ) {
+			_logger?.PrintLine( $"SubscriptionSet.Pump: publishing event {eventData.DebugName}" );
 			_pumpLock.EnterUpgradeableReadLock();
 			try {
 				bool shouldCleanup = false;
@@ -218,12 +238,13 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		/// <param name="ct"></param>
 		/// <returns></returns>
 		public async Task PumpAsync( TArgs args, CancellationToken ct ) {
+			_logger?.PrintLine( $"SubscriptionSet.PumpAsync: publishing event {eventData.DebugName} asynchronously..." );
 			int subscriptionCount = _asyncSubscriptions.Subscriptions.Count;
 			List<Task> tasks = new List<Task>( subscriptionCount );
 
 			for ( int i = 0; i < subscriptionCount; i++ ) {
 				if ( _asyncSubscriptions.Subscriptions[ i ].Callback.TryGetTarget( out var callback ) ) {
-					tasks.Add( callback( args, ct ) );
+					tasks.Add( Task.Run( async () => callback( args, ct ) ) );
 				}
 			}
 
@@ -243,7 +264,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		/// <param name="index"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public bool ContainsCallback<TCaller>( object subscriber, TCaller callback, out int index ) where TCaller : Delegate {
+		public bool ContainsCallback<TCaller>( object subscriber, TCaller callback, out int index ) {
 			_pumpLock.EnterReadLock();
 			index = -1;
 			try {

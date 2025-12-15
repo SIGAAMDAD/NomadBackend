@@ -36,10 +36,15 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects {
 	/// </summary>
 	
 	internal sealed record FMODEventResource( FMOD.Studio.EventDescription handle ) : IEventResource {
-		public bool IsValid => _handle.isValid();
+		public bool IsValid => Handle.isValid();
 		
-		private readonly FMOD.Studio.EventDescription _handle = handle;
+		public readonly FMOD.Studio.EventDescription Handle = handle;
 
+		/*
+		===============
+		Dispose
+		===============
+		*/
 		public void Dispose() {
 			Unload();
 		}
@@ -53,10 +58,10 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects {
 		/// Unloads and deallocates all event instances bound to this event description.
 		/// </summary>
 		public void Unload() {
-			if ( _handle.isValid() ) {
-				_handle.unloadSampleData();
-				_handle.releaseAllInstances();
-				_handle.clearHandle();
+			if ( Handle.isValid() ) {
+				Handle.unloadSampleData();
+				Handle.releaseAllInstances();
+				Handle.clearHandle();
 			}
 		}
 	};

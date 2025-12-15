@@ -22,10 +22,8 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.EntitySystem;
-using NomadCore.Systems.EntitySystem.Common;
-using NomadCore.Systems.EntitySystem.Common.Models.Components;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Systems.EntitySystem.Domain.Models.ValueObjects.Components;
 using System;
 using System.Collections.Generic;
 
@@ -40,12 +38,15 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 	/// <summary>
 	/// 
 	/// </summary>
+	/// <param name="owner"></param>
+	/// <param name="system"></param>
+	/// <param name="characterBody"></param>
 
-	public sealed class Body : PhysicsEntity {
+	internal sealed class Body : PhysicsEntity {
 		public IReadOnlyList<Rid> Shapes => _shapes;
-		private readonly List<Rid> _shapes = new List<Rid>();
+		private readonly List<Rid> _shapes;
 
-		private readonly PhysicsSystem _system;
+		private readonly int _maxSteps;
 
 		private bool _isOnFloor;
 		private bool _isOnWall;
@@ -59,14 +60,14 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="ecs"></param>
 		/// <param name="owner"></param>
-		/// <param name="system"></param>
 		/// <param name="characterBody"></param>
-		public Body( IEntityComponentSystemService ecs, IEntity owner, PhysicsSystem system, CharacterBody2D characterBody )
-			: base( ecs, owner, PhysicsServer2D.BodyCreate(), characterBody )
+		public Body( IGameEntity owner, CharacterBody2D characterBody )
+			: base( owner, PhysicsServer2D.BodyCreate(), characterBody )
 		{
-			_system = system;
+			AddShapesToBody( _physicsRid, characterBody.GetChildren() );
+			_shapes = GetBodyShapes( _physicsRid );
+			_maxSteps = (int)PhysicsServer2D.SpaceGetParam( characterBody.GetWorld2D().Space, PhysicsServer2D.SpaceParameter.SolverIterations );
 		}
 
 		/*
@@ -79,8 +80,12 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 		/// </summary>
 		/// <param name="delta"></param>
 		public void Update( float deltaTime ) {
-			ref var velocityComponent = ref _ecs.GetComponent<VelocityComponent>( _owner );
-			ref var transformComponent = ref _ecs.GetComponent<TransformComponent>( _owner );
+			if ( !_owner.TryGetTarget( out var owner ) ) {
+				return;
+			}
+
+			ref var velocityComponent = ref owner.GetComponent<VelocityComponent>();
+			ref var transformComponent = ref owner.GetComponent<TransformComponent>();
 
 			PhysicsTestMotionParameters2D motionTest = new PhysicsTestMotionParameters2D() {
 				From = new Transform2D( transformComponent.Rotation, transformComponent.Scale, 0.0f, transformComponent.Position ),
@@ -90,6 +95,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 			if ( PhysicsServer2D.BodyTestMotion( _physicsRid, motionTest, result ) ) {
 
 			}
+			MoveAndSlide( deltaTime, owner );
 		}
 
 		protected override void SetCollisionLayer( uint collisionLayer ) {
@@ -110,17 +116,17 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 			}
 		}
 
-		private void MoveAndSlide( float deltaTime ) {
+		private void MoveAndSlide( float deltaTime, IGameEntity owner ) {
 			_isOnFloor = false;
 			_isOnWall = false;
 			_isOnCeiling = false;
 
-			ref var velocityComponent = ref _ecs.GetComponent<VelocityComponent>( _owner );
+			ref var velocityComponent = ref owner.GetComponent<VelocityComponent>();
 			Vector2 motion = velocityComponent.Velocity * deltaTime;
 
-			ref var transformComponent = ref _ecs.GetComponent<TransformComponent>( _owner );
+			ref var transformComponent = ref owner.GetComponent<TransformComponent>();
 
-			for ( int i = 0; i < _system.MaxSteps; i++ ) {
+			for ( int i = 0; i < _maxSteps; i++ ) {
 				if ( motion.Length() < 0.001f ) {
 					break;
 				}

@@ -42,7 +42,7 @@ namespace NomadCore.GameServices {
 		public ICVar<T> Register<T>( CVarCreateInfo<T> createInfo );
 		public void Unregister( in ICVar cvar );
 
-		public bool CVarExists( string? name );
+		public bool CVarExists( string name );
 
 		public ICVar<T>? GetCVar<T>( string name );
 		public ICVar? GetCVar( string name );

@@ -37,8 +37,15 @@ namespace NomadCore.Infrastructure.Collections {
 	/// 
 	/// </summary>
 	
-	public readonly struct InternString( int id ) : IEquatable<InternString> {
-		private readonly int _id = id;
+	public readonly struct InternString : IEquatable<InternString> {
+		private readonly int _id;
+		
+		internal InternString( int id ) {
+			_id = id;
+		}
+		public InternString( ReadOnlySpan<char> value ) {
+			StringPool.Intern( value, ref _id );
+		}
 
 		public static readonly InternString Empty = new InternString();
 		
@@ -50,6 +57,9 @@ namespace NomadCore.Infrastructure.Collections {
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public override int GetHashCode() => _id;
+
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public static implicit operator string( InternString value ) => StringPool.FromInterned( value ) ?? String.Empty;
 
 		public static bool operator==( InternString left, InternString right ) => left._id == right._id;
 		public static bool operator!=( InternString left, InternString right ) => left._id != right._id;

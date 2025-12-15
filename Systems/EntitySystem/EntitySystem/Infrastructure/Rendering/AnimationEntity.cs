@@ -22,13 +22,13 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.EntitySystem;
-using NomadCore.Systems.EntitySystem.Common;
-using NomadCore.Systems.EntitySystem.Common.Events;
-using NomadCore.Systems.EntitySystem.Common.Models.Components;
+using NomadCore.GameServices;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Infrastructure.Collections;
+using NomadCore.Systems.EntitySystem.Domain.Events;
 using System;
 using System.Collections.Generic;
+using NomadCore.Systems.EntitySystem.Domain.Models.ValueObjects.Components;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 	/*
@@ -43,18 +43,8 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 	/// </summary>
 	
 	internal sealed class AnimationEntity : ServerRenderEntity {
-		private readonly struct FrameData( Texture2D texture, float duration ) {
-			public readonly Texture2D Texture = texture;
-			public readonly float Duration = duration;
-		};
-		private readonly struct AnimationData( bool loop, float speed, int frameCount, FrameData[] frames ) {
-			public readonly FrameData[] Frames = frames;
-			public readonly int FrameCount = frameCount;
-
-			public readonly float Speed = speed;
-
-			public readonly bool Loop = loop;
-		};
+		private record FrameData( Texture2D Texture, float Duration );
+		private record AnimationData( bool Loop, float Speed, int FrameCount, FrameData[] Frames );
 
 		public bool Playing {
 			get => _playing;
@@ -62,17 +52,17 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 		}
 		private bool _playing;
 
-		public string Animation {
+		public InternString Animation {
 			get => _animation;
 			set {
-				if ( string.Equals( _animation, value ) ) {
+				if ( _animation == value ) {
 					return;
 				}
 				_animation = value;
 				Play( _animation );
 			}
 		}
-		private string _animation;
+		private InternString _animation;
 
 		public float SpeedScale {
 			get => _speedScale;
@@ -80,7 +70,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 		}
 		private float _speedScale = 0.0f;
 
-		private readonly Dictionary<string, AnimationData> _animations;
+		private readonly Dictionary<InternString, AnimationData> _animations;
 
 		private int _currentFrame = 0;
 		private float _customSpeedScale = 1.0f;
@@ -90,31 +80,43 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 
 		private float _frameSpeedScale = 0.0f;
 
-		public readonly AnimationChanged AnimationChanged = new AnimationChanged();
-		public readonly AnimationFinished AnimationFinished = new AnimationFinished();
-		public readonly AnimationLooped AnimationLooped = new AnimationLooped();
-		public readonly FrameChanged FrameChanged = new FrameChanged();
+		public IGameEvent<AnimationChangedEventData> AnimationChanged => _animationChanged;
+		private readonly IGameEvent<AnimationChangedEventData> _animationChanged;
+
+		public IGameEvent<AnimationFinishedEventData> AnimationFinished => _animationFinished;
+		private readonly IGameEvent<AnimationFinishedEventData> _animationFinished;
+
+		public IGameEvent<AnimationLoopedEventData> AnimationLooped => _animationLooped;
+		private readonly IGameEvent<AnimationLoopedEventData> _animationLooped;
+
+		public IGameEvent<FrameChangedEventData> FrameChanged => _frameChanged;
+		private readonly IGameEvent<FrameChangedEventData> _frameChanged;
 
 		/*
 		===============
 		AnimationEntity
 		===============
 		*/
-		public AnimationEntity( IEntityComponentSystemService ecs, IEntity owner, AnimatedSprite2D animatedSprite )
-			: base( ecs, owner, animatedSprite )
+		public AnimationEntity( IGameEventRegistryService eventFactory, IGameEntity owner, AnimatedSprite2D animatedSprite )
+			: base( eventFactory, owner, animatedSprite )
 		{
-			_animation = animatedSprite.Animation;
+			_animation = SceneStringPool.Intern( animatedSprite.Animation );
 
-			ref var animationComponent = ref ecs.GetOrAddComponent<AnimationStateComponent>( owner );
-			animationComponent.CurrentAnimation = animatedSprite.Animation;
+			_animationChanged = eventFactory.GetEvent<AnimationChangedEventData>( nameof( AnimationChanged ) );
+			_animationFinished = eventFactory.GetEvent<AnimationFinishedEventData>( nameof( AnimationFinished ) );
+			_animationLooped = eventFactory.GetEvent<AnimationLoopedEventData>( nameof( AnimationLooped ) );
+			_frameChanged = eventFactory.GetEvent<FrameChangedEventData>( nameof( FrameChanged ) );
+
+			ref var animationComponent = ref owner.GetOrAddComponent<AnimationStateComponent>();
+			animationComponent.CurrentAnimation = SceneStringPool.Intern( animatedSprite.Animation );
 
 			string[] animationNames = animatedSprite.SpriteFrames.GetAnimationNames();
-			var animationCount = animationNames.Length;
-			_animations = new Dictionary<string, AnimationData>( animationCount );
+			int animationCount = animationNames.Length;
+			_animations = new Dictionary<InternString, AnimationData>( animationCount );
 
 			SpriteFrames spriteFrames = animatedSprite.SpriteFrames;
 			for ( int i = 0; i < animationCount; i++ ) {
-				StringName animationName = animationNames[ i ];
+				var animationName = animationNames[ i ];
 				
 				var frameCount = spriteFrames.GetFrameCount( animationName );
 				var frames = new FrameData[ frameCount ];
@@ -125,19 +127,19 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 					);
 				}
 
-				_animations[ animationName ] = new AnimationData(
+				_animations[ SceneStringPool.Intern( animationName ) ] = new AnimationData(
 					spriteFrames.GetAnimationLoop( animationName ),
 					(float)spriteFrames.GetAnimationSpeed( animationName ),
 					frameCount,
 					frames
 				);
 			}
-			_currentFrame = animatedSprite.Frame;
 
+			_currentFrame = animatedSprite.Frame;
 			_offset = animatedSprite.Offset;
 
-			if ( _animations.ContainsKey( animatedSprite.Autoplay ) ) {
-				Play( animatedSprite.Autoplay );
+			if ( _animations.ContainsKey( SceneStringPool.Intern( animatedSprite.Autoplay ) ) ) {
+				Play( SceneStringPool.Intern( animatedSprite.Autoplay ) );
 			}
 			animatedSprite.CallDeferred( AnimatedSprite2D.MethodName.QueueFree );
 		}
@@ -155,10 +157,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 		/// <param name="fromEnd"></param>
 		/// <exception cref="ArgumentException"></exception>
 		/// <exception cref="KeyNotFoundException"></exception>
-		public void Play( string animationName, float speedScale = 1.0f, bool fromEnd = false ) {
-			if ( string.IsNullOrEmpty( animationName ) ) {
-				throw new ArgumentException( "Animation name cannot be null or empty" );
-			}
+		public void Play( InternString animationName, float speedScale = 1.0f, bool fromEnd = false ) {
 			if ( !_animations.TryGetValue( animationName, out var animation ) ) {
 				throw new KeyNotFoundException( $"There is no animation with name '{animationName}'" );
 			}
@@ -207,6 +206,11 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 			StopInternal( true );
 		}
 
+		/*
+		===============
+		Update
+		===============
+		*/
 		public override void Update( float deltaTime ) {
 			if ( !_playing || !_animations.TryGetValue( _animation, out var animation ) ) {
 				return;
@@ -233,7 +237,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 							} else {
 								_currentFrame = 0;
 								Pause();
-								AnimationFinished.Publish( new AnimationFinishedEventArgs() );
+								AnimationFinished.Publish( new AnimationFinishedEventData() );
 								return;
 							}
 						} else {
@@ -254,7 +258,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 							if ( animation.Loop ) {
 								_currentFrame = lastFrame;
 								Pause();
-								AnimationFinished.Publish( new AnimationFinishedEventArgs() );
+								AnimationFinished.Publish( new AnimationFinishedEventData() );
 								return;
 							}
 						} else {
@@ -280,8 +284,11 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 		Draw
 		===============
 		*/
-		public void Draw( float deltaTime ) {
+		public override void Draw( float deltaTime ) {
 			if ( !_animations.TryGetValue( _animation, out var animation ) ) {
+				return;
+			}
+			if ( !_owner.TryGetTarget( out var owner ) ) {
 				return;
 			}
 			
@@ -289,7 +296,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 			Vector2 offset = ( _offset + new Vector2( 0.5f, 0.5f ) ).Floor();
 			Rect2 dstRect = new Rect2( offset, texture.GetSize() );
 
-			ref var animationState = ref _ecs.GetComponent<AnimationStateComponent>( _owner );
+			ref var animationState = ref owner.GetComponent<AnimationStateComponent>();
 			if ( animationState.HFlip ) {
 				dstRect.Size = new Vector2( -dstRect.Size.X, dstRect.Size.Y );
 			}
@@ -331,6 +338,11 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 			FrameChanged.Publish( new FrameChangedEventData() );
 		}
 
+		/*
+		===============
+		StopInternal
+		===============
+		*/
 		private void StopInternal( bool reset ) {
 			_playing = false;
 			if ( reset ) {

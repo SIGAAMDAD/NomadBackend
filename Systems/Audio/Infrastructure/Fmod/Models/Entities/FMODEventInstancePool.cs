@@ -23,12 +23,15 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Infrastructure.Collections;
 using NomadCore.Infrastructure.Memory;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	internal sealed class FMODEventInstancePool {
-		private readonly BasicObjectPool<FMOD.Studio.EventInstance> _pool;
+		private readonly Dictionary<string, Queue<FMOD.Studio.EventInstance>> _pool;
 
-		public FMODEventInstancePool() {
+		public FMODEventInstancePool( int maxChannels ) {
+			_pool = new Dictionary<string, Queue<FMOD.Studio.EventInstance>>();
 		}
 	};
 };

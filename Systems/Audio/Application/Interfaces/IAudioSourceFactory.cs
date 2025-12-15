@@ -21,10 +21,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Systems.Audio.Domain.Interfaces;
 
 namespace NomadCore.Systems.Audio.Application.Interfaces {
 	public interface IAudioSourceFactory {
-		public IAudioSource CreateSource();
+		public IAudioSource CreateSource( InternString category );
 	};
 };

@@ -21,7 +21,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\NomadCore.csproj" />
     <ProjectReference Include="..\EventSystem\EventSystem\EventSystem.csproj" />
-    <ProjectReference Include="..\EntitySystem\EntitySystem.csproj" />
     <ProjectReference Include="..\ResourceCache\ResourceCache.csproj" />
   </ItemGroup>
 

@@ -22,25 +22,27 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Systems.EntitySystem.Common;
-using NomadCore.Systems.EntitySystem.Common.Extensions;
-using NomadCore.Systems.EntitySystem.Common.Models.Components;
-using System;
+using NomadCore.GameServices;
 using System.Collections.Generic;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Navigation {
+	/*
+	===================================================================================
+	
+	NavigationSystem
+	
+	===================================================================================
+	*/
+	/// <summary>
+	/// 
+	/// </summary>
+	
 	public sealed class NavigationSystem : ComponentSystem {
 		private readonly HashSet<Rid> _navigationMaps;
 		private readonly List<Rid> _obstacles;
 		private readonly List<Rid> _regions;
 
-		public NavigationSystem( IEntityComponentSystemService ecs )
-			: base( ecs )
-		{ }
-
 		public override void Update( float deltaTime ) {
-			throw new NotImplementedException();
 		}
 	};
 };

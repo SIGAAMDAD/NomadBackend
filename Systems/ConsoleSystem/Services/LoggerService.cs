@@ -21,16 +21,21 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using Godot;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
+using NomadCore.Interfaces;
 using NomadCore.Systems.ConsoleSystem.Events;
+using NomadCore.Systems.ConsoleSystem.Infrastructure;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
-namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
+namespace NomadCore.Systems.ConsoleSystem.Services {
 	/*
 	===================================================================================
 	
@@ -42,36 +47,51 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 	/// 
 	/// </summary>
 
-	internal sealed class LoggerService : IDisposable, ILoggerService {
-		private readonly List<ILoggerSink> _sinks;
-		private readonly ICVar<LogLevel> _logDepth;
-		private readonly ICommandLine _commandLine;
+	public sealed class LoggerService : IDisposable, ILoggerService {
+		private ICVar<LogLevel> _logDepth;
+		private ICommandLineService _commandLine;
+		private readonly List<ILoggerSink> _sinks = new List<ILoggerSink>();
+
+		private readonly LockFreePooledQueue<string> _messageQueue = new LockFreePooledQueue<string>( 512 );
+		private readonly object _lockObject = new object();
 
 		/*
 		===============
-		LoggerService
+		Init
 		===============
 		*/
 		/// <summary>
-		/// 
+		/// Initializes the logging service
 		/// </summary>
-		/// <param name="commandLine"></param>
-		/// <param name="commandService"></param>
-		/// <param name="cvarSystem"></param>
-		/// <param name="sinks"></param>
+		/// <param name="locator"></param>
 		/// <exception cref="Exception"></exception>
-		public LoggerService( ICommandLine commandLine, ICommandService commandService, ICVarSystemService cvarSystem ) {
-			ArgumentNullException.ThrowIfNull( commandLine );
+		public void Init( IServiceLocator locator ) {
+			// create the logger thread
+			_ = Task.Run( LoggerThreadAsync );
 
-			commandLine.TextEntered.Subscribe( this, OnTextEntered );
-			
-			_commandLine = commandLine;
-			_sinks = new List<ILoggerSink>();
+			var cvarSystem = locator.GetService<ICVarSystemService>();
+//			_logDepth = cvarSystem.GetCVar<LogLevel>( "console.LogLevel" ) ?? throw new Exception( "Missing CVar 'console.LogLevel'" );
+		}
 
-			_logDepth = cvarSystem.GetCVar<LogLevel>( "console.LogLevel" ) ?? throw new Exception( "Missing CVar 'console.LogLevel'" );
+		/*
+		===============
+		InitCommandService
+		===============
+		*/
+		public void InitCommandService( IGameService commandService ) {
+			var service = commandService as ICommandService ?? throw new InvalidCastException( nameof( commandService ) );
+			service.RegisterCommand( new ConsoleCommand( "clear", OnClear, "Clears the console." ) );
+			service.RegisterCommand( new ConsoleCommand( "echo", OnEcho, "Prints a string to the console." ) );
+		}
 
-			commandService.RegisterCommand( new ConsoleCommand( "clear", OnClear, "Clears the console." ) );
-			commandService.RegisterCommand( new ConsoleCommand( "echo", OnEcho, "Prints a string to the console." ) );
+		/*
+		===============
+		InitCommandLineService
+		===============
+		*/
+		public void InitCommandLineService( IGameService commandLine ) {
+			_commandLine = commandLine as ICommandLineService ?? throw new InvalidCastException( nameof( commandLine ) );
+			_commandLine.TextEntered.Subscribe( this, OnTextEntered );
 		}
 
 		/*
@@ -110,12 +130,10 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// <param name="message"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private void PrintMessage( LogLevel level, string message ) {
-			if ( level > _logDepth.Value ) {
+			if ( level > _logDepth?.Value ) {
 				return;
 			}
-			for ( int i = 0; i < _sinks.Count; i++ ) {
-				_sinks[ i ].Print( message );
-			}
+			_messageQueue.TryEnqueue( message );
 		}
 
 		/*
@@ -210,6 +228,26 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// <exception cref="InvalidCastException"></exception>
 		private void OnTextEntered( in TextEnteredEventData args ) {
 			PrintLine( $"> {args.Text}" );
+		}
+
+		/*
+		===============
+		LoggerThreadAsync
+		===============
+		*/
+		private async Task LoggerThreadAsync() {
+			try {
+				while ( true ) {
+					while ( _messageQueue.TryDequeue( out var message ) ) {
+						for ( int i = 0; i < _sinks.Count; i++ ) {
+							_sinks[ i ].Print( message );
+						}
+					}
+					await Task.Delay( 500 );
+				}
+			} catch ( Exception e ) {
+				GD.PrintErr( $"Exception caught: {e}" );
+			}
 		}
 	};
 };

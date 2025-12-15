@@ -26,6 +26,7 @@ using NomadCore.Domain.Events;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -79,12 +80,12 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		/// <summary>
 		/// Name of the CVar, should preferrably be prefixed with the system it's tied to, for instance: display.WindowMode
 		/// </summary>
-		public string Name { get; }
+		public InternString Name { get; }
 
 		/// <summary>
 		/// A description of what the CVar does or impacts. Can be empty but preferrably isn't
 		/// </summary>
-		public string Description { get; }
+		public InternString Description { get; }
 
 		/// <summary>
 		/// The CVar's flags (permissions, abilities, capabilities)
@@ -146,10 +147,10 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 			_defaultValue = createInfo.DefaultValue;
 			_value = createInfo.DefaultValue;
 			_type = DetermineType( Value );
-			_valueChanged = eventFactory.GetEvent<CVarValueChangedEventData<T>>( nameof( ValueChanged ) );
+			_valueChanged = eventFactory.GetEvent<CVarValueChangedEventData<T>>( nameof( ValueChanged ), $"CVars:{StringPool.FromInterned( Name )}" );
 
 			_validator = createInfo.Validator;
-			Description = createInfo.Description ?? String.Empty;
+			Description = createInfo.Description;
 		}
 
 		/*
@@ -176,7 +177,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		/// <param name="value">The value to set the CVar's <see cref="Value"/> to.</param>
 		/// <exception cref="ArgumentException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetFromString( string? value ) {
+		public void SetFromString( string value ) {
 			ArgumentNullException.ThrowIfNull( value );
 			if ( !TryConvertStringToType( value, typeof( T ), out object convertedValue ) ) {
 				throw new ArgumentException( $"Failed to convert cvar value '{value}' to type {typeof( T ).Name}" );
@@ -208,8 +209,8 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		/// </summary>
 		/// <returns>The <see cref="Value"/> in string format.</returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public string GetStringValue() {
-			return Value?.ToString() ?? String.Empty;
+		public string? GetStringValue() {
+			return Value is string stringValue ? stringValue : null;
 		}
 
 		/*
@@ -224,7 +225,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public uint GetUIntegerValue() {
 			ArgumentNullException.ThrowIfNull( Value );
-			return uint.TryParse( Value.ToString(), out uint result ) ? result : 0;
+			return Value is uint uintValue ? uintValue : 0;
 		}
 
 		/*
@@ -239,7 +240,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public int GetIntegerValue() {
 			ArgumentNullException.ThrowIfNull( Value );
-			return int.TryParse( Value.ToString(), out int result ) ? result : 0;
+			return Value is int intValue ? intValue : 0;
 		}
 
 		/*
@@ -254,7 +255,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public float GetDecimalValue() {
 			ArgumentNullException.ThrowIfNull( Value );
-			return float.TryParse( Value.ToString(), out float result ) ? result : 0.0f;
+			return Value is float floatValue ? floatValue : 0.0f;
 		}
 
 		/*
@@ -269,7 +270,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public bool GetBooleanValue() {
 			ArgumentNullException.ThrowIfNull( Value );
-			return bool.TryParse( Value.ToString(), out bool result ) && result;
+			return Value is bool boolValue && boolValue;
 		}
 
 		/*
@@ -285,7 +286,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		/// <exception cref="NotImplementedException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public T1 GetValue<T1>() {
-			throw new NotImplementedException();
+			return Value is T1 value ? value : default;
 		}
 
 		/*
@@ -329,9 +330,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		/// <param name="targetType"></param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException">Thrown if the provided <paramref name="targetType"/> isn't a valid CVar <see cref="Value"/> type.</exception>
-		private static bool TryConvertStringToType( string? value, Type targetType, out object result ) {
-			ArgumentNullException.ThrowIfNull( value );
-
+		private static bool TryConvertStringToType( string value, Type targetType, out object result ) {
 			try {
 				bool output;
 				if ( targetType.IsEnum ) {
@@ -411,7 +410,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 		/// </summary>
 		/// <param name="name">The name to check</param>
 		/// <returns>Returns true if the name is valid</returns>
-		private static bool IsValidName( string? name ) {
+		private static bool IsValidName( string name ) {
 			if ( string.IsNullOrEmpty( name ) ) {
 				return false;
 			}

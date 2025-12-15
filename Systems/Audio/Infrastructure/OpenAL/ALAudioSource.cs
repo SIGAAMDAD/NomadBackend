@@ -21,17 +21,5 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Enums.Audio;
-using OpenTK.Audio.OpenAL;
-
 namespace NomadCore.Systems.Audio.Infrastructure.OpenAL {
-	internal sealed class ALAudioSource : AudioSourceBase {
-		private int _sourceId;
-
-		public ALAudioSource( SourceType type )
-			: base( type )
-		{
-			_sourceId = AL.GenSource();
-		}
-	};
 };

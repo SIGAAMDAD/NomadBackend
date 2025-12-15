@@ -29,6 +29,5 @@ using System;
 namespace NomadCore.Systems.Audio.Domain.Interfaces {
 	public interface IAudioBank : IDisposable, IAggregateRoot<BankId> {
 		public BankState Status { get; }
-		public IAudioEvent[] Events { get; }
 	};
 };

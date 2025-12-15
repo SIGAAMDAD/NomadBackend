@@ -24,6 +24,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using System;
 using NomadCore.Domain.Events;
 using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Domain.Models.Interfaces {
 	/*
@@ -38,8 +39,8 @@ namespace NomadCore.Domain.Models.Interfaces {
 	/// </summary>
 	
 	public interface ICVar {
-		public string Name { get; }
-		public string Description { get; }
+		public InternString Name { get; }
+		public InternString Description { get; }
 		public CVarType Type { get; }
 		public CVarFlags Flags { get; }
 
@@ -53,7 +54,7 @@ namespace NomadCore.Domain.Models.Interfaces {
 		public float GetDecimalValue();
 		public int GetIntegerValue();
 		public uint GetUIntegerValue();
-		public string GetStringValue();
+		public string? GetStringValue();
 		public bool GetBooleanValue();
 		public T GetValue<T>();
 

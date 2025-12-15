@@ -64,9 +64,9 @@ namespace NomadCore.Domain.Models.Interfaces {
 		/// <param name="args"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public delegate Task AsyncCallback( in TArgs args, CancellationToken ct = default );
+		public delegate Task AsyncCallback( TArgs args, CancellationToken ct = default );
 
-		public void SubscribeAsync( object subscriber, AsyncCallback asynCallback );
+		public void SubscribeAsync( object subscriber, AsyncCallback asyncCallback );
 		public void Subscribe( object subscriber, EventCallback callback );
 		public void UnsubscribeAsync( object subscriber, AsyncCallback asyncCallback );
 		public void Unsubscribe( object subscriber, EventCallback callback );

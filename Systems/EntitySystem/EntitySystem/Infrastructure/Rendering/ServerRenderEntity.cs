@@ -22,9 +22,14 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.EntitySystem;
+using NomadCore.GameServices;
+using NomadCore.Domain.Models.Interfaces;
 using System;
+using NomadCore.Systems.EntitySystem.Domain.Events;
+using NomadCore.Systems.EntitySystem.Domain.Models.ValueObjects;
+using NomadCore.Interfaces.Common;
+using NomadCore.Systems.EntitySystem.Application.Interfaces;
+using NomadCore.Systems.EntitySystem.Domain.Models.Interfaces;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 	/*
@@ -38,7 +43,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 	/// 
 	/// </summary>
 	
-	internal class ServerRenderEntity : IRenderEntity {
+	internal abstract class ServerRenderEntity : IRenderEntity {
 		public bool Visible {
 			get => _visible;
 			set {
@@ -46,6 +51,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 					return;
 				}
 				_visible = value;
+				_visibilityChanged.PublishAsync( new RenderEntityVisibilityChangedEventArgs( this, value ) );
 				RenderingServer.CanvasItemSetVisible( _canvasItemRid, _visible );
 			}
 		}
@@ -102,12 +108,29 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 		public Rid Rid => _canvasItemRid;
 		protected readonly Rid _canvasItemRid;
 
-		protected readonly IEntity _owner;
-		protected readonly IEntityComponentSystemService _ecs;
+		protected readonly WeakReference<IGameEntity> _owner;
 
-		public ServerRenderEntity( IEntityComponentSystemService ecs, IEntity owner, CanvasItem canvasItem ) {
-			_ecs = ecs;
-			_owner = owner;
+		public IGameEvent<RenderEntityVisibilityChangedEventArgs> VisibilityChanged => _visibilityChanged;
+
+		public RenderEntityId Id => throw new NotImplementedException();
+
+		public DateTime CreatedAt => throw new NotImplementedException();
+
+		public DateTime? ModifiedAt => throw new NotImplementedException();
+
+		public int Version => throw new NotImplementedException();
+
+		protected readonly IGameEvent<RenderEntityVisibilityChangedEventArgs> _visibilityChanged;
+
+		/*
+		===============
+		ServerRenderEntity
+		===============
+		*/
+		public ServerRenderEntity( IGameEventRegistryService eventFactory, IGameEntity owner, CanvasItem canvasItem ) {
+			_owner = new WeakReference<IGameEntity>( owner );
+
+			_visibilityChanged = eventFactory.GetEvent<RenderEntityVisibilityChangedEventArgs>( nameof( VisibilityChanged ), "EntitySystem:ServerRenderEntity" );
 
 			_zindex = canvasItem.ZIndex;
 			_modulate = canvasItem.Modulate;
@@ -132,7 +155,24 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 			GC.SuppressFinalize( this );
 		}
 
+		/*
+		===============
+		Update
+		===============
+		*/
 		public virtual void Update( float deltaTime ) {
+		}
+
+		/*
+		===============
+		Draw
+		===============
+		*/
+		public virtual void Draw( float deltaTime ) {
+		}
+
+		public bool Equals( IEntity<RenderEntityId>? other ) {
+			throw new NotImplementedException();
 		}
 	};
 };

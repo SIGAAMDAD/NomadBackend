@@ -22,7 +22,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
+using NomadCore.GameServices;
+using NomadCore.Interfaces.Common;
+using NomadCore.Systems.EntitySystem.Application.Interfaces;
 using NomadCore.Systems.EntitySystem.Common;
+using NomadCore.Systems.EntitySystem.Domain;
 using System;
 using System.Collections.Concurrent;
 
@@ -37,34 +41,24 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 	/// <summary>
 	/// 
 	/// </summary>
+	/// <param name="eventFactory"></param>
+	/// <param name="ecs"></param>
+	/// <param name="maxSize"></param>
 
-	internal sealed class EntityPool {
-		public int AvailableCount => AvailableObjects.Count;
+	internal sealed class EntityPool( IGameEventRegistryService eventFactory, int maxSize = int.MaxValue ) {
+		public int AvailableCount => _availableObjects.Count;
 
 		public int TotalCount => _currentSize;
 		private int _currentSize = 0;
 
-		public int ActiveObjectCount => _currentSize - AvailableObjects.Count;
+		public int ActiveObjectCount => _currentSize - _availableObjects.Count;
 
-		private readonly ConcurrentBag<Entity> AvailableObjects = new ConcurrentBag<Entity>();
+		private readonly ConcurrentBag<Entity> _availableObjects = new ConcurrentBag<Entity>();
 
-		private readonly int MaxSize;
-		private bool IsDisposed;
+		private readonly int _maxSize = maxSize;
+		private bool _isDisposed;
 
-		/*
-		===============
-		EntityPool
-		===============
-		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="maxSize"></param>
-		/// <exception cref="ArgumentNullException"></exception>
-		public EntityPool( int maxSize = int.MaxValue ) {
-			AvailableObjects = new ConcurrentBag<Entity>();
-			MaxSize = maxSize;
-		}
+		private readonly IGameEventRegistryService _eventFactory = eventFactory;
 
 		/*
 		===============
@@ -80,16 +74,16 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public Entity Rent( Node2D entityNode, Area2D area, Sprite2D sprite ) {
-			ObjectDisposedException.ThrowIf( IsDisposed, this );
+			ObjectDisposedException.ThrowIf( _isDisposed, this );
 
-			if ( AvailableObjects.TryTake( out Entity? obj ) ) {
+			if ( _availableObjects.TryTake( out Entity? obj ) ) {
 				ArgumentNullException.ThrowIfNull( obj );
 				return obj;
 			}
 
-			if ( _currentSize < MaxSize ) {
+			if ( _currentSize < _maxSize ) {
 				_currentSize++;
-				return new Entity( entityNode, area, sprite );
+				return new Entity( _eventFactory, entityNode, area, sprite );
 			}
 			throw new InvalidOperationException( "Object pool exhausted and maximum size reached" );
 		}
@@ -108,16 +102,16 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 		/// <returns></returns>
 		/// <exception cref="InvalidOperationException"></exception>
 		public Entity Rent( Node2D entityNode, CharacterBody2D body, AnimatedSprite2D animatedSprite ) {
-			ObjectDisposedException.ThrowIf( IsDisposed, this );
+			ObjectDisposedException.ThrowIf( _isDisposed, this );
 
-			if ( AvailableObjects.TryTake( out Entity? obj ) ) {
+			if ( _availableObjects.TryTake( out Entity? obj ) ) {
 				ArgumentNullException.ThrowIfNull( obj );
 				return obj;
 			}
 
-			if ( _currentSize < MaxSize ) {
+			if ( _currentSize < _maxSize ) {
 				_currentSize++;
-				return new Entity( entityNode, body, animatedSprite );
+				return new Entity( _eventFactory, entityNode, body, animatedSprite );
 			}
 			throw new InvalidOperationException( "Object pool exhausted and maximum size reached" );
 		}
@@ -132,15 +126,15 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 		/// </summary>
 		/// <param name="obj"></param>
 		public void Return( in Entity obj ) {
-			if ( IsDisposed ) {
+			if ( _isDisposed ) {
 				obj.Dispose();
 				return;
 			}
 
 			ArgumentNullException.ThrowIfNull( obj );
 
-			if ( AvailableObjects.Count < MaxSize ) {
-				AvailableObjects.Add( obj );
+			if ( _availableObjects.Count < _maxSize ) {
+				_availableObjects.Add( obj );
 			} else {
 				obj.Dispose();
 				_currentSize--;
@@ -156,12 +150,12 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 		/// 
 		/// </summary>
 		public void Dispose() {
-			if ( IsDisposed ) {
+			if ( _isDisposed ) {
 				return;
 			}
 
-			IsDisposed = true;
-			while ( AvailableObjects.TryTake( out Entity? obj ) ) {
+			_isDisposed = true;
+			while ( _availableObjects.TryTake( out Entity? obj ) ) {
 				ArgumentNullException.ThrowIfNull( obj );
 				obj.Dispose();
 			}

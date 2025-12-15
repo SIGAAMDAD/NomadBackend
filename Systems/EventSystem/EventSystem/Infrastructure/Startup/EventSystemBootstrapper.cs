@@ -22,35 +22,17 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.GameServices;
-using NomadCore.Interfaces.Common;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
-using NomadCore.Infrastructure.ServiceRegistry.Services;
+using NomadCore.Systems.EventSystem.Domain.Registries;
 using NomadCore.Systems.EventSystem.Services;
-using NomadCore.Systems.EventSystem.Domain;
-using NomadCore.Interfaces;
 
 namespace NomadCore.Systems.EventSystem.Infrastructure.Startup {
-	public sealed class EventSystemBootstrapper : IBootstrapper {
-		private readonly IServiceRegistry _services;
-		private readonly IServiceLocator _locator;
+	public static class EventSystemBootstrapper {
+		public static void Initialize( IServiceLocator locator, IServiceRegistry registry ) {
+			var logger = locator.GetService<ILoggerService>();
 
-		public EventSystemBootstrapper( ILoggerService logger ) {
-			var services = new ServiceCollection();
-			_locator = new ServiceLocator( services );
-
-			var eventBus = new GameEventBus();
-
-			services.RegisterSingleton<IGameEventBusService>( eventBus );
-			services.RegisterSingleton<IGameService>( new GameEventFactory( eventBus, logger ) );
-		}
-
-		public void Initialize() {
-		}
-		
-		public void Start() {
-		}
-
-		public void Shutdown() {
+			var eventBus = registry.RegisterSingleton<IGameEventBusService>( new GameEventBus() );
+			registry.RegisterSingleton<IGameEventRegistryService>( new GameEventRegistry( logger ) );
 		}
 	};
 };

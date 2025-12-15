@@ -22,8 +22,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Systems.EntitySystem.Services;
-using System;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 	/*
@@ -45,16 +43,12 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 
 		private readonly AreaSystem _areaSystem;
 
-		public PhysicsSystem( EntityComponentSystem ecs, Rid worldSpace, EntityComponentSystem? system )
-			: base( ecs )
-		{
-			ArgumentNullException.ThrowIfNull( system );
-
+		public PhysicsSystem( Rid worldSpace ) {
 			_worldSpaceRid = worldSpace;
 
 			MaxSteps = (int)PhysicsServer2D.SpaceGetParam( _worldSpaceRid, PhysicsServer2D.SpaceParameter.SolverIterations );
 
-			_areaSystem = new AreaSystem( worldSpace, system );
+			_areaSystem = new AreaSystem( worldSpace );
 		}
 
 		/*

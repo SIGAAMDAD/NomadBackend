@@ -22,9 +22,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.EntitySystem;
-using NomadCore.Systems.EntitySystem.Common.Events;
+using NomadCore.GameServices;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Systems.EntitySystem.Domain.Events;
 using System;
 using System.Collections.Generic;
 
@@ -40,12 +40,17 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 	/// 
 	/// </summary>
 	
-	public sealed class Area : PhysicsEntity {
+	internal sealed class Area : PhysicsEntity {
 		public IReadOnlyList<Rid> Shapes => _shapes;
 		private readonly List<Rid> _shapes;
 
-		public readonly AreaEntered AreaEntered = new AreaEntered();
-		public readonly AreaExited AreaExited = new AreaExited();
+		private readonly Rid _physicsSpace;
+
+		public IGameEvent<AreaEnteredEventData> AreaEntered => _areaEntered;
+		private readonly IGameEvent<AreaEnteredEventData> _areaEntered;
+
+		public IGameEvent<AreaExitedEventData> AreaExited => _areaExited;
+		private readonly IGameEvent<AreaExitedEventData> _areaExited;
 
 		/*
 		===============
@@ -55,13 +60,29 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="ecs"></param>
 		/// <param name="owner"></param>
 		/// <param name="area"></param>
-		public Area( IEntityComponentSystemService ecs, IEntity owner, Area2D area )
-			: base( ecs, owner, PhysicsServer2D.AreaCreate(), area )
+		public Area( IGameEventRegistryService eventFactory, IGameEntity owner, Area2D area )
+			: base( owner, PhysicsServer2D.AreaCreate(), area )
 		{
+			AddShapesToArea( _physicsRid, area.GetChildren() );
 			_shapes = GetAreaShapes( _physicsRid );
+
+			_physicsSpace = area.GetWorld2D().Space;
+			PhysicsServer2D.AreaSetSpace( _physicsRid, _physicsSpace );
+
+			_areaEntered = eventFactory.GetEvent<AreaEnteredEventData>( nameof( AreaEnteredEventData ) );
+			_areaExited = eventFactory.GetEvent<AreaExitedEventData>( nameof( AreaExitedEventData ) );
+
+			area.CallDeferred( Area2D.MethodName.QueueFree );
+		}
+
+		/*
+		===============
+		Updaet
+		===============
+		*/
+		public void Update( float delta ) {
 		}
 
 		/*

@@ -28,6 +28,7 @@ namespace NomadCore.Domain.Models.Interfaces {
 	public interface ICacheEntry<TId> : IEntity<TId>
 		where TId : IEquatable<TId>
 	{
+		public IDisposable Resource { get; }
 		public int ReferenceCount { get; }
 	};
 };

@@ -61,9 +61,9 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 			ArgumentNullException.ThrowIfNull( callback );
 
-			_name = SceneStringPool.Intern( name );
+			_name = StringPool.Intern( name );
 			_callback = callback;
-			_description = SceneStringPool.Intern( String.Empty );
+			_description = StringPool.Intern( String.Empty );
 		}
 
 		/*
@@ -81,7 +81,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 			: this( name, callback )
 		{
 			ArgumentException.ThrowIfNullOrEmpty( description );
-			_description = SceneStringPool.Intern( description );
+			_description = StringPool.Intern( description );
 		}
 	};
 };

@@ -25,6 +25,7 @@ using Godot;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Systems.ConsoleSystem.Interfaces.Abstractions;
 using System;
 using System.Runtime.CompilerServices;
@@ -52,16 +53,16 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure.Sinks {
 		public FileSink( ICVarSystemService cvarSystem ) {
 			ICVar<string> logfile = cvarSystem.Register(
 				new CVarCreateInfo<string>(
-					Name: "console.LogFile",
+					Name: StringPool.Intern( "console.LogFile" ),
 					DefaultValue: "user://debug.log",
-					Description: "The path to the console's logging file.",
+					Description: StringPool.Intern( "The path to the console's logging file." ),
 					Flags: CVarFlags.Archive | CVarFlags.Developer,
-					Validator: ( file ) => file.Length > 0
+					Validator: file => file.Length > 0
 				)
 			);
 
 			try {
-				using System.IO.FileStream stream = new System.IO.FileStream( logfile.Value, System.IO.FileMode.CreateNew, System.IO.FileAccess.Write );
+				using System.IO.FileStream stream = new System.IO.FileStream( FilePath.FromUserPath( logfile.Value ).OSPath, System.IO.FileMode.Create, System.IO.FileAccess.Write );
 				_writer = new System.IO.StreamWriter( stream );
 			} catch ( Exception e ) {
 				_writer?.Close();

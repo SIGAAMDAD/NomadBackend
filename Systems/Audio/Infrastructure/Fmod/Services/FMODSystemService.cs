@@ -21,13 +21,20 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+#define FMOD_LOGGING
+
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Systems.Audio.Application.Interfaces;
+using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Registries;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 	/*
@@ -61,42 +68,60 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 
 		public bool CanSetAudioDriver => true;
 
-		private readonly List<string> _drivers;
+		private readonly List<string> _drivers = new List<string>();
 
-		public FMOD.Studio.System StudioSystem => _system.StudioSystem;
-		public FMOD.System CoreSystem => _system.System;
+		public FMOD.Studio.System StudioSystem => _studioSystem;
+		private FMOD.Studio.System _studioSystem;
 
-		private readonly FMODSystemHandle _system;
+		public FMOD.System System => _system;
+		private FMOD.System _system;
 
 		private readonly ILoggerService _logger;
 
-		private readonly FMODEventRepository _eventRepository;
-		private readonly FMODBankRepository _bankRepository;
+		public IResourceCacheService<FMODEventId> EventRepository => _eventRepository;
+		private readonly IResourceCacheService<FMODEventId> _eventRepository;
+
+		private readonly IResourceCacheService<BankId> _bankRepository;
+		
+		public FMODGuidRepository GuidRepository => _guidRepository;
+		private readonly FMODGuidRepository _guidRepository;
+
+		private readonly StringBuilder _fmodDebugString = new StringBuilder( 1024 );
 
 		/*
 		===============
 		FMODSystemService
 		===============
 		*/
-		public FMODSystemService( ILoggerService logger, IGameEventRegistryService eventFactory, ICVarSystemService cvarSystem ) {
-			_logger = logger;
-			_eventRepository = new FMODEventRepository( logger, eventFactory, this );
-			_bankRepository = new FMODBankRepository( logger, eventFactory, this );
+		public FMODSystemService( IServiceLocator locator, IServiceRegistry registry ) {
+			_logger = locator.GetService<ILoggerService>();
 
-			_logger.PrintLine( $"FMODSystemService: initializing FMOD sound system..." );
+			var eventFactory = locator.GetService<IGameEventRegistryService>();
+			var cvarSystem = locator.GetService<ICVarSystemService>();
 
-			_system = new FMODSystemHandle();
-
-#if DEBUG
+#if FMOD_LOGGING
 			var debugFlags = FMOD.DEBUG_FLAGS.LOG | FMOD.DEBUG_FLAGS.ERROR | FMOD.DEBUG_FLAGS.WARNING | FMOD.DEBUG_FLAGS.TYPE_TRACE | FMOD.DEBUG_FLAGS.DISPLAY_THREAD;
 			FMODValidator.ValidateCall( FMOD.Debug.Initialize( debugFlags, FMOD.DEBUG_MODE.CALLBACK, DebugCallback ) );
 #endif
 
-			_system.System.setCallback( OnAudioOutputDeviceListChanged, FMOD.SYSTEM_CALLBACK_TYPE.DEVICELISTCHANGED );
+			FMODValidator.ValidateCall( FMOD.Studio.System.create( out _studioSystem ) );
+			if ( !_studioSystem.isValid() ) {
+				_logger.PrintError( $"FMODSystemHandle: failed to create FMOD.Studio.System instance!" );
+				return;
+			}
+			
+			FMODValidator.ValidateCall( _studioSystem.getCoreSystem( out _system ) );
+
+			_guidRepository = new FMODGuidRepository();
+			_eventRepository = new FMODEventRepository( _logger, eventFactory, this, _guidRepository );
+			_bankRepository = new FMODBankRepository( _logger, eventFactory, this, _guidRepository );
+
+			_logger.PrintLine( $"FMODSystemService: initializing FMOD sound system..." );
 
 			FMODCVarRegistry.Register( cvarSystem );
-
 			ConfigureFMODDevice( cvarSystem );
+
+			_system.setCallback( OnAudioOutputDeviceListChanged, FMOD.SYSTEM_CALLBACK_TYPE.DEVICELISTCHANGED );
 		}
 
 		/*
@@ -109,7 +134,16 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 
 			_eventRepository?.Dispose();
 			_bankRepository?.Dispose();
-			_system.Dispose();
+			_guidRepository?.Dispose();
+
+			if ( _studioSystem.isValid() ) {
+				_system.close();
+				_system.release();
+				_system.clearHandle();
+				_studioSystem.unloadAll();
+				_studioSystem.release();
+				_studioSystem.clearHandle();
+			}
 		}
 
 		/*
@@ -118,10 +152,16 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 		===============
 		*/
 		public void Update( float deltaTime ) {
-			_system.Update();
+			_system.update();
+			_studioSystem.update();
 		}
 
-		public IReadOnlyList<string> GetAudioDrivers() {
+		/*
+		===============
+		GetAudioDriverNames
+		===============
+		*/
+		public IReadOnlyList<string> GetAudioDriverNames() {
 			return _drivers;
 		}
 
@@ -140,16 +180,26 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 		/// <param name="userdata"></param>
 		/// <returns></returns>
 		private FMOD.RESULT OnAudioOutputDeviceListChanged( nint system, FMOD.SYSTEM_CALLBACK_TYPE type, nint commanddata1, nint commanddata2, nint userdata ) {
-			_system.System.getNumDrivers( out int numDrivers );
+			GetAudioDrivers();
+			return FMOD.RESULT.OK;
+		}
+
+		/*
+		===============
+		GetAudioDrivers
+		===============
+		*/
+		private void GetAudioDrivers() {
+			FMODValidator.ValidateCall( _system.getNumDrivers( out int numDrivers ) );
 			_drivers.Clear();
 			_drivers.EnsureCapacity( numDrivers );
 
 			for ( int i = 0; i < numDrivers; i++ ) {
-				_system.System.getDriverInfo( i, out string name, 256, out _, out _, out FMOD.SPEAKERMODE speakerMode, out int speakerChannels );
+				FMODValidator.ValidateCall( _system.getDriverInfo( i, out string name, 256, out _, out _, out FMOD.SPEAKERMODE speakerMode, out int speakerChannels ) );
+				_drivers.Add( name );
+				_logger.PrintLine( $"FMODSystemService.GetAudioDrivers: found audio driver '{name}' - speakerMode = '{speakerMode}', channelCount = '{speakerChannels}'" );
 			}
-			_system.System.getDriver( out _audioDriver );
-
-			return FMOD.RESULT.OK;
+			FMODValidator.ValidateCall( _system.getDriver( out _audioDriver ) );
 		}
 
 		/*
@@ -174,7 +224,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 			}
 
 			_logger.PrintLine( $"FMODSystemService.SetAudioDriver: setting audio driver to '{driverName}'..." );
-			FMODValidator.ValidateCall( _system.System.setDriver( driverIndex ) );
+			FMODValidator.ValidateCall( _system.setDriver( driverIndex ) );
 			_audioDriver = driverIndex;
 		}
 
@@ -191,14 +241,14 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 		private void ConfigureFMODDevice( ICVarSystemService cvarSystem ) {
 			var streamBufferSize = cvarSystem.GetCVar<int>( "audio.fmod.StreamBufferSize" )
 				?? throw new Exception( "Missing cvar audio.fmod.streamBufferSize!" );
-			
-			var maxChannels = cvarSystem.GetCVar<int>( "audio.MaxChannels" )
-				?? throw new Exception( "Missing cvar audio.MaxChannels!" );
 
 			var flags = FMOD.INITFLAGS.CHANNEL_DISTANCEFILTER | FMOD.INITFLAGS.CHANNEL_LOWPASS | FMOD.INITFLAGS.VOL0_BECOMES_VIRTUAL;
 
-			FMODValidator.ValidateCall( _system.System.setStreamBufferSize( (uint)streamBufferSize.Value * 1024, FMOD.TIMEUNIT.RAWBYTES ) );
-			FMODValidator.ValidateCall( _system.StudioSystem.initialize( maxChannels.Value, FMOD.Studio.INITFLAGS.LIVEUPDATE | FMOD.Studio.INITFLAGS.SYNCHRONOUS_UPDATE, flags, 0 ) );
+			FMODValidator.ValidateCall( _system.setStreamBufferSize( (uint)streamBufferSize.Value * 1024, FMOD.TIMEUNIT.RAWBYTES ) );
+			FMODValidator.ValidateCall( _studioSystem.initialize( 512, FMOD.Studio.INITFLAGS.LIVEUPDATE | FMOD.Studio.INITFLAGS.SYNCHRONOUS_UPDATE, flags, 0 ) );
+
+			GetAudioDrivers();
+			_audioDriver = 0;
 		}
 
 		/*
@@ -216,12 +266,22 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 		/// <param name="message"></param>
 		/// <returns></returns>
 		private FMOD.RESULT DebugCallback( FMOD.DEBUG_FLAGS flags, nint file, int line, nint func, nint message ) {
+			string formattedMessage = Marshal.PtrToStringAnsi( message );
+			string formattedFile = Marshal.PtrToStringAnsi( file );
+			string formattedFunc = Marshal.PtrToStringAnsi( func );
+
+			_fmodDebugString.Clear();
+			_fmodDebugString.Append( $"[FMOD {formattedFile}:{line}, {formattedFunc}] {formattedMessage}" );
+
+			// remove the '\n' escape
+			_fmodDebugString.Length--;
+
 			if ( ( flags & FMOD.DEBUG_FLAGS.LOG ) != 0 ) {
-				_logger.PrintLine( $"[FMOD] {message}" );
+				_logger.PrintLine( _fmodDebugString.ToString() );
 			} else if ( ( flags & FMOD.DEBUG_FLAGS.WARNING ) != 0 ) {
-				_logger.PrintWarning( $"[FMOD] {message}" );
+				_logger.PrintWarning( _fmodDebugString.ToString()  );
 			} else if ( ( flags & FMOD.DEBUG_FLAGS.ERROR ) != 0 ) {
-				_logger.PrintError( $"[FMOD] {message}" );
+				_logger.PrintError( _fmodDebugString.ToString()  );
 			}
 			return FMOD.RESULT.OK;
 		}

@@ -21,14 +21,15 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Interfaces.Common;
 using System;
 
 namespace NomadCore.Domain.Models.ValueObjects {
 	public readonly record struct CVarCreateInfo<T>(
-		string Name,
+		InternString Name,
 		T DefaultValue,
-		string Description = "",
+		InternString Description,
 		CVarFlags Flags = CVarFlags.None,
 		Func<T, bool>? Validator = null
 	) : IValueObject<CVarCreateInfo<T>>;

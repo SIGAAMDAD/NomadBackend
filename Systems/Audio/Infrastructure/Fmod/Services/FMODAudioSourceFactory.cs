@@ -21,21 +21,27 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Systems.Audio.Application.Interfaces;
 using NomadCore.Systems.Audio.Domain.Interfaces;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
-	internal sealed class FMODAudioSourceFactory : IAudioSourceFactory {
-		private readonly FMODChannelRepository _channelRepository;
-
-		public FMODAudioSourceFactory( FMODChannelRepository channelRepository ) {
-			_channelRepository = channelRepository;
-		}
-
-		public IAudioSource CreateSource() {
-			return new FMODAudioSource( _channelRepository );
+	/*
+	===================================================================================
+	
+	FMODAudioSourceFactory
+	
+	===================================================================================
+	*/
+	/// <summary>
+	/// 
+	/// </summary>
+	
+	internal sealed class FMODAudioSourceFactory( FMODChannelRepository channelRepository ) : IAudioSourceFactory {
+		public IAudioSource CreateSource( InternString category ) {
+			return new FMODAudioSource( channelRepository, category );
 		}
 	};
 };

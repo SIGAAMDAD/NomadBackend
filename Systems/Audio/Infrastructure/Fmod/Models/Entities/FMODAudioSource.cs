@@ -25,8 +25,8 @@ using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Domain.Interfaces;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using Godot;
-using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
+using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	/*
@@ -40,15 +40,15 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	/// A source of audio, an "emitter" in a sense.
 	/// </summary>
 	
-	internal sealed class FMODAudioSource( FMODChannelRepository channelRepository ) : IAudioSource {
+	internal sealed class FMODAudioSource( FMODChannelRepository channelRepository, InternString category ) : IAudioSource {
 		public Vector2 Positon {
 			get => _position;
 			set {
-				if ( _channel == null || _position == value ) {
+				if ( _position == value ) {
 					return;
 				}
 				_position = value;
-				_channel.SetPosition( value );
+				_channel?.SetPosition( value );
 			}
 		}
 		private Vector2 _position = Vector2.Zero;
@@ -56,28 +56,24 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 		public float Volume {
 			get => _volume;
 			set {
-				if ( _channel == null || _volume == value ) {
+				if ( _volume == value ) {
 					return;
 				}
 				_volume = value;
-				_channel.SetVolume( value );
+				_channel?.SetVolume( value );
 			}
 		}
 		private float _volume = 0.0f;
 
+		public InternString Category => category;
+
 		public AudioSourceStatus Status => _status;
 		private AudioSourceStatus _status = AudioSourceStatus.Stopped;
 
-		private readonly FMODChannelRepository _channelRepository = channelRepository;
-
 		private FMODChannel? _channel;
 
-		public void PlaySound( EventId id ) {
-			_channel = _channelRepository.AllocateChannel( this, id );
-		}
-
-		internal FMOD.Studio.EventInstance CreateInstance( EventId id ) {
-			
+		public void PlaySound( EventId id, float priority = 0.5f ) {
+			_channel = channelRepository.AllocateChannel( id, _position, StringPool.FromInterned( category ), priority, false );
 		}
 	};
 };

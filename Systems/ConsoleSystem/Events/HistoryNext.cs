@@ -25,6 +25,7 @@ using NomadCore.Domain.Models.Interfaces;
 
 namespace NomadCore.Systems.ConsoleSystem.Events {
 	public readonly record struct HistoryNextEventData(
-		bool EndReached, string Text
+		bool EndReached,
+		string Text
 	) : IEventArgs;
 };

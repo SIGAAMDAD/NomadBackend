@@ -45,7 +45,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		where TCallback : class
 	{
 		public IReadOnlyList<WeakSubscription<TArgs, TCallback>> Subscriptions => _subscriptions;
-		private readonly List<WeakSubscription<TArgs, TCallback>> _subscriptions = new List<WeakSubscription<TArgs,TCallback>>( 32 );
+		private readonly List<WeakSubscription<TArgs, TCallback>> _subscriptions = new List<WeakSubscription<TArgs, TCallback>>( 32 );
 		
 		private readonly Dictionary<int, List<int>> _indexMap = new Dictionary<int, List<int>>( 32 );
 
@@ -80,13 +80,13 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		/// <param name="callback"></param>
 		public void AddSubscription( object subscriber, TCallback callback ) {
 			if ( ContainsCallback( subscriber, callback, out _ ) ) {
-				logger?.PrintError( $"EventSubscriptionSet.CheckForDuplicateSubscription: duplicate subscription from '{subscriber.GetType().Name}'" );
+				logger?.PrintError( $"EventSubscriptionSet.AddSubscription: duplicate subscription from '{subscriber.GetType().Name}'" );
 				return;
 			}
 
 			int index = _subscriptions.Count;
 			_subscriptions.Add( new WeakSubscription<TArgs, TCallback>( subscriber, callback ) );
-			logger?.PrintLine( $"EventSubscriptionSet.AddSubsription: added subscription from '{subscriber.GetType().Name}'" );
+			logger?.PrintLine( $"EventSubscriptionSet.AddSubscription: added subscription from '{subscriber.GetType().Name}'" );
 
 			int key = RuntimeHelpers.GetHashCode( subscriber );
 			if ( _indexMap.TryGetValue( key, out List<int>? indices ) ) {

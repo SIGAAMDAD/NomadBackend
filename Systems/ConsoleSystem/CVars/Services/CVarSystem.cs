@@ -30,6 +30,7 @@ using NomadCore.Systems.ConsoleSystem.CVars.Common;
 using NomadCore.GameServices;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 	/*
@@ -44,7 +45,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 	/// </summary>
 
 	public sealed class CVarSystem( IGameEventRegistryService eventFactory, ILoggerService logger ) : ICVarSystemService {
-		private readonly ConcurrentDictionary<string, ICVar> _cvars = new ConcurrentDictionary<string, ICVar>( StringComparer.OrdinalIgnoreCase );
+		private readonly ConcurrentDictionary<InternString, ICVar> _cvars = new ConcurrentDictionary<InternString, ICVar>();
 		private readonly HashSet<CVarGroup> _groups = new HashSet<CVarGroup>();
 
 		private readonly IGameEventRegistryService _eventFactory = eventFactory;
@@ -100,7 +101,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 			ICVar<T> cvar = new CVar<T>( _eventFactory, in createInfo );
 			_cvars.TryAdd( createInfo.Name, cvar );
 
-			_logger.PrintLine( $"CVarSystem.Register: registered CVar '{createInfo.Name}' with default value {createInfo.DefaultValue} and flags {createInfo.Flags}." );
+			_logger.PrintLine( $"CVarSystem.Register: registered CVar '{StringPool.FromInterned( createInfo.Name )}' with default value {createInfo.DefaultValue} and flags {createInfo.Flags}." );
 
 			return cvar;
 		}
@@ -118,7 +119,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 			ArgumentNullException.ThrowIfNull( cvar );
 
 			try {
-				_cvars.TryRemove( new KeyValuePair<string, ICVar>( cvar.Name, cvar ) );
+				_cvars.TryRemove( new KeyValuePair<InternString, ICVar>( cvar.Name, cvar ) );
 			} catch ( Exception e ) {
 				_logger.PrintError( $"CVarSystem.RemoveCVar: error removing cached CVar {cvar.Name} - {e.Message}" );
 			}
@@ -157,7 +158,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 		/// <returns></returns>
 		public ICVar? Find( string name ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
-			return _cvars.TryGetValue( name, out ICVar? cvar ) ? cvar : null;
+			return _cvars.TryGetValue( StringPool.Intern( name ), out ICVar? cvar ) ? cvar : null;
 		}
 
 		/*
@@ -175,7 +176,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 		public bool TryFind<T>( string name, out CVar<T>? cvar ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
-			if ( _cvars.TryGetValue( name, out ICVar? var ) && var is CVar<T> typedVar ) {
+			if ( _cvars.TryGetValue( StringPool.Intern( name ), out ICVar? var ) && var is CVar<T> typedVar ) {
 				cvar = typedVar;
 				return true;
 			}
@@ -231,7 +232,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 						if ( reader.TryGetValue( cvar, out string? value ) ) {
 							ArgumentException.ThrowIfNullOrEmpty( value );
 
-							var.SetFromString( value );
+							var.SetFromString( StringPool.Intern( value ) );
 						}
 					}
 				}
@@ -323,9 +324,9 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public bool CVarExists( string? name ) {
+		public bool CVarExists( string name ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
-			return _cvars.ContainsKey( name );
+			return _cvars.ContainsKey( StringPool.Intern( name ) );
 		}
 
 		/*
@@ -333,10 +334,10 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 		GetCVar
 		===============
 		*/
-		public ICVar<T>? GetCVar<T>( string? name ) {
+		public ICVar<T>? GetCVar<T>( string name ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
-			if ( !_cvars.TryGetValue( name, out var cvar ) ) {
+			if ( !_cvars.TryGetValue( StringPool.Intern( name ), out var cvar ) ) {
 				_logger.PrintError( $"CVarSystem.GetCVar: no cvar found for name '{name}'!" );
 				return null;
 			}
@@ -348,10 +349,10 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Services {
 		GetCVar
 		===============
 		*/
-		public ICVar? GetCVar( string? name ) {
+		public ICVar? GetCVar( string name ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
-			if ( !_cvars.TryGetValue( name, out var cvar ) ) {
+			if ( !_cvars.TryGetValue( StringPool.Intern( name ), out var cvar ) ) {
 				_logger.PrintError( $"CVarSystem.GetCVar: no cvar found for name '{name}'!" );
 				return null;
 			}

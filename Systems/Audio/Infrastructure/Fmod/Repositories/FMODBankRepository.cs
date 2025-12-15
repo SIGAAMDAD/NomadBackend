@@ -40,6 +40,8 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 	/// 
 	/// </summary>
 	
-	internal sealed class FMODBankRepository( ILoggerService logger, IGameEventRegistryService eventFactory, FMODSystemService fmodSystem ) : BaseCache<BankComposite, BankId>( logger, eventFactory, new FMODBankLoader( fmodSystem ) ) {
+	internal sealed class FMODBankRepository( ILoggerService logger, IGameEventRegistryService eventFactory, FMODSystemService fmodSystem, FMODGuidRepository guidRepository )
+		: BaseCache<BankComposite, BankId>( logger, eventFactory, new FMODBankLoader( fmodSystem, guidRepository ) )
+	{
 	};
 };

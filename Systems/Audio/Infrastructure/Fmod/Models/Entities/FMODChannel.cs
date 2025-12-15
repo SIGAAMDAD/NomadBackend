@@ -22,7 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using System;
+using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	/*
@@ -37,9 +37,21 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	/// </summary>
 	
 	internal sealed class FMODChannel {
-		public int Timestamp { get; set; }
+		public FMOD.Studio.EventInstance Instance;
+		public Vector2 Position;
+		public EventId Path;
+		public float BasePriority;
+		public float CurrentPriority;
+		public float StartTime;
+		public int ChannelId;
+		public SoundCategory Category;
+		public float LastStolenTime = 0.0f;
+		public float Volume = 1.0f;
+		public int PlayCount = 0;
+		public bool IsEssential = false;
 
-		private FMOD.Studio.EventInstance _instance;
+		public float Age => Time.GetTicksMsec() / 1000.0f - StartTime;
+		public bool IsPlaying => GetPlaybackState() == FMOD.Studio.PLAYBACK_STATE.PLAYING;
 
 		/*
 		===============
@@ -47,7 +59,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 		===============
 		*/
 		public bool HasInstance() {
-			return _instance.hasHandle();
+			return Instance.hasHandle();
 		}
 
 		/*
@@ -56,9 +68,9 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 		===============
 		*/
 		public void ReleaseInstance() {
-			if ( _instance.hasHandle() ) {
-				FMODValidator.ValidateCall( _instance.release() );
-				Timestamp = DateTime.UtcNow.Millisecond;
+			if ( Instance.hasHandle() ) {
+				FMODValidator.ValidateCall( Instance.release() );
+				StartTime = Time.GetTicksMsec();
 			}
 		}
 
@@ -68,7 +80,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 		===============
 		*/
 		public FMOD.Studio.PLAYBACK_STATE GetPlaybackState() {
-			FMODValidator.ValidateCall( _instance.getPlaybackState( out var state ) );
+			FMODValidator.ValidateCall( Instance.getPlaybackState( out var state ) );
 			return state;
 		}
 
@@ -78,8 +90,8 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 		===============
 		*/
 		public void AllocateInstance( FMOD.Studio.EventDescription description ) {
-			FMODValidator.ValidateCall( description.createInstance( out _instance ) );
-			Timestamp = DateTime.UtcNow.Millisecond;
+			FMODValidator.ValidateCall( description.createInstance( out Instance ) );
+			StartTime = Time.GetTicksMsec();
 		}
 
 		/*
@@ -88,8 +100,8 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 		===============
 		*/
 		public void SetVolume( float volume ) {
-			if ( _instance.hasHandle() ) {
-				FMODValidator.ValidateCall(_instance.setVolume( volume ) );
+			if ( Instance.hasHandle() ) {
+				FMODValidator.ValidateCall(Instance.setVolume( volume ) );
 			}
 		}
 
@@ -99,8 +111,8 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 		===============
 		*/
 		public void SetPosition( Vector2 position ) {
-			if ( _instance.hasHandle() ) {
-				FMODValidator.ValidateCall( _instance.set3DAttributes( new FMOD.ATTRIBUTES_3D{ position = new FMOD.VECTOR{ x = position.X, y = position.Y, z = 0.0f } } ) );
+			if ( Instance.hasHandle() ) {
+				FMODValidator.ValidateCall( Instance.set3DAttributes( new FMOD.ATTRIBUTES_3D{ position = new FMOD.VECTOR{ x = position.X, y = position.Y, z = 0.0f } } ) );
 			}
 		}
 	};

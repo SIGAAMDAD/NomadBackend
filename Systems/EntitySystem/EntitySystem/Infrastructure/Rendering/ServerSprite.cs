@@ -22,12 +22,24 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.EntitySystem;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.GameServices;
+using NomadCore.Systems.EntitySystem.Application.Interfaces;
 using NomadCore.Systems.EntitySystem.Infrastructure.Rendering;
 
 namespace NomadCore.Infrastructure.Rendering {
-	internal sealed class ServerSprite : ServerRenderEntity {
+	/*
+	===================================================================================
+	
+	ServerSprite
+	
+	===================================================================================
+	*/
+	/// <summary>
+	/// 
+	/// </summary>
+	
+	internal sealed class ServerSprite( IGameEventRegistryService eventFactory, IGameEntity owner, Sprite2D sprite ) : ServerRenderEntity( eventFactory, owner, sprite ) {
 		public Vector2 Size {
 			get => _size;
 			set => _size = value;
@@ -40,35 +52,32 @@ namespace NomadCore.Infrastructure.Rendering {
 		}
 		private float _scale;
 
-		private readonly bool _regionEnabled;
-		private readonly bool _regionFilterClipEnabled;
-		private readonly Rect2 _regionRect;
+		private readonly bool _regionEnabled = sprite.RegionEnabled;
+		private readonly bool _regionFilterClipEnabled = sprite.RegionFilterClipEnabled;
+		private readonly Rect2 _regionRect = sprite.RegionRect;
 
-		private readonly int _hframes;
-		private readonly int _vframes;
-		private readonly int _frame;
-		private readonly Vector2 _offset;
+		private readonly int _hframes = sprite.Hframes;
+		private readonly int _vframes = sprite.Vframes;
+		private readonly int _frame = sprite.Frame;
+		private readonly Vector2 _offset = sprite.Offset;
 
-		private readonly Texture2D _texture;
+		private readonly Texture2D _texture = sprite.Texture;
 
-		public ServerSprite( IEntityComponentSystemService ecs, IEntity owner, Sprite2D sprite )
-			: base( ecs, owner, sprite )
-		{
-			_regionEnabled = sprite.RegionEnabled;
-			_regionFilterClipEnabled = sprite.RegionFilterClipEnabled;
-			_regionRect = sprite.RegionRect;
-			_texture = sprite.Texture;
-			_hframes = sprite.Hframes;
-			_vframes = sprite.Vframes;
-			_frame = sprite.Frame;
-			_offset = sprite.Offset;
-		}
-
-		public void Draw( float deltaTime ) {
+		/*
+		===============
+		Draw
+		===============
+		*/
+		public override void Draw( float deltaTime ) {
 			GetRects( out Rect2 srcRect, out Rect2 dstRect, out bool filterClipEnabled );
 			RenderingServer.CanvasItemAddTextureRectRegion( _canvasItemRid, dstRect, _texture.GetRid(), srcRect, Colors.White, false, filterClipEnabled );
 		}
 
+		/*
+		===============
+		GetRects
+		===============
+		*/
 		private void GetRects( out Rect2 srcRect, out Rect2 dstRect, out bool filterClipEnabled ) {
 			Rect2 baseRect;
 			if ( _regionEnabled ) {

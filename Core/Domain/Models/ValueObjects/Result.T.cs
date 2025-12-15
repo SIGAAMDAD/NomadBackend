@@ -38,7 +38,7 @@ namespace NomadCore.Domain.Models.ValueObjects {
 	
 	public record Result<T> {
 		public bool IsSuccess { get; init; }
-		public bool IsFailure => !IsSuccess;
+		public bool IsFailure => !IsSuccess || Value == null;
 		public T? Value { get; init; }
 		public IError? Error { get; init; }
 

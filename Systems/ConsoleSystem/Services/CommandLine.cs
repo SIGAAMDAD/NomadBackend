@@ -41,10 +41,11 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class CommandLine : ICommandLine {
+	internal sealed class CommandLine : ICommandLineService {
 		public int ArgumentCount => _commandBuilder.ArgumentCount;
 
 		private readonly ICommandBuilder _commandBuilder;
+		private readonly IHistory _history;
 
 		//
 		// autocomplete
@@ -77,12 +78,13 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 			_commandBuilder = builder;
 			_commandService = commandService;
 			_logger = logger;
+			_history = new History( builder, logger, eventFactory );
 
 			_textEntered = eventFactory.GetEvent<TextEnteredEventData>( nameof( TextEntered ) );
 			_unknownCommand = eventFactory.GetEvent<CommandExecutedEventData>( nameof( UnknownCommand ) );
 			_commandExecuted = eventFactory.GetEvent<CommandExecutedEventData>( nameof( CommandExecuted ) );
 
-			eventFactory.GetEvent<IEventArgs>( "ConsoleClosed" ).Subscribe( this, OnConsoleClosed );
+			eventFactory.GetEvent<IEventArgs>( "ConsoleClosed", "ConsoleSystem" ).Subscribe( this, OnConsoleClosed );
 
 			builder.TextEntered.Subscribe( this, OnCommandExecuted );
 		}
@@ -108,7 +110,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		/// </summary>
 		/// <param name="text"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void ExecuteCommand( string? text ) {
+		public void ExecuteCommand( string text ) {
 			ArgumentException.ThrowIfNullOrEmpty( text );
 		}
 
@@ -156,8 +158,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 				var arguments = _commandBuilder.GetArgs();
 
 				try {
-					consoleCommand.Callback.Invoke( new CommandExecutedEventData( consoleCommand, arguments ) );
-					_commandExecuted.Publish( new CommandExecutedEventData( consoleCommand, arguments ) );
+					_commandExecuted.PublishAsync( new CommandExecutedEventData( consoleCommand, arguments.Length ) );
 				} catch ( Exception ex ) {
 					_logger.PrintError( $"CommandLine.OnCommandExecuted: error executing command - {ex.Message}" );
 					throw;

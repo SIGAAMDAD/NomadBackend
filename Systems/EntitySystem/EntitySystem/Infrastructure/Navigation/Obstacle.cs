@@ -24,7 +24,18 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using Godot;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Navigation {
-	public sealed class Obstacle {
+	/*
+	===================================================================================
+	
+	Obstacle
+	
+	===================================================================================
+	*/
+	/// <summary>
+	/// 
+	/// </summary>
+	
+	internal sealed class Obstacle {
 		public Rid ObstacleRid => _obstacleRid;
 		private readonly Rid _obstacleRid;
 

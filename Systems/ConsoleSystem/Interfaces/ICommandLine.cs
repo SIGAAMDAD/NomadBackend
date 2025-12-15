@@ -26,14 +26,14 @@ using NomadCore.Interfaces;
 using NomadCore.Systems.ConsoleSystem.Events;
 
 namespace NomadCore.Systems.ConsoleSystem.Interfaces {
-	public interface ICommandLine : IGameService {
+	public interface ICommandLineService : IGameService {
 		public int ArgumentCount { get; }
 
 		public IGameEvent<TextEnteredEventData> TextEntered { get; }
 		public IGameEvent<CommandExecutedEventData> UnknownCommand { get; }
 		public IGameEvent<CommandExecutedEventData> CommandExecuted { get; }
 
-		public void ExecuteCommand( string? text );
+		public void ExecuteCommand( string text );
 		public string GetArgumentAt( int index );
 		public string[] GetArguments();
 	};

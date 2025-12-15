@@ -25,6 +25,7 @@ using Godot;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
+using NomadCore.Systems.ConsoleSystem.CVars.Services;
 using NomadCore.Systems.ConsoleSystem.Infrastructure.Sinks;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using NomadCore.Systems.ConsoleSystem.Services;
@@ -51,30 +52,34 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure.Startup {
 		public static void Initialize( IServiceLocator services, IServiceRegistry registry, Node rootNode ) {
 			ArgumentNullException.ThrowIfNull( rootNode );
 			
-			var logger = registry.RegisterSingleton<ILoggerService, LoggerService>();
-
+			var logger = services.GetService<ILoggerService>();
 			var eventFactory = services.GetService<IGameEventRegistryService>();
 			var eventBus = services.GetService<IGameEventBusService>();
-			var cvarSystem = services.GetService<ICVarSystemService>();
 
-			var consoleOpened = eventFactory.GetEvent<IEventArgs>( "ConsoleOpened" );
-			var consoleClosed = eventFactory.GetEvent<IEventArgs>( "ConsoleClosed" );
-			var historyPrev = eventFactory.GetEvent<IEventArgs>( "HistoryPrev" );
-			var historyNext = eventFactory.GetEvent<IEventArgs>( "HistoryNext" );
-			var autoComplete = eventFactory.GetEvent<IEventArgs>( "AutoComplete" );
-			var pageUp = eventFactory.GetEvent<IEventArgs>( "PageUp" );
-			var pageDown = eventFactory.GetEvent<IEventArgs>( "PageDown" );
-
-			var commandBuilder = new GodotCommandBuilder( eventBus, eventFactory );
-			var commandService = registry.RegisterSingleton<ICommandService>( new CommandCacheService( logger ) );
-			var console = new GodotConsole( commandBuilder, commandService, eventFactory );
-			var commandLine = registry.RegisterSingleton<ICommandLine>( new CommandLine( commandBuilder, commandService, logger, eventFactory ) );
+			var cvarSystem = registry.RegisterSingleton<ICVarSystemService>( new CVarSystem( eventFactory, logger ) );
+			logger.Init( services );
 
 			logger.AddSink( new GodotSink() );
 			logger.AddSink( new FileSink( cvarSystem ) );
-			logger.AddSink( new InGameSink( console, commandBuilder, eventFactory ) );
 
-			var history = new History( commandBuilder, logger, eventFactory );
+			eventFactory.GetEvent<IEventArgs>( "ConsoleOpened" );
+			eventFactory.GetEvent<IEventArgs>( "ConsoleClosed" );
+			eventFactory.GetEvent<IEventArgs>( "HistoryPrev" );
+			eventFactory.GetEvent<IEventArgs>( "HistoryNext" );
+			eventFactory.GetEvent<IEventArgs>( "AutoComplete" );
+			eventFactory.GetEvent<IEventArgs>( "PageUp" );
+			eventFactory.GetEvent<IEventArgs>( "PageDown" );
+
+			var commandBuilder = new GodotCommandBuilder( eventBus, eventFactory );
+			var commandService = registry.RegisterSingleton<ICommandService>( new CommandCacheService( logger ) );
+			logger.InitCommandService( commandService );
+
+			var console = new GodotConsole( commandBuilder, commandService, eventFactory );
+			logger.InitCommandLineService(
+				registry.RegisterSingleton<ICommandLineService>( new CommandLine( commandBuilder, commandService, logger, eventFactory ) )
+			);
+
+			logger.AddSink( new InGameSink( console, commandBuilder, eventFactory ) );
 
 			rootNode.CallDeferred( Node.MethodName.AddChild, console );
 		}

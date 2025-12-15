@@ -96,7 +96,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public IConsoleCommand GetCommand( string command ) {
 			ArgumentException.ThrowIfNullOrEmpty( command );
-			return _commands[ SceneStringPool.Intern( command ) ];
+			return _commands[ StringPool.Intern( command ) ];
 		}
 
 		/*
@@ -113,7 +113,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public bool TryGetCommand( string name, out IConsoleCommand command ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
-			return _commands.TryGetValue( SceneStringPool.Intern( name ), out command );
+			return _commands.TryGetValue( StringPool.Intern( name ), out command );
 		}
 
 		/*
@@ -129,7 +129,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public bool CommandExists( string command ) {
 			ArgumentException.ThrowIfNullOrEmpty( command );
-			return _commands.ContainsKey( SceneStringPool.Intern( command ) );
+			return _commands.ContainsKey( StringPool.Intern( command ) );
 		}
 
 		/*

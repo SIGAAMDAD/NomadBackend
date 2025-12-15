@@ -22,7 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.Domain.Models.Interfaces;
-using System.Numerics;
+using Godot;
 
 namespace NomadCore.Systems.Audio.Domain.Interfaces {
 	public interface IListener : IComponent {

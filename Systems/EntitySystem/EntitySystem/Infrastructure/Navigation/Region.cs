@@ -25,7 +25,18 @@ using Godot;
 using NomadCore.Interfaces.EntitySystem;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Navigation {
-	public sealed class Region : INavigationRegion {
+	/*
+	===================================================================================
+	
+	Region
+	
+	===================================================================================
+	*/
+	/// <summary>
+	/// 
+	/// </summary>
+	
+	internal sealed class Region : INavigationRegion {
 		public bool Enabled {
 			get => NavigationServer2D.RegionGetEnabled( _regionRid );
 			set => NavigationServer2D.RegionSetEnabled( _regionRid, value );
@@ -36,6 +47,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Navigation {
 
 		public Region( NavigationRegion2D region ) {
 			_regionRid = NavigationServer2D.RegionCreate();
+			
 			Enabled = region.Enabled;
 			NavigationServer2D.RegionSetEnterCost( _regionRid, region.EnterCost );
 			NavigationServer2D.RegionSetMap( _regionRid, region.GetNavigationMap() );

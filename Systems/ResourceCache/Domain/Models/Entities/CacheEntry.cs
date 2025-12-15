@@ -39,14 +39,18 @@ namespace NomadCore.Systems.ResourceCache.Domain.Models.Entities {
 	/// 
 	/// </summary>
 	
-	internal sealed class CacheEntry<TResource, TId> : ICacheEntry<TId>
-		where TResource : notnull
+	internal sealed class CacheEntry<TResource, TId>( TId id, TResource resource, int memorySize, TimeSpan loadTime, ResourceLoadState loadState ) : ICacheEntry<TId>
+		where TResource : notnull, IDisposable
 		where TId : IEquatable<TId>
 	{
-		public TId Id { get; }
+		public TId Id => _id;
+		private readonly TId _id = id;
+
+		public IDisposable Resource => _resource;
+		private readonly TResource _resource = resource;
 
 		public DateTime CreatedAt => _createdAt;
-		private readonly DateTime _createdAt;
+		private readonly DateTime _createdAt = DateTime.UtcNow;
 
 		public DateTime? ModifiedAt => _accessStats.LastAccessTime;
 		public int Version => _accessStats.AccessCount;
@@ -55,20 +59,10 @@ namespace NomadCore.Systems.ResourceCache.Domain.Models.Entities {
 		private EntryAccessStatistics _accessStats;
 
 		public int ReferenceCount { get; set; }
-		public TimeSpan LoadTimer;
-		public ResourceLoadState LoadState { get; } = ResourceLoadState.Complete;
+		public TimeSpan LoadTimer = loadTime;
+		public ResourceLoadState LoadState { get; } = loadState;
 
-		public readonly TResource Resource;
-		public readonly int MemorySize;
-
-		public CacheEntry( TId id, TResource resource, int memorySize, TimeSpan loadTime, ResourceLoadState loadState ) {
-			Id = id;
-			_createdAt = DateTime.UtcNow;
-			Resource = resource;
-			MemorySize = memorySize;
-			LoadTimer = loadTime;
-			LoadState = loadState;
-		}
+		public readonly int MemorySize = memorySize;
 
 		public bool Equals( IEntity<TId>? other ) {
 			return other is not null && other.Id.Equals( Id );

@@ -22,6 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Interfaces;
 
 namespace NomadCore.GameServices {
@@ -30,6 +31,10 @@ namespace NomadCore.GameServices {
 		public void PrintDebug( string message );
 		public void PrintWarning( string message );
 		public void PrintError( string message );
+
+		public void Init( IServiceLocator locator );
+		public void InitCommandService( IGameService commandService );
+		public void InitCommandLineService( IGameService commandLine );
 
 		public void AddSink( ILoggerSink sink );
 	};

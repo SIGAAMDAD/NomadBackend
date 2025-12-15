@@ -39,10 +39,10 @@ namespace NomadCore.Systems.Audio.Domain.Models.Aggregates {
 	/// </summary>
 
 	internal sealed class BankComposite( IEventCollection events, IBankResource resource, IBankMetadata metadata ) : IAudioBank {
-		public BankId Id => _metadata.Id;
-		public DateTime CreatedAt => _metadata.CreatedAt;
-		public DateTime? ModifiedAt => _metadata.ModifiedAt;
-		public int Version => _metadata.Version;
+		public BankId Id => metadata.Id;
+		public DateTime CreatedAt => metadata.CreatedAt;
+		public DateTime? ModifiedAt => metadata.ModifiedAt;
+		public int Version => metadata.Version;
 
 		public BankState Status {
 			get => _status;
@@ -55,19 +55,13 @@ namespace NomadCore.Systems.Audio.Domain.Models.Aggregates {
 		}
 		private BankState _status = BankState.Unloaded;
 
-		public IAudioEvent[] Events => _events.GetEvents();
-
-		private readonly IEventCollection _events = events;
-		private readonly IBankResource _resource = resource;
-		private readonly IBankMetadata _metadata = metadata;
-
 		/*
 		===============
 		Dispose
 		===============
 		*/
 		public void Dispose() {
-			_resource.Dispose();
+			resource.Dispose();
 		}
 
 		/*
@@ -76,7 +70,7 @@ namespace NomadCore.Systems.Audio.Domain.Models.Aggregates {
 		===============
 		*/
 		public bool IsEventInBank( EventId id ) {
-			return _events.ContainsEvent( id );
+			return events.ContainsEvent( id );
 		}
 
 		/*

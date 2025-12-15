@@ -26,9 +26,9 @@ using NomadCore.Systems.ConsoleSystem.Events;
 
 namespace NomadCore.Systems.ConsoleSystem.Interfaces {
 	public interface ICommandBuilder {
-		public IGameEvent<TextEnteredEventData> TextEntered { get; }
-
 		public int ArgumentCount { get; }
+		
+		public IGameEvent<TextEnteredEventData> TextEntered { get; }
 
 		public string GetArgumentAt( int index );
 		public string[] GetArgs();

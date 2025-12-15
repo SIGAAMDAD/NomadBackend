@@ -21,16 +21,15 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Interfaces;
 using System;
 
 namespace NomadCore.Systems.Audio.Domain.Interfaces {
 	public interface IListenerService : IDisposable, IGameService {
 		public int ListenerCount { get; }
-		public IListener ActiveListener { get; }
+		public IListener? ActiveListener { get; }
 
-		public IListener AddListener( IGameEntity entity );
+		public IListener AddListener();
 		public IListener SetActiveListener( IListener listener );
 		public void ClearListeners();
 	};

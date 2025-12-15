@@ -23,15 +23,16 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Registries {
 	internal static class FMODCVarRegistry {
 		public static void Register( ICVarSystemService cvarSystem ) {
 			cvarSystem.Register(
 				new CVarCreateInfo<int>(
-					Name: "audio.fmod.streamBufferSize",
+					Name: StringPool.Intern( "audio.fmod.StreamBufferSize" ),
 					DefaultValue: 12,
-					Description: "The size of FMOD's stream buffer size in MB.",
+					Description: StringPool.Intern( "The size of FMOD's stream buffer size in MB." ),
 					Flags: CVarFlags.Archive | CVarFlags.Init,
 					Validator: value => value > 10 && value < 48
 				)

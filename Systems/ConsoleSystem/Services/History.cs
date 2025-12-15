@@ -70,7 +70,6 @@ namespace NomadCore.Systems.ConsoleSystem {
 		/// <param name="builder"></param>
 		/// <param name="logger"></param>
 		/// <param name="eventFactory"></param>
-		/// <param name="events"></param>
 		public History( ICommandBuilder builder, ILoggerService logger, IGameEventRegistryService eventFactory ) {
 			ArgumentNullException.ThrowIfNull( builder );
 			ArgumentNullException.ThrowIfNull( eventFactory );

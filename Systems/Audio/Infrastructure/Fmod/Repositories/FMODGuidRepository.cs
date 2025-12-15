@@ -22,26 +22,174 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.Infrastructure.Collections;
+using NomadCore.Interfaces.Common;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
-using System.Collections.Concurrent;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
-	internal sealed class FMODGuidRepository {
-		private readonly ConcurrentDictionary<FMODBankId, BankId> _bankGuids = new ConcurrentDictionary<FMODBankId, BankId>();
+	/*
+	===================================================================================
+	
+	FMODGuidRepository
+	
+	===================================================================================
+	*/
+	/// <summary>
+	/// 
+	/// </summary>
 
-		private readonly ConcurrentDictionary<FMODEventId, EventId> _eventGuids = new ConcurrentDictionary<FMODEventId, EventId>();
+	internal sealed class FMODGuidRepository : IDisposable {
+		private sealed class GUIDCache<TGuid, TId>( Func<InternString, TId> factory )
+			where TGuid : IValueObject<TGuid>
+			where TId : IValueObject<TId>
+		{
+			private readonly Dictionary<TGuid, TId> _guids = new Dictionary<TGuid, TId>();
+			private readonly Dictionary<TId, TGuid> _reverseLookup = new Dictionary<TId, TGuid>();
+			private readonly Func<InternString, TId> _factory = factory;
 
-		public EventId GetEventID( string path, FMOD.GUID guid ) {
-			var eventId = new EventId( SceneStringPool.Intern( path ) );
-			_eventGuids[ new FMODEventId( guid ) ] = eventId;
-			return eventId;
+			public TGuid this[ TId id ] => _reverseLookup[ id ];
+			public TId this[ TGuid guid ] => _guids[ guid ];
+
+			/*
+			===============
+			Add
+			===============
+			*/
+			public void Add( string path, TGuid guid ) {
+				var key = StringPool.Intern( path );
+				var id = _factory.Invoke( key );
+
+				_guids[ guid ] = id;
+				_reverseLookup[ id ] = guid;
+			}
+
+			/*
+			===============
+			Clear
+			===============
+			*/
+			public void Clear() {
+				_guids.Clear();
+				_reverseLookup.Clear();
+			}
+		};
+
+		private readonly GUIDCache<FMODEventId, EventId> _eventGuids = new GUIDCache<FMODEventId, EventId>( e => new EventId( e ) );
+		private readonly GUIDCache<FMODBankId, BankId> _bankGuids = new GUIDCache<FMODBankId, BankId>( b => new BankId( b ) );
+
+		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+
+		/*
+		===============
+		Dispose
+		===============
+		*/
+		public void Dispose() {
+			_eventGuids.Clear();
+			_bankGuids.Clear();
 		}
 
-		public BankId GetBankID( string path, FMOD.GUID guid ) {
-			var bankId = new BankId( SceneStringPool.Intern( path ) );
-			_bankGuids[ new FMODBankId( guid ) ] = bankId;
-			return bankId;
+		/*
+		===============
+		AddEventId
+		===============
+		*/
+		/// <summary>
+		/// Adds an event's id to the guid cache.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="guid"></param>
+		public void AddEventId( string path, FMODEventId guid ) {
+			_lock.EnterWriteLock();
+			try {
+				_eventGuids.Add( path, guid );
+			}
+			finally {
+				_lock.ExitWriteLock();
+			}
+		}
+
+		/*
+		===============
+		AddBankId
+		===============
+		*/
+		/// <summary>
+		/// Adds a bank's id to the guid cache.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="guid"></param>
+		public void AddBankId( string path, FMODBankId guid ) {
+			_lock.EnterWriteLock();
+			try {
+				_bankGuids.Add( path, guid );
+			}
+			finally {
+				_lock.ExitWriteLock();
+			}
+		}
+
+		/*
+		===============
+		GetEventId
+		===============
+		*/
+		public EventId GetEventId( FMODEventId guid ) {
+			_lock.EnterUpgradeableReadLock();
+			try {
+				return _eventGuids[ guid ];
+			}
+			finally {
+				_lock.ExitUpgradeableReadLock();
+			}
+		}
+
+		/*
+		===============
+		GetEventGuid
+		===============
+		*/
+		public FMODEventId GetEventGuid( EventId id ) {
+			_lock.EnterUpgradeableReadLock();
+			try {
+				return _eventGuids[ id ];
+			}
+			finally {
+				_lock.ExitUpgradeableReadLock();
+			}
+		}
+
+		/*
+		===============
+		GetBankId
+		===============
+		*/
+		public BankId GetBankId( FMODBankId guid ) {
+			_lock.EnterUpgradeableReadLock();
+			try {
+				return _bankGuids[ guid ];
+			}
+			finally {
+				_lock.ExitUpgradeableReadLock();
+			}
+		}
+
+		/*
+		===============
+		GetBankGuid
+		===============
+		*/
+		public FMODBankId GetBankGuid( BankId id ) {
+			_lock.EnterUpgradeableReadLock();
+			try {
+				return _bankGuids[ id ];
+			}
+			finally {
+				_lock.ExitUpgradeableReadLock();
+			}
 		}
 	};
 };

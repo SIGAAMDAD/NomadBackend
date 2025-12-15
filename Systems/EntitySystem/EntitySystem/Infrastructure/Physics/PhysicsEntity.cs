@@ -22,9 +22,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Godot;
-using NomadCore.Abstractions.Services;
-using NomadCore.Interfaces.EntitySystem;
+using NomadCore.Domain.Models.Interfaces;
 using System;
+using NomadCore.Systems.EntitySystem.Domain.Models.Interfaces;
+using NomadCore.Systems.EntitySystem.Domain.Models.ValueObjects;
+using NomadCore.Interfaces.Common;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 	/*
@@ -38,7 +40,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 	/// 
 	/// </summary>
 	
-	public abstract class PhysicsEntity : IPhysicsEntity {
+	internal abstract class PhysicsEntity : IPhysicsEntity {
 		public uint CollisionLayer {
 			get => _collisionLayer;
 			set {
@@ -91,10 +93,18 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 		protected bool _active = true;
 
 		public Rid BodyRid => _physicsRid;
+
+		public PhysicsEntityId Id => throw new NotImplementedException();
+
+		public DateTime CreatedAt => throw new NotImplementedException();
+
+		public DateTime? ModifiedAt => throw new NotImplementedException();
+
+		public int Version => throw new NotImplementedException();
+
 		protected readonly Rid _physicsRid;
 
-		protected readonly IEntityComponentSystemService _ecs;
-		protected readonly IEntity _owner;
+		protected WeakReference<IGameEntity> _owner;
 
 		/*
 		===============
@@ -104,13 +114,11 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="ecs"></param>
 		/// <param name="owner"></param>
 		/// <param name="body"></param>
 		/// <param name="collisionObject"></param>
-		public PhysicsEntity( IEntityComponentSystemService ecs, IEntity owner, Rid body, CollisionObject2D collisionObject ) {
-			_ecs = ecs;
-			_owner = owner;
+		public PhysicsEntity( IGameEntity owner, Rid body, CollisionObject2D collisionObject ) {
+			_owner = new WeakReference<IGameEntity>( owner );
 
 			_physicsRid = body;
 
@@ -123,8 +131,6 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 			SetCollisionMask( _collisionMask );
 			SetCollisionPriority( _collisionPriority );
 			SetTransform( _transform );
-
-			collisionObject.CallDeferred( CollisionObject2D.MethodName.QueueFree );
 		}
 
 		/*
@@ -143,5 +149,9 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 		protected abstract void SetCollisionMask( uint collisionMask );
 		protected abstract void SetCollisionPriority( float collisionPriority );
 		protected abstract void SetTransform( Transform2D transform );
+
+		public bool Equals( IEntity<PhysicsEntityId>? other ) {
+			return other?.Id == Id;
+		}
 	};
 };

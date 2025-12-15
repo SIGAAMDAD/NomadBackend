@@ -63,7 +63,7 @@ namespace NomadCore.Domain.Models.ValueObjects {
 				case PathType.User:
 				case PathType.Resource:
 					GodotPath = filePath;
-					OSPath = ProjectSettings.GlobalizePath( OSPath );
+					OSPath = ProjectSettings.GlobalizePath( GodotPath );
 					_hashCode = OSPath.GetHashCode();
 					break;
 				default:

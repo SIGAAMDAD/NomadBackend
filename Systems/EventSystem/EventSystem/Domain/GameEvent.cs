@@ -24,8 +24,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
-using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
-using NomadCore.Systems.EventSystem.Infrastructure;
 using NomadCore.Systems.EventSystem.Infrastructure.Subscriptions;
 using NomadCore.Systems.EventSystem.Services;
 using System;
@@ -132,7 +130,7 @@ namespace NomadCore.Systems.EventSystem.Domain {
 		/// <param name="eventArgs"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public void Publish( TArgs eventArgs ) {
-			_subscriptions.Pump( in eventArgs );
+			_subscriptions.Pump( eventArgs );
 		}
 
 		/*
@@ -184,7 +182,7 @@ namespace NomadCore.Systems.EventSystem.Domain {
 			ArgumentNullException.ThrowIfNull( subscriber );
 			ArgumentNullException.ThrowIfNull( callback );
 
-			_subscriptions.AddSubscription( subscriber, callback );
+			_subscriptions.AddSubscriptionAsync( subscriber, callback );
 		}
 
 		/*

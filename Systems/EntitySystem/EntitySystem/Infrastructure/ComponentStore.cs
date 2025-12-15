@@ -21,7 +21,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.EntitySystem;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Interfaces.Common;
+using NomadCore.Systems.EntitySystem.Domain.Models.ValueObjects;
 using NomadCore.Systems.EntitySystem.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -38,10 +40,12 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 	/// 
 	/// </summary>
 
-	internal sealed class ComponentStore<T>( int initialCapacity = 2048 ) : IComponentStore where T : struct, IComponent {
+	internal sealed class ComponentStore<T>( int initialCapacity = 2048 ) : IComponentStore
+		where T : struct, IComponent, IValueObject<T>
+	{
 		private T[] _components = new T[ initialCapacity ];
-		private readonly Dictionary<int, int> _entityToIndex = new Dictionary<int, int>( initialCapacity );
-		private readonly List<int> _indexToEntity = new List<int>( initialCapacity );
+		private readonly Dictionary<EntityId, int> _entityToIndex = new Dictionary<EntityId, int>( initialCapacity );
+		private readonly List<EntityId> _indexToEntity = new List<EntityId>( initialCapacity );
 
 		/*
 		===============
@@ -54,7 +58,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 		/// <param name="entityId"></param>
 		/// <returns></returns>
 		/// <exception cref="Exception"></exception>
-		public ref T GetComponent( int entityId ) {
+		public ref T GetComponent( EntityId entityId ) {
 			if ( _entityToIndex.TryGetValue( entityId, out int index ) ) {
 				return ref _components[ index ];
 			}
@@ -72,7 +76,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 		/// <param name="entityId"></param>
 		/// <param name="component"></param>
 		/// <exception cref="Exception"></exception>
-		public void AddComponent( int entityId, T component ) {
+		public void AddComponent( EntityId entityId, T component ) {
 			if ( _entityToIndex.ContainsKey( entityId ) ) {
 				throw new Exception( $"Entity {entityId} already has component {typeof( T ).Name}" );
 			}
@@ -96,13 +100,13 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 		/// 
 		/// </summary>
 		/// <param name="entityId"></param>
-		public void RemoveComponent( int entityId ) {
+		public void RemoveComponent( EntityId entityId ) {
 			if ( !_entityToIndex.TryGetValue( entityId, out int index ) ) {
 				return;
 			}
 			int lastIndex = _indexToEntity.Count - 1;
 			if ( index != lastIndex ) {
-				int lastEntityId = _indexToEntity[ lastIndex ];
+				EntityId lastEntityId = _indexToEntity[ lastIndex ];
 				_components[ index ] = _components[ lastIndex ];
 				_entityToIndex[ lastEntityId ] = index;
 				_indexToEntity[ index ] = lastEntityId;
@@ -122,7 +126,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure {
 		/// </summary>
 		/// <param name="entityId"></param>
 		/// <returns></returns>
-		public bool HasComponent( int entityId ) {
+		public bool HasComponent( EntityId entityId ) {
 			return _entityToIndex.ContainsKey( entityId );
 		}
 	};

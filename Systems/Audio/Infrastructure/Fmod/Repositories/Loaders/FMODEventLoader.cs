@@ -22,9 +22,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.Domain.Models.ValueObjects;
-using NomadCore.Infrastructure.Collections;
-using NomadCore.Systems.Audio.Domain.Models.Aggregates;
-using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Services;
@@ -44,11 +41,12 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod {
 	/// 
 	/// </summary>
 	
-	internal readonly struct FMODEventLoader( FMODSystemService fmodSystem ) : IResourceLoader<EventComposite, EventId> {
-		public IResourceLoader<EventComposite, EventId>.LoadCallback Load => LoadEvent;
-		public IResourceLoader<EventComposite, EventId>.LoadAsyncCallback LoadAsync => throw new System.NotImplementedException();
+	internal sealed class FMODEventLoader( FMODSystemService fmodSystem, FMODGuidRepository guidRepository ) : IResourceLoader<FMODEventResource, FMODEventId> {
+		public IResourceLoader<FMODEventResource, FMODEventId>.LoadCallback Load => LoadEvent;
+		public IResourceLoader<FMODEventResource, FMODEventId>.LoadAsyncCallback LoadAsync => LoadEventAsync;
 
 		private readonly FMODSystemService _fmodSystem = fmodSystem;
+		private readonly FMODGuidRepository _guidRepository = guidRepository;
 		
 		/*
 		===============
@@ -60,13 +58,13 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		private Result<EventComposite> LoadEvent( EventId id ) {
-			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.getEvent( SceneStringPool.FromInterned( id.Name ), out var eventDescription ) );
+		private Result<FMODEventResource> LoadEvent( FMODEventId id ) {
+			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.getEventByID( id.Value, out var eventDescription ) );
+			FMODValidator.ValidateCall( eventDescription.getPath( out var path ) );
 
-			var metadata = new FMODEventMetadata( id );
-			var resource = new FMODEventResource( eventDescription );
+			_guidRepository.AddEventId( path, id );
 
-			return Result<EventComposite>.Success( new EventComposite( metadata, resource ) );
+			return Result<FMODEventResource>.Success( new FMODEventResource( eventDescription ) );
 		}
 
 		/*
@@ -80,15 +78,15 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod {
 		/// <param name="id"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		private async Task<Result<EventComposite>> LoadEventAsync( EventId id, CancellationToken ct = default ) {
+		private async Task<Result<FMODEventResource>> LoadEventAsync( FMODEventId id, CancellationToken ct = default ) {
 			ct.ThrowIfCancellationRequested();
 
-			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.getEvent( SceneStringPool.FromInterned( id.Name ), out var eventDescription ) );
+			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.getEventByID( id.Value, out var eventDescription ) );
+			FMODValidator.ValidateCall( eventDescription.getPath( out var path ) );
 
-			var metadata = new FMODEventMetadata( id );
-			var resource = new FMODEventResource( eventDescription );
+			_guidRepository.AddEventId( path, id );
 
-			return Result<EventComposite>.Success( new EventComposite( metadata, resource ) );
+			return Result<FMODEventResource>.Success( new FMODEventResource( eventDescription ) );
 		}
 	};
 };

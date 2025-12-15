@@ -6,6 +6,10 @@
 /* https://fmod.com/docs/2.03/api/core-api.html                                             */
 /* ======================================================================================== */
 
+#if DEBUG
+#define FMOD_LOGGING
+#endif
+
 using System;
 using System.Text;
 using System.Runtime.InteropServices;

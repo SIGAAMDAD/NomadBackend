@@ -21,7 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
+using NomadCore.GameServices;
 using NomadCore.Utilities;
 
 namespace NomadCore.Systems.SaveSystem.Infrastructure.Storage {

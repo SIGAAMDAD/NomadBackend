@@ -54,7 +54,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 			_parameters = new Dictionary<ParameterId, FMOD.Studio.PARAMETER_ID>( parameterCount );
 			for ( int i = 0; i < parameterCount; i++ ) {
 				FMODValidator.ValidateCall( owner.getParameterDescriptionByIndex( i, out var parameter ) );
-				_parameters[ new ParameterId( SceneStringPool.Intern( parameter.name ) ) ] = parameter.id;
+				_parameters[ new ParameterId( StringPool.Intern( parameter.name ) ) ] = parameter.id;
 			}
 		}
 
@@ -69,7 +69,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 		/// <param name="id"></param>
 		/// <returns></returns>
 		public float GetParameter( in ParameterId id ) {
-			_instance.getParameterByName( SceneStringPool.FromInterned( id.Value ), out float value );
+			_instance.getParameterByName( StringPool.FromInterned( id.Value ), out float value );
 			return value;
 		}
 

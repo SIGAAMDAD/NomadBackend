@@ -39,9 +39,9 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Rendering {
 		public ServerPointLight( PointLight2D light )
 			: base( light, false )
 		{
-			RenderingServer.CanvasLightSetTexture( _lightRid, light.Texture.GetRid() );
-			RenderingServer.CanvasLightSetTextureOffset( _lightRid, light.Offset );
-			RenderingServer.CanvasLightSetTextureScale( _lightRid, light.TextureScale );
+			RenderingServer.CanvasLightSetTexture( _lightRid.Value, light.Texture.GetRid() );
+			RenderingServer.CanvasLightSetTextureOffset( _lightRid.Value, light.Offset );
+			RenderingServer.CanvasLightSetTextureScale( _lightRid.Value, light.TextureScale );
 			light.CallDeferred( PointLight2D.MethodName.QueueFree );
 		}
 	};

@@ -21,21 +21,26 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Abstractions.Services;
 using NomadCore.Systems.EntitySystem.Interfaces;
 using System.Collections.Generic;
 using Godot;
-using NomadCore.Systems.EntitySystem.Common;
+using NomadCore.Systems.EntitySystem.Domain;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure {
+	/*
+	===================================================================================
+	
+	ComponentSystem
+	
+	===================================================================================
+	*/
+	/// <summary>
+	/// 
+	/// </summary>
+	
 	public abstract class ComponentSystem : ISystem {
-		protected readonly IEntityComponentSystemService _ecs;
 		protected readonly Dictionary<Entity, Rid> _entityToRid = new Dictionary<Entity, Rid>();
 		protected readonly Dictionary<Rid, Entity> _ridToEntity = new Dictionary<Rid, Entity>();
-
-		public ComponentSystem( IEntityComponentSystemService ecs ) {
-			_ecs = ecs;
-		}
 
 		public abstract void Update( float deltaTime );
 	};

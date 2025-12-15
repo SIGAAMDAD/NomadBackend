@@ -24,21 +24,31 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.GameServices;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Systems.Audio.Application.Interfaces;
-using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
-using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Services;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Startup {
-	internal static class FMODBootstrapper {
+	/*
+	===================================================================================
+	
+	FMODBootstrapper
+	
+	===================================================================================
+	*/
+	/// <summary>
+	/// 
+	/// </summary>
+
+	public static class FMODBootstrapper {
 		public static void Initialize( IServiceLocator locator, IServiceRegistry registry ) {
 			var logger = locator.GetService<ILoggerService>();
 			var eventFactory = locator.GetService<IGameEventRegistryService>();
 			var cvarSystem = locator.GetService<ICVarSystemService>();
 
-			var systemService = (FMODSystemService)registry.RegisterSingleton<IAudioSystemService>( new FMODSystemService( logger, eventFactory, cvarSystem ) );
-			var channelRepository = new FMODChannelRepository( cvarSystem );
-			var sourceFactory = registry.RegisterSingleton<IAudioSourceFactory>( new FMODAudioSourceFactory( channelRepository ) );
-			registry.RegisterSingleton<IResourceCacheService<BankId>>( new FMODBankRepository( logger, eventFactory, systemService ) );
+			try {
+				registry.RegisterSingleton<IAudioSystemService>( new FMODSystemService( locator, registry ) );
+			} catch ( FMODException e ) {
+				logger.PrintError( $"FMODBootstrapper: error initializing FMOD audio system - {e.Error}\n{e.StackTrace}" );
+			}
 		}
 	};
 };

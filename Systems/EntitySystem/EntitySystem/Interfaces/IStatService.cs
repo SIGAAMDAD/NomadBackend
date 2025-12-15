@@ -21,13 +21,19 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Infrastructure.Collections;
+using NomadCore.Systems.EntitySystem.Domain.Events;
+
 namespace NomadCore.Systems.EntitySystem.Interfaces {
 	public interface IStatService {
-		public void SetStatValue<T>( string statName, T newValue ) where T : unmanaged;
-		public void SetStatMaxValue<T>( string statName, T maxValue ) where T : unmanaged;
-		public void SetStatMinValue<T>( string statName, T minValue ) where T : unmanaged;
-		public T GetStatValue<T>( string? statName ) where T : unmanaged;
-		public T GetStatMaxValue<T>( string? statName ) where T : unmanaged;
-		public T GetStatMinValue<T>( string? statName ) where T : unmanaged;
+		public IGameEvent<StatChangedEventData> StatChanged { get; }
+
+		public void SetStatValue<T>( InternString statName, T newValue ) where T : unmanaged;
+		public void SetStatMaxValue<T>( InternString statName, T maxValue ) where T : unmanaged;
+		public void SetStatMinValue<T>( InternString statName, T minValue ) where T : unmanaged;
+		public T GetStatValue<T>( InternString statName ) where T : unmanaged;
+		public T GetStatMaxValue<T>( InternString statName ) where T : unmanaged;
+		public T GetStatMinValue<T>( InternString statName ) where T : unmanaged;
 	};
 };

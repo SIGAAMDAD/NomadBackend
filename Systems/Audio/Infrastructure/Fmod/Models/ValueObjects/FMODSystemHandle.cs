@@ -21,6 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.GameServices;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -40,9 +41,8 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects {
 		public readonly FMOD.Studio.System StudioSystem;
 		public readonly FMOD.System System;
 
-		public FMODSystemHandle() {
-			FMODValidator.ValidateCall( FMOD.Studio.System.create( out StudioSystem ) );
-			FMODValidator.ValidateCall( StudioSystem.getCoreSystem( out System ) );
+		public FMODSystemHandle( ILoggerService logger ) {
+			
 		}
 
 		/*
@@ -54,14 +54,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects {
 		/// Releases the unmanaged FMOD system handles.
 		/// </summary>
 		public void Dispose() {
-			if ( StudioSystem.isValid() ) {
-				System.close();
-				System.release();
-				System.clearHandle();
-				StudioSystem.unloadAll();
-				StudioSystem.release();
-				StudioSystem.clearHandle();
-			}
+			
 		}
 
 		/*

@@ -49,9 +49,11 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories.Loaders {
 		public IResourceLoader<BankComposite, BankId>.LoadAsyncCallback LoadAsync => LoadBankAsync;
 
 		private readonly FMODSystemService _fmodSystem;
+		private readonly FMODGuidRepository _guidRepository;
 
-		public FMODBankLoader( FMODSystemService fmodSystem ) {
+		public FMODBankLoader( FMODSystemService fmodSystem, FMODGuidRepository guidRepository ) {
 			_fmodSystem = fmodSystem;
+			_guidRepository = guidRepository;
 		}
 
 		/*
@@ -65,14 +67,18 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories.Loaders {
 		/// <param name="id"></param>
 		/// <returns></returns>
 		private Result<BankComposite> LoadBank( BankId id ) {
-			var path = FilePath.FromResourcePath( $"res://Assets/Audio/{SceneStringPool.FromInterned( id.Name )}" );
+			var filePath = FilePath.FromResourcePath( $"res://Assets/Audio/{StringPool.FromInterned( id.Name )}" );
 
-			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.loadBankFile( path.OSPath, FMOD.Studio.LOAD_BANK_FLAGS.NORMAL, out var bank ) );
+			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.loadBankFile( filePath.OSPath, FMOD.Studio.LOAD_BANK_FLAGS.NORMAL, out var bank ) );
 			FMODValidator.ValidateCall( bank.getEventList( out var events ) );
+			FMODValidator.ValidateCall( bank.getPath( out var path ) );
+			FMODValidator.ValidateCall( bank.getID( out var bankId ) );
 
-			var eventCollection = new FMODEventCollection( events );
+			var eventCollection = new FMODEventCollection( events, _guidRepository );
 			var resource = new FMODBankResource( bank );
 			var metadata = new FMODBankMetadata( id );
+
+			_guidRepository.AddBankId( path, new FMODBankId( bankId ) );
 
 			return Result<BankComposite>.Success( new BankComposite( eventCollection, resource, metadata ) );
 		}
@@ -91,14 +97,18 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories.Loaders {
 		private async Task<Result<BankComposite>> LoadBankAsync( BankId id, CancellationToken ct = default ) {
 			ct.ThrowIfCancellationRequested();
 
-			var path = FilePath.FromResourcePath( $"res://Assets/Audio/{SceneStringPool.FromInterned( id.Name )}" );
+			var filePath = FilePath.FromResourcePath( $"res://Assets/Audio/{StringPool.FromInterned( id.Name )}" );
 
-			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.loadBankFile( path.OSPath, FMOD.Studio.LOAD_BANK_FLAGS.NONBLOCKING, out var bank ) );
+			FMODValidator.ValidateCall( _fmodSystem.StudioSystem.loadBankFile( filePath.OSPath, FMOD.Studio.LOAD_BANK_FLAGS.NONBLOCKING, out var bank ) );
 			FMODValidator.ValidateCall( bank.getEventList( out var events ) );
+			FMODValidator.ValidateCall( bank.getPath( out var path ) );
+			FMODValidator.ValidateCall( bank.getID( out var bankId ) );
 
-			var eventCollection = new FMODEventCollection( events );
+			var eventCollection = new FMODEventCollection( events, _guidRepository );
 			var resource = new FMODBankResource( bank );
 			var metadata = new FMODBankMetadata( id );
+
+			_guidRepository.AddBankId( path, new FMODBankId( bankId ) );
 
 			return Result<BankComposite>.Success( new BankComposite( eventCollection, resource, metadata ) );
 		}

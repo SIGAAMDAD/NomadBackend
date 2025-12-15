@@ -26,6 +26,7 @@ using NomadCore.Domain.Models.Interfaces;
 
 namespace NomadCore.Systems.ConsoleSystem.Events {
 	public readonly record struct CommandExecutedEventData(
-		IConsoleCommand Command, string[] Args
+		IConsoleCommand Command,
+		int ArgumentCount
 	) : ICommandExecutedEventData;
 };
