@@ -21,12 +21,18 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models;
-using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
+using System;
 
-namespace NomadCore.GameServices {
-	public interface IGameEventRegistryService {
-		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string? nameSpace = null, EventFlags flags = EventFlags.Default )
-			where TArgs : IEventArgs;
+namespace NomadCore.Systems.Audio.Application.Interfaces {
+	public interface IGuidRepository<TEventId, TBankId> : IDisposable {
+		public void AddEventId( string path, TEventId guid );
+		public void AddBankId( string path, TBankId guid );
+		
+		public EventId GetEventId( TEventId guid );
+		public BankId GetBankId( TBankId guid );
+
+		public TEventId GetEventGuid( EventId id );
+		public TBankId GetBankGuid( BankId id );
 	};
 };

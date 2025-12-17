@@ -21,12 +21,28 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models;
 using NomadCore.Domain.Models.Interfaces;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace NomadCore.GameServices {
-	public interface IGameEventRegistryService {
-		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string? nameSpace = null, EventFlags flags = EventFlags.Default )
-			where TArgs : IEventArgs;
+namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
+	internal interface ISubscriptionSet<TArgs> : IDisposable
+		where TArgs : IEventArgs
+	{
+		public void BindEventFriend( IGameEvent friend );
+		public void RemoveAllForSubscriber( object subscriber );
+
+		public void AddSubscription( object subscriber, IGameEvent<TArgs>.EventCallback callback );
+		public void AddSubscriptionAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback );
+		
+		public void RemoveSubscription( object subscriber, IGameEvent<TArgs>.EventCallback callback );
+		public void RemoveSubscriptionAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback );
+
+		public void Pump( in TArgs args );
+		public Task PumpAsync( TArgs args, CancellationToken ct );
+
+		public bool ContainsCallback( object subscriber, IGameEvent<TArgs>.EventCallback callback, out int index );
+		public bool ContainsCallbackAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback, out int index );
 	};
 };

@@ -21,12 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models;
-using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Interfaces;
 
-namespace NomadCore.GameServices {
-	public interface IGameEventRegistryService {
-		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string? nameSpace = null, EventFlags flags = EventFlags.Default )
-			where TArgs : IEventArgs;
+namespace NomadCore.Systems.Audio.Application.Interfaces {
+	public interface IChannelRepository : IGameService {
+		public void Update( float deltaTime );
 	};
 };

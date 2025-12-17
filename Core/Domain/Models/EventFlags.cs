@@ -21,12 +21,31 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models;
-using NomadCore.Domain.Models.Interfaces;
+using System;
 
-namespace NomadCore.GameServices {
-	public interface IGameEventRegistryService {
-		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string? nameSpace = null, EventFlags flags = EventFlags.Default )
-			where TArgs : IEventArgs;
+namespace NomadCore.Domain.Models {
+	[Flags]
+	public enum EventFlags : uint {
+		/// <summary>
+		/// Notifies all synchronous subscribers.
+		/// </summary>
+		Synchronous			= 1 << 0,
+
+		/// <summary>
+		/// Notifies all asynchronous subscribers.
+		/// </summary>
+		Asynchronous		= 1 << 1,
+
+		/// <summary>
+		/// Don't use a WeakReference when allocating a new subscription.
+		/// </summary>
+		StrongSubscriptions = 1 << 2,
+
+		/// <summary>
+		/// Don't do any synchronization when publishing the event. This also disables asynchronous subscriptions.
+		/// </summary>
+		NoLock				= 1 << 3,
+
+		Default = Synchronous | Asynchronous
 	};
 };

@@ -21,6 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Domain.Models;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
 using NomadCore.Interfaces;
@@ -69,7 +70,7 @@ namespace NomadCore.Systems.EventSystem.Domain.Registries {
 		/// <param name="name">Name of the event to register.</param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string? nameSpace = null )
+		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string? nameSpace = null, EventFlags flags = EventFlags.Default )
 			where TArgs : IEventArgs
 		{
 			ArgumentException.ThrowIfNullOrEmpty( name );
@@ -85,7 +86,7 @@ namespace NomadCore.Systems.EventSystem.Domain.Registries {
 						$"Event '{key.Name}' already registered with type {existing.GetType().GenericTypeArguments[ 0 ].Name} cannot register with type {typeof( TArgs ).Name}"
 					);
 				}
-				return new GameEvent<TArgs>( k.Name, _logger );
+				return new GameEvent<TArgs>( k.Name, _logger, flags );
 			} );
 		}
 

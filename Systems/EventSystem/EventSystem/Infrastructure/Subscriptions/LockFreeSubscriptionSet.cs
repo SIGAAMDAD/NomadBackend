@@ -34,7 +34,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 	/*
 	===================================================================================
 	
-	SubscriptionSet
+	LockFreeSubscriptionSet
 	
 	===================================================================================
 	*/
@@ -42,7 +42,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 	/// 
 	/// </summary>
 
-	internal sealed class SubscriptionSet<TArgs>( IGameEvent<TArgs> eventData, ILoggerService logger, int cleanupInterval = 30 ) : ISubscriptionSet<TArgs>
+	internal sealed class LockFreeSubscriptionSet<TArgs>( IGameEvent<TArgs> eventData, ILoggerService logger, int cleanupInterval = 100 ) : ISubscriptionSet<TArgs>
 		where TArgs : IEventArgs {
 		/// <summary>
 		/// The number of pumps before initiating a purge.
@@ -52,7 +52,6 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		private readonly ILoggerService _logger = logger;
 
 		private readonly SubscriptionCache<TArgs, IGameEvent<TArgs>.EventCallback> _genericSubscriptions = new( logger );
-		private readonly SubscriptionCache<TArgs, IGameEvent<TArgs>.AsyncCallback> _asyncSubscriptions = new( logger );
 		private int _cleanupCounter = 0;
 
 		private readonly HashSet<WeakReference<IGameEvent>> _friends = new HashSet<WeakReference<IGameEvent>>();
@@ -104,13 +103,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 			ArgumentNullException.ThrowIfNull( subscriber );
 			ArgumentNullException.ThrowIfNull( callback );
 
-			_pumpLock.EnterWriteLock();
-			try {
-				_genericSubscriptions.AddSubscription( subscriber, callback );
-			}
-			finally {
-				_pumpLock.ExitWriteLock();
-			}
+			_genericSubscriptions.AddSubscription( subscriber, callback );
 		}
 
 		/*
@@ -119,22 +112,13 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		===============
 		*/
 		/// <summary>
-		/// Adds a callback method to the <see cref="Subscriptions"/> list.
+		/// 
 		/// </summary>
 		/// <param name="subscriber"></param>
-		/// <param name="callback">The method that is called whenever the event triggers.</param>
-		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
+		/// <param name="callback"></param>
+		/// <exception cref="NotSupportedException"></exception>
 		public void AddSubscriptionAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback ) {
-			ArgumentNullException.ThrowIfNull( subscriber );
-			ArgumentNullException.ThrowIfNull( callback );
-
-			_pumpLock.EnterWriteLock();
-			try {
-				_asyncSubscriptions.AddSubscription( subscriber, callback );
-			}
-			finally {
-				_pumpLock.ExitWriteLock();
-			}
+			throw new NotSupportedException();
 		}
 
 		/*
@@ -153,13 +137,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 			ArgumentNullException.ThrowIfNull( subscriber );
 			ArgumentNullException.ThrowIfNull( callback );
 
-			_pumpLock.EnterWriteLock();
-			try {
-				_genericSubscriptions.RemoveSubscription( _genericSubscriptions, callback );
-			}
-			finally {
-				_pumpLock.ExitWriteLock();
-			}
+			_genericSubscriptions.RemoveSubscription( _genericSubscriptions, callback );
 		}
 
 		/*
@@ -168,23 +146,13 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		===============
 		*/
 		/// <summary>
-		/// Removes the provided <paramref name="callback"/> from the event's subscription list.
+		/// 
 		/// </summary>
 		/// <param name="subscriber"></param>
-		/// <param name="callback">The callback to remove from the subscription list.</param>
-		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
-		/// <exception cref="ArgumentOutOfRangeException">Thrown if the returned index from <see cref="ContainsCallback"/> is invalid.</exception>
+		/// <param name="callback"></param>
+		/// <exception cref="NotSupportedException"></exception>
 		public void RemoveSubscriptionAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback ) {
-			ArgumentNullException.ThrowIfNull( subscriber );
-			ArgumentNullException.ThrowIfNull( callback );
-
-			_pumpLock.EnterWriteLock();
-			try {
-				_asyncSubscriptions.RemoveSubscription( _asyncSubscriptions, callback );
-			}
-			finally {
-				_pumpLock.ExitWriteLock();
-			}
+			throw new NotSupportedException();
 		}
 
 		/*
@@ -200,7 +168,6 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 			ArgumentNullException.ThrowIfNull( subscriber );
 
 			_genericSubscriptions.RemoveAllForSubscriber( subscriber );
-			_asyncSubscriptions.RemoveAllForSubscriber( subscriber );
 		}
 
 		/*
@@ -216,32 +183,20 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 #if EVENT_DEBUG
 			_logger?.PrintLine( $"SubscriptionSet.Pump: publishing event {eventData.DebugName}" );
 #endif
-			_pumpLock.EnterUpgradeableReadLock();
-			try {
-				bool shouldCleanup = false;
-				if ( ++_cleanupCounter >= _cleanupInterval ) {
-					shouldCleanup = true;
-					_cleanupCounter = 0;
-				}
-
-				var subscriptions = _genericSubscriptions.Subscriptions;
-				for ( int i = 0; i < subscriptions.Count; i++ ) {
-					NotifySubscriber( subscriptions[ i ], in args );
-				}
-
-				if ( shouldCleanup ) {
-					_pumpLock.EnterWriteLock();
-					try {
-						_genericSubscriptions.CleanupDeadSubscriptions();
-						_asyncSubscriptions.CleanupDeadSubscriptions();
-					}
-					finally {
-						_pumpLock.ExitWriteLock();
-					}
-				}
+			bool shouldCleanup = false;
+			if ( ++_cleanupCounter >= _cleanupInterval ) {
+				shouldCleanup = true;
+				_cleanupCounter = 0;
 			}
-			finally {
-				_pumpLock.ExitUpgradeableReadLock();
+
+			var subscriptions = _genericSubscriptions.Subscriptions;
+			int count = subscriptions.Count;
+			for ( int i = 0; i < count; i++ ) {
+				NotifySubscriber( subscriptions[ i ], in args );
+			}
+
+			if ( shouldCleanup ) {
+				_genericSubscriptions.CleanupDeadSubscriptions();
 			}
 		}
 
@@ -256,20 +211,9 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		/// <param name="args"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
+		/// <exception cref="NotSupportedException"></exception>
 		public async Task PumpAsync( TArgs args, CancellationToken ct ) {
-#if EVENT_DEBUG
-			_logger?.PrintLine( $"SubscriptionSet.PumpAsync: publishing event {eventData.DebugName} asynchronously..." );
-#endif
-			int subscriptionCount = _asyncSubscriptions.Subscriptions.Count;
-			List<Task> tasks = new List<Task>( subscriptionCount );
-
-			for ( int i = 0; i < subscriptionCount; i++ ) {
-				if ( _asyncSubscriptions.Subscriptions[ i ].Callback.TryGetTarget( out var callback ) ) {
-					tasks.Add( Task.Run( async () => callback( args, ct ) ) );
-				}
-			}
-
-			Task.WaitAll( tasks, ct );
+			throw new NotSupportedException();
 		}
 
 		/*
@@ -285,14 +229,8 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		/// <param name="index"></param>
 		/// <returns></returns>
 		public bool ContainsCallback( object subscriber, IGameEvent<TArgs>.EventCallback callback, out int index ) {
-			_pumpLock.EnterReadLock();
 			index = -1;
-			try {
-				return _genericSubscriptions.ContainsCallback( subscriber, callback, out index );
-			}
-			finally {
-				_pumpLock.ExitReadLock();
-			}
+			return _genericSubscriptions.ContainsCallback( subscriber, callback, out index );
 		}
 
 		/*
@@ -301,21 +239,15 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		===============
 		*/
 		/// <summary>
-		/// Public method that acquires the read lock and checks for callback existence.
-		/// </summary>s
+		/// 
+		/// </summary>
 		/// <param name="subscriber"></param>
 		/// <param name="callback"></param>
 		/// <param name="index"></param>
 		/// <returns></returns>
+		/// <exception cref="NotSupportedException"></exception>
 		public bool ContainsCallbackAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback, out int index ) {
-			_pumpLock.EnterReadLock();
-			index = -1;
-			try {
-				return _asyncSubscriptions.ContainsCallback( subscriber, callback, out index );
-			}
-			finally {
-				_pumpLock.ExitReadLock();
-			}
+			throw new NotSupportedException();
 		}
 
 		/*

@@ -26,7 +26,6 @@ using NomadCore.GameServices;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 	/*
@@ -46,10 +45,8 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 	{
 		public IReadOnlyList<WeakSubscription<TArgs, TCallback>> Subscriptions => _subscriptions;
 		private readonly List<WeakSubscription<TArgs, TCallback>> _subscriptions = new List<WeakSubscription<TArgs, TCallback>>( 64 );
-		
-		private readonly Dictionary<int, List<int>> _indexMap = new Dictionary<int, List<int>>( 64 );
 
-		private readonly ReaderWriterLockSlim _pumpLock = new ReaderWriterLockSlim();
+		private readonly Dictionary<int, List<int>> _indexMap = new Dictionary<int, List<int>>( 64 );
 
 		/*
 		===============
@@ -127,20 +124,14 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		public void RemoveAllForSubscriber( object subscriber ) {
 			ArgumentNullException.ThrowIfNull( subscriber );
 
-			_pumpLock.EnterWriteLock();
-			try {
-				int removed = 0;
-				for ( int i = _subscriptions.Count - 1; i >= 0; i-- ) {
-					if ( _subscriptions[ i ].Subscriber.TryGetTarget( out object? existingSubscriber ) && existingSubscriber == subscriber ) {
-						RemoveAtIndexInternal( i, subscriber );
-						removed++;
-					}
+			int removed = 0;
+			for ( int i = _subscriptions.Count - 1; i >= 0; i-- ) {
+				if ( _subscriptions[ i ].Subscriber.TryGetTarget( out object? existingSubscriber ) && existingSubscriber == subscriber ) {
+					RemoveAtIndexInternal( i, subscriber );
+					removed++;
 				}
-				logger?.PrintLine( $"EventSubscriptionSet.RemoveAllForSubscriber: removed {removed} subscriptions for '{subscriber.GetType().Name}'" );
 			}
-			finally {
-				_pumpLock.ExitWriteLock();
-			}
+			logger?.PrintLine( $"EventSubscriptionSet.RemoveAllForSubscriber: removed {removed} subscriptions for '{subscriber.GetType().Name}'" );
 		}
 
 		/*
@@ -209,8 +200,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 					if ( idx >= 0 && idx < _subscriptions.Count ) {
 						WeakSubscription<TArgs, TCallback> subscription = _subscriptions[ idx ];
 						if ( subscription.Subscriber.TryGetTarget( out object? existing ) && existing == subscriber
-							&& subscription.Callback.TryGetTarget( out TCallback? caller ) && caller == callback )
-						{
+							&& subscription.Callback.TryGetTarget( out TCallback? caller ) && caller == callback ) {
 							index = idx;
 							return true;
 						}

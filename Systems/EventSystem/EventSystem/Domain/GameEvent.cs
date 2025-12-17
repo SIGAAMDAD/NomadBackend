@@ -21,6 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Domain.Models;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
@@ -76,7 +77,7 @@ namespace NomadCore.Systems.EventSystem.Domain {
 
 		public EventThreadingPolicy ThreadingPolicy => EventThreadingPolicy.MainThread;
 
-		private readonly SubscriptionSet<TArgs> _subscriptions;
+		private readonly ISubscriptionSet<TArgs> _subscriptions;
 
 		/*
 		===============
@@ -89,12 +90,25 @@ namespace NomadCore.Systems.EventSystem.Domain {
 		/// <param name="name">The name of the event, should be unique.</param>
 		/// <param name="logger"></param>
 		/// <exception cref="ArgumentException">Thrown if name is null or empty.</exception>
-		internal GameEvent( string name, ILoggerService logger ) {
+		internal GameEvent( string name, ILoggerService logger, EventFlags flags ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			_name = name;
-			_subscriptions = new SubscriptionSet<TArgs>( this, logger );
 			_hashCode = HashCode.Combine( GetHashCode(), _name.GetHashCode() );
+
+			bool isSynchronous = ( flags & EventFlags.Synchronous ) != 0;
+			bool isAsync = ( flags & EventFlags.Asynchronous ) != 0;
+			bool lockFree = ( flags & EventFlags.NoLock ) != 0;
+
+			if ( lockFree && isAsync ) {
+				throw new NotSupportedException( "Cannot have an event that is both lock free and asynchronous!" );
+			}
+
+			if ( lockFree ) {
+				_subscriptions = new LockFreeSubscriptionSet<TArgs>( this, logger );
+			} else if ( isAsync ) {
+				_subscriptions = new SubscriptionSet<TArgs>( this, logger );
+			}
 		}
 
 		/*
@@ -220,7 +234,7 @@ namespace NomadCore.Systems.EventSystem.Domain {
 			ArgumentNullException.ThrowIfNull( subscriber );
 			ArgumentNullException.ThrowIfNull( callback );
 
-			_subscriptions.RemoveSubscription( subscriber, callback );
+			_subscriptions.RemoveSubscriptionAsync( subscriber, callback );
 		}
 
 		/*

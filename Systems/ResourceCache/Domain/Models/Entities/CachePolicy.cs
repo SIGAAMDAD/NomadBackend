@@ -21,12 +21,28 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models;
-using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Systems.ResourceCache.Enums;
+using System;
 
-namespace NomadCore.GameServices {
-	public interface IGameEventRegistryService {
-		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string? nameSpace = null, EventFlags flags = EventFlags.Default )
-			where TArgs : IEventArgs;
+namespace NomadCore.Systems.ResourceCache.Domain.Entities {
+	/*
+	===================================================================================
+	
+	CachePolicy
+	
+	===================================================================================
+	*/
+	/// <summary>
+	/// 
+	/// </summary>
+	
+	public sealed class CachePolicy {
+		public static CachePolicy Default => new CachePolicy();
+
+		public long MaxMemorySize { get; set; } = 512 * 1024 * 1024; // 512MB default
+		public int MaxResourceCount { get; set; } = 1000;
+		public bool PreloadDependencies { get; set; } = true;
+		public EvictionPolicy EvictionPolicy { get; set; } = EvictionPolicy.LRU;
+		public TimeSpan UnloadUnusedAfter { get; set; } = TimeSpan.FromMinutes( 20 );
 	};
 };

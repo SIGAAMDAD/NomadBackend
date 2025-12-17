@@ -4,6 +4,7 @@ using NomadCore.GameServices;
 using NomadCore.Systems.EventSystem.Domain.Registries;
 using System;
 using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.Domain.Models;
 
 namespace NomadCore.Systems.EventSystem.Tests {
 	[TestFixture]
@@ -19,7 +20,7 @@ namespace NomadCore.Systems.EventSystem.Tests {
 		[SetUp]
 		public void Setup() {
 			var eventBus = new GameEventBus();
-			_event = _eventRegistry.GetEvent<EmptyEventArgs>( "TestEvent" );
+			_event = _eventRegistry.GetEvent<EmptyEventArgs>( "TestEvent", null, EventFlags.Synchronous | EventFlags.NoLock );
 			_event.Subscribe( this, OnEventTriggered );
 			_event.Subscribe( this, OnEventTriggered2 );
 			_event.Subscribe( this, OnEventTriggered3 );
