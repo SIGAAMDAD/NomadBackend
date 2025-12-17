@@ -30,6 +30,7 @@ using NomadCore.Systems.Audio.Domain.Interfaces;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
+using NomadCore.Utilities;
 using System;
 using System.Collections.Generic;
 
@@ -74,6 +75,8 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 		private readonly FMODGuidRepository _guidRepository;
 		private readonly ILoggerService _logger;
 		private readonly IListenerService _listenerService;
+
+		private readonly ObjectPool<FMODChannel> _channelPool = new ObjectPool<FMODChannel>();
 
 		private float _effectsVolume = 0.0f;
 
@@ -158,6 +161,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 			if ( !_categories.TryGetValue( categoryName, out var config ) ) {
 				config = new SoundCategory { Name = categoryName };
 				_categories[ categoryName ] = config;
+				GD.Print( "Adding category..." );
 			}
 
 			int soundsInCategory = CountSoundsInCategory( categoryName );
@@ -177,17 +181,17 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 			}
 
 			var instance = CreateSoundInstance( id, position, channelId );
-			var channel = new FMODChannel {
-				Instance = instance,
-				Path = id,
-				Category = config,
-				BasePriority = basePriority,
-				CurrentPriority = actualPriority,
-				StartTime = Time.GetTicksMsec() / 1000.0f,
-				Position = position,
-				IsEssential = isEssential,
-				ChannelId = channelId
-			};
+
+			var channel = _channelPool.Rent();
+			channel.Instance = instance;
+			channel.Path = id;
+			channel.Category = config;
+			channel.BasePriority = basePriority;
+			channel.CurrentPriority = actualPriority;
+			channel.StartTime = Time.GetTicksMsec() / 1000.0f;
+			channel.Position = position;
+			channel.IsEssential = isEssential;
+			channel.ChannelId = channelId;
 
 			_allocatedChannels.Add( channel );
 			UpdateLastPlayTime( id );
@@ -588,6 +592,8 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 				channel.LastStolenTime = Time.GetTicksMsec() / 1000.0f;
 			}
 
+			_channelPool.Return( channel );
+
 			// FIXME: this is slow
 			_allocatedChannels.Remove( channel );
 			_freeChannelIds.Enqueue( channel.ChannelId );
@@ -618,7 +624,6 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 			FMOD.ATTRIBUTES_3D attributes = new FMOD.ATTRIBUTES_3D { };
 			attributes.position = new FMOD.VECTOR { x = position.X, y = position.Y, z = 0.0f };
 			instance.set3DAttributes( attributes );
-			FMODValidator.ValidateCall( eventResource.Handle.loadSampleData() );
 			FMODValidator.ValidateCall( instance.setVolume( _effectsVolume / 10.0f ) );
 
 			FMODValidator.ValidateCall( instance.start() );

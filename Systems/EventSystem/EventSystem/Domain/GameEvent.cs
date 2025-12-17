@@ -25,6 +25,7 @@ using NomadCore.Domain.Models;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Systems.EventSystem.Infrastructure.Subscriptions;
 using NomadCore.Systems.EventSystem.Services;
 using System;
@@ -70,7 +71,7 @@ namespace NomadCore.Systems.EventSystem.Domain {
 		/// The name of the event.
 		/// </summary>
 		public string DebugName => _name;
-		private readonly string _name;
+		private readonly InternString _name;
 
 		public int Id => _hashCode;
 		private readonly int _hashCode;
@@ -90,7 +91,7 @@ namespace NomadCore.Systems.EventSystem.Domain {
 		/// <param name="name">The name of the event, should be unique.</param>
 		/// <param name="logger"></param>
 		/// <exception cref="ArgumentException">Thrown if name is null or empty.</exception>
-		internal GameEvent( string name, ILoggerService logger, EventFlags flags ) {
+		internal GameEvent( InternString name, ILoggerService logger, EventFlags flags ) {
 			ArgumentException.ThrowIfNullOrEmpty( name );
 
 			_name = name;

@@ -30,6 +30,7 @@ using NomadCore.Systems.ConsoleSystem.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Systems.ConsoleSystem {
 	/*
@@ -79,11 +80,11 @@ namespace NomadCore.Systems.ConsoleSystem {
 
 			builder.TextEntered.Subscribe( this, OnTextEntered );
 
-			eventFactory.GetEvent<IEventArgs>( nameof( HistoryPrev ) ).Subscribe( this, OnHistoryPrev );
-			eventFactory.GetEvent<IEventArgs>( nameof( HistoryNext ) ).Subscribe( this, OnHistoryNext );
+			eventFactory.GetEvent<EmptyEventArgs>( StringPool.Intern( nameof( HistoryPrev ) ) ).Subscribe( this, OnHistoryPrev );
+			eventFactory.GetEvent<EmptyEventArgs>( StringPool.Intern( nameof( HistoryNext ) ) ).Subscribe( this, OnHistoryNext );
 
-			_historyPrev = eventFactory.GetEvent<HistoryPrevEventData>( nameof( HistoryPrev ) );
-			_historyNext = eventFactory.GetEvent<HistoryNextEventData>( nameof( HistoryNext ) );
+			_historyPrev = eventFactory.GetEvent<HistoryPrevEventData>( StringPool.Intern( nameof( HistoryPrev ) ) );
+			_historyNext = eventFactory.GetEvent<HistoryNextEventData>( StringPool.Intern( nameof( HistoryNext ) ) );
 
 			_historyPath = new FilePath( CONSOLE_HISTORY_FILE, PathType.User );
 
@@ -147,7 +148,7 @@ namespace NomadCore.Systems.ConsoleSystem {
 		/// <summary>
 		/// 
 		/// </summary>
-		private void OnHistoryPrev( in IEventArgs args ) {
+		private void OnHistoryPrev( in EmptyEventArgs args ) {
 			if ( _historyIndex > 0 ) {
 				_historyIndex--;
 				if ( _historyIndex >= 0 ) {
@@ -164,7 +165,7 @@ namespace NomadCore.Systems.ConsoleSystem {
 		/// <summary>
 		/// 
 		/// </summary>
-		private void OnHistoryNext( in IEventArgs args ) {
+		private void OnHistoryNext( in EmptyEventArgs args ) {
 			if ( _historyIndex < _consoleHistory.Count ) {
 				_historyIndex++;
 				HistoryNext.Publish( new HistoryNextEventData( _historyIndex < _consoleHistory.Count, _consoleHistory.ElementAt( _historyIndex ) ) );

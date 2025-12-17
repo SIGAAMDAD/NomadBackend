@@ -25,6 +25,7 @@ using Godot;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Systems.ConsoleSystem.Events;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using System;
@@ -51,12 +52,12 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		public bool PauseEnabled { get; private set; } = false;
 
 		private readonly GodotCommandBuilder _commandBuilder;
-		private readonly IGameEvent<IEventArgs> _consoleOpened;
-		private readonly IGameEvent<IEventArgs> _consoleClosed;
+		private readonly IGameEvent<EmptyEventArgs> _consoleOpened;
+		private readonly IGameEvent<EmptyEventArgs> _consoleClosed;
 		private readonly IGameEvent<HistoryPrevEventData> _historyPrev;
 		private readonly IGameEvent<HistoryNextEventData> _historyNext;
-		private readonly IGameEvent<IEventArgs> _pageDown;
-		private readonly IGameEvent<IEventArgs> _pageUp;
+		private readonly IGameEvent<EmptyEventArgs> _pageDown;
+		private readonly IGameEvent<EmptyEventArgs> _pageUp;
 
 		private bool _wasPausedAlready = false;
 
@@ -68,12 +69,12 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		public GodotConsole( ICommandBuilder builder, ICommandService commands, IGameEventRegistryService eventRegistry ) {
 			ArgumentNullException.ThrowIfNull( builder );
 
-			_consoleClosed = eventRegistry.GetEvent<IEventArgs>( "ConsoleClosed", "Console" );
-			_consoleOpened = eventRegistry.GetEvent<IEventArgs>( "ConsoleOpened", "Console" );
-			_historyNext = eventRegistry.GetEvent<HistoryNextEventData>( "HistoryNext", "Console" );
-			_historyPrev = eventRegistry.GetEvent<HistoryPrevEventData>( "HistoryPrev", "Console" );
-			_pageDown = eventRegistry.GetEvent<IEventArgs>( "PageDown", "Console" );
-			_pageUp = eventRegistry.GetEvent<IEventArgs>( "PageUp", "Console" );
+			_consoleClosed = eventRegistry.GetEvent<EmptyEventArgs>( StringPool.Intern( "Console:ConsoleClosed" ) );
+			_consoleOpened = eventRegistry.GetEvent<EmptyEventArgs>( StringPool.Intern( "Console:ConsoleOpened" ) );
+			_historyNext = eventRegistry.GetEvent<HistoryNextEventData>( StringPool.Intern( "Console:HistoryNext" ) );
+			_historyPrev = eventRegistry.GetEvent<HistoryPrevEventData>( StringPool.Intern( "Console:HistoryPrev" ) );
+			_pageDown = eventRegistry.GetEvent<EmptyEventArgs>( StringPool.Intern( "Console:PageDown" ) );
+			_pageUp = eventRegistry.GetEvent<EmptyEventArgs>( StringPool.Intern( "ConsolePageUp" ) );
 			_commandBuilder = builder as GodotCommandBuilder ?? throw new InvalidOperationException( "Cannot create a GodotConsole without a GodotCommandBuilder!" );
 
 			commands.RegisterCommand( new ConsoleCommand( "quit", OnQuit, "Closes the game application." ) );

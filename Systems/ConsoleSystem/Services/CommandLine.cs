@@ -28,6 +28,8 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using NomadCore.GameServices;
 using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Infrastructure.Collections;
+using NomadCore.Domain.Models.ValueObjects;
 
 namespace NomadCore.Systems.ConsoleSystem.Services {
 	/*
@@ -80,11 +82,11 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 			_logger = logger;
 			_history = new History( builder, logger, eventFactory );
 
-			_textEntered = eventFactory.GetEvent<TextEnteredEventData>( nameof( TextEntered ) );
-			_unknownCommand = eventFactory.GetEvent<CommandExecutedEventData>( nameof( UnknownCommand ) );
-			_commandExecuted = eventFactory.GetEvent<CommandExecutedEventData>( nameof( CommandExecuted ) );
+			_textEntered = eventFactory.GetEvent<TextEnteredEventData>( StringPool.Intern( nameof( TextEntered ) ) );
+			_unknownCommand = eventFactory.GetEvent<CommandExecutedEventData>( StringPool.Intern( nameof( UnknownCommand ) ) );
+			_commandExecuted = eventFactory.GetEvent<CommandExecutedEventData>( StringPool.Intern( nameof( CommandExecuted ) ) );
 
-			eventFactory.GetEvent<IEventArgs>( "ConsoleClosed", "ConsoleSystem" ).Subscribe( this, OnConsoleClosed );
+			eventFactory.GetEvent<EmptyEventArgs>( StringPool.Intern( "Console:ConsoleClosed" ) ).Subscribe( this, OnConsoleClosed );
 
 			builder.TextEntered.Subscribe( this, OnCommandExecuted );
 		}
@@ -179,7 +181,7 @@ namespace NomadCore.Systems.ConsoleSystem.Services {
 		/// </summary>
 		/// <param name="eventData"></param>
 		/// <param name="args"></param>
-		private void OnConsoleClosed( in IEventArgs args ) {
+		private void OnConsoleClosed( in EmptyEventArgs args ) {
 			//ResetAutocomplete();
 		}
 

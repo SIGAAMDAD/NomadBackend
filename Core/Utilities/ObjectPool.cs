@@ -36,39 +36,8 @@ namespace NomadCore.Utilities {
 	/// 
 	/// </summary>
 
-	public class ObjectPool<T> : IDisposable where T : IDisposable {
-		public int AvailableCount => AvailableObjects.Count;
-
-		public int TotalCount => _currentSize;
-		private int _currentSize;
-
-		public int ActiveObjectCount => _currentSize - AvailableObjects.Count;
-
-		private readonly ConcurrentBag<T> AvailableObjects = new ConcurrentBag<T>();
-		private readonly Func<T> CreateObject;
-
-		private readonly int MaxSize;
-		private bool IsDisposed;
-
-		/*
-		===============
-		ObjectPool
-		===============
-		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="createObject"></param>
-		/// <param name="initialSize"></param>
-		/// <param name="maxSize"></param>
-		/// <exception cref="ArgumentNullException"></exception>
-		public ObjectPool( Func<T> createObject, int initialSize = 32, int maxSize = int.MaxValue ) {
-			AvailableObjects = new ConcurrentBag<T>();
-			CreateObject = createObject ?? throw new ArgumentNullException( nameof( createObject ) );
-			MaxSize = maxSize;
-
-			InitializePool( initialSize );
-		}
+	public class ObjectPool<T> : IDisposable where T : IDisposable, new() {
+		private readonly ConcurrentBag<T> _pool = new ConcurrentBag<T>();
 
 		/*
 		===============
@@ -79,20 +48,11 @@ namespace NomadCore.Utilities {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		/// <exception cref="InvalidOperationException"></exception>
 		public T Rent() {
-			ObjectDisposedException.ThrowIf( IsDisposed, this );
-
-			if ( AvailableObjects.TryTake( out T? obj ) ) {
-				ArgumentNullException.ThrowIfNull( obj );
-				return obj;
+			if ( _pool.TryTake( out var value ) ) {
+				return value;
 			}
-
-			if ( _currentSize < MaxSize ) {
-				_currentSize++;
-				return CreateObject.Invoke();
-			}
-			throw new InvalidOperationException( "Object pool exhausted and maximum size reached" );
+			return new T();
 		}
 
 		/*
@@ -105,19 +65,7 @@ namespace NomadCore.Utilities {
 		/// </summary>
 		/// <param name="obj"></param>
 		public void Return( in T obj ) {
-			if ( IsDisposed ) {
-				obj.Dispose();
-				return;
-			}
-
-			ArgumentNullException.ThrowIfNull( obj );
-
-			if ( AvailableObjects.Count < MaxSize ) {
-				AvailableObjects.Add( obj );
-			} else {
-				obj.Dispose();
-				_currentSize--;
-			}
+			_pool.Add( obj );
 		}
 
 		/*
@@ -129,32 +77,10 @@ namespace NomadCore.Utilities {
 		/// 
 		/// </summary>
 		public void Dispose() {
-			if ( IsDisposed ) {
-				return;
+			foreach ( var value in _pool ) {
+				value.Dispose();
 			}
-
-			IsDisposed = true;
-			while ( AvailableObjects.TryTake( out T? obj ) ) {
-				ArgumentNullException.ThrowIfNull( obj );
-				obj.Dispose();
-			}
-			_currentSize = 0;
-		}
-
-		/*
-		===============
-		InitializePool
-		===============
-		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="initialSize"></param>
-		private void InitializePool( int initialSize ) {
-			for ( int i = 0; i < initialSize && _currentSize < MaxSize; i++ ) {
-				AvailableObjects.Add( CreateObject.Invoke() );
-				_currentSize++;
-			}
+			_pool.Clear();
 		}
 	};
 };

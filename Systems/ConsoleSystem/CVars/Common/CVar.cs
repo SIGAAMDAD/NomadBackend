@@ -147,7 +147,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Common {
 			_defaultValue = createInfo.DefaultValue;
 			_value = createInfo.DefaultValue;
 			_type = DetermineType( Value );
-			_valueChanged = eventFactory.GetEvent<CVarValueChangedEventData<T>>( nameof( ValueChanged ), $"CVars:{StringPool.FromInterned( Name )}" );
+			_valueChanged = eventFactory.GetEvent<CVarValueChangedEventData<T>>( StringPool.Intern( $"CVars:{StringPool.FromInterned( Name )}:{nameof( ValueChanged )}" ) );
 
 			_validator = createInfo.Validator;
 			Description = createInfo.Description;

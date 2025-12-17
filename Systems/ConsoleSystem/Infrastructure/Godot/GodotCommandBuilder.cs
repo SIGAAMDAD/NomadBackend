@@ -24,6 +24,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using Godot;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Systems.ConsoleSystem.Events;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using NomadCore.Systems.ConsoleSystem.Services;
@@ -67,9 +68,9 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 
 			EventBus = eventBus;
 
-			_textEntered = eventFactory.GetEvent<TextEnteredEventData>( nameof( TextEntered ) );
+			_textEntered = eventFactory.GetEvent<TextEnteredEventData>( StringPool.Intern( nameof( TextEntered ) ) );
 
-			eventFactory.GetEvent<IEventArgs>( "ConsoleOpened" ).Subscribe( this, OnConsoleOpened );
+			eventFactory.GetEvent<IEventArgs>( StringPool.Intern( "ConsoleOpened" ) ).Subscribe( this, OnConsoleOpened );
 		}
 
 		/*

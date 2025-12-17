@@ -21,6 +21,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.Infrastructure.Collections;
 using System;
 
 namespace NomadCore.Systems.EventSystem.Domain.ValueObjects {
@@ -36,15 +37,15 @@ namespace NomadCore.Systems.EventSystem.Domain.ValueObjects {
 	/// </summary>
 	
 	internal readonly record struct EventKey : IEquatable<EventKey> {
-		public readonly string Name { get; }
+		public readonly InternString Name { get; }
 		public readonly Type ArgsType { get; }
 		private readonly int _hashCode;
 
-		public EventKey( string name, Type argsType ) {
-			Name = string.Intern( name );
+		public EventKey( InternString name, Type argsType ) {
+			Name = name;
 			ArgsType = argsType;
 			_hashCode = HashCode.Combine(
-				name.GetHashCode( StringComparison.Ordinal ),
+				name.GetHashCode(),
 				argsType.AssemblyQualifiedName?.GetHashCode( StringComparison.Ordinal ) ?? 0
 			);
 		}
