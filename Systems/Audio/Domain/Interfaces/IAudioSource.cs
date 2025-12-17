@@ -24,7 +24,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using Godot;
-using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Systems.Audio.Domain.Interfaces {
 	public interface IAudioSource {

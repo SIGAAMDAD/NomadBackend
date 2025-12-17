@@ -25,8 +25,6 @@ using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Security.Principal;
 
 namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 	/*
@@ -44,7 +42,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		where TArgs : IEventArgs
 		where TCallback : class
 	{
-		public IReadOnlyList<WeakSubscription<TArgs, TCallback>> Subscriptions => _subscriptions;
+		public List<WeakSubscription<TArgs, TCallback>> Subscriptions => _subscriptions;
 		private readonly List<WeakSubscription<TArgs, TCallback>> _subscriptions = new List<WeakSubscription<TArgs, TCallback>>( 64 );
 
 		private readonly Dictionary<int, List<int>> _indexMap = new Dictionary<int, List<int>>( 64 );

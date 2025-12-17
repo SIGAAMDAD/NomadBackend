@@ -37,6 +37,7 @@ using NomadCore.Systems.ResourceCache.Domain.Models.Entities;
 using NomadCore.Systems.ResourceCache.Application.Interfaces;
 using NomadCore.Domain.Events;
 using NomadCore.Systems.ResourceCache.Domain.Entities;
+using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Systems.ResourceCache.Common {
 	/*
@@ -121,9 +122,9 @@ namespace NomadCore.Systems.ResourceCache.Common {
 			_logger = logger;
 			_loader = loader;
 
-			_resourceLoaded = eventFactory.GetEvent<ResourceLoadedEventData<TId>>( nameof( ResourceLoaded ) );
-			_resourceUnloaded = eventFactory.GetEvent<ResourceUnloadedEventData<TId>>( nameof( ResourceUnloaded ) );
-			_resourceLoadFailed = eventFactory.GetEvent<ResourceLoadFailedEventData<TId>>( nameof( ResourceLoadFailed ) );
+			_resourceLoaded = eventFactory.GetEvent<ResourceLoadedEventData<TId>>( StringPool.Intern( nameof( ResourceLoaded ) ) );
+			_resourceUnloaded = eventFactory.GetEvent<ResourceUnloadedEventData<TId>>( StringPool.Intern( nameof( ResourceUnloaded ) ) );
+			_resourceLoadFailed = eventFactory.GetEvent<ResourceLoadFailedEventData<TId>>( StringPool.Intern( nameof( ResourceLoadFailed ) ) );
 
 			_cleanupTimer = new Timer( _ => ClearUnused(), null, TimeSpan.FromMinutes( 1 ), TimeSpan.FromMinutes( 10 ) );
 		}

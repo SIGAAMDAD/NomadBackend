@@ -25,9 +25,8 @@ using Godot;
 using System.Collections.Generic;
 using System;
 using NomadCore.Systems.EntitySystem.Domain;
-using NomadCore.Utilities;
-using NomadCore.GameServices;
 using NomadCore.Systems.EntitySystem.Domain.Events;
+using NomadCore.Infrastructure.Memory;
 
 namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 	/*
@@ -52,7 +51,7 @@ namespace NomadCore.Systems.EntitySystem.Infrastructure.Physics {
 		private readonly Dictionary<Entity, Area> _areas = new Dictionary<Entity, Area>();
 
 		private readonly Dictionary<Entity, OverlapSet> _currentOverlaps = new Dictionary<Entity, OverlapSet>();
-		private readonly ObjectPool<OverlapSet> _overlapPool = new ObjectPool<OverlapSet>( () => new OverlapSet() );
+		private readonly BasicObjectPool<OverlapSet> _overlapPool = new BasicObjectPool<OverlapSet>( () => new OverlapSet() );
 		
 		/*
 		===============

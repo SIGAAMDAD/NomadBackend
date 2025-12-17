@@ -23,7 +23,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using Godot;
 using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Systems.ConsoleSystem.Events;
 using NomadCore.Systems.ConsoleSystem.Interfaces;
 using NomadCore.Systems.ConsoleSystem.Interfaces.Abstractions;
@@ -74,9 +76,9 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 			node.CallDeferred( Control.MethodName.AddChild, _richLabel );
 
 			builder.TextEntered.Subscribe( this, OnScrollToBottom );
-			eventRegistry.GetEvent<IEventArgs>( "ConsoleOpened" ).Subscribe( this, OnConsoleOpened );
-			eventRegistry.GetEvent<IEventArgs>( "PageUp" ).Subscribe( this, OnPageUp );
-			eventRegistry.GetEvent<IEventArgs>( "PageDown" ).Subscribe( this, OnPageDown );
+			eventRegistry.GetEvent<EmptyEventArgs>( StringPool.Intern( "ConsoleOpened" ) ).Subscribe( this, OnConsoleOpened );
+			eventRegistry.GetEvent<EmptyEventArgs>( StringPool.Intern( "PageUp" ) ).Subscribe( this, OnPageUp );
+			eventRegistry.GetEvent<EmptyEventArgs>( StringPool.Intern( "PageDown" ) ).Subscribe( this, OnPageDown );
 		}
 
 		/*
@@ -142,7 +144,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnConsoleOpened( in IEventArgs args ) {
+		private void OnConsoleOpened( in EmptyEventArgs args ) {
 			OnScrollToBottom( new TextEnteredEventData() );
 		}
 
@@ -156,7 +158,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// </summary>
 		/// <param name="eventData"></param>
 		/// <param name="args"></param>
-		private void OnPageUp( in IEventArgs args ) {
+		private void OnPageUp( in EmptyEventArgs args ) {
 			VScrollBar scroll = _richLabel.GetVScrollBar();
 			Tween tween = _richLabel.CreateTween();
 			tween.TweenProperty( scroll, "value", scroll.Value - ( scroll.Page - scroll.Page * 0.1f ), 0.1f );
@@ -173,7 +175,7 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure {
 		/// </summary>
 		/// <param name="eventData"></param>
 		/// <param name="args"></param>
-		private void OnPageDown( in IEventArgs args ) {
+		private void OnPageDown( in EmptyEventArgs args ) {
 			VScrollBar scroll = _richLabel.GetVScrollBar();
 			Tween tween = _richLabel.CreateTween();
 			tween.TweenProperty( scroll, "value", scroll.Value + ( scroll.Page - scroll.Page * 0.1f ), 0.1f );

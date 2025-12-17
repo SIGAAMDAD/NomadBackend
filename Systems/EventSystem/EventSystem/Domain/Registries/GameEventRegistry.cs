@@ -24,7 +24,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Domain.Models;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
-using NomadCore.Interfaces;
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Systems.EventSystem.Domain.ValueObjects;
 using System;
 using System.Collections.Concurrent;
@@ -70,24 +70,26 @@ namespace NomadCore.Systems.EventSystem.Domain.Registries {
 		/// <param name="name">Name of the event to register.</param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string? nameSpace = null, EventFlags flags = EventFlags.Default )
+		public IGameEvent<TArgs> GetEvent<TArgs>( InternString name, EventFlags flags = EventFlags.Default )
 			where TArgs : IEventArgs
 		{
-			ArgumentException.ThrowIfNullOrEmpty( name );
-
 			var key = new EventKey(
-				name: nameSpace != null ? $"{nameSpace}:{name}" : name,
+				name: name,
 				argsType: typeof( TArgs )
 			);
 
-			return (IGameEvent<TArgs>)_eventCache.GetOrAdd( key, k => {
-				if ( _eventCache.TryGetValue( key, out var existing ) && existing is not IGameEvent<TArgs> ) {
-					throw new InvalidOperationException(
-						$"Event '{key.Name}' already registered with type {existing.GetType().GenericTypeArguments[ 0 ].Name} cannot register with type {typeof( TArgs ).Name}"
-					);
+			if ( _eventCache.TryGetValue( key, out var value ) ) {
+				if ( value is IGameEvent<TArgs> typedEvent ) {
+					return typedEvent;
 				}
-				return new GameEvent<TArgs>( k.Name, _logger, flags );
-			} );
+				throw new InvalidOperationException(
+					$"Event '{key.Name}' already registered with type {value.GetType().GenericTypeArguments[ 0 ].Name} cannot register with type {typeof( TArgs ).Name}"
+				);
+			}
+
+			value = new GameEvent<TArgs>( key.Name, _logger, flags );
+			_eventCache.TryAdd( key, value );
+			return (IGameEvent<TArgs>)value;
 		}
 
 		/*
@@ -103,13 +105,10 @@ namespace NomadCore.Systems.EventSystem.Domain.Registries {
 		/// <param name="nameSpace"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public bool TryRemoveEvent<TArgs>( string name, string? nameSpace = null )
-			where TArgs : IEventArgs
-		{
-			ArgumentException.ThrowIfNullOrEmpty( name );
-
+		public bool TryRemoveEvent<TArgs>( InternString name )
+			where TArgs : IEventArgs {
 			var key = new EventKey(
-				name: nameSpace != null ? $"{nameSpace}:{name}" : name,
+				name: name,
 				argsType: typeof( TArgs )
 			);
 			if ( _eventCache.TryRemove( key, out var eventObj ) ) {

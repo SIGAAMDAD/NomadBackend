@@ -23,6 +23,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using Godot;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
+using System;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	/*
@@ -36,7 +37,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 	/// 
 	/// </summary>
 	
-	internal sealed class FMODChannel {
+	internal sealed class FMODChannel : IDisposable {
 		public FMOD.Studio.EventInstance Instance;
 		public Vector2 Position;
 		public EventId Path;
@@ -52,6 +53,10 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 
 		public float Age => Time.GetTicksMsec() / 1000.0f - StartTime;
 		public bool IsPlaying => GetPlaybackState() == FMOD.Studio.PLAYBACK_STATE.PLAYING;
+
+		public void Dispose() {
+			ReleaseInstance();
+		}
 
 		/*
 		===============
@@ -70,7 +75,6 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities {
 		public void ReleaseInstance() {
 			if ( Instance.hasHandle() ) {
 				FMODValidator.ValidateCall( Instance.release() );
-				StartTime = Time.GetTicksMsec();
 			}
 		}
 

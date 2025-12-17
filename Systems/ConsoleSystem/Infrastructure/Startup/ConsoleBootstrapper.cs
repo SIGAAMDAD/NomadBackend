@@ -74,13 +74,13 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure.Startup {
 			logger.AddSink( new GodotSink() );
 			logger.AddSink( new FileSink( cvarSystem ) );
 
-			eventFactory.GetEvent<IEventArgs>( "ConsoleOpened" );
-			eventFactory.GetEvent<IEventArgs>( "ConsoleClosed" );
-			eventFactory.GetEvent<IEventArgs>( "HistoryPrev" );
-			eventFactory.GetEvent<IEventArgs>( "HistoryNext" );
-			eventFactory.GetEvent<IEventArgs>( "AutoComplete" );
-			eventFactory.GetEvent<IEventArgs>( "PageUp" );
-			eventFactory.GetEvent<IEventArgs>( "PageDown" );
+			eventFactory.GetEvent<EmptyEventArgs>( StringPool.Intern( "ConsoleOpened" ) );
+			eventFactory.GetEvent<EmptyEventArgs>( StringPool.Intern( "ConsoleClosed" ) );
+			eventFactory.GetEvent<EmptyEventArgs>( StringPool.Intern( "HistoryPrev" ) );
+			eventFactory.GetEvent<EmptyEventArgs>( StringPool.Intern( "HistoryNext" ) );
+			eventFactory.GetEvent<EmptyEventArgs>( StringPool.Intern( "AutoComplete" ) );
+			eventFactory.GetEvent<EmptyEventArgs>( StringPool.Intern( "PageUp" ) );
+			eventFactory.GetEvent<EmptyEventArgs>( StringPool.Intern( "PageDown" ) );
 
 			var commandBuilder = new GodotCommandBuilder( eventBus, eventFactory );
 			var commandService = registry.RegisterSingleton<ICommandService>( new CommandCacheService( logger ) );

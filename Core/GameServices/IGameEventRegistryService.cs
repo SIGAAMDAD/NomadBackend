@@ -23,10 +23,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Models;
 using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.GameServices {
 	public interface IGameEventRegistryService {
-		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string? nameSpace = null, EventFlags flags = EventFlags.Default )
+		public IGameEvent<TArgs> GetEvent<TArgs>( InternString name, EventFlags flags = EventFlags.Default )
 			where TArgs : IEventArgs;
 	};
 };
