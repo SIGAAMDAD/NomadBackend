@@ -25,6 +25,7 @@ using NomadCore.GameServices;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Systems.Audio.Application.Interfaces;
 using NomadCore.Systems.Audio.Domain.Interfaces;
+using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Services;
 
@@ -42,14 +43,16 @@ namespace NomadCore.Systems.Audio.Infrastructure.Startup {
 
 	public static class AudioBootstrapper {
 		public static void Initialize( IServiceLocator locator, IServiceRegistry registry ) {
-			var system = locator.GetService<IAudioSystemService>() as FMODSystemService;
+			var system = locator.GetService<IAudioSystemService>();
 			var logger = locator.GetService<ILoggerService>();
 			var cvarSystem = locator.GetService<ICVarSystemService>();
+			var listener = locator.GetService<IListenerService>();
 
-			var listener = registry.RegisterSingleton<IListenerService>( new FMODListenerService( logger, system ) );
-			var channelRepository = new FMODChannelRepository( logger, cvarSystem, listener, system.EventRepository, system.GuidRepository );
+			var channelRepository = new FMODChannelRepository( logger, cvarSystem, listener, system.EventRepository, system.GuidRepository as FMODGuidRepository );
 			registry.RegisterSingleton<IChannelRepository>( channelRepository );
 			registry.RegisterSingleton<IAudioSourceFactory>( new FMODAudioSourceFactory( channelRepository ) );
+
+			registry.RegisterSingleton<IMusicService>( new FMODMusicService( system.EventRepository, cvarSystem ) );
 		}
 	};
 };

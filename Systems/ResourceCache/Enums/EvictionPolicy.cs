@@ -23,9 +23,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 namespace NomadCore.Systems.ResourceCache.Enums {
 	public enum EvictionPolicy : sbyte {
-		LRU,    // Least Recently Used
-		LFU,    // Least Frequently Used
-		FIFO,   // First In First Out
-		SizeBased // Evict largest first
+		LRU,    	// Least Recently Used
+		LFU,    	// Least Frequently Used
+		FIFO,   	// First In First Out
+		SizeBased,	// Evict largest first
+		Never		// Keep all entries in the cache until manually released
 	};
 };

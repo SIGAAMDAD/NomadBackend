@@ -23,9 +23,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
+using NomadCore.GameServices;
 using NomadCore.Interfaces.Common;
 using NomadCore.Systems.ResourceCache.Domain.Models.ValueObjects;
 using System;
+using System.Threading.Tasks;
 
 namespace NomadCore.Systems.ResourceCache.Domain.Models.Entities {
 	/*
@@ -39,16 +41,11 @@ namespace NomadCore.Systems.ResourceCache.Domain.Models.Entities {
 	/// 
 	/// </summary>
 	
-	internal sealed class CacheEntry<TResource, TId>( TId id, TResource resource, int memorySize, TimeSpan loadTime, ResourceLoadState loadState ) : ICacheEntry<TId>
+	internal sealed class CacheEntry<TResource, TId>( IResourceCacheService<TResource, TId> owner, TId id, TResource cached, int memorySize, TimeSpan loadTime, ResourceLoadState loadState ) : ICacheEntry<TResource, TId>
 		where TResource : notnull, IDisposable
 		where TId : IEquatable<TId>
 	{
-		public TId Id => _id;
-		private readonly TId _id = id;
-
-		public IDisposable Resource => _resource;
-		private readonly TResource _resource = resource;
-
+		public TId Id => id;
 		public DateTime CreatedAt => _createdAt;
 		private readonly DateTime _createdAt = DateTime.UtcNow;
 
@@ -58,16 +55,58 @@ namespace NomadCore.Systems.ResourceCache.Domain.Models.Entities {
 		public EntryAccessStatistics AccessStats => _accessStats;
 		private EntryAccessStatistics _accessStats;
 
-		public int ReferenceCount { get; set; }
+		public int ReferenceCount { get; set; } = 1;
 		public TimeSpan LoadTimer = loadTime;
 		public ResourceLoadState LoadState { get; } = loadState;
 
 		public readonly int MemorySize = memorySize;
 
+		private readonly TResource _cached = cached;
+
+		/*
+		===============
+		Get
+		===============
+		*/
+		public void Get( out TResource resource ) {
+			UpdateAccessStats();
+			resource = cached;
+		}
+
+		/*
+		===============
+		GetAsync
+		===============
+		*/
+		public async ValueTask<TResource> GetAsync() {
+			UpdateAccessStats();
+			return cached;
+		}
+
+		/*
+		===============
+		Dispose
+		===============
+		*/
+		public void Dispose() {
+			cached?.Dispose();
+			ReferenceCount = 0;
+		}
+
+		/*
+		===============
+		Equals
+		===============
+		*/
 		public bool Equals( IEntity<TId>? other ) {
 			return other is not null && other.Id.Equals( Id );
 		}
 
+		/*
+		===============
+		UpdateAccessStats
+		===============
+		*/
 		public void UpdateAccessStats() {
 			_accessStats = _accessStats with {
 				LastAccessTime = DateTime.UtcNow,

@@ -21,6 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using NomadCore.GameServices;
+using NomadCore.Systems.Audio.Domain.Interfaces;
+using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
+using System;
 using System.Collections.Generic;
 
 namespace NomadCore.Systems.Audio.Application.Interfaces {
@@ -29,6 +33,9 @@ namespace NomadCore.Systems.Audio.Application.Interfaces {
 		public string AudioDriver { get; set; }
 
 		public bool CanSetAudioDriver { get; }
+
+		public IResourceCacheService<IEventResource, EventId> EventRepository { get; }
+		public IDisposable GuidRepository { get; }
 
 		public IReadOnlyList<string> GetAudioDriverNames();
 

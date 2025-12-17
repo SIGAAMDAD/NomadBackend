@@ -1,45 +1,52 @@
-﻿using NomadCore.Abstractions.Services;
-using NomadCore.Systems.EventSystem.Services;
-using NomadCore.Systems.ConsoleSystem.Services;
-using NomadCore.Interfaces;
-using NomadCore.Infrastructure;
-using NomadCore.Systems.ConsoleSystem.Infrastructure;
-using NomadCore.Systems.ConsoleSystem.Infrastructure.Sinks;
-using NUnit.Framework;
+﻿using NomadCore.Systems.EventSystem.Services;
+using NomadCore.Domain.Models.Interfaces;
+using NomadCore.GameServices;
+using NomadCore.Systems.EventSystem.Domain.Registries;
+using System;
+using NomadCore.Domain.Models.ValueObjects;
 
 namespace NomadCore.Systems.EventSystem.Tests {
 	[TestFixture]
 	public class Tests {
-		private readonly struct EventArgs( int test1, bool conditional ) : IEventArgs {
-			public readonly int Test1 = test1;
-			public readonly bool TestConditional = conditional;
-		};
+		private readonly record struct EventArgs(
+			int Test1,
+			bool Conditional
+		) : IEventArgs;
 
-		private IGameEventBusService EventBus;
-
-		private IGameEvent<EventArgs> TestArgs;
+		private readonly IGameEventRegistryService _eventRegistry = new GameEventRegistry( new MockLogger() );
+		private IGameEvent<EmptyEventArgs> _event;
 
 		[SetUp]
 		public void Setup() {
-			EventBus = ServiceRegistry.Register<IGameEventBusService>( new GameEventBus() );
-
-			TestArgs = EventBus.CreateEvent<EventArgs>( nameof( TestArgs ) );
-			TestArgs.Subscribe( this, OnEventTriggered );
+			var eventBus = new GameEventBus();
+			_event = _eventRegistry.GetEvent<EmptyEventArgs>( "TestEvent" );
+			_event.Subscribe( this, OnEventTriggered );
+			_event.Subscribe( this, OnEventTriggered2 );
+			_event.Subscribe( this, OnEventTriggered3 );
 		}
 
 		[TearDown]
 		public void TearDown() {
-			TestArgs.Dispose();
+			_event.Dispose();
 		}
 
 		[Test]
-		public void Test_EventArgsCorrect() {
-			TestArgs.Publish( new EventArgs( 21, true ) );
+		public void Test_EventPublishingSpeed() {
+			var start = DateTime.UtcNow;
+			for ( int i = 0; i < 1000; i++ ) {
+				_event.Publish( in EmptyEventArgs.Args );
+			}
+			var end = DateTime.UtcNow;
+			var elapsed = end - start;
+
+			Console.WriteLine( $"Publishing 1000 events with EmptyEventArgs took {elapsed.Nanoseconds} ns" );
 		}
 
-		private void OnEventTriggered( in EventArgs args ) {
-			Assert.That( args.Test1 == 21 );
-			Assert.That( args.TestConditional == true );
+		private void OnEventTriggered( in EmptyEventArgs args ) {
+		}
+		private void OnEventTriggered2( in EmptyEventArgs args ) {
+		}
+		private void OnEventTriggered3( in EmptyEventArgs args ) {
 		}
 	}
 };

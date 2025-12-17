@@ -45,9 +45,9 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		where TCallback : class
 	{
 		public IReadOnlyList<WeakSubscription<TArgs, TCallback>> Subscriptions => _subscriptions;
-		private readonly List<WeakSubscription<TArgs, TCallback>> _subscriptions = new List<WeakSubscription<TArgs, TCallback>>( 32 );
+		private readonly List<WeakSubscription<TArgs, TCallback>> _subscriptions = new List<WeakSubscription<TArgs, TCallback>>( 64 );
 		
-		private readonly Dictionary<int, List<int>> _indexMap = new Dictionary<int, List<int>>( 32 );
+		private readonly Dictionary<int, List<int>> _indexMap = new Dictionary<int, List<int>>( 64 );
 
 		private readonly ReaderWriterLockSlim _pumpLock = new ReaderWriterLockSlim();
 
@@ -173,7 +173,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		public void CleanupDeadSubscriptions() {
 			int initialCount = _subscriptions.Count;
 
-			logger?.PrintLine( $"SubscriptionCache({typeof( TCallback )}).CleanupDeadSubscriptionsInternal: cleaning up dead subscriptions..." );
+			//logger?.PrintLine( $"SubscriptionCache({typeof( TCallback )}).CleanupDeadSubscriptionsInternal: cleaning up dead subscriptions..." );
 
 			for ( int i = _subscriptions.Count - 1; i >= 0; i-- ) {
 				if ( !_subscriptions[ i ].IsAlive ) {

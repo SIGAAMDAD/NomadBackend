@@ -22,6 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using Microsoft.Extensions.Configuration.Ini;
+using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ namespace NomadCore.Systems.ConsoleSystem.CVars.Infrastructure {
 			ArgumentException.ThrowIfNullOrEmpty( configFile );
 
 			try {
-				using FileStream fileStream = new FileStream( configFile, FileMode.Open, FileAccess.Read );
+				using FileStream fileStream = new FileStream( FilePath.FromResourcePath( configFile ).OSPath, FileMode.Open, FileAccess.Read );
 
 				IniData = IniStreamConfigurationProvider.Read( fileStream );
 				if ( IniData == null ) {

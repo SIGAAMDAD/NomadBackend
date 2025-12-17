@@ -25,7 +25,7 @@ using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 
 namespace NomadCore.Systems.ResourceCache.Domain.Models.ValueObjects {
-	internal sealed record LoadError(
+	public sealed record LoadError(
 		string Message,
 		ErrorType Type = ErrorType.Infrastructure
 	) : IError {

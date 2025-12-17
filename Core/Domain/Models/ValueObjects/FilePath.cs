@@ -82,14 +82,6 @@ namespace NomadCore.Domain.Models.ValueObjects {
 
 		/*
 		===============
-		GetHashCode
-		===============
-		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public override int GetHashCode() => _hashCode;
-
-		/*
-		===============
 		FromUserPath
 		===============
 		*/
@@ -119,6 +111,14 @@ namespace NomadCore.Domain.Models.ValueObjects {
 		*/
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public static FilePath FromNative( string path ) => new FilePath( path, PathType.Native );
+
+		/*
+		===============
+		GetHashCode
+		===============
+		*/
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public override int GetHashCode() => _hashCode;
 
 		/*
 		===============

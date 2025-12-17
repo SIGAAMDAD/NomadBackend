@@ -23,12 +23,16 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Interfaces.Common;
 using System;
+using System.Threading.Tasks;
 
 namespace NomadCore.Domain.Models.Interfaces {
-	public interface ICacheEntry<TId> : IEntity<TId>
+	public interface ICacheEntry<TResource, TId> : IEntity<TId>
+		where TResource : notnull, IDisposable
 		where TId : IEquatable<TId>
 	{
-		public IDisposable Resource { get; }
 		public int ReferenceCount { get; }
+
+		public void Get( out TResource resource );
+		public ValueTask<TResource> GetAsync();
 	};
 };

@@ -42,10 +42,11 @@ namespace NomadCore.GameServices {
 	/// A specialized repository for game/engine assets.
 	/// </summary>
 	
-	public interface IResourceCacheService<TId> :
-		IReadRepository<ICacheEntry<TId>, TId>,
-		IAsyncReadRepository<ICacheEntry<TId>, TId>,
+	public interface IResourceCacheService<TResource, TId> :
+		IReadRepository<ICacheEntry<TResource, TId>, TId>,
+		IAsyncReadRepository<ICacheEntry<TResource, TId>, TId>,
 		IGameService
+		where TResource : notnull, IDisposable
 		where TId : IEquatable<TId>
 	{
 		public long CurrentCacheSize { get; }
@@ -54,10 +55,10 @@ namespace NomadCore.GameServices {
 		public IGameEvent<ResourceUnloadedEventData<TId>> ResourceUnloaded { get; }
 		public IGameEvent<ResourceLoadFailedEventData<TId>> ResourceLoadFailed { get; }
 
-		public ICacheEntry<TId> GetCached( TId id );
-		public ValueTask<ICacheEntry<TId>> GetCachedAsync( TId id, IProgress<ResourceLoadProgressEventData<TId>>? progress = null, CancellationToken ct = default );
+		public ICacheEntry<TResource, TId> GetCached( TId id );
+		public ValueTask<ICacheEntry<TResource, TId>> GetCachedAsync( TId id, IProgress<ResourceLoadProgressEventData<TId>>? progress = null, CancellationToken ct = default );
 		
-		public bool TryGetCached( TId id, out ICacheEntry<TId>? resource );
+		public bool TryGetCached( TId id, out ICacheEntry<TResource, TId>? resource );
 		public void Preload( TId id );
 		public void Unload( TId id );
 		public void UnloadAll();

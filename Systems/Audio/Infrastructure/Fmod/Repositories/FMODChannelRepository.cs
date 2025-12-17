@@ -32,13 +32,14 @@ using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.Entities;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 	/*
 	===================================================================================
 	
 	FMODChannelRepository
+
+	FIXME: this violates SOLID
 	
 	===================================================================================
 	*/
@@ -69,10 +70,12 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 		private float _distanceFalloffStart = 50.0f;
 		private float _distanceFalloffEnd = 100.0f;
 
-		private readonly IResourceCacheService<EventId> _eventRepository;
+		private readonly IResourceCacheService<IEventResource, EventId> _eventRepository;
 		private readonly FMODGuidRepository _guidRepository;
 		private readonly ILoggerService _logger;
 		private readonly IListenerService _listenerService;
+
+		private float _effectsVolume = 0.0f;
 
 		/*
 		===============
@@ -80,7 +83,8 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 		===============
 		*/
 		public FMODChannelRepository( ILoggerService logger, ICVarSystemService cvarSystem, IListenerService listenerService,
-			IResourceCacheService<EventId> eventRepository, FMODGuidRepository guidRepository ) {
+			IResourceCacheService<IEventResource, EventId> eventRepository, FMODGuidRepository guidRepository )
+		{
 			_logger = logger;
 			_listenerService = listenerService;
 
@@ -92,6 +96,10 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 				maxActiveChannels.Reset();
 				maxChannels.Reset();
 			}
+
+			var effectsVolume = cvarSystem.GetCVar<float>( "audio.EffectsVolume" ) ?? throw new Exception( "Missing CVar 'audio.EffectsVolume'" );
+			effectsVolume.ValueChanged.Subscribe( this, OnEffectsVolumeChanged );
+			_effectsVolume = effectsVolume.Value;
 
 			var distanceFalloffStart = cvarSystem.GetCVar<float>( "audio.DistanceFalloffStart" ) ?? throw new Exception( "Missing CVar 'audio.DistanceFalloffStart'" );
 			var distanceFalloffEnd = cvarSystem.GetCVar<float>( "audio.DistanceFalloffEnd" ) ?? throw new Exception( "Missing CVar 'audio.DistanceFalloffEnd'" );
@@ -144,14 +152,13 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 		/// <returns></returns>
 		public FMODChannel? AllocateChannel( EventId id, Vector2 position,
 			ReadOnlySpan<char> category = "SoundCategory:Default", float basePriority = 0.5f,
-			bool isEssential = false ) {
+			bool isEssential = false )
+		{
 			var categoryName = StringPool.Intern( category );
 			if ( !_categories.TryGetValue( categoryName, out var config ) ) {
 				config = new SoundCategory { Name = categoryName };
 				_categories[ categoryName ] = config;
 			}
-
-			_logger.PrintLine( $"Allocating fmod event channel for event '{id.Name}'..." );
 
 			int soundsInCategory = CountSoundsInCategory( categoryName );
 			if ( soundsInCategory >= config.MaxSimultaneous ) {
@@ -181,8 +188,6 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 				IsEssential = isEssential,
 				ChannelId = channelId
 			};
-
-			_logger.PrintLine( $"Playing sound event '{id.Name}'..." );
 
 			_allocatedChannels.Add( channel );
 			UpdateLastPlayTime( id );
@@ -300,6 +305,15 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 		*/
 		private void OnMaxChannelsValueChanged( in CVarValueChangedEventData<int> args ) {
 			_maxChannels = args.Value;
+		}
+
+		/*
+		===============
+		OnMaxChannelsValueChanged
+		===============
+		*/
+		private void OnEffectsVolumeChanged( in CVarValueChangedEventData<float> args ) {
+			_effectsVolume = args.Value;
 		}
 
 		/*
@@ -566,7 +580,6 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 		/// <param name="channel"></param>
 		/// <param name="wasStolen"></param>
 		private void StopSound( FMODChannel channel, bool wasStolen = false ) {
-			_logger.PrintLine( "Stopping sound..." );
 			if ( channel.Instance.isValid() ) {
 				channel.Instance.stop( wasStolen ? FMOD.Studio.STOP_MODE.IMMEDIATE : FMOD.Studio.STOP_MODE.ALLOWFADEOUT );
 				channel.Instance.release();
@@ -593,16 +606,20 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 		/// <param name="channelId"></param>
 		/// <returns></returns>
 		private FMOD.Studio.EventInstance CreateSoundInstance( EventId id, Vector2 position, int channelId ) {
-			var cached = _eventRepository.GetById( id ) ?? throw new Exception( $"Couldn't find event description for '{id.Name}'" );
+			var cached = _eventRepository.GetCached( id ) ?? throw new Exception( $"Couldn't find event description for '{id.Name}'" );
+			cached.Get( out var description );
 
-			var description = cached.Resource as FMODEventResource;
-			FMODValidator.ValidateCall( description.Handle.createInstance( out var instance ) );
+			if ( description is not FMODEventResource eventResource ) {
+				throw new InvalidCastException();
+			}
+
+			FMODValidator.ValidateCall( eventResource.Handle.createInstance( out var instance ) );
 
 			FMOD.ATTRIBUTES_3D attributes = new FMOD.ATTRIBUTES_3D { };
 			attributes.position = new FMOD.VECTOR { x = position.X, y = position.Y, z = 0.0f };
-			//			instance.set3DAttributes( attributes );
-			FMODValidator.ValidateCall( description.Handle.loadSampleData() );
-			FMODValidator.ValidateCall( instance.setVolume( 5.0f ) );
+			instance.set3DAttributes( attributes );
+			FMODValidator.ValidateCall( eventResource.Handle.loadSampleData() );
+			FMODValidator.ValidateCall( instance.setVolume( _effectsVolume / 10.0f ) );
 
 			FMODValidator.ValidateCall( instance.start() );
 			FMODValidator.ValidateCall( instance.setCallback( SoundFinishedCallback, FMOD.Studio.EVENT_CALLBACK_TYPE.STOPPED | FMOD.Studio.EVENT_CALLBACK_TYPE.START_FAILED ) );

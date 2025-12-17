@@ -22,7 +22,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.Systems.ResourceCache.Application.Interfaces;
-using Godot;
 using NomadCore.Domain.Models.ValueObjects;
 using System;
 using System.Threading.Tasks;
@@ -41,7 +40,9 @@ namespace NomadCore.Systems.ResourceCache.Infrastructure.Godot {
 	/// A godot-focused resource loader.
 	/// </summary>
 	
-	public readonly struct GodotLoader : IResourceLoader<Resource, FilePath> {
+	public sealed class GodotLoader<Resource> : IResourceLoader<Resource, FilePath>
+		where Resource : global::Godot.Resource
+	{
 		public IResourceLoader<Resource, FilePath>.LoadCallback Load => LoadResource;
 		public IResourceLoader<Resource, FilePath>.LoadAsyncCallback LoadAsync => LoadResourceAsync;
 
@@ -56,11 +57,11 @@ namespace NomadCore.Systems.ResourceCache.Infrastructure.Godot {
 		/// <param name="path"></param>
 		/// <returns></returns>
 		private Result<Resource> LoadResource( FilePath path ) {
-			var resource = ResourceLoader.Load( path.GodotPath, String.Empty, ResourceLoader.CacheMode.ReplaceDeep );
+			var resource = global::Godot.ResourceLoader.Load( path.GodotPath, String.Empty, global::Godot.ResourceLoader.CacheMode.ReplaceDeep );
 			if ( resource == null ) {
 				return Result<Resource>.Failure( LoadError.Create( $"Error loading godot resource '{path}'" ) );
 			}
-			return Result<Resource>.Success( resource );
+			return Result<Resource>.Success( resource as Resource );
 		}
 
 		/*
@@ -75,23 +76,23 @@ namespace NomadCore.Systems.ResourceCache.Infrastructure.Godot {
 		/// <param name="ct"></param>
 		/// <returns></returns>
 		private async Task<Result<Resource>> LoadResourceAsync( FilePath path, CancellationToken ct = default ) {
-			global::Godot.Error requestError = ResourceLoader.LoadThreadedRequest( path, String.Empty, true, ResourceLoader.CacheMode.ReplaceDeep );
+			global::Godot.Error requestError = global::Godot.ResourceLoader.LoadThreadedRequest( path, String.Empty, true, global::Godot.ResourceLoader.CacheMode.ReplaceDeep );
 			if ( requestError != global::Godot.Error.Ok ) {
 				return Result<Resource>.Failure( LoadError.Create( $"Error loading godot resource '{path}' - {requestError}" ) );
 			}
 
-			ResourceLoader.ThreadLoadStatus status = ResourceLoader.ThreadLoadStatus.Failed;
-			SceneTree sceneTree = (SceneTree)Engine.GetMainLoop();
+			global::Godot.ResourceLoader.ThreadLoadStatus status = global::Godot.ResourceLoader.ThreadLoadStatus.Failed;
+			global::Godot.SceneTree sceneTree = (global::Godot.SceneTree)global::Godot.Engine.GetMainLoop();
 
 			do {
-				if ( status == ResourceLoader.ThreadLoadStatus.InProgress ) {
-					await sceneTree.ToSignal( sceneTree, SceneTree.SignalName.ProcessFrame );
+				if ( status == global::Godot.ResourceLoader.ThreadLoadStatus.InProgress ) {
+					await sceneTree.ToSignal( sceneTree, global::Godot.SceneTree.SignalName.ProcessFrame );
 				}
-				status = ResourceLoader.LoadThreadedGetStatus( path );
-			} while ( status == ResourceLoader.ThreadLoadStatus.InProgress );
+				status = global::Godot.ResourceLoader.LoadThreadedGetStatus( path );
+			} while ( status == global::Godot.ResourceLoader.ThreadLoadStatus.InProgress );
 
-			if ( status == ResourceLoader.ThreadLoadStatus.Loaded ) {
-				return Result<Resource>.Success( ResourceLoader.LoadThreadedGet( path ) );
+			if ( status == global::Godot.ResourceLoader.ThreadLoadStatus.Loaded ) {
+				return Result<Resource>.Success( global::Godot.ResourceLoader.LoadThreadedGet( path ) as Resource );
 			}
 			return Result<Resource>.Failure( LoadError.Create( $"godot resource '{path}' failed to load with thread status '{status}" ) );
 		}

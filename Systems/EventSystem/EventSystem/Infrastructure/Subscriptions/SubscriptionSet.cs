@@ -21,7 +21,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using Godot;
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
 using NomadCore.Systems.EventSystem.Errors;
@@ -43,15 +42,15 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 	/// 
 	/// </summary>
 	
-	internal sealed class SubscriptionSet<TArgs>( IGameEvent<TArgs> eventData, ILoggerService? logger ) : IDisposable
+	internal sealed class SubscriptionSet<TArgs>( IGameEvent<TArgs> eventData, ILoggerService logger, int cleanupInterval = 30 ) : IDisposable
 		where TArgs : IEventArgs
 	{
 		/// <summary>
 		/// The number of pumps before initiating a purge.
 		/// </summary>
-		private const int CLEANUP_INTERVAL = 30;
+		private readonly int _cleanupInterval = cleanupInterval;
 
-		private readonly ILoggerService? _logger = logger;
+		private readonly ILoggerService _logger = logger;
 
 		private readonly SubscriptionCache<TArgs, IGameEvent<TArgs>.EventCallback> _genericSubscriptions = new( logger );
 		private readonly SubscriptionCache<TArgs, IGameEvent<TArgs>.AsyncCallback> _asyncSubscriptions = new( logger );
@@ -196,11 +195,11 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		/// </summary>
 		/// <param name="args"></param>
 		public void Pump( in TArgs args ) {
-			_logger?.PrintLine( $"SubscriptionSet.Pump: publishing event {eventData.DebugName}" );
+			//_logger?.PrintLine( $"SubscriptionSet.Pump: publishing event {eventData.DebugName}" );
 			_pumpLock.EnterUpgradeableReadLock();
 			try {
 				bool shouldCleanup = false;
-				if ( ++_cleanupCounter >= CLEANUP_INTERVAL ) {
+				if ( ++_cleanupCounter >= _cleanupInterval ) {
 					shouldCleanup = true;
 					_cleanupCounter = 0;
 				}
@@ -238,7 +237,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		/// <param name="ct"></param>
 		/// <returns></returns>
 		public async Task PumpAsync( TArgs args, CancellationToken ct ) {
-			_logger?.PrintLine( $"SubscriptionSet.PumpAsync: publishing event {eventData.DebugName} asynchronously..." );
+			//_logger?.PrintLine( $"SubscriptionSet.PumpAsync: publishing event {eventData.DebugName} asynchronously..." );
 			int subscriptionCount = _asyncSubscriptions.Subscriptions.Count;
 			List<Task> tasks = new List<Task>( subscriptionCount );
 

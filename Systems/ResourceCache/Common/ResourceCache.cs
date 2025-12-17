@@ -38,6 +38,8 @@ namespace NomadCore.Systems.ResourceCache.Common {
 	/// 
 	/// </summary>
 	
-	public sealed class ResourceCache( ILoggerService logger, IGameEventRegistryService eventFactory, IResourceLoader<Resource, FilePath> loader ) : BaseCache<Resource, FilePath>( logger, eventFactory, loader ) {
+	public sealed class ResourceCache( ILoggerService logger, IGameEventRegistryService eventFactory, IResourceLoader<Resource, FilePath> loader )
+		: BaseCache<Resource, FilePath>( logger, eventFactory, loader )
+	{
 	};
 };

@@ -129,8 +129,8 @@ namespace NomadCore.Systems.EventSystem.Domain {
 		/// </summary>
 		/// <param name="eventArgs"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void Publish( TArgs eventArgs ) {
-			_subscriptions.Pump( eventArgs );
+		public void Publish( in TArgs eventArgs ) {
+			_subscriptions.Pump( in eventArgs );
 		}
 
 		/*

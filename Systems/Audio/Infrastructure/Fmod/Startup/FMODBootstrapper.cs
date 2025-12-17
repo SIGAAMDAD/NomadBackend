@@ -24,6 +24,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.GameServices;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Systems.Audio.Application.Interfaces;
+using NomadCore.Systems.Audio.Domain.Interfaces;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Services;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Startup {
@@ -45,7 +46,10 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Startup {
 			var cvarSystem = locator.GetService<ICVarSystemService>();
 
 			try {
-				registry.RegisterSingleton<IAudioSystemService>( new FMODSystemService( locator, registry ) );
+				var system = new FMODSystemService( locator, registry );
+				
+				registry.RegisterSingleton<IAudioSystemService>( system );
+				registry.RegisterSingleton<IListenerService>( new FMODListenerService( logger, system ) );
 			} catch ( FMODException e ) {
 				logger.PrintError( $"FMODBootstrapper: error initializing FMOD audio system - {e.Error}\n{e.StackTrace}" );
 			}

@@ -21,8 +21,8 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Infrastructure.Collections;
 using NomadCore.Interfaces.Common;
+using NomadCore.Systems.Audio.Application.Interfaces;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using System;
@@ -41,7 +41,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 	/// 
 	/// </summary>
 
-	internal sealed class FMODGuidRepository : IDisposable {
+	internal sealed class FMODGuidRepository : IGuidRepository<FMODEventId, FMODBankId> {
 		private sealed class GUIDCache<TGuid, TId>( Func<string, TId> factory )
 			where TGuid : IValueObject<TGuid>
 			where TId : IValueObject<TId>

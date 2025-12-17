@@ -61,6 +61,9 @@ namespace NomadCore.Infrastructure.Collections {
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public static implicit operator string( InternString value ) => StringPool.FromInterned( value ) ?? String.Empty;
 
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public static implicit operator int( InternString value ) => value._id;
+
 		public static bool operator==( InternString left, InternString right ) => left._id == right._id;
 		public static bool operator!=( InternString left, InternString right ) => left._id != right._id;
 	};

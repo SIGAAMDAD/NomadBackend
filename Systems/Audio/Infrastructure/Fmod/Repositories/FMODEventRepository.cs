@@ -22,14 +22,14 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 using NomadCore.GameServices;
+using NomadCore.Systems.Audio.Domain.Interfaces;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
-using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Services;
 using NomadCore.Systems.ResourceCache.Common;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 	internal sealed class FMODEventRepository( ILoggerService logger, IGameEventRegistryService eventFactory, FMODSystemService fmodSystem, FMODGuidRepository guidRepository )
-		: BaseCache<FMODEventResource, EventId>( logger, eventFactory, new FMODEventLoader( fmodSystem, guidRepository, logger ) )
+		: BaseCache<IEventResource, EventId>( logger, eventFactory, new FMODEventLoader( fmodSystem, guidRepository, logger ) )
 	{
 	};
 };

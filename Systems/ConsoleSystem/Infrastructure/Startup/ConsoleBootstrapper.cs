@@ -23,7 +23,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using Godot;
 using NomadCore.Domain.Models.Interfaces;
+using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
+using NomadCore.Infrastructure.Collections;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Systems.ConsoleSystem.CVars.Services;
 using NomadCore.Systems.ConsoleSystem.Infrastructure.Sinks;
@@ -57,6 +59,16 @@ namespace NomadCore.Systems.ConsoleSystem.Infrastructure.Startup {
 			var eventBus = services.GetService<IGameEventBusService>();
 
 			var cvarSystem = registry.RegisterSingleton<ICVarSystemService>( new CVarSystem( eventFactory, logger ) );
+			var configFile = cvarSystem.Register(
+				new CVarCreateInfo<string>(
+					Name: StringPool.Intern( "system.DefaultConfig" ),
+					DefaultValue: StringPool.Intern( "res://Assets/Config/default.ini" ),
+					Description: StringPool.Intern( "The default configuration file." ),
+					Flags: CVarFlags.Init | CVarFlags.ReadOnly
+				)
+			);
+			cvarSystem.Load( configFile.Value );
+
 			logger.Init( services );
 
 			logger.AddSink( new GodotSink() );

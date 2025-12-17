@@ -71,7 +71,7 @@ namespace NomadCore.Domain.Models.Interfaces {
 		public void UnsubscribeAsync( object subscriber, AsyncCallback asyncCallback );
 		public void Unsubscribe( object subscriber, EventCallback callback );
 		public Task PublishAsync( TArgs eventArgs, CancellationToken ct = default );
-		public void Publish( TArgs eventArgs );
+		public void Publish( in TArgs eventArgs );
 
 		public EventThreadingPolicy GetDefaultThreadingPolicy();
 	};

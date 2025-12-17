@@ -27,12 +27,12 @@ using NomadCore.GameServices;
 using NomadCore.Infrastructure.Collections;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Systems.Audio.Application.Interfaces;
+using NomadCore.Systems.Audio.Domain.Interfaces;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Registries;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -79,12 +79,12 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 
 		private readonly ILoggerService _logger;
 
-		public IResourceCacheService<EventId> EventRepository => _eventRepository;
-		private readonly IResourceCacheService<EventId> _eventRepository;
+		public IResourceCacheService<IEventResource, EventId> EventRepository => _eventRepository;
+		private readonly FMODEventRepository _eventRepository;
 
-		private readonly IResourceCacheService<BankId> _bankRepository;
+		private readonly FMODBankRepository _bankRepository;
 		
-		public FMODGuidRepository GuidRepository => _guidRepository;
+		public IDisposable GuidRepository => _guidRepository;
 		private readonly FMODGuidRepository _guidRepository;
 
 		private readonly StringBuilder _fmodDebugString = new StringBuilder( 1024 );
@@ -125,7 +125,6 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 			FMODValidator.ValidateCall( _system.setCallback( OnAudioOutputDeviceListChanged, FMOD.SYSTEM_CALLBACK_TYPE.DEVICELISTCHANGED ) );
 
 			_bankRepository.Preload( [ new BankId( "Master.strings.bank" ), new BankId( "Master.bank" ) ] );
-			_eventRepository.PreloadAsync( [ new EventId( "event:/ui/button_focused" ), new EventId( "event:/ui/button_pressed" ) ] );
 		}
 
 		/*
