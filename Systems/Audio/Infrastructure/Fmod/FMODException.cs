@@ -24,7 +24,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using System;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod {
-	internal sealed class FMODException( string errorString ) : Exception {
+	public sealed class FMODException( string errorString ) : Exception {
 		public readonly string Error = errorString;
 	};
 };

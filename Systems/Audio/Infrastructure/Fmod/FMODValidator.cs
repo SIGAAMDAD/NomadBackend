@@ -22,7 +22,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 */
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod {
-	internal static class FMODValidator {
+	public static class FMODValidator {
 		public static void ValidateCall( FMOD.RESULT result ) {
 			if ( result != FMOD.RESULT.OK ) {
 				throw new FMODException( FMOD.Error.String( result ) );

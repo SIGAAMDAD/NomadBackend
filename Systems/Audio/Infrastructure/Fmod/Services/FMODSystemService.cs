@@ -24,12 +24,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 #define FMOD_LOGGING
 
 using NomadCore.GameServices;
-using NomadCore.Infrastructure.Collections;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Systems.Audio.Application.Interfaces;
 using NomadCore.Systems.Audio.Domain.Interfaces;
 using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
-using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Registries;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
 using System;

@@ -26,7 +26,7 @@ using NomadCore.GameServices;
 using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Registries {
-	internal static class FMODCVarRegistry {
+	public static class FMODCVarRegistry {
 		public static void Register( ICVarSystemService cvarSystem ) {
 			cvarSystem.Register(
 				new CVarCreateInfo<int>(
