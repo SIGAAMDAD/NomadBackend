@@ -23,7 +23,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
-using NomadCore.Systems.EventSystem.Errors;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;

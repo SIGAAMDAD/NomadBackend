@@ -106,7 +106,8 @@ namespace NomadCore.Systems.EventSystem.Domain.Registries {
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public bool TryRemoveEvent<TArgs>( InternString name )
-			where TArgs : IEventArgs {
+			where TArgs : IEventArgs
+		{
 			var key = new EventKey(
 				name: name,
 				argsType: typeof( TArgs )
