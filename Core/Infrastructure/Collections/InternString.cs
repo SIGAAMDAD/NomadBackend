@@ -38,7 +38,7 @@ namespace NomadCore.Infrastructure.Collections {
 	/// </summary>
 	
 	public readonly struct InternString : IEquatable<InternString> {
-		private readonly int _id;
+		private readonly int _id = 0;
 		
 		public InternString( int id ) => _id = id;
 		public InternString( ReadOnlySpan<char> value ) => _id = StringPool.Intern( value );

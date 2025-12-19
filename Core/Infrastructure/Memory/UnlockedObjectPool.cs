@@ -38,11 +38,11 @@ namespace NomadCore.Infrastructure.Memory {
 	
 	public sealed class UnlockedObjectPool<T, TFactory> : IObjectPool<T> where T : class, IDisposable, new() {
 		public int TotalCount => _currentSize;
-		private int _currentSize;
+		private int _currentSize = 0;
 		
 		public int ActiveObjectCount => _currentSize - _pool.Count;
 
-		private readonly List<T> _pool;
+		private readonly List<T> _pool = new List<T>();
 
 		private readonly int _maxSize = int.MaxValue;
 		private bool _isDisposed = false;
@@ -52,7 +52,15 @@ namespace NomadCore.Infrastructure.Memory {
 			_pool = new List<T>( initialCapacity );
 		}
 
+		/*
+		===============
+		Dispose
+		===============
+		*/
 		public void Dispose() {
+			for ( int i = 0; i < _currentSize; i++ ) {
+				_pool[ i ].Dispose();
+			}
 		}
 
 		/*

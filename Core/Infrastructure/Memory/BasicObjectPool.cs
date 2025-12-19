@@ -40,15 +40,15 @@ namespace NomadCore.Infrastructure.Memory {
 		public int AvailableCount => _availableObjects.Count;
 
 		public int TotalCount => _currentSize;
-		private int _currentSize;
+		private int _currentSize = 0;
 
 		public int ActiveObjectCount => _currentSize - _availableObjects.Count;
 
 		private readonly ConcurrentBag<T> _availableObjects = new ConcurrentBag<T>();
 		private readonly Func<T> _createObject;
 
-		private readonly int _maxSize;
-		private bool _isDisposed;
+		private readonly int _maxSize = 0;
+		private bool _isDisposed = false;
 
 		/*
 		===============

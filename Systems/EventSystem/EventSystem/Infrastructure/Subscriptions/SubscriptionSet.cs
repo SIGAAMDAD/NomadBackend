@@ -23,7 +23,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
-using NomadCore.Systems.EventSystem.Errors;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -262,6 +261,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 			_logger?.PrintLine( $"SubscriptionSet.PumpAsync: publishing event {eventData.DebugName} asynchronously..." );
 #endif
 			int subscriptionCount = _asyncSubscriptions.Subscriptions.Count;
+			// TODO: optimize
 			List<Task> tasks = new List<Task>( subscriptionCount );
 
 			for ( int i = 0; i < subscriptionCount; i++ ) {

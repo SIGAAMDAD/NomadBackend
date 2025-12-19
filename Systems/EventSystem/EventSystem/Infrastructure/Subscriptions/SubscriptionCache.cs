@@ -82,7 +82,9 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 
 			int index = _subscriptions.Count;
 			_subscriptions.Add( new WeakSubscription<TArgs, TCallback>( subscriber, callback ) );
+#if DEBUG
 			logger?.PrintLine( $"SubscriptionCache.AddSubscription: added subscription from '{subscriber.GetType().Name}'" );
+#endif
 
 			int key = subscriber.GetHashCode();
 			if ( _indexMap.TryGetValue( key, out List<int>? indices ) ) {
@@ -107,7 +109,9 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 				logger?.PrintWarning( $"SubscriptionCache.RemoveSubscription: subscription not found from '{subscriber.GetType().Name}'" );
 				return;
 			}
+#if DEBUG
 			logger?.PrintLine( $"SubscriptionCache.RemoveSubscription: removed subscription from '{subscriber.GetType().Name}'" );
+#endif
 			RemoveAtIndexInternal( index, subscriber );
 		}
 
@@ -130,7 +134,9 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 					removed++;
 				}
 			}
+#if DEBUG
 			logger?.PrintLine( $"SubscriptionCache.RemoveAllForSubscriber: removed {removed} subscriptions for '{subscriber.GetType().Name}'" );
+#endif
 		}
 
 		/*
@@ -162,8 +168,9 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 		*/
 		public void CleanupDeadSubscriptions() {
 			int initialCount = _subscriptions.Count;
-
-			//logger?.PrintLine( $"SubscriptionCache({typeof( TCallback )}).CleanupDeadSubscriptionsInternal: cleaning up dead subscriptions..." );
+#if DEBUG
+			logger?.PrintLine( $"SubscriptionCache({typeof( TCallback )}).CleanupDeadSubscriptionsInternal: cleaning up dead subscriptions..." );
+#endif
 
 			for ( int i = _subscriptions.Count - 1; i >= 0; i-- ) {
 				if ( !_subscriptions[ i ].IsAlive ) {
@@ -173,7 +180,9 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 
 			int removed = initialCount - _subscriptions.Count;
 			if ( removed > 0 ) {
+#if DEBUG
 				logger?.PrintLine( $"SubscriptionCache.CleanupDeadSubscriptions: removed {removed} dangling subscriptions" );
+#endif
 				RebuildIndexMap();
 			}
 		}

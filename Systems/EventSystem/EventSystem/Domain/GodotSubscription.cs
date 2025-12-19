@@ -49,10 +49,6 @@ namespace NomadCore.Systems.EventSystem.Domain {
 			owner.Connect( signalName, callback );
 		}
 
-		~GodotSubscription() {
-			Dispose();
-		}
-
 		/*
 		===============
 		Dispose

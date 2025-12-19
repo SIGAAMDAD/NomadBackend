@@ -37,7 +37,7 @@ namespace NomadCore.Utilities.Tweens {
 	/// 
 	/// </summary>
 	
-	public class Tween {
+	public class Tween : IDisposable {
 		public float ElapsedTime => (float)_stopwatch.Elapsed.TotalSeconds;
 		public float Progress => Math.Clamp( ( ElapsedTime - _delay ) / _duration, 0f, 1f );
 		public bool IsPlaying => _isPlaying;
@@ -50,6 +50,17 @@ namespace NomadCore.Utilities.Tweens {
 		private Action _onCompleted;
 		private bool _isPlaying;
 		private float _delay;
+
+		/*
+		===============
+		Dispose
+		===============
+		*/
+		public void Dispose() {
+			_properties.Clear();
+			_easing = null;
+			_onCompleted = null;
+		}
 
 		/*
 		===============

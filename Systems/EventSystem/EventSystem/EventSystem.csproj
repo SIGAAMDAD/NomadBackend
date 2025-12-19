@@ -9,6 +9,7 @@
     <PubishAOT>true</PubishAOT>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <EnforceCodeStyleInBuilds>true</EnforceCodeStyleInBuilds>
+    <SkipLocalsInit>true</SkipLocalsInit>
   </PropertyGroup>
 
   <ItemGroup>

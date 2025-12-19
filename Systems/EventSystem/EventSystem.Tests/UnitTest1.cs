@@ -30,6 +30,10 @@ namespace NomadCore.Systems.EventSystem.Tests {
 
 			_typedEvent = _eventRegistry.GetEvent<EventArgs>( StringPool.Intern( "MemoryEvent" ), EventFlags.Synchronous | EventFlags.Asynchronous );
 			_typedEvent.Subscribe( this, OnMemoryEventTriggered );
+
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+			GC.Collect();
 		}
 
 		[TearDown]
@@ -52,23 +56,23 @@ namespace NomadCore.Systems.EventSystem.Tests {
 
 		[Test]
 		public void Test_EventMemoryUsageVariableInstanced() {
-			long current = GC.GetTotalMemory( true );
+			long current = GC.GetAllocatedBytesForCurrentThread();
 			for ( int i = 0; i < 1000; i++ ) {
 				var eventArgs = new EventArgs( 0, true );
 				_typedEvent.Publish( in eventArgs );
 			}
-			long after = GC.GetTotalMemory( true );
+			long after = GC.GetAllocatedBytesForCurrentThread();
 
 			Console.WriteLine( $"Published 1000 events with EventArgs and used { after - current } bytes (variable instanced)" );
 		}
 
 		[Test]
 		public void Test_EventMemoryUsageRAII() {
-			long current = GC.GetTotalMemory( true );
+			long current = GC.GetAllocatedBytesForCurrentThread();
 			for ( int i = 0; i < 1000; i++ ) {
 				_typedEvent.Publish( new EventArgs( 0, true ) );
 			}
-			long after = GC.GetTotalMemory( true );
+			long after = GC.GetAllocatedBytesForCurrentThread();
 
 			Console.WriteLine( $"Published 1000 events with EventArgs and used { after - current } bytes (RAII)" );
 		}
