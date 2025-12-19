@@ -54,11 +54,11 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 		public FMODMusicService( IResourceCacheService<IEventResource, EventId> eventRepository, ICVarSystemService cvarSystem ) {
 			_eventRepository = eventRepository;
 
-			var musicVolume = cvarSystem.GetCVar<float>( "audio.MusicVolume" ) ?? throw new Exception( "Missing CVar 'audio.MusicVolume'" );
+			var musicVolume = cvarSystem.GetCVar<float>( AudioConstants.CVars.AUDIO_MUSIC_VOLUME ) ?? throw new Exception( "Missing CVar 'audio.MusicVolume'" );
 			musicVolume.ValueChanged.Subscribe( this, OnMusicVolumeChanged );
 			_musicVolume = musicVolume.Value;
 
-			var musicOn = cvarSystem.GetCVar<bool>( "audio.MusicOn" ) ?? throw new Exception( "Missing CVar 'audio.MusicOn'" );
+			var musicOn = cvarSystem.GetCVar<bool>( AudioConstants.CVars.AUDIO_MUSIC_ON ) ?? throw new Exception( "Missing CVar 'audio.MusicOn'" );
 			musicOn.ValueChanged.Subscribe( this, OnMusicOnChanged );
 			_musicOn = musicOn.Value;
 		}

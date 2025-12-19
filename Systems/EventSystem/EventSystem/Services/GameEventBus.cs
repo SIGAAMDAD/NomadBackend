@@ -77,14 +77,21 @@ namespace NomadCore.Systems.EventSystem.Services {
 		/// <summary>
 		/// The container for all scene based events
 		/// </summary>
-		private readonly ConditionalWeakTable<object, HashSet<IGameEvent>> _subscriberToEvents = new();
+		private readonly ConditionalWeakTable<object, HashSet<IGameEvent>> _subscriberToEvents;
 
 		/// <summary>
-		/// 
+		/// The container for all godot node events.
 		/// </summary>
 		private readonly ConditionalWeakTable<GodotObject, List<ConnectionInfo>> _godotConnections = new();
 
-		private readonly Func<object, HashSet<IGameEvent>> _hashSetFactory = new( ( s ) => new HashSet<IGameEvent>() );
+		/*
+		===============
+		Dispose
+		===============
+		*/
+		public void Dispose() {
+			_godotConnections.Clear();
+		}
 
 		/*
 		===============
@@ -175,10 +182,36 @@ namespace NomadCore.Systems.EventSystem.Services {
 		public void DisconnectSignal( GodotObject source, StringName signalName ) {
 		}
 
+		/*
+		===============
+		CleanupSubscriber
+		===============
+		*/
 		public void CleanupSubscriber( object subscriber ) {
+			ArgumentNullException.ThrowIfNull( subscriber );
+
+			if ( subscriber is GodotObject godotObject ) {
+				DisconnectAllForGodotObject( godotObject );
+				_godotConnections.Remove( godotObject, out _ );
+			}
 		}
 
-		public void Dispose() {
+		/*
+		===============
+		DisconnectAllForGodotObjects
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obj"></param>
+		private void DisconnectAllForGodotObject( GodotObject obj ) {
+			if ( _godotConnections.TryGetValue( obj, out List<ConnectionInfo>? connections ) ) {
+				for ( int i = 0; i < connections.Count; i++ ) {
+					connections[ i ].Source?.Disconnect( connections[ i ].SignalName, connections[ i ].Callable );
+				}
+				_godotConnections.Remove( obj, out _ );
+			}
 		}
 
 		/*

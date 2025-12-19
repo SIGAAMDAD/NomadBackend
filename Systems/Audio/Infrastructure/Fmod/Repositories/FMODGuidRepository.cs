@@ -76,8 +76,8 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 			}
 		};
 
-		private readonly GUIDCache<FMODEventId, EventId> _eventGuids = new GUIDCache<FMODEventId, EventId>( e => new EventId( e ) );
-		private readonly GUIDCache<FMODBankId, BankId> _bankGuids = new GUIDCache<FMODBankId, BankId>( b => new BankId( b ) );
+		private readonly GUIDCache<FMODEventId, EventId> _eventGuids = new GUIDCache<FMODEventId, EventId>( e => new EventId( new( e ) ) );
+		private readonly GUIDCache<FMODBankId, BankId> _bankGuids = new GUIDCache<FMODBankId, BankId>( b => new BankId( new( b ) ) );
 
 		private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 

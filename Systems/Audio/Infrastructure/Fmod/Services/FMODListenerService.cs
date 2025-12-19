@@ -21,7 +21,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models.Interfaces;
 using NomadCore.GameServices;
 using NomadCore.Systems.Audio.Domain.Interfaces;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Exceptions;
@@ -106,7 +105,10 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 			for ( int i = 0; i < _listenerCount; i++ ) {
 				_listeners[ i ] = null;
 			}
-			_system.StudioSystem.setNumListeners( 0 );
+			if ( _listenerCount > 0 ) {
+				_system.StudioSystem.setNumListeners( 0 );
+				_listenerCount = 0;
+			}
 		}
 
 		/*

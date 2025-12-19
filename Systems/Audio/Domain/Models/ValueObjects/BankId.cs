@@ -26,7 +26,7 @@ using NomadCore.Interfaces.Common;
 
 namespace NomadCore.Systems.Audio.Domain.Models.ValueObjects {
 	public readonly record struct BankId(
-		string Name
+		InternString Name
 	) : IValueObject<BankId> {
 		public override int GetHashCode() => Name.GetHashCode();
 	};

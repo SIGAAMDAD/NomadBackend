@@ -27,6 +27,7 @@ using NomadCore.Systems.Audio.Domain.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories.Loaders;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Services;
 using NomadCore.Systems.ResourceCache.Common;
+using System;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 	/*
@@ -40,8 +41,24 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories {
 	/// 
 	/// </summary>
 	
-	internal sealed class FMODBankRepository( ILoggerService logger, IGameEventRegistryService eventFactory, FMODSystemService fmodSystem, FMODGuidRepository guidRepository )
-		: BaseCache<BankComposite, BankId>( logger, eventFactory, new FMODBankLoader( fmodSystem, guidRepository, logger ) )
-	{
+	internal sealed class FMODBankRepository : BaseCache<BankComposite, BankId> {
+		public FMODBankRepository( ILoggerService logger, IGameEventRegistryService eventFactory, FMODSystemService fmodSystem, FMODGuidRepository guidRepository )
+			: base( logger, eventFactory, new FMODBankLoader( fmodSystem, guidRepository, logger ) )
+		{
+			LoadBanks();
+		}
+
+		/*
+		===============
+		LoadBanks
+		===============
+		*/
+		private void LoadBanks() {
+			try {
+				var files = System.IO.Directory.GetFiles(  );
+			} catch ( Exception e ) {
+				
+			}
+		}
 	};
 };

@@ -23,18 +23,49 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.GameServices;
-using NomadCore.Infrastructure.Collections;
 
 namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Registries {
+	/*
+	===================================================================================
+	
+	FMODCVarRegistry
+	
+	===================================================================================
+	*/
+	/// <summary>
+	/// 
+	/// </summary>
+	
 	public static class FMODCVarRegistry {
+		/*
+		===============
+		Register
+		===============
+		*/
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="cvarSystem"></param>
 		public static void Register( ICVarSystemService cvarSystem ) {
 			cvarSystem.Register(
 				new CVarCreateInfo<int>(
-					Name: StringPool.Intern( "audio.fmod.StreamBufferSize" ),
+					Name: new( "audio.fmod.StreamBufferSize" ),
 					DefaultValue: 12,
-					Description: StringPool.Intern( "The size of FMOD's stream buffer size in MB." ),
+					Description: new( "The size of FMOD's stream buffer size in MB." ),
 					Flags: CVarFlags.Archive | CVarFlags.Init,
 					Validator: value => value > 10 && value < 48
+				)
+			);
+			cvarSystem.Register(
+				new CVarCreateInfo<bool>(
+					Name: new( "audio.fmod.LoggingEnabled" ),
+#if DEBUG
+					DefaultValue: true,
+#else
+					DefaultValue: false,
+#endif
+					Description: new( "Enables a dedicated FMOD debug log." ),
+					Flags: CVarFlags.Developer | CVarFlags.ReadOnly
 				)
 			);
 		}

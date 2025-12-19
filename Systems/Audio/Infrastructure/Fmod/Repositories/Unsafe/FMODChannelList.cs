@@ -21,11 +21,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Infrastructure.Collections;
-using NomadCore.Interfaces.Common;
-
-namespace NomadCore.Systems.Audio.Domain.Models.ValueObjects {
-	public readonly record struct EventId(
-		InternString Name
-	) : IValueObject<EventId>;
+namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Registries.Unsafe {
+//	[System.Runtime.CompilerServices.InlineArray( 512 )]
 };

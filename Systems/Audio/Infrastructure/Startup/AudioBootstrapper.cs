@@ -25,7 +25,6 @@ using NomadCore.GameServices;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Systems.Audio.Application.Interfaces;
 using NomadCore.Systems.Audio.Domain.Interfaces;
-using NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Repositories;
 using NomadCore.Systems.Audio.Infrastructure.Fmod.Services;
 
@@ -51,7 +50,6 @@ namespace NomadCore.Systems.Audio.Infrastructure.Startup {
 			var channelRepository = new FMODChannelRepository( logger, cvarSystem, listener, system.EventRepository, system.GuidRepository as FMODGuidRepository );
 			registry.RegisterSingleton<IChannelRepository>( channelRepository );
 			registry.RegisterSingleton<IAudioSourceFactory>( new FMODAudioSourceFactory( channelRepository ) );
-
 			registry.RegisterSingleton<IMusicService>( new FMODMusicService( system.EventRepository, cvarSystem ) );
 		}
 	};

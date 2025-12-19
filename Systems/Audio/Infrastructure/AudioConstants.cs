@@ -21,11 +21,23 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Infrastructure.Collections;
-using NomadCore.Interfaces.Common;
+namespace NomadCore.Systems.Audio.Infrastructure {
+	public static class AudioConstants {
+		public static class CVars {
+			public const string AUDIO_EFFECTS_VOLUME = "audio.EffectsVolume";
+			public const string AUDIO_EFFECTS_ON = "audio.EffectsOn";
 
-namespace NomadCore.Systems.Audio.Domain.Models.ValueObjects {
-	public readonly record struct EventId(
-		InternString Name
-	) : IValueObject<EventId>;
+			public const string AUDIO_MUSIC_VOLUME = "audio.MusicVolume";
+			public const string AUDIO_MUSIC_ON = "audio.MusicOn";
+
+			public const string AUDIO_MAX_CHANNELS = "audio.MaxChannels";
+			public const string AUDIO_MAX_ACTIVE_CHANNELS = "audio.MaxActiveChannels";
+
+			public const string AUDIO_DISTANCE_FALLOFF_START = "audio.DistanceFalloffStart";
+			public const string AUDIO_DISTANCE_FALLOFF_END = "audio.DistanceFalloffEnd";
+
+			public const string AUDIO_MIN_TIME_BETWEEN_CHANNEL_STEALS = "audio.MinTimeBetweenChannelSteals";
+			public const string AUDIO_FREQUENCY_PENALTY = "audio.FrequencyPenalty";
+		};
+	};
 };

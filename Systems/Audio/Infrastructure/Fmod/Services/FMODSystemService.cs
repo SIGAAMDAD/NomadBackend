@@ -98,19 +98,6 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Services {
 			var eventFactory = locator.GetService<IGameEventRegistryService>();
 			var cvarSystem = locator.GetService<ICVarSystemService>();
 
-#if FMOD_LOGGING
-			var debugFlags = FMOD.DEBUG_FLAGS.LOG | FMOD.DEBUG_FLAGS.ERROR | FMOD.DEBUG_FLAGS.WARNING | FMOD.DEBUG_FLAGS.TYPE_TRACE | FMOD.DEBUG_FLAGS.DISPLAY_THREAD;
-			FMODValidator.ValidateCall( FMOD.Debug.Initialize( debugFlags, FMOD.DEBUG_MODE.CALLBACK, DebugCallback ) );
-#endif
-
-			FMODValidator.ValidateCall( FMOD.Studio.System.create( out _studioSystem ) );
-			if ( !_studioSystem.isValid() ) {
-				_logger.PrintError( $"FMODSystemHandle: failed to create FMOD.Studio.System instance!" );
-				return;
-			}
-			
-			FMODValidator.ValidateCall( _studioSystem.getCoreSystem( out _system ) );
-
 			_guidRepository = new FMODGuidRepository();
 			_bankRepository = new FMODBankRepository( _logger, eventFactory, this, _guidRepository );
 			_eventRepository = new FMODEventRepository( _logger, eventFactory, this, _guidRepository );

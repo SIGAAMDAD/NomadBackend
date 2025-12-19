@@ -36,13 +36,24 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects {
 	/// <summary>
 	/// 
 	/// </summary>
-	
+
 	internal readonly record struct FMODSystemHandle : IDisposable {
-		public readonly FMOD.Studio.System StudioSystem;
-		public readonly FMOD.System System;
+		public readonly FMOD.Studio.System StudioSystem { get; }
+		public readonly FMOD.System System { get; }
 
 		public FMODSystemHandle( ILoggerService logger ) {
-			
+#if FMOD_LOGGING
+			var debugFlags = FMOD.DEBUG_FLAGS.LOG | FMOD.DEBUG_FLAGS.ERROR | FMOD.DEBUG_FLAGS.WARNING | FMOD.DEBUG_FLAGS.TYPE_TRACE | FMOD.DEBUG_FLAGS.DISPLAY_THREAD;
+			FMODValidator.ValidateCall( FMOD.Debug.Initialize( debugFlags, FMOD.DEBUG_MODE.CALLBACK, DebugCallback ) );
+#endif
+
+			FMODValidator.ValidateCall( FMOD.Studio.System.create( out _studioSystem ) );
+			if ( !_studioSystem.isValid() ) {
+				_logger.PrintError( $"FMODSystemHandle: failed to create FMOD.Studio.System instance!" );
+				return;
+			}
+
+			FMODValidator.ValidateCall( _studioSystem.getCoreSystem( out _system ) );
 		}
 
 		/*
@@ -54,7 +65,7 @@ namespace NomadCore.Systems.Audio.Infrastructure.Fmod.Models.ValueObjects {
 		/// Releases the unmanaged FMOD system handles.
 		/// </summary>
 		public void Dispose() {
-			
+
 		}
 
 		/*
