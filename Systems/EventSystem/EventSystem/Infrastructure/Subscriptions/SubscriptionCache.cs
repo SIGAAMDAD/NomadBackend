@@ -39,7 +39,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 	/// </summary>
 
 	internal sealed class SubscriptionCache<TArgs, TCallback>( ILoggerService? logger ) : IDisposable
-		where TArgs : IEventArgs
+		where TArgs : struct
 		where TCallback : class
 	{
 		public List<WeakSubscription<TArgs, TCallback>> Subscriptions => _subscriptions;

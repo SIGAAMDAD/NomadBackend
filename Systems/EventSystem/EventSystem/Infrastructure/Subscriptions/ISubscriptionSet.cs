@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 
 namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 	internal interface ISubscriptionSet<TArgs> : IDisposable
-		where TArgs : IEventArgs
+		where TArgs : struct
 	{
 		public void BindEventFriend( IGameEvent friend );
 		public void RemoveAllForSubscriber( object subscriber );

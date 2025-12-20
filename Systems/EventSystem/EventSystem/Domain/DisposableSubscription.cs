@@ -37,7 +37,7 @@ namespace NomadCore.Systems.EventSystem.Domain {
 	/// </summary>
 	
 	public class DisposableSubscription<TArgs>
-		where TArgs : IEventArgs
+		where TArgs : struct
 	{
 		private IGameEvent<TArgs> _event;
 		private IGameEvent<TArgs>.EventCallback _callback;

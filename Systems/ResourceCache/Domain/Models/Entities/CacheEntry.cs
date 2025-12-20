@@ -40,7 +40,7 @@ namespace NomadCore.Systems.ResourceCache.Domain.Models.Entities {
 	/// <summary>
 	/// 
 	/// </summary>
-	
+
 	internal sealed class CacheEntry<TResource, TId>( IResourceCacheService<TResource, TId> owner, TId id, TResource cached, int memorySize, TimeSpan loadTime, ResourceLoadState loadState ) : ICacheEntry<TResource, TId>
 		where TResource : notnull, IDisposable
 		where TId : IEquatable<TId>
@@ -52,16 +52,22 @@ namespace NomadCore.Systems.ResourceCache.Domain.Models.Entities {
 		public DateTime? ModifiedAt => _accessStats.LastAccessTime;
 		public int Version => _accessStats.AccessCount;
 
-		public EntryAccessStatistics AccessStats => _accessStats;
+		public EntryAccessStatistics AccessStats {
+			get {
+				lock ( _statsLock ) {
+					return _accessStats;
+				}
+			}
+		}
 		private EntryAccessStatistics _accessStats;
 
-		public int ReferenceCount { get; set; } = 1;
+		public int ReferenceCount = 1;
 		public TimeSpan LoadTimer = loadTime;
 		public ResourceLoadState LoadState { get; } = loadState;
 
 		public readonly int MemorySize = memorySize;
 
-		private readonly TResource _cached = cached;
+		private readonly object _statsLock = new object();
 
 		/*
 		===============
@@ -107,11 +113,16 @@ namespace NomadCore.Systems.ResourceCache.Domain.Models.Entities {
 		UpdateAccessStats
 		===============
 		*/
+		/// <summary>
+		/// 
+		/// </summary>
 		public void UpdateAccessStats() {
-			_accessStats = _accessStats with {
-				LastAccessTime = DateTime.UtcNow,
-				AccessCount = AccessStats.AccessCount + 1
-			};
+			lock ( _statsLock ) {
+				_accessStats = _accessStats with {
+					LastAccessTime = DateTime.UtcNow,
+					AccessCount = AccessStats.AccessCount + 1
+				};
+			}
 		}
 	};
 };

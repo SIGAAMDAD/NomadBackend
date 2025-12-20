@@ -21,7 +21,6 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Domain.Models.Interfaces;
 using System;
 
 namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
@@ -37,7 +36,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 	/// </summary>
 	
 	internal sealed class WeakSubscription<TArgs, TCallback>( object subscriber, TCallback callback )
-		where TArgs : IEventArgs
+		where TArgs : struct
 		where TCallback : class
 	{
 		public readonly WeakReference<object> Subscriber = new WeakReference<object>( subscriber );

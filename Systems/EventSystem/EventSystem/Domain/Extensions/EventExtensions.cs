@@ -24,6 +24,7 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Domain.Models.Interfaces;
 using System;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace NomadCore.Systems.EventSystem.Domain.Extensions {
@@ -46,10 +47,13 @@ namespace NomadCore.Systems.EventSystem.Domain.Extensions {
 		*/
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public static IDisposable Subscribe<TArgs>( this IGameEvent<TArgs> gameEvent, object subscriber, IGameEvent<TArgs>.EventCallback callback )
-			where TArgs : IEventArgs
+			where TArgs : struct
 		{
+			void Unsubscribe() {
+				gameEvent.Unsubscribe( subscriber, callback );
+			}
 			gameEvent.Subscribe( subscriber, callback );
-			return new EventUnsubscriber( () => gameEvent.Unsubscribe( subscriber, callback ) );
+			return new EventUnsubscriber( Unsubscribe );
 		}
 
 		/*
@@ -59,7 +63,7 @@ namespace NomadCore.Systems.EventSystem.Domain.Extensions {
 		*/
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public static void SubscribeOnce<TArgs>( this IGameEvent<TArgs> gameEvent, object subscriber, IGameEvent<TArgs>.EventCallback callback )
-			where TArgs : IEventArgs
+			where TArgs : struct
 		{
 			void Wrapper( in TArgs args ) {
 				callback( args );
@@ -67,7 +71,6 @@ namespace NomadCore.Systems.EventSystem.Domain.Extensions {
 			}
 			gameEvent.Subscribe( subscriber, Wrapper );
 		}
-
 
 		// TODO: perhaps pool this
 		private record EventUnsubscriber( Action unsubscribe ) : IDisposable { public void Dispose() => unsubscribe?.Invoke(); };

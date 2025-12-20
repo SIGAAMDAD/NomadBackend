@@ -65,7 +65,7 @@ namespace NomadCore.Systems.EventSystem.Domain {
 	/// </example>
 
 	public class GameEvent<TArgs> : IGameEvent<TArgs>
-		where TArgs : IEventArgs
+		where TArgs : struct
 	{
 		/// <summary>
 		/// The name of the event.

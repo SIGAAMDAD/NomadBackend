@@ -71,7 +71,7 @@ namespace NomadCore.Systems.EventSystem.Domain.Registries {
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public IGameEvent<TArgs> GetEvent<TArgs>( InternString name, EventFlags flags = EventFlags.Default )
-			where TArgs : IEventArgs
+			where TArgs : struct
 		{
 			var key = new EventKey(
 				name: name,
@@ -106,7 +106,7 @@ namespace NomadCore.Systems.EventSystem.Domain.Registries {
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public bool TryRemoveEvent<TArgs>( InternString name )
-			where TArgs : IEventArgs
+			where TArgs : struct
 		{
 			var key = new EventKey(
 				name: name,

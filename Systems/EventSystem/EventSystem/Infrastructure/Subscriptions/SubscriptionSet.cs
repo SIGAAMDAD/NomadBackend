@@ -42,7 +42,7 @@ namespace NomadCore.Systems.EventSystem.Infrastructure.Subscriptions {
 	/// </summary>
 
 	internal sealed class SubscriptionSet<TArgs>( IGameEvent<TArgs> eventData, ILoggerService logger, int cleanupInterval = 30 ) : ISubscriptionSet<TArgs>
-		where TArgs : IEventArgs
+		where TArgs : struct
 	{
 		/// <summary>
 		/// The number of pumps before initiating a purge.

@@ -26,8 +26,10 @@ using NomadCore.GameServices;
 
 namespace NomadCore.Systems.EventSystem.Common.Extensions {
 	public static class EventBusExtensions {
-		public static void ChainEvents<TArgs>( this IGameEventBusService eventBus, IGameEvent<TArgs> source, IGameEvent<TArgs> target ) where TArgs : IEventArgs {
-			source.Subscribe( eventBus,  ( in args ) => target.Publish( args ) );
+		public static void ChainEvents<TArgs>( this IGameEventBusService eventBus, IGameEvent<TArgs> source, IGameEvent<TArgs> target )
+			where TArgs : struct
+		{
+			source.Subscribe( eventBus,  target.Publish );
 		}
 	};
 };
