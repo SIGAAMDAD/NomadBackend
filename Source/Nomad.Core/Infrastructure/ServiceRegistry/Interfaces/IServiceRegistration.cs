@@ -23,11 +23,13 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using System;
 
-namespace NomadCore.Infrastructure.ServiceRegistry.Interfaces {
-	public interface IServiceRegistration {
-		public ServiceLifetime ServiceLifetime { get; }
-		public Type ServiceType { get; }
-		public Type ImplementationType { get; }
-		public Func<IServiceLocator, object> Factory { get; }
-	};
+namespace NomadCore.Infrastructure.ServiceRegistry.Interfaces
+{
+    public interface IServiceRegistration
+    {
+        ServiceLifetime ServiceLifetime { get; }
+        Type ServiceType { get; }
+        Type ImplementationType { get; }
+        Func<IServiceLocator, object> Factory { get; }
+    };
 };

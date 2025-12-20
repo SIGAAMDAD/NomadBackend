@@ -26,72 +26,79 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Nomad.Core.Memory {
-	/*
+namespace Nomad.Core.Memory
+{
+    /*
 	===================================================================================
 	
 	StringPool
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
+    /// <summary>
+    /// 
+    /// </summary>
 
-	public sealed class StringPool : IDisposable {
-		private readonly Dictionary<string, int> _stringToIds = new Dictionary<string, int>( 2048 );
-		private readonly Dictionary<int, string> _idToString = new Dictionary<int, string>( 2048 );
+    public sealed class StringPool : IDisposable
+    {
+        private readonly Dictionary<string, int> _stringToIds = new Dictionary<string, int>(2048);
+        private readonly Dictionary<int, string> _idToString = new Dictionary<int, string>(2048);
 
-		[ThreadStatic]
-		private static StringPool? _currentStringPool;
+        [ThreadStatic]
+        private static StringPool? _currentStringPool;
 
-		private static StringPool _current => _currentStringPool ??= new();
+        private static StringPool _current => _currentStringPool ??= new();
 
-		/*
+        /*
 		===============
 		FromInterned
 		===============
 		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="str"></param>
-		/// <returns>Returns the interned string if it exists, null if not found.</returns>
-		public static string? FromInterned( in InternString str ) {
-			return _current._idToString.TryGetValue( str.GetHashCode(), out string? value ) ? value : null;
-		}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns>Returns the interned string if it exists, null if not found.</returns>
+        public static string? FromInterned(in InternString str)
+        {
+            return _current._idToString.TryGetValue(str.GetHashCode(), out string? value) ? value : null;
+        }
 
-		/*
+        /*
 		===============
 		Intern
 		===============
 		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="str"></param>
-		/// <returns></returns>
-		public static InternString Intern( ReadOnlySpan<char> str ) {
-			if ( str.IsEmpty ) {
-				return InternString.Empty;
-			}
-			ref int id = ref CollectionsMarshal.GetValueRefOrAddDefault( _current._stringToIds, new string( str ), out bool exists );
-			if ( !exists ) {
-				id = string.GetHashCode( str );
-				_current._idToString[ id ] = new string( str );
-			}
-			return new InternString( id );
-		}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static InternString Intern(ReadOnlySpan<char> str)
+        {
+            if (str.IsEmpty)
+            {
+                return InternString.Empty;
+            }
+            ref int id = ref CollectionsMarshal.GetValueRefOrAddDefault(_current._stringToIds, new string(str), out bool exists);
+            if (!exists)
+            {
+                id = string.GetHashCode(str);
+                _current._idToString[id] = new string(str);
+            }
+            return new InternString(id);
+        }
 
-		/*
+        /*
 		===============
 		Dispose
 		===============
 		*/
-		public void Dispose() {
-			_stringToIds.Clear();
-			_idToString.Clear();
-			_currentStringPool = null;
-		}
-	};
+        public void Dispose()
+        {
+            _stringToIds.Clear();
+            _idToString.Clear();
+            _currentStringPool = null;
+        }
+    };
 };

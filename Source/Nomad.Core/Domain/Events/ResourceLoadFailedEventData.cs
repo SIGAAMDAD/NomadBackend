@@ -24,22 +24,24 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Domain.Models.Interfaces;
 using System;
 
-namespace NomadCore.Domain.Events {
-	/*
+namespace NomadCore.Domain.Events
+{
+    /*
 	===================================================================================
 	
 	ResourceLoadFailedEventData
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// Event data regarding a resource that failed to load, this structure includes the relevant data for the
-	/// error information.
-	/// </summary>
-	
-	public readonly record struct ResourceLoadFailedEventData<TId>(
-		TId Id,
-		string Error,
-		Exception Exception = null
-	) : IEventArgs { };
+    /// <summary>
+    /// Event data regarding a resource that failed to load, this structure includes the relevant data for the
+    /// error information.
+    /// </summary>
+
+    public readonly record struct ResourceLoadFailedEventData<TId>(
+        TId Id,
+        string Error,
+        Exception Exception = null
+    ) : IEventArgs
+    { };
 };

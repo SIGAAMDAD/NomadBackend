@@ -23,8 +23,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.GameServices;
 
-namespace NomadCore.Interfaces {
-	public interface ICoreService : IGameService {
-		public void InitConfiguration( ICVarSystemService cvarSystem );
-	};
+namespace NomadCore.Interfaces
+{
+    public interface ICoreService : IGameService
+    {
+        void InitConfiguration(ICVarSystemService cvarSystem);
+    };
 };

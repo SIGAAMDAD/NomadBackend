@@ -23,13 +23,16 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Models.Interfaces;
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	public record Error(
-		string Message,
-		ErrorType Type = ErrorType.Validation
-	) : IError {
-		public static Error Create( string message, ErrorType type = ErrorType.Validation ) {
-			return new Error( message, type );
-		}
-	};
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    public record Error(
+        string Message,
+        ErrorType Type = ErrorType.Validation
+    ) : IError
+    {
+        public static Error Create(string message, ErrorType type = ErrorType.Validation)
+        {
+            return new Error(message, type);
+        }
+    };
 };

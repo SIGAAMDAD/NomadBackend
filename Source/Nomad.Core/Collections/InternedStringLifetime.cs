@@ -21,16 +21,18 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace Nomad.Core.Collections {
-	/// <summary>
-	/// The lifetime of an interned string.
-	/// </summary>
-	public enum InternedStringLifetime : byte {
-		Scene,
-		Forever,
+namespace Nomad.Core.Collections
+{
+    /// <summary>
+    /// The lifetime of an interned string.
+    /// </summary>
+    public enum InternedStringLifetime : byte
+    {
+        Scene,
+        Forever,
 
-		Count,
+        Count,
 
-		Default = Scene
-	};
+        Default = Scene
+    };
 };

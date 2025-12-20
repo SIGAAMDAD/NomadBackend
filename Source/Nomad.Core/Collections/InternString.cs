@@ -25,42 +25,44 @@ using Nomad.Core.Memory;
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Nomad.Core.Util {
-	/*
+namespace Nomad.Core.Util
+{
+    /*
 	===================================================================================
 	
 	InternString
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public readonly struct InternString : IEquatable<InternString> {
-		private readonly int _id = 0;
-		
-		public InternString( int id ) => _id = id;
-		public InternString( ReadOnlySpan<char> value ) => _id = StringPool.Intern( value );
+    /// <summary>
+    /// 
+    /// </summary>
 
-		public static readonly InternString Empty = new InternString();
-		
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public bool Equals( InternString other ) => other._id == _id;
+    public readonly struct InternString : IEquatable<InternString>
+    {
+        private readonly int _id = 0;
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public override bool Equals( object? obj ) => obj is InternString other && other._id == _id;
+        public InternString(int id) => _id = id;
+        public InternString(ReadOnlySpan<char> value) => _id = StringPool.Intern(value);
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public override int GetHashCode() => _id;
+        public static readonly InternString Empty = new InternString();
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static implicit operator string( InternString value ) => StringPool.FromInterned( value ) ?? String.Empty;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(InternString other) => other._id == _id;
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static implicit operator int( InternString value ) => value._id;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object? obj) => obj is InternString other && other._id == _id;
 
-		public static bool operator==( InternString left, InternString right ) => left._id == right._id;
-		public static bool operator!=( InternString left, InternString right ) => left._id != right._id;
-	};
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode() => _id;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator string(InternString value) => StringPool.FromInterned(value) ?? String.Empty;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator int(InternString value) => value._id;
+
+        public static bool operator ==(InternString left, InternString right) => left._id == right._id;
+        public static bool operator !=(InternString left, InternString right) => left._id != right._id;
+    };
 };

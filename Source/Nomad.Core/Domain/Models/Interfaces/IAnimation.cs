@@ -21,12 +21,14 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Domain.Models.Interfaces {
-	public interface IAnimation {
-		public string Animation { get; }
-		public float FrameProgress { get; }
-		public int Frame { get; }
-		public float SpeedScale { get; }
-		public bool Playing { get; }
-	};
+namespace NomadCore.Domain.Models.Interfaces
+{
+    public interface IAnimation
+    {
+        string Animation { get; }
+        float FrameProgress { get; }
+        int Frame { get; }
+        float SpeedScale { get; }
+        bool Playing { get; }
+    };
 };

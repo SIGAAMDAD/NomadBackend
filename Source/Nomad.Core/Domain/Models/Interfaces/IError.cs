@@ -23,9 +23,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Models.ValueObjects;
 
-namespace NomadCore.Domain.Models.Interfaces {
-	public interface IError {
-		public string Message { get; }
-		public ErrorType Type { get; }
-	};
+namespace NomadCore.Domain.Models.Interfaces
+{
+    public interface IError
+    {
+        string Message { get; }
+        ErrorType Type { get; }
+    };
 };

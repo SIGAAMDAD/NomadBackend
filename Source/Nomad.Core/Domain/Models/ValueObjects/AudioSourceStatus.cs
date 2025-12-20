@@ -21,15 +21,17 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	/// <summary>
-	/// An <see cref="Interfaces.Audio.IAudioSource"/>'s current state.
-	/// </summary>
-	public enum AudioSourceStatus : byte {
-		Stopped,
-		Playing,
-		Looping,
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    /// <summary>
+    /// An <see cref="Interfaces.Audio.IAudioSource"/>'s current state.
+    /// </summary>
+    public enum AudioSourceStatus : byte
+    {
+        Stopped,
+        Playing,
+        Looping,
 
-		Count
-	};
+        Count
+    };
 };

@@ -23,20 +23,22 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using Nomad.Core.Util;
 
-namespace Nomad.Core.Events {
-	/*
+namespace Nomad.Core.Events
+{
+    /*
 	===================================================================================
 	
 	IGameEventRegistryService
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public interface IGameEventRegistryService {
-		public IGameEvent<TArgs> GetEvent<TArgs>( InternString name, EventFlags flags = EventFlags.Default )
-			where TArgs : struct;
-	};
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public interface IGameEventRegistryService
+    {
+        IGameEvent<TArgs> GetEvent<TArgs>(InternString name, EventFlags flags = EventFlags.Default)
+            where TArgs : struct;
+    };
 };

@@ -30,46 +30,47 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace NomadCore.GameServices {
-	/*
+namespace NomadCore.GameServices
+{
+    /*
 	===================================================================================
 	
 	IResourceCacheService
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// A specialized repository for game/engine assets.
-	/// </summary>
-	
-	public interface IResourceCacheService<TResource, TId> :
-		IReadRepository<ICacheEntry<TResource, TId>, TId>,
-		IAsyncReadRepository<ICacheEntry<TResource, TId>, TId>,
-		IGameService
-		where TResource : notnull, IDisposable
-		where TId : IEquatable<TId>
-	{
-		public long CurrentCacheSize { get; }
+    /// <summary>
+    /// A specialized repository for game/engine assets.
+    /// </summary>
 
-		public IGameEvent<ResourceLoadedEventData<TId>> ResourceLoaded { get; }
-		public IGameEvent<ResourceUnloadedEventData<TId>> ResourceUnloaded { get; }
-		public IGameEvent<ResourceLoadFailedEventData<TId>> ResourceLoadFailed { get; }
+    public interface IResourceCacheService<TResource, TId> :
+        IReadRepository<ICacheEntry<TResource, TId>, TId>,
+        IAsyncReadRepository<ICacheEntry<TResource, TId>, TId>,
+        IGameService
+        where TResource : notnull, IDisposable
+        where TId : IEquatable<TId>
+    {
+        long CurrentCacheSize { get; }
 
-		public ICacheEntry<TResource, TId> GetCached( TId id );
-		public ValueTask<ICacheEntry<TResource, TId>> GetCachedAsync( TId id, IProgress<ResourceLoadProgressEventData<TId>>? progress = null, CancellationToken ct = default );
-		
-		public bool TryGetCached( TId id, out ICacheEntry<TResource, TId>? resource );
-		public void Preload( TId id );
-		public ValueTask PreloadAsync( TId id, CancellationToken ct = default );
-		public void Unload( TId id );
-		public void UnloadAll();
-		public void ClearUnused();
+        IGameEvent<ResourceLoadedEventData<TId>> ResourceLoaded { get; }
+        IGameEvent<ResourceUnloadedEventData<TId>> ResourceUnloaded { get; }
+        IGameEvent<ResourceLoadFailedEventData<TId>> ResourceLoadFailed { get; }
 
-		public void AddReference( TId id );
-		public int GetReferenceCount( TId id );
-		public void ReleaseReference( TId id );
+        ICacheEntry<TResource, TId> GetCached(TId id);
+        ValueTask<ICacheEntry<TResource, TId>> GetCachedAsync(TId id, IProgress<ResourceLoadProgressEventData<TId>>? progress = null, CancellationToken ct = default);
 
-		public void Preload( IEnumerable<TId> ids );
-		public Task PreloadAsync( IEnumerable<TId> ids, CancellationToken ct = default );
-	};
+        bool TryGetCached(TId id, out ICacheEntry<TResource, TId>? resource);
+        void Preload(TId id);
+        ValueTask PreloadAsync(TId id, CancellationToken ct = default);
+        void Unload(TId id);
+        void UnloadAll();
+        void ClearUnused();
+
+        void AddReference(TId id);
+        int GetReferenceCount(TId id);
+        void ReleaseReference(TId id);
+
+        void Preload(IEnumerable<TId> ids);
+        Task PreloadAsync(IEnumerable<TId> ids, CancellationToken ct = default);
+    };
 };

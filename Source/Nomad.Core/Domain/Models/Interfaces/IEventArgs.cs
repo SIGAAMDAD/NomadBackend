@@ -21,20 +21,22 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Domain.Models.Interfaces {
-	/*
+namespace NomadCore.Domain.Models.Interfaces
+{
+    /*
 	===================================================================================
 	
 	IEventArgs
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// The base interface that all event argument structures must inherit from. It is highly advised to do
-	/// a check on the IEventArgs in the callback and throw a <see cref="System.InvalidCastException"/> when
-	/// the type isn't what was expected.
-	/// </summary>
+    /// <summary>
+    /// The base interface that all event argument structures must inherit from. It is highly advised to do
+    /// a check on the IEventArgs in the callback and throw a <see cref="System.InvalidCastException"/> when
+    /// the type isn't what was expected.
+    /// </summary>
 
-	public interface IEventArgs {
-	};
+    public interface IEventArgs
+    {
+    };
 };

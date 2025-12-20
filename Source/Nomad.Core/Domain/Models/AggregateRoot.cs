@@ -24,9 +24,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Interfaces.Common;
 using System;
 
-namespace NomadCore.Abstractions.Models {
-	public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot<TId>
-		where TId : notnull, IEquatable<TId>
-	{
-	};
+namespace NomadCore.Abstractions.Models
+{
+    public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot<TId>
+        where TId : notnull, IEquatable<TId>
+    {
+    };
 };

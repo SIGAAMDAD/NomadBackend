@@ -21,8 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace LobbySystem.Server {
-	public interface INetworkPlayer {
-		//public void Update( in INetworkPacket packet );
-	};
+namespace LobbySystem.Server
+{
+    public interface INetworkPlayer
+    {
+        //public void Update( in INetworkPacket packet );
+    };
 };

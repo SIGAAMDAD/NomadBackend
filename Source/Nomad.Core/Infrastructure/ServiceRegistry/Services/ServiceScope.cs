@@ -25,36 +25,41 @@ using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using System.Collections.Generic;
 using System;
 
-namespace NomadCore.Infrastructure.ServiceRegistry.Services {
-	/*
+namespace NomadCore.Infrastructure.ServiceRegistry.Services
+{
+    /*
 	===================================================================================
 	
 	ServiceScope
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	internal sealed class ServiceScope( IServiceLocator locator ) : IServiceScope {
-		public IServiceLocator ServiceLocator => _locator;
-		private readonly IServiceLocator _locator = locator;
+    /// <summary>
+    /// 
+    /// </summary>
 
-		private readonly Dictionary<Type, object> _scopedInstance = new Dictionary<Type, object>();
+    internal sealed class ServiceScope(IServiceLocator locator) : IServiceScope
+    {
+        public IServiceLocator ServiceLocator => _locator;
+        private readonly IServiceLocator _locator = locator;
 
-		/*
+        private readonly Dictionary<Type, object> _scopedInstance = new Dictionary<Type, object>();
+
+        /*
 		===============
 		Dispose
 		===============
 		*/
-		public void Dispose() {
-			foreach ( var instance in _scopedInstance.Values ) {
-				if ( instance is IDisposable disposable ) {
-					disposable.Dispose();
-				}
-			}
-			_scopedInstance.Clear();
-		}
-	};
+        public void Dispose()
+        {
+            foreach (var instance in _scopedInstance.Values)
+            {
+                if (instance is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
+            _scopedInstance.Clear();
+        }
+    };
 };

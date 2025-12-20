@@ -24,24 +24,25 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using Nomad.Core.Util;
 using System;
 
-namespace Nomad.Core.CVars {
-	/*
+namespace Nomad.Core.CVars
+{
+    /*
 	===================================================================================
 	
 	CVarCreateInfo
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <typeparam name="T">The CVar's value type.</typeparam>
-	
-	public readonly record struct CVarCreateInfo<T>(
-		InternString Name,
-		T DefaultValue,
-		InternString Description,
-		CVarFlags Flags = CVarFlags.None,
-		Func<T, bool>? Validator = null
-	);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T">The CVar's value type.</typeparam>
+
+    public readonly record struct CVarCreateInfo<T>(
+        InternString Name,
+        T DefaultValue,
+        InternString Description,
+        CVarFlags Flags = CVarFlags.None,
+        Func<T, bool>? Validator = null
+    );
 };

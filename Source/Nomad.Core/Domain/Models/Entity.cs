@@ -26,49 +26,51 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace NomadCore.Abstractions.Models {
-	/*
+namespace NomadCore.Abstractions.Models
+{
+    /*
 	===================================================================================
 	
 	Entity
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// The base entity type for all entities in the game.
-	/// </summary>
-	
-	public abstract class Entity<TId> : IEntity<TId>
-		where TId : notnull, IEquatable<TId>
-	{
-		public TId Id { get; protected init; }
-		public DateTime CreatedAt { get; protected init; }
-		public DateTime? ModifiedAt { get; protected set; }
-		public int Version { get; protected set; }
+    /// <summary>
+    /// The base entity type for all entities in the game.
+    /// </summary>
 
-		protected Entity() {
-			CreatedAt = DateTime.UtcNow;
-		}
+    public abstract class Entity<TId> : IEntity<TId>
+        where TId : notnull, IEquatable<TId>
+    {
+        public TId Id { get; protected init; }
+        public DateTime CreatedAt { get; protected init; }
+        public DateTime? ModifiedAt { get; protected set; }
+        public int Version { get; protected set; }
 
-		protected Entity( TId id )
-			: this()
-		{
-			Id = id;
-		}
+        protected Entity()
+        {
+            CreatedAt = DateTime.UtcNow;
+        }
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public bool Equals( IEntity<TId>? other ) => other is not null && Id.Equals( other.Id );
+        protected Entity(TId id)
+            : this()
+        {
+            Id = id;
+        }
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public override bool Equals( object? obj ) => obj is Entity<TId> entity && Equals( entity );
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(IEntity<TId>? other) => other is not null && Id.Equals(other.Id);
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public override int GetHashCode() => Id.GetHashCode();
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object? obj) => obj is Entity<TId> entity && Equals(entity);
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static bool operator ==( Entity<TId>? left, Entity<TId>? right ) => Equals( left, right );
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode() => Id.GetHashCode();
 
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static bool operator !=( Entity<TId>? left, Entity<TId>? right ) => !Equals( left, right );
-	};
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Entity<TId>? left, Entity<TId>? right) => Equals(left, right);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Entity<TId>? left, Entity<TId>? right) => !Equals(left, right);
+    };
 };

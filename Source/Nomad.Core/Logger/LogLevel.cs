@@ -21,36 +21,38 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace Nomad.Core.Logger {
-	/// <summary>
-	/// 
-	/// </summary>
-	public enum LogLevel : byte {
-		/// <summary>
-		/// 
-		/// </summary>
-		Error,
+namespace Nomad.Core.Logger
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum LogLevel : byte
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        Error,
 
-		/// <summary>
-		/// 
-		/// </summary>
-		Warning,
-		
-		/// <summary>
-		/// 
-		/// </summary>
-		Info,
+        /// <summary>
+        /// 
+        /// </summary>
+        Warning,
 
-		/// <summary>
-		/// 
-		/// </summary>
-		Debug,
+        /// <summary>
+        /// 
+        /// </summary>
+        Info,
 
-		/// <summary>
-		/// Pedantic information.
-		/// </summary>
-		Trace,
+        /// <summary>
+        /// 
+        /// </summary>
+        Debug,
 
-		Count
-	};
+        /// <summary>
+        /// Pedantic information.
+        /// </summary>
+        Trace,
+
+        Count
+    };
 };

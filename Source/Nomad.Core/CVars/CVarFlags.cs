@@ -23,45 +23,47 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using System;
 
-namespace Nomad.Core.CVars {
-	/// <summary>
-	/// Various flags that can be applied to a <see cref="CVar"/>.
-	/// </summary>
-	[Flags]
-	public enum CVarFlags : uint {
-		/// <summary>
-		/// The default state for a CVar to be in, nothing fancy happens here.
-		/// </summary>
-		None = 0,
+namespace Nomad.Core.CVars
+{
+    /// <summary>
+    /// Various flags that can be applied to a <see cref="CVar"/>.
+    /// </summary>
+    [Flags]
+    public enum CVarFlags : uint
+    {
+        /// <summary>
+        /// The default state for a CVar to be in, nothing fancy happens here.
+        /// </summary>
+        None = 0,
 
-		/// <summary>
-		/// Cannot change after initialization.
-		/// </summary>
-		ReadOnly = 1 << 0,
+        /// <summary>
+        /// Cannot change after initialization.
+        /// </summary>
+        ReadOnly = 1 << 0,
 
-		/// <summary>
-		/// Created in the console by the user.
-		/// </summary>
-		UserCreated = 1 << 2,
+        /// <summary>
+        /// Created in the console by the user.
+        /// </summary>
+        UserCreated = 1 << 2,
 
-		/// <summary>
-		/// Saves the CVar's value to the configuration file (usually settings.ini).
-		/// </summary>
-		Archive = 1 << 3,
+        /// <summary>
+        /// Saves the CVar's value to the configuration file (usually settings.ini).
+        /// </summary>
+        Archive = 1 << 3,
 
-		/// <summary>
-		/// Hidden from console auto-completion.
-		/// </summary>
-		Hidden = 1 << 4,
+        /// <summary>
+        /// Hidden from console auto-completion.
+        /// </summary>
+        Hidden = 1 << 4,
 
-		/// <summary>
-		/// Can only be modified in debug/developer mode.
-		/// </summary>
-		Developer = 1 << 5,
+        /// <summary>
+        /// Can only be modified in debug/developer mode.
+        /// </summary>
+        Developer = 1 << 5,
 
-		/// <summary>
-		/// Cannot change from the console at all.
-		/// </summary>
-		Init = 1 << 6
-	};
-};
+        /// <summary>
+        /// Cannot change from the console at all.
+        /// </summary>
+        Init = 1 << 6
+    }
+}

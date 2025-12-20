@@ -21,48 +21,52 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
+using Nomad.Core.Events;
 using Nomad.Core.Util;
 using System;
 
-namespace Nomad.Core.CVars {
-	/*
+namespace Nomad.Core.CVars
+{
+    /*
 	===================================================================================
-	
+
 	ICvar
-	
+
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public interface ICVar {
-		public InternString Name { get; }
-		public InternString Description { get; }
-		public CVarType Type { get; }
-		public CVarFlags Flags { get; }
+    /// <summary>
+    ///
+    /// </summary>
 
-		public bool IsSaved { get; }
-		public bool IsReadOnly { get; }
-		public bool IsUserCreated { get; }
-		public bool IsHidden { get; }
+    public interface ICVar
+    {
+        InternString Name { get; }
+        InternString Description { get; }
+        CVarType Type { get; }
+        CVarFlags Flags { get; }
 
-		public Type ValueType { get; }
+        bool IsSaved { get; }
+        bool IsReadOnly { get; }
+        bool IsUserCreated { get; }
+        bool IsHidden { get; }
 
-		public float GetDecimalValue();
-		public int GetIntegerValue();
-		public uint GetUIntegerValue();
-		public string? GetStringValue();
-		public bool GetBooleanValue();
-		public T GetValue<T>();
+        Type ValueType { get; }
 
-		public void Reset();
-		public void SetFromString( string value );
-	};
-	public interface ICVar<T> : ICVar {
-		public T Value { get; set; }
-		public T DefaultValue { get; }
+        float GetDecimalValue();
+        int GetIntegerValue();
+        uint GetUIntegerValue();
+        string? GetStringValue();
+        bool GetBooleanValue();
+        T GetValue<T>();
 
-		public IGameEvent<CVarValueChangedEventData<T>> ValueChanged { get; }
-	};
-};
+        void Reset();
+        void SetFromString(string value);
+    };
+    public interface ICVar<T> : ICVar
+    {
+        T Value { get; set; }
+        T DefaultValue { get; }
+
+        IGameEvent<CVarValueChangedEventData<T>> ValueChanged { get; }
+    }
+}

@@ -25,36 +25,38 @@ using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 using NomadCore.Interfaces;
 
-namespace NomadCore.GameServices {
-	/*
+namespace NomadCore.GameServices
+{
+    /*
 	===================================================================================
 	
 	ICVarSystemService
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public interface ICVarSystemService : IGameService {
-		public void Register( in ICVar cvar );
-		public ICVar<T> Register<T>( CVarCreateInfo<T> createInfo );
-		public void Unregister( in ICVar cvar );
+    /// <summary>
+    /// 
+    /// </summary>
 
-		public bool CVarExists( string name );
+    public interface ICVarSystemService : IGameService
+    {
+        void Register(in ICVar cvar);
+        ICVar<T> Register<T>(CVarCreateInfo<T> createInfo);
+        void Unregister(in ICVar cvar);
 
-		public ICVar<T>? GetCVar<T>( string name );
-		public ICVar? GetCVar( string name );
-		public ICVar[]? GetCVars();
-		public ICVar<T>[]? GetCVarsWithValueType<T>();
-		public ICVar[]? GetCVarsInGroup( string groupName );
+        bool CVarExists(string name);
 
-		public bool GroupExists( string groupName );
+        ICVar<T>? GetCVar<T>(string name);
+        ICVar? GetCVar(string name);
+        ICVar[]? GetCVars();
+        ICVar<T>[]? GetCVarsWithValueType<T>();
+        ICVar[]? GetCVarsInGroup(string groupName);
 
-		public void Restart();
+        bool GroupExists(string groupName);
 
-		public void Load( string configFile );
-		public void Save( string configFile );
-	};
+        void Restart();
+
+        void Load(string configFile);
+        void Save(string configFile);
+    };
 };

@@ -21,15 +21,17 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	/// <summary>
-	/// 
-	/// </summary>
-	public enum EventThreadingPolicy : byte {
-		MainThread,         // always dispatch to Godot's main thread
-		ThreadPool,         // use a .NET ThreadPool
-		Background,         // use dedicated background thread
-		PublisherThread,    // execute on whatever thread publishes
-		Custom
-	};
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public enum EventThreadingPolicy : byte
+    {
+        MainThread,         // always dispatch to Godot's main thread
+        ThreadPool,         // use a .NET ThreadPool
+        Background,         // use dedicated background thread
+        PublisherThread,    // execute on whatever thread publishes
+        Custom
+    };
 };

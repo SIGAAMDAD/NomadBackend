@@ -24,123 +24,138 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using System;
 using System.Collections.Concurrent;
 
-namespace NomadCore.Infrastructure {
-	/*
+namespace NomadCore.Infrastructure
+{
+    /*
 	===================================================================================
 
 	StructPool
 
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <remarks>
-	/// 
-	/// </remarks>
-	/// <param name="createObject"></param>
-	/// <param name="initialSize"></param>
-	/// <param name="maxSize"></param>
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    /// 
+    /// </remarks>
+    /// <param name="createObject"></param>
+    /// <param name="initialSize"></param>
+    /// <param name="maxSize"></param>
 
-	public sealed class StructPool<T> : IDisposable where T : struct {
-		public int AvailableCount => AvailableObjects.Count;
+    public sealed class StructPool<T> : IDisposable where T : struct
+    {
+        public int AvailableCount => AvailableObjects.Count;
 
-		public int TotalCount => _currentSize;
-		private int _currentSize;
+        public int TotalCount => _currentSize;
+        private int _currentSize;
 
-		public int ActiveObjectCount => _currentSize - AvailableObjects.Count;
+        public int ActiveObjectCount => _currentSize - AvailableObjects.Count;
 
-		private readonly ConcurrentBag<T> AvailableObjects = new ConcurrentBag<T>();
-		private readonly Func<T> CreateObject;
+        private readonly ConcurrentBag<T> AvailableObjects = new ConcurrentBag<T>();
+        private readonly Func<T> CreateObject;
 
-		private readonly int MaxSize;
-		private bool IsDisposed;
+        private readonly int MaxSize;
+        private bool IsDisposed;
 
-		public StructPool( Func<T> createObject, int initialSize = 32, int maxSize = int.MaxValue ) {
-			AvailableObjects = new ConcurrentBag<T>();
-			CreateObject = createObject ?? throw new ArgumentNullException( nameof( createObject ) );
-			MaxSize = maxSize;
+        public StructPool(Func<T> createObject, int initialSize = 32, int maxSize = int.MaxValue)
+        {
+            AvailableObjects = new ConcurrentBag<T>();
+            CreateObject = createObject ?? throw new ArgumentNullException(nameof(createObject));
+            MaxSize = maxSize;
 
-			InitializePool( initialSize );
-		}
+            InitializePool(initialSize);
+        }
 
-		/*
+        /*
 		===============
 		Rent
 		===============
 		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		/// <exception cref="InvalidOperationException"></exception>
-		public T Rent() {
-			ObjectDisposedException.ThrowIf( IsDisposed, this );
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public T Rent()
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
 
-			if ( AvailableObjects.TryTake( out T obj ) ) {
-				return obj;
-			}
+            if (AvailableObjects.TryTake(out T obj))
+            {
+                return obj;
+            }
 
-			if ( _currentSize < MaxSize ) {
-				_currentSize++;
-				return CreateObject.Invoke();
-			}
-			throw new InvalidOperationException( "Object pool exhausted and maximum size reached" );
-		}
+            if (_currentSize < MaxSize)
+            {
+                _currentSize++;
+                return CreateObject.Invoke();
+            }
+            throw new InvalidOperationException("Object pool exhausted and maximum size reached");
+        }
 
-		/*
+        /*
 		===============
 		Return
 		===============
 		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="obj"></param>
-		public void Return( in T obj ) {
-			if ( IsDisposed ) {
-				return;
-			}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        public void Return(in T obj)
+        {
+            if (IsDisposed)
+            {
+                return;
+            }
 
-			if ( AvailableObjects.Count < MaxSize ) {
-				AvailableObjects.Add( obj );
-			} else {
-				_currentSize--;
-			}
-		}
+            if (AvailableObjects.Count < MaxSize)
+            {
+                AvailableObjects.Add(obj);
+            }
+            else
+            {
+                _currentSize--;
+            }
+        }
 
-		/*
+        /*
 		===============
 		Dispose
 		===============
 		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		public void Dispose() {
-			if ( IsDisposed ) {
-				return;
-			}
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Dispose()
+        {
+            if (IsDisposed)
+            {
+                return;
+            }
 
-			IsDisposed = true;
-			AvailableObjects.Clear();
-			_currentSize = 0;
-		}
+            IsDisposed = true;
+            AvailableObjects.Clear();
+            _currentSize = 0;
+        }
 
-		/*
+        /*
 		===============
 		InitializePool
 		===============
 		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="initialSize"></param>
-		private void InitializePool( int initialSize ) {
-			for ( int i = 0; i < initialSize && _currentSize < MaxSize; i++ ) {
-				AvailableObjects.Add( CreateObject.Invoke() );
-				_currentSize++;
-			}
-		}
-	};
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="initialSize"></param>
+        private void InitializePool(int initialSize)
+        {
+            for (int i = 0; i < initialSize && _currentSize < MaxSize; i++)
+            {
+                AvailableObjects.Add(CreateObject.Invoke());
+                _currentSize++;
+            }
+        }
+    };
 };

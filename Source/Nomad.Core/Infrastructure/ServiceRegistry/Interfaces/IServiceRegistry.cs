@@ -25,25 +25,27 @@ using NomadCore.Infrastructure.ServiceRegistry.Services;
 using System;
 using System.Collections.Generic;
 
-namespace NomadCore.Infrastructure.ServiceRegistry.Interfaces {
-	public interface IServiceRegistry {
-		public TService Register<TService, TImplementation>( ServiceLifetime lifetime )
-			where TService : class
-			where TImplementation : class, TService;
-		
-		public TService Register<TService>( Func<IServiceLocator, TService> factory, ServiceLifetime lifetime )
-			where TService : class;
-		
-		public TService RegisterSingleton<TService>( TService instance )
-			where TService : class;
-		
-		public TService RegisterSingleton<TService, TImplementation>()
-			where TService : class
-			where TImplementation : class, TService;
+namespace NomadCore.Infrastructure.ServiceRegistry.Interfaces
+{
+    public interface IServiceRegistry
+    {
+        TService Register<TService, TImplementation>(ServiceLifetime lifetime)
+            where TService : class
+            where TImplementation : class, TService;
 
-		public bool IsRegistered<TService>()
-			where TService : class;
-		
-		public IEnumerable<ServiceDescriptor> GetDescriptors();
-	};
+        TService Register<TService>(Func<IServiceLocator, TService> factory, ServiceLifetime lifetime)
+            where TService : class;
+
+        TService RegisterSingleton<TService>(TService instance)
+            where TService : class;
+
+        TService RegisterSingleton<TService, TImplementation>()
+            where TService : class
+            where TImplementation : class, TService;
+
+        bool IsRegistered<TService>()
+            where TService : class;
+
+        IEnumerable<ServiceDescriptor> GetDescriptors();
+    };
 };

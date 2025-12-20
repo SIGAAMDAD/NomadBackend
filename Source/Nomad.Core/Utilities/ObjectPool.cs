@@ -24,63 +24,70 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using System;
 using System.Collections.Concurrent;
 
-namespace NomadCore.Utilities {
-	/*
+namespace NomadCore.Utilities
+{
+    /*
 	===================================================================================
 
 	ObjectPool
 
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
+    /// <summary>
+    /// 
+    /// </summary>
 
-	public class ObjectPool<T> : IDisposable where T : IDisposable, new() {
-		private readonly ConcurrentBag<T> _pool = new ConcurrentBag<T>();
+    public class ObjectPool<T> : IDisposable where T : IDisposable, new()
+    {
+        private readonly ConcurrentBag<T> _pool = new ConcurrentBag<T>();
 
-		/*
+        /*
 		===============
 		Rent
 		===============
 		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <returns></returns>
-		public T Rent() {
-			if ( _pool.TryTake( out var value ) ) {
-				return value;
-			}
-			return new T();
-		}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public T Rent()
+        {
+            if (_pool.TryTake(out var value))
+            {
+                return value;
+            }
+            return new T();
+        }
 
-		/*
+        /*
 		===============
 		Return
 		===============
 		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="obj"></param>
-		public void Return( in T obj ) {
-			_pool.Add( obj );
-		}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        public void Return(in T obj)
+        {
+            _pool.Add(obj);
+        }
 
-		/*
+        /*
 		===============
 		Dispose
 		===============
 		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		public void Dispose() {
-			foreach ( var value in _pool ) {
-				value.Dispose();
-			}
-			_pool.Clear();
-		}
-	};
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (var value in _pool)
+            {
+                value.Dispose();
+            }
+            _pool.Clear();
+        }
+    };
 };

@@ -23,7 +23,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using System;
 
-namespace NomadCore.Interfaces {
-	public interface IGameService : IDisposable {
-	};
-};
+namespace Nomad.Core.Abstractions
+{
+    public interface IGameService : IDisposable
+    {
+    }
+}

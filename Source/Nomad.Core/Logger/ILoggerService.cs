@@ -24,15 +24,17 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Interfaces;
 
-namespace NomadCore.GameServices {
-	public interface ILoggerService : IGameService {
-		public void PrintLine( in string message );
-		public void PrintDebug( in string message );
-		public void PrintWarning( in string message );
-		public void PrintError( in string message );
+namespace NomadCore.GameServices
+{
+    public interface ILoggerService : IGameService
+    {
+        void PrintLine(in string message);
+        void PrintDebug(in string message);
+        void PrintWarning(in string message);
+        void PrintError(in string message);
 
-		public void Init( IServiceLocator locator );
-		public void InitCommandService( IGameService commandService );
-		public void InitCommandLineService( IGameService commandLine );
-	};
+        void Init(IServiceLocator locator);
+        void InitCommandService(IGameService commandService);
+        void InitCommandLineService(IGameService commandLine);
+    };
 };

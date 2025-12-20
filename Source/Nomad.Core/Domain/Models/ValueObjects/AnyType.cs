@@ -21,23 +21,25 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	/// <summary>
-	/// The type of a <see cref="Core.Infrastructure.Any"/>
-	/// </summary>
-	public enum AnyType : byte {
-		Boolean,
-		Int8,
-		Int16,
-		Int32,
-		Int64,
-		UInt8,
-		UInt16,
-		UInt32,
-		UInt64,
-		Float32,
-		Float64,
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    /// <summary>
+    /// The type of a <see cref="Core.Infrastructure.Any"/>
+    /// </summary>
+    public enum AnyType : byte
+    {
+        Boolean,
+        Int8,
+        Int16,
+        Int32,
+        Int64,
+        UInt8,
+        UInt16,
+        UInt32,
+        UInt64,
+        Float32,
+        Float64,
 
-		Count
-	};
+        Count
+    };
 };

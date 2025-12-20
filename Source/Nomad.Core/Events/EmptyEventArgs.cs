@@ -23,23 +23,25 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using System.Runtime.InteropServices;
 
-namespace Nomad.Core.Events {
-	/*
+namespace Nomad.Core.Events
+{
+    /*
 	===================================================================================
-	
+
 	EmptyEventArgs
-	
+
 	===================================================================================
 	*/
-	/// <summary>
-	/// Represents an event callback with no arguments.
-	/// </summary>
+    /// <summary>
+    /// Represents an event callback with no arguments.
+    /// </summary>
 
-	[StructLayout( LayoutKind.Explicit, Pack = 1 )]
-	public readonly record struct EmptyEventArgs{
-		/// <summary>
-		/// Represents no arguments.
-		/// </summary>
-		public static readonly EmptyEventArgs Args = new();
-	};
-};
+    [StructLayout(LayoutKind.Explicit, Pack = 1)]
+    public readonly record struct EmptyEventArgs
+    {
+        /// <summary>
+        /// Represents no arguments.
+        /// </summary>
+        public static readonly EmptyEventArgs Args = new();
+    }
+}

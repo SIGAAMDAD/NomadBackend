@@ -24,21 +24,23 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 
-namespace NomadCore.Domain.Events {
-	/*
+namespace NomadCore.Domain.Events
+{
+    /*
 	===================================================================================
 	
 	ResourceUnloadedEventData
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// Event data regarding a resource that was just evicted from a data cache.
-	/// </summary>
-	
-	public readonly record struct ResourceUnloadedEventData<TId>(
-		TId Id,
-		long FreedMemory,
-		UnloadReason Reason
-	) : IEventArgs { };
+    /// <summary>
+    /// Event data regarding a resource that was just evicted from a data cache.
+    /// </summary>
+
+    public readonly record struct ResourceUnloadedEventData<TId>(
+        TId Id,
+        long FreedMemory,
+        UnloadReason Reason
+    ) : IEventArgs
+    { };
 };

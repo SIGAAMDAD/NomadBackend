@@ -24,22 +24,24 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using Godot;
 using System;
 
-namespace Nomad.Core.Events {
-	/*
+namespace Nomad.Core.Events
+{
+    /*
 	===================================================================================
 	
 	IGodotEventBusService
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public interface IGodotEventBusService : IDisposable {
-		public void ConnectSignal( GodotObject source, StringName signalName, GodotObject target, Action method );
-		public void ConnectSignal( GodotObject source, StringName signalName, GodotObject target, Callable method );
-		public void DisconnectSignal( GodotObject source, StringName signalName );
-		public void CleanupSubscriber( GodotObject source );
-	};
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public interface IGodotEventBusService : IDisposable
+    {
+        void ConnectSignal(GodotObject source, StringName signalName, GodotObject target, Action method);
+        void ConnectSignal(GodotObject source, StringName signalName, GodotObject target, Callable method);
+        void DisconnectSignal(GodotObject source, StringName signalName);
+        void CleanupSubscriber(GodotObject source);
+    };
 };

@@ -24,14 +24,16 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using System;
 using System.Collections.Generic;
 
-namespace NomadCore.Infrastructure.ServiceRegistry.Interfaces {
-	public interface IServiceLocator : IDisposable {
-		public IServiceRegistry Collection { get; }
+namespace NomadCore.Infrastructure.ServiceRegistry.Interfaces
+{
+    public interface IServiceLocator : IDisposable
+    {
+        IServiceRegistry Collection { get; }
 
-		public TService GetService<TService>() where TService : class;
-		public bool TryGetService<TService>( out TService service ) where TService : class;
-		public IEnumerable<TService> GetServices<TService>() where TService : class;
-		public IServiceScope CreateScope();
-		public TService CreateInstance<TService>() where TService : class;
-	};
+        TService GetService<TService>() where TService : class;
+        bool TryGetService<TService>(out TService service) where TService : class;
+        IEnumerable<TService> GetServices<TService>() where TService : class;
+        IServiceScope CreateScope();
+        TService CreateInstance<TService>() where TService : class;
+    };
 };

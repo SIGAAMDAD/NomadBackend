@@ -24,36 +24,55 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using System;
 using System.Runtime.InteropServices;
 
-namespace NomadCore.Infrastructure.Collections {
-	public unsafe class NativeArray<T> : IDisposable where T : unmanaged {
-		public int Length => _length;
-		private readonly int _length;
-		
-		private readonly T *_data;
+namespace Nomad.Core.Collections
+{
+    /// <summary>
+    ///
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public unsafe class NativeArray<T> : IDisposable where T : unmanaged
+    {
+        public int Length => _length;
+        private readonly int _length;
 
-		public ref T this[ int index ] {
-			get {
+        private readonly T* _data;
+
+        public ref T this[int index]
+        {
+            get
+            {
 #if DEBUG
-				if ( index < 0 || index >= _length ) {
-					throw new IndexOutOfRangeException();
-				}
+                if (index < 0 || index >= _length)
+                {
+                    throw new IndexOutOfRangeException();
+                }
 #endif
-				return ref _data[ index ];
-			}
-		}
+                return ref _data[index];
+            }
+        }
 
-		public NativeArray( int length ) {
-			_length = length;
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="length"></param>
+        public NativeArray(int length)
+        {
+            _length = length;
 
-			// assume a cacheline of 64
-			_data = (T *)NativeMemory.AlignedAlloc( (nuint)( _length * Marshal.SizeOf<T>() ), 64 );
-		}
+            // assume a cacheline of 64
+            _data = (T*)NativeMemory.AlignedAlloc((nuint)(_length * Marshal.SizeOf<T>()), 64);
+        }
 
-		public void Dispose() {
-			if ( _data != null ) {
-				NativeMemory.AlignedFree( _data );
-			}
-			GC.SuppressFinalize( this );
-		}
-	};
-};
+        /// <summary>
+        ///
+        /// </summary>
+        public void Dispose()
+        {
+            if (_data != null)
+            {
+                NativeMemory.AlignedFree(_data);
+            }
+            GC.SuppressFinalize(this);
+        }
+    }
+}

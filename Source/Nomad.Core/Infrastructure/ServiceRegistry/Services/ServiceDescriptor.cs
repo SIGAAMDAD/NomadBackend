@@ -25,107 +25,110 @@ using System.Runtime.CompilerServices;
 using System;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 
-namespace NomadCore.Infrastructure.ServiceRegistry.Services {
-	/*
+namespace NomadCore.Infrastructure.ServiceRegistry.Services
+{
+    /*
 	===================================================================================
 	
 	ServiceDescriptor
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public class ServiceDescriptor( Type serviceType, Type? implementationType, ServiceLifetime lifetime, Func<IServiceLocator, object>? factory, object? instance = null ) : IEquatable<ServiceDescriptor> {
-		public Type ServiceType { get; } = serviceType;
-		public Type? ImplementationType { get; } = implementationType;
-		public ServiceLifetime Lifetime { get; } = lifetime;
-		public Func<IServiceLocator, object>? Factory { get; } = factory;
-		public readonly object? Instance = instance;
+    /// <summary>
+    /// 
+    /// </summary>
 
-		/*
+    public class ServiceDescriptor(Type serviceType, Type? implementationType, ServiceLifetime lifetime, Func<IServiceLocator, object>? factory, object? instance = null) : IEquatable<ServiceDescriptor>
+    {
+        public Type ServiceType { get; } = serviceType;
+        public Type? ImplementationType { get; } = implementationType;
+        public ServiceLifetime Lifetime { get; } = lifetime;
+        public Func<IServiceLocator, object>? Factory { get; } = factory;
+        public readonly object? Instance = instance;
+
+        /*
 		===============
 		CreateSingleton
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static ServiceDescriptor CreateSingleton<TService, TImplementation>()
-			where TService : class
-			where TImplementation : class, TService
-		{
-			return new ServiceDescriptor( typeof( TService ), typeof( TImplementation ), ServiceLifetime.Singleton, null );
-		}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ServiceDescriptor CreateSingleton<TService, TImplementation>()
+            where TService : class
+            where TImplementation : class, TService
+        {
+            return new ServiceDescriptor(typeof(TService), typeof(TImplementation), ServiceLifetime.Singleton, null);
+        }
 
-		/*
+        /*
 		===============
 		CreateSingleton
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static ServiceDescriptor CreateSingleton<TService>( TService instance )
-			where TService : class
-		{
-			return new ServiceDescriptor( typeof( TService ), instance.GetType(), ServiceLifetime.Singleton, null, instance );
-		}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ServiceDescriptor CreateSingleton<TService>(TService instance)
+            where TService : class
+        {
+            return new ServiceDescriptor(typeof(TService), instance.GetType(), ServiceLifetime.Singleton, null, instance);
+        }
 
-		/*
+        /*
 		===============
 		CreateSingleton
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static ServiceDescriptor CreateSingleton<TService>( Func<IServiceLocator, TService> factory )
-			where TService : class
-		{
-			return new ServiceDescriptor( typeof( TService ), null, ServiceLifetime.Singleton, provider => factory( provider ) );
-		}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ServiceDescriptor CreateSingleton<TService>(Func<IServiceLocator, TService> factory)
+            where TService : class
+        {
+            return new ServiceDescriptor(typeof(TService), null, ServiceLifetime.Singleton, provider => factory(provider));
+        }
 
-		/*
+        /*
 		===============
 		CreateTransient
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static ServiceDescriptor CreateTransient<TService, TImplementation>()
-			where TService : class
-			where TImplementation : class, TService
-		{
-			return new ServiceDescriptor( typeof( TService ), typeof( TImplementation ), ServiceLifetime.Transient, null );
-		}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ServiceDescriptor CreateTransient<TService, TImplementation>()
+            where TService : class
+            where TImplementation : class, TService
+        {
+            return new ServiceDescriptor(typeof(TService), typeof(TImplementation), ServiceLifetime.Transient, null);
+        }
 
-		/*
+        /*
 		===============
 		CreateTransient
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static ServiceDescriptor CreateTransient<TService>( Func<IServiceLocator, TService> factory )
-			where TService : class
-		{
-			return new ServiceDescriptor( typeof( TService ), null, ServiceLifetime.Transient, provider => factory( provider ) );
-		}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ServiceDescriptor CreateTransient<TService>(Func<IServiceLocator, TService> factory)
+            where TService : class
+        {
+            return new ServiceDescriptor(typeof(TService), null, ServiceLifetime.Transient, provider => factory(provider));
+        }
 
-		/*
+        /*
 		===============
 		CreateScope d
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static ServiceDescriptor CreateScoped<TService, TImplementation>()
-			where TService : class
-			where TImplementation : class, TService
-		{
-			return new ServiceDescriptor( typeof( TService ), typeof( TImplementation ), ServiceLifetime.Scoped, null );
-		}
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ServiceDescriptor CreateScoped<TService, TImplementation>()
+            where TService : class
+            where TImplementation : class, TService
+        {
+            return new ServiceDescriptor(typeof(TService), typeof(TImplementation), ServiceLifetime.Scoped, null);
+        }
 
-		/*
+        /*
 		===============
 		Equals
 		===============
 		*/
-		public bool Equals( ServiceDescriptor? other ) {
-			return other is not null && other.ServiceType == ServiceType && other.ImplementationType == ImplementationType && other.Lifetime == Lifetime;
-		}
-	};
+        public bool Equals(ServiceDescriptor? other)
+        {
+            return other is not null && other.ServiceType == ServiceType && other.ImplementationType == ImplementationType && other.Lifetime == Lifetime;
+        }
+    };
 };

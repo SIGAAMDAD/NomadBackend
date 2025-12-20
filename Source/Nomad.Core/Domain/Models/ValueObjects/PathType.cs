@@ -21,23 +21,25 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	public enum PathType : byte {
-		/// <summary>
-		/// Prefixed with "user://"
-		/// </summary>
-		User,
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    public enum PathType : byte
+    {
+        /// <summary>
+        /// Prefixed with "user://"
+        /// </summary>
+        User,
 
-		/// <summary>
-		/// Prefixed with "res://"
-		/// </summary>
-		Resource,
+        /// <summary>
+        /// Prefixed with "res://"
+        /// </summary>
+        Resource,
 
-		/// <summary>
-		/// Native OS path, usually resolved with ProjectSettings.GlobalizePath
-		/// </summary>
-		Native,
+        /// <summary>
+        /// Native OS path, usually resolved with ProjectSettings.GlobalizePath
+        /// </summary>
+        Native,
 
-		Count
-	};
+        Count
+    };
 };

@@ -21,9 +21,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Interfaces.Common {
-	public interface IFactory<TValue> where TValue : class, new() {
-		public void AddFactory();
-		public TValue CreateObject();
-	};
+namespace NomadCore.Interfaces.Common
+{
+    public interface IFactory<TValue> where TValue : class, new()
+    {
+        void AddFactory();
+        TValue CreateObject();
+    };
 };

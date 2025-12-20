@@ -21,8 +21,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Utilities.Tweens {
-	public interface IEasingFunction {
-		public float Calculate( float t );
-	};
+namespace NomadCore.Utilities.Tweens
+{
+    public interface IEasingFunction
+    {
+        float Calculate(float t);
+    };
 };

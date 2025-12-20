@@ -21,10 +21,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-using NomadCore.Interfaces.Common;
-
-namespace NomadCore.Domain.Models.ValueObjects {
-	public readonly record struct StreamedResourceId(
-		string Path
-	) : IValueObject<StreamedResourceId>;
+namespace Nomad.Core.Abstractions
+{
+    public readonly record struct StreamedResourceId(
+        string Path
+    ) : IValueObject<StreamedResourceId>;
 };

@@ -23,8 +23,10 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using System;
 
-namespace NomadCore.Infrastructure.ServiceRegistry.Interfaces {
-	public interface IServiceScope : IDisposable {
-		public IServiceLocator ServiceLocator { get; }
-	};
+namespace NomadCore.Infrastructure.ServiceRegistry.Interfaces
+{
+    public interface IServiceScope : IDisposable
+    {
+        IServiceLocator ServiceLocator { get; }
+    };
 };

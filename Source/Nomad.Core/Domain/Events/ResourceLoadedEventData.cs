@@ -24,21 +24,23 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Domain.Models.Interfaces;
 using System;
 
-namespace NomadCore.Domain.Events {
-	/*
+namespace NomadCore.Domain.Events
+{
+    /*
 	===================================================================================
 	
 	ResourceLoadedEventData
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public readonly record struct ResourceLoadedEventData<TId>(
-		TId Id,
-		TimeSpan LoadTime,
-		long MemorySize
-	) : IEventArgs { };
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public readonly record struct ResourceLoadedEventData<TId>(
+        TId Id,
+        TimeSpan LoadTime,
+        long MemorySize
+    ) : IEventArgs
+    { };
 };

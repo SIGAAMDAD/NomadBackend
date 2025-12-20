@@ -21,16 +21,18 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	public enum ErrorType : int {
-		Validation,
-		NotFound,
-		Conflict,
-		Unauthorized,
-		Forbidden,
-		BusinessRule,
-		Infrastructure,
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    public enum ErrorType : int
+    {
+        Validation,
+        NotFound,
+        Conflict,
+        Unauthorized,
+        Forbidden,
+        BusinessRule,
+        Infrastructure,
 
-		Count
-	};
+        Count
+    };
 };

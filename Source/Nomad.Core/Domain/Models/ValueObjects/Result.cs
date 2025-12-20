@@ -23,43 +23,49 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Models.Interfaces;
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	/*
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    /*
 	===================================================================================
 	
 	Result<T>
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public readonly record struct Result {
-		public bool IsSuccess { get; init; } = true;
-		public bool IsFailure => !IsSuccess;
-		public IError? Error { get; init; } = null;
+    /// <summary>
+    /// 
+    /// </summary>
 
-		private Result( IError error ) {
-			IsSuccess = false;
-			Error = error;
-		}
+    public readonly record struct Result
+    {
+        public bool IsSuccess { get; init; } = true;
+        public bool IsFailure => !IsSuccess;
+        public IError? Error { get; init; } = null;
 
-		public static Result Success() {
-			return new Result();
-		}
-		public static Result Failure( IError error ) {
-			return new Result( error );
-		}
+        private Result(IError error)
+        {
+            IsSuccess = false;
+            Error = error;
+        }
 
-		/*
+        public static Result Success()
+        {
+            return new Result();
+        }
+        public static Result Failure(IError error)
+        {
+            return new Result(error);
+        }
+
+        /*
 		===============
 		Deconstruct
 		===============
 		*/
-		public void Deconstruct( out bool isSuccess, out IError? error ) {
-			isSuccess = IsSuccess;
-			error = Error;
-		}
-	};
+        public void Deconstruct(out bool isSuccess, out IError? error)
+        {
+            isSuccess = IsSuccess;
+            error = Error;
+        }
+    };
 };

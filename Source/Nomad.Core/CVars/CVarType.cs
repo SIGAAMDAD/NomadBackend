@@ -21,18 +21,20 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace Nomad.Core.CVars {
-	/// <summary>
-	/// A CVar's internal type.
-	/// </summary>
-	public enum CVarType : byte {
-		UInt,		// 32-bit unsigned integer
-		Int,		// 32-bit signed integer
-		Decimal,	// 32-bit float
-		String,
-		Boolean,
-		NodePath,	// a godot node path
+namespace Nomad.Core.CVars
+{
+    /// <summary>
+    /// A CVar's internal type.
+    /// </summary>
+    public enum CVarType : byte
+    {
+        UInt,       // 32-bit unsigned integer
+        Int,        // 32-bit signed integer
+        Decimal,    // 32-bit float
+        String,
+        Boolean,
+        NodePath,   // a godot node path
 
-		Count
-	};
-};
+        Count
+    }
+}

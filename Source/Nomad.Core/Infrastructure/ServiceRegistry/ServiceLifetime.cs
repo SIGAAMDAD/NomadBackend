@@ -21,14 +21,16 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Infrastructure.ServiceRegistry {
-	public enum ServiceLifetime : byte {
-		Singleton,		// one instance per container
-		Transient,		// new instance each time
-		Scoped,			// one instance per scope
-		Thread,			// one instance per thread
-		Scene,			// new instance each time the scene is changed
+namespace NomadCore.Infrastructure.ServiceRegistry
+{
+    public enum ServiceLifetime : byte
+    {
+        Singleton,      // one instance per container
+        Transient,      // new instance each time
+        Scoped,         // one instance per scope
+        Thread,         // one instance per thread
+        Scene,          // new instance each time the scene is changed
 
-		Count
-	};
+        Count
+    };
 };

@@ -23,24 +23,26 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using System;
 
-namespace NomadCore.Abstractions.Models {
-	[Flags]
-	public enum EntityFlags : byte {
-		None = 0,
+namespace NomadCore.Abstractions.Models
+{
+    [Flags]
+    public enum EntityFlags : byte
+    {
+        None = 0,
 
-		/// <summary>
-		/// Call Save() on it to archive it to the save data.
-		/// </summary>
-		Persistent = 1 << 0,
+        /// <summary>
+        /// Call Save() on it to archive it to the save data.
+        /// </summary>
+        Persistent = 1 << 0,
 
-		/// <summary>
-		/// Can be processed.
-		/// </summary>
-		Active = 1 << 1,
+        /// <summary>
+        /// Can be processed.
+        /// </summary>
+        Active = 1 << 1,
 
-		/// <summary>
-		/// Will be drawn when in view.
-		/// </summary>
-		Visible = 1 << 2
-	};
+        /// <summary>
+        /// Will be drawn when in view.
+        /// </summary>
+        Visible = 1 << 2
+    };
 };

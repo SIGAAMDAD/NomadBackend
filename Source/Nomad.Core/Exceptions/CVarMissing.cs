@@ -23,18 +23,20 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using System;
 
-namespace Nomad.Core.Exceptions {
-	/*
+namespace Nomad.Core.Exceptions
+{
+    /*
 	===================================================================================
 	
 	CVarMissing
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public sealed class CVarMissing( string name ) : Exception( $"Missing CVar '{name}'" ) {
-	};
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public sealed class CVarMissing(string name) : Exception($"Missing CVar '{name}'")
+    {
+    };
 };

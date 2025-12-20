@@ -21,12 +21,14 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	public enum ResourceLoadState : byte {
-		Queued,
-		Loading,
-		Processing,
-		Complete,
-		Failed
-	};
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    public enum ResourceLoadState : byte
+    {
+        Queued,
+        Loading,
+        Processing,
+        Complete,
+        Failed
+    };
 };

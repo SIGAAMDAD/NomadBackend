@@ -21,10 +21,12 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Interfaces.Common {
-	public interface IBootstrapper {
-		public void Initialize();
-		public void Start();
-		public void Shutdown();
-	};
-};
+namespace NomadCore.Interfaces.Common
+{
+    public interface IBootstrapper
+    {
+        void Initialize();
+        void Start();
+        void Shutdown();
+    }
+}

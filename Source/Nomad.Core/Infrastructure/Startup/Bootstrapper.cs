@@ -25,12 +25,15 @@ using NomadCore.Infrastructure.ServiceRegistry;
 using NomadCore.Infrastructure.ServiceRegistry.Interfaces;
 using NomadCore.Infrastructure.ServiceRegistry.Services;
 
-namespace NomadCore.Infrastructure.Startup {
-	public sealed class GameBootstrapper {
-		private IServiceRegistry _services;
+namespace NomadCore.Infrastructure.Startup
+{
+    public sealed class GameBootstrapper
+    {
+        private IServiceRegistry _services;
 
-		public void Initialize() {
-			_services = new ServiceCollection();
-		}
-	};
+        public void Initialize()
+        {
+            _services = new ServiceCollection();
+        }
+    };
 };

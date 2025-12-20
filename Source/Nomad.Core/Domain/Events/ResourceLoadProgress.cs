@@ -24,21 +24,23 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using NomadCore.Domain.Models.Interfaces;
 using NomadCore.Domain.Models.ValueObjects;
 
-namespace NomadCore.Domain.Events {
-	/*
+namespace NomadCore.Domain.Events
+{
+    /*
 	===================================================================================
 	
 	ResourceLoadProgressEventData
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public readonly record struct ResourceLoadProgressEventData<TId>(
-		TId Id,
-		float Progress,
-		ResourceLoadState State
-	) : IEventArgs { };
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public readonly record struct ResourceLoadProgressEventData<TId>(
+        TId Id,
+        float Progress,
+        ResourceLoadState State
+    ) : IEventArgs
+    { };
 };

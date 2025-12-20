@@ -23,52 +23,59 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using NomadCore.Domain.Models.Interfaces;
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	/*
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    /*
 	===================================================================================
 	
 	Result<T>
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
-	
-	public record Result<T> {
-		public bool IsSuccess { get; init; }
-		public bool IsFailure => !IsSuccess || Value == null;
-		public T? Value { get; init; }
-		public IError? Error { get; init; }
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
 
-		protected Result( T value ) {
-			IsSuccess = true;
-			Value = value;
-			Error = null;
-		}
-		protected Result( IError error ) {
-			IsSuccess = false;
-			Value = default;
-			Error = error;
-		}
-		
-		public static Result<T> Success( T value ) {
-			return new Result<T>( value );
-		}
-		public static Result<T> Failure( IError error ) {
-			return new Result<T>( error );
-		}
+    public record Result<T>
+    {
+        public bool IsSuccess { get; init; }
+        public bool IsFailure => !IsSuccess || Value == null;
+        public T? Value { get; init; }
+        public IError? Error { get; init; }
 
-		/*
+        protected Result(T value)
+        {
+            IsSuccess = true;
+            Value = value;
+            Error = null;
+        }
+        protected Result(IError error)
+        {
+            IsSuccess = false;
+            Value = default;
+            Error = error;
+        }
+
+        public static Result<T> Success(T value)
+        {
+            return new Result<T>(value);
+        }
+        public static Result<T> Failure(IError error)
+        {
+            return new Result<T>(error);
+        }
+
+        /*
 		===============
 		Deconstruct
 		===============
 		*/
-		public void Deconstruct( out bool isSuccess, out T? value, out IError? error ) {
-			isSuccess = IsSuccess;
-			value = Value;
-			error = Error;
-		}
-	};
+        public void Deconstruct(out bool isSuccess, out T? value, out IError? error)
+        {
+            isSuccess = IsSuccess;
+            value = Value;
+            error = Error;
+        }
+    };
 };

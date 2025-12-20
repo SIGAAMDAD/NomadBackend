@@ -21,7 +21,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Domain.Models.Interfaces {
-	public interface ICommandExecutedEventData : IEventArgs {
-	};
+namespace NomadCore.Domain.Models.Interfaces
+{
+    public interface ICommandExecutedEventData : IEventArgs
+    {
+    };
 };

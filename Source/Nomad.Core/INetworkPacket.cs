@@ -21,7 +21,9 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Systems.LobbySystem.Server {
-	public interface INetworkPacket {
-	};
+namespace NomadCore.Systems.LobbySystem.Server
+{
+    public interface INetworkPacket
+    {
+    };
 };

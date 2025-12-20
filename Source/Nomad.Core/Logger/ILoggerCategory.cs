@@ -23,21 +23,23 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using System;
 
-namespace Nomad.Core.Logger {
-	/*
+namespace Nomad.Core.Logger
+{
+    /*
 	===================================================================================
 	
 	ILoggerCategory
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// 
-	/// </summary>
-	
-	public interface ILoggerCategory : IDisposable {
-		public string Name { get; }
-		public LogLevel Level { get; }
-		public bool Enabled { get; set; }
-	};
+    /// <summary>
+    /// 
+    /// </summary>
+
+    public interface ILoggerCategory : IDisposable
+    {
+        string Name { get; }
+        LogLevel Level { get; }
+        bool Enabled { get; set; }
+    };
 };

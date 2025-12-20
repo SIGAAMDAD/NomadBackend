@@ -21,13 +21,15 @@ terms, you may contact me via email at nyvantil@gmail.com.
 ===========================================================================
 */
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	public enum SourceType : byte {
-		UI,
-		Entity,
-		Ambience,
-		Music,
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    public enum SourceType : byte
+    {
+        UI,
+        Entity,
+        Ambience,
+        Music,
 
-		Count
-	};
+        Count
+    };
 };

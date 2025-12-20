@@ -23,10 +23,13 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using System;
 
-public abstract class PoolableObject : IDisposable {
-	protected virtual void OnDeactivate() {
-	}
+public abstract class PoolableObject : IDisposable
+{
+    protected virtual void OnDeactivate()
+    {
+    }
 
-	public virtual void Dispose() {
-	}
+    public virtual void Dispose()
+    {
+    }
 };

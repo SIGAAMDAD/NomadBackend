@@ -24,30 +24,36 @@ terms, you may contact me via email at nyvantil@gmail.com.
 using System;
 using System.Runtime.InteropServices;
 
-namespace NomadCore.Infrastructure.Collections {
-	public unsafe struct NativeList<T> : IDisposable where T : unmanaged {
-		public int Count => _length;
-		private int _length = 0;
-		
-		public int Capacity => _capacity;
-		private int _capacity = 0;
+namespace NomadCore.Infrastructure.Collections
+{
+    public unsafe struct NativeList<T> : IDisposable where T : unmanaged
+    {
+        public int Count => _length;
+        private int _length = 0;
 
-		private readonly T *_data;
+        public int Capacity => _capacity;
+        private int _capacity = 0;
 
-		public NativeList( int size ) {
-			_data = (T *)NativeMemory.AlignedAlloc( (nuint)( size * Marshal.SizeOf<T>() ), 64 );
-			_length = size;
-			_capacity = size;
-		}
-		
-		public void Dispose() {
-			if ( _data != null ) {
-				NativeMemory.AlignedFree( _data );
-			}
-		}
+        private readonly T* _data;
 
-		private void CheckCapacity( int newCapacity ) {
-			
-		}
-	};
-};
+        public NativeList(int size)
+        {
+            _data = (T*)NativeMemory.AlignedAlloc((nuint)(size * Marshal.SizeOf<T>()), 64);
+            _length = size;
+            _capacity = size;
+        }
+
+        public void Dispose()
+        {
+            if (_data != null)
+            {
+                NativeMemory.AlignedFree(_data);
+            }
+        }
+
+        private void CheckCapacity(int newCapacity)
+        {
+
+        }
+    }
+}

@@ -23,9 +23,11 @@ terms, you may contact me via email at nyvantil@gmail.com.
 
 using Godot;
 
-namespace NomadCore.Interfaces.EntitySystem {
-	public interface INavigationRegion {
-		public bool Enabled { get; set; }
-		public Rid RegionRid { get; }
-	};
+namespace NomadCore.Interfaces.EntitySystem
+{
+    public interface INavigationRegion
+    {
+        bool Enabled { get; set; }
+        Rid RegionRid { get; }
+    };
 };

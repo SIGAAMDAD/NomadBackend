@@ -27,109 +27,114 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace NomadCore.Domain.Models.ValueObjects {
-	/*
+namespace NomadCore.Domain.Models.ValueObjects
+{
+    /*
 	===================================================================================
 	
 	FilePath
 	
 	===================================================================================
 	*/
-	/// <summary>
-	/// A wrapper class that holds a godot res:// or user:// path along with it's platform specific path.
-	/// </summary>
-	
-	public record FilePath : IValueObject<FilePath> {
-		public string OSPath { get; init; }
-		public string GodotPath { get; init; }
-		public PathType Type { get; init; }
+    /// <summary>
+    /// A wrapper class that holds a godot res:// or user:// path along with it's platform specific path.
+    /// </summary>
 
-		private readonly int _hashCode;
+    public record FilePath : IValueObject<FilePath>
+    {
+        public string OSPath { get; init; }
+        public string GodotPath { get; init; }
+        public PathType Type { get; init; }
 
-		/*
+        private readonly int _hashCode;
+
+        /*
 		===============
 		FilePath
 		===============
 		*/
-		public FilePath( string filePath, PathType type ) {
-			ArgumentException.ThrowIfNullOrEmpty( filePath );
+        public FilePath(string filePath, PathType type)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(filePath);
 
-			switch ( type ) {
-				case PathType.Native:
-					OSPath = filePath;
-					GodotPath = ProjectSettings.LocalizePath( OSPath );
-					_hashCode = GodotPath.GetHashCode();
-					break;
-				case PathType.User:
-				case PathType.Resource:
-					GodotPath = filePath;
-					OSPath = ProjectSettings.GlobalizePath( GodotPath );
-					_hashCode = OSPath.GetHashCode();
-					break;
-				default:
-					throw new ArgumentOutOfRangeException( $"Path type '{type}' isn't a valid PathType" );
-			}
-			Type = type;
-		}
+            switch (type)
+            {
+                case PathType.Native:
+                    OSPath = filePath;
+                    GodotPath = ProjectSettings.LocalizePath(OSPath);
+                    _hashCode = GodotPath.GetHashCode();
+                    break;
+                case PathType.User:
+                case PathType.Resource:
+                    GodotPath = filePath;
+                    OSPath = ProjectSettings.GlobalizePath(GodotPath);
+                    _hashCode = OSPath.GetHashCode();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException($"Path type '{type}' isn't a valid PathType");
+            }
+            Type = type;
+        }
 
-		/*
+        /*
 		===============
 		GetFileName
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public string GetFileName() => GodotPath[ GodotPath.LastIndexOf( '/' ).. ];
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string GetFileName() => GodotPath[GodotPath.LastIndexOf('/')..];
 
-		/*
+        /*
 		===============
 		FromUserPath
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static FilePath FromUserPath( string path ) => new FilePath( path, PathType.User );
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FilePath FromUserPath(string path) => new FilePath(path, PathType.User);
 
-		/*
+        /*
 		===============
 		FromResourcePath
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static FilePath FromResourcePath( string path ) => new FilePath( path, PathType.Resource );
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FilePath FromResourcePath(string path) => new FilePath(path, PathType.Resource);
 
-		/*
+        /*
 		===============
 		FromOSPath
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static FilePath FromOSPath( string path ) => new FilePath( path, PathType.Native );
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FilePath FromOSPath(string path) => new FilePath(path, PathType.Native);
 
-		/*
+        /*
 		===============
 		FromNative
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static FilePath FromNative( string path ) => new FilePath( path, PathType.Native );
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FilePath FromNative(string path) => new FilePath(path, PathType.Native);
 
-		/*
+        /*
 		===============
 		GetHashCode
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public override int GetHashCode() => _hashCode;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode() => _hashCode;
 
-		/*
+        /*
 		===============
 		operator string
 		===============
 		*/
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static implicit operator string( FilePath path ) => path.Type switch {
-			PathType.Native => path.OSPath,
-			PathType.Resource or PathType.User => path.GodotPath,
-			_ => throw new IndexOutOfRangeException( nameof( path.Type ) )
-		};
-	};
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator string(FilePath path) => path.Type switch
+        {
+            PathType.Native => path.OSPath,
+            PathType.Resource or PathType.User => path.GodotPath,
+            _ => throw new IndexOutOfRangeException(nameof(path.Type))
+        };
+    };
 };
