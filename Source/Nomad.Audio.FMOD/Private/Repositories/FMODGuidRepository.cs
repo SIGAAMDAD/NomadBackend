@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Nomad.Audio.Fmod.Private.ValueObjects;
 using Nomad.Audio.Fmod.ValueObjects;
+using Nomad.Audio.Interfaces;
 using Nomad.Audio.ValueObjects;
 using Nomad.Core.Abstractions;
 

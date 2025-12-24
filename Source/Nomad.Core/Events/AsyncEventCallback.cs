@@ -25,6 +25,6 @@ namespace Nomad.Core.Events
     /// <param name="eventArgs"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public delegate Task AsyncEventCallback<TArgs>(GameEventArgs<TArgs> args, CancellationToken ct = default)
+    public delegate Task AsyncEventCallback<TArgs>(TArgs args, CancellationToken ct = default)
         where TArgs : struct;
 }

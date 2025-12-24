@@ -1,23 +1,15 @@
 /*
 ===========================================================================
-The Nomad AGPL Source Code
+The Nomad Framework
 Copyright (C) 2025 Noah Van Til
 
-The Nomad Source Code is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v2. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-The Nomad Source Code is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with The Nomad Source Code.  If not, see <http://www.gnu.org/licenses/>.
-
-If you have questions concerning this license or the applicable additional
-terms, you may contact me via email at nyvantil@gmail.com.
+This software is provided "as is", without warranty of any kind,
+express or implied, including but not limited to the warranties
+of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
@@ -26,6 +18,8 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Nomad.Core.Events;
+using Nomad.Core.Logger;
 
 namespace Nomad.Events.Private {
 	/*
@@ -49,7 +43,7 @@ namespace Nomad.Events.Private {
 
 		private readonly ILoggerService _logger = logger;
 
-		private readonly SubscriptionCache<TArgs, IGameEvent<TArgs>.EventCallback> _genericSubscriptions = new( logger );
+		private readonly SubscriptionCache<TArgs, EventCallback<TArgs>> _genericSubscriptions = new( logger );
 		private int _cleanupCounter = 0;
 
 		private readonly HashSet<WeakReference<IGameEvent>> _friends = new HashSet<WeakReference<IGameEvent>>();
@@ -96,7 +90,7 @@ namespace Nomad.Events.Private {
 		/// <param name="subscriber"></param>
 		/// <param name="callback">The method that is called whenever the event triggers.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
-		public void AddSubscription( object subscriber, IGameEvent<TArgs>.EventCallback callback ) {
+		public void AddSubscription( object subscriber, EventCallback<TArgs> callback ) {
 			ArgumentNullException.ThrowIfNull( subscriber );
 			ArgumentNullException.ThrowIfNull( callback );
 
@@ -114,7 +108,7 @@ namespace Nomad.Events.Private {
 		/// <param name="subscriber"></param>
 		/// <param name="callback"></param>
 		/// <exception cref="NotSupportedException"></exception>
-		public void AddSubscriptionAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback ) {
+		public void AddSubscriptionAsync( object subscriber, AsyncEventCallback<TArgs> callback ) {
 			throw new NotSupportedException();
 		}
 
@@ -130,7 +124,7 @@ namespace Nomad.Events.Private {
 		/// <param name="callback">The callback to remove from the subscription list.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the returned index from <see cref="ContainsCallback"/> is invalid.</exception>
-		public void RemoveSubscription( object subscriber, IGameEvent<TArgs>.EventCallback callback ) {
+		public void RemoveSubscription( object subscriber, EventCallback<TArgs> callback ) {
 			ArgumentNullException.ThrowIfNull( subscriber );
 			ArgumentNullException.ThrowIfNull( callback );
 
@@ -148,7 +142,7 @@ namespace Nomad.Events.Private {
 		/// <param name="subscriber"></param>
 		/// <param name="callback"></param>
 		/// <exception cref="NotSupportedException"></exception>
-		public void RemoveSubscriptionAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback ) {
+		public void RemoveSubscriptionAsync( object subscriber, AsyncEventCallback<TArgs> callback ) {
 			throw new NotSupportedException();
 		}
 
@@ -173,7 +167,7 @@ namespace Nomad.Events.Private {
 		===============
 		*/
 		/// <summary>
-		/// "Publishes" an event to all subscribers with thread-safety
+		/// "Publishes" an event to all subscribers with thread-safety.
 		/// </summary>
 		/// <param name="args"></param>
 		public void Pump( in TArgs args ) {
@@ -189,7 +183,10 @@ namespace Nomad.Events.Private {
 			var subscriptions = _genericSubscriptions.Subscriptions;
 			int count = subscriptions.Count;
 			for ( int i = 0; i < count; i++ ) {
-				NotifySubscriber( subscriptions[ i ], in args );
+				var subscription = subscriptions[ i ];
+				if ( subscription.Subscriber.TryGetTarget( out _ ) && subscription.Callback.TryGetTarget( out var callback ) ) {
+					callback.Invoke( in args );
+				}
 			}
 
 			if ( shouldCleanup ) {
@@ -225,7 +222,7 @@ namespace Nomad.Events.Private {
 		/// <param name="callback"></param>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public bool ContainsCallback( object subscriber, IGameEvent<TArgs>.EventCallback callback, out int index ) {
+		public bool ContainsCallback( object subscriber, EventCallback<TArgs> callback, out int index ) {
 			index = -1;
 			return _genericSubscriptions.ContainsCallback( subscriber, callback, out index );
 		}
@@ -243,25 +240,8 @@ namespace Nomad.Events.Private {
 		/// <param name="index"></param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
-		public bool ContainsCallbackAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback, out int index ) {
+		public bool ContainsCallbackAsync( object subscriber, AsyncEventCallback<TArgs> callback, out int index ) {
 			throw new NotSupportedException();
-		}
-
-		/*
-		===============
-		NotifySubscriber
-		===============
-		*/
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="subscription"></param>
-		/// <param name="args"></param>
-		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void NotifySubscriber( in WeakSubscription<TArgs, IGameEvent<TArgs>.EventCallback> subscription, in TArgs args ) {
-			if ( subscription.Subscriber.TryGetTarget( out _ ) && subscription.Callback.TryGetTarget( out var callback ) ) {
-				callback.Invoke( in args );
-			}
 		}
 	};
 };

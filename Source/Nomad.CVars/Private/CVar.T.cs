@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Nomad.Core.Events;
+using Nomad.Core;
 
 namespace Nomad.CVars.Private {
 	/*
@@ -111,10 +112,10 @@ namespace Nomad.CVars.Private {
 		///
 		/// </summary>
 		/// <param name="createInfo"></param>
-		internal CVar( in CVarCreateInfo<T> createInfo ) {
+		internal CVar( IGameEventRegistryService eventFactory, in CVarCreateInfo<T> createInfo ) {
 			_validator = new CVarValidator<T>( createInfo.Validator );
 			if ( !_validator.ValidateCVarType() ) {
-				return;
+				throw new InvalidCastException();
 			}
 			_metadata = new CVarMetadata(
 				createInfo.Name,
@@ -122,6 +123,10 @@ namespace Nomad.CVars.Private {
 				createInfo.Flags,
 				typeof( T ).GetCVarType()
 			);
+
+			_value = createInfo.DefaultValue;
+			_defaultValue = createInfo.DefaultValue;
+			_valueChanged = eventFactory.GetEvent<CVarValueChangedEventArgs<T>>( Constants.Events.CVars.CVAR_VALUE_CHANGED_EVENT );
 		}
 
 		/*

@@ -21,15 +21,15 @@ using Nomad.Audio.ValueObjects;
 namespace Nomad.Audio.Fmod.Private.Entities {
 	/*
 	===================================================================================
-	
+
 	FMODChannel
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
-	
+
 	internal sealed class FMODChannel : IDisposable {
 		public EventInstance Instance;
 		public Vector2 Position;
@@ -40,7 +40,33 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		public int ChannelId;
 		public SoundCategory Category;
 		public float LastStolenTime = 0.0f;
-		public float Volume = 1.0f;
+
+		public ChannelGroupHandle Group;
+
+		public float Volume {
+			get => _volume;
+			set {
+				if ( _volume == value ) {
+					return;
+				}
+				_volume = value;
+				Instance.setVolume( value );
+			}
+		}
+		private float _volume = 1.0f;
+
+		public float Pitch {
+			get => _pitch;
+			set {
+				if ( _pitch == value ) {
+					return;
+				}
+				_pitch = value;
+				Instance.setPitch( value );
+			}
+		}
+		private float _pitch = 1.0f;
+
 		public int PlayCount = 0;
 		public bool IsEssential = false;
 
@@ -106,7 +132,7 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		*/
 		public void SetVolume( float volume ) {
 			if ( Instance.hasHandle() ) {
-				FMODValidator.ValidateCall(Instance.setVolume( volume ) );
+				FMODValidator.ValidateCall( Instance.setVolume( volume ) );
 			}
 		}
 
@@ -117,7 +143,7 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		*/
 		public void SetPosition( Vector2 position ) {
 			if ( Instance.hasHandle() ) {
-				FMODValidator.ValidateCall( Instance.set3DAttributes( new FMOD.ATTRIBUTES_3D{ position = new FMOD.VECTOR{ x = position.X, y = position.Y, z = 0.0f } } ) );
+				FMODValidator.ValidateCall( Instance.set3DAttributes( new FMOD.ATTRIBUTES_3D { position = new FMOD.VECTOR { x = position.X, y = position.Y, z = 0.0f } } ) );
 			}
 		}
 	};

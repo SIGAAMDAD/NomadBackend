@@ -14,11 +14,10 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using Nomad.Core.Abstractions;
-using Nomad.Core.Util;
 
 namespace Nomad.Audio.ValueObjects
 {
     public readonly record struct EventId(
-        InternString Name
+        string Name
     ) : IValueObject<EventId>;
 }

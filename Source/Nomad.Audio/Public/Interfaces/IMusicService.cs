@@ -36,17 +36,6 @@ namespace Nomad.Audio.Interfaces
         /// <summary>
         ///
         /// </summary>
-        /// <param name="name"></param>
-        void AddLoopingTrack(EventId name);
-
-        /// <summary>
-        ///
-        /// </summary>
-        void ClearLoopingTracks();
-
-        /// <summary>
-        ///
-        /// </summary>
-        void Stop();
+        void StopTheme();
     }
 }

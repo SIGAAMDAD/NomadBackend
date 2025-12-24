@@ -13,6 +13,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
+using Nomad.Audio.ValueObjects;
+
 namespace Nomad.Audio.Interfaces
 {
     /// <summary>
@@ -22,8 +24,8 @@ namespace Nomad.Audio.Interfaces
     {
         int ParameterCount { get; }
 
-        void SetParameter(string id, float value);
-        float GetParameter(string id);
-        bool ParameterExists(string id);
+        void SetParameter(ParameterId id, float value);
+        float GetParameter(ParameterId id);
+        bool ParameterExists(ParameterId id);
     }
 }

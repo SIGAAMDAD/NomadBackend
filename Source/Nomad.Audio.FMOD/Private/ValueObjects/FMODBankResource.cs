@@ -13,7 +13,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-using Nomad.Audio.Interfaces;
+using System;
 
 namespace Nomad.Audio.Fmod.Private.ValueObjects {
 	/*
@@ -27,10 +27,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 	///
 	/// </summary>
 
-	internal sealed class FMODBankResource( FMOD.Studio.Bank instance ) : IBankResource {
-		public bool IsValid => _instance.isValid();
-
-		private readonly FMOD.Studio.Bank _instance = instance;
+	internal readonly record struct FMODBankResource( FMOD.Studio.Bank Instance ) : IDisposable {
+		public bool IsValid => Instance.isValid();
 
 		/*
 		===============
@@ -38,10 +36,10 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		===============
 		*/
 		public void Unload() {
-			if ( _instance.isValid() ) {
-				_instance.unloadSampleData();
-				_instance.unload();
-				_instance.clearHandle();
+			if ( Instance.isValid() ) {
+				FMODValidator.ValidateCall( Instance.unloadSampleData() );
+				FMODValidator.ValidateCall( Instance.unload() );
+				Instance.clearHandle();
 			}
 		}
 

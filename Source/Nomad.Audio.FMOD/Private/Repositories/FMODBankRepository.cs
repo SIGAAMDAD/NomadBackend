@@ -14,10 +14,16 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
-using Nomad.Audio.Fmod.Private.Repositories.Loaders;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using Nomad.Audio.Fmod.Private.Services;
+using Nomad.Audio.Fmod.Private.ValueObjects;
 using Nomad.Audio.Fmod.ValueObjects;
 using Nomad.Audio.ValueObjects;
+using Nomad.Core;
 using Nomad.Core.Logger;
+using Nomad.Core.Util;
+using Nomad.CVars;
 
 namespace Nomad.Audio.Fmod.Private.Repositories {
 	/*
@@ -31,37 +37,69 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 	///
 	/// </summary>
 
-	internal sealed class FMODBankRepository : BaseCache<BankComposite, BankId> {
-		private const string BANK_PATH = "res://Assets/Audio/Banks/";
-
+	internal sealed class FMODBankRepository {
 		private readonly FMODBankLoadingStrategy _loadingStrategy;
+		private readonly FMOD.Studio.System _system;
+		private readonly ConcurrentDictionary<BankHandle, FMODBankResource> _cache = new();
+		private readonly ILoggerService _logger;
 
-		public FMODBankRepository( ILoggerService logger, IGameEventRegistryService eventFactory, ICVarSystemService cvarSystem, FMODSystemService fmodSystem, FMODGuidRepository guidRepository )
-			: base( logger, eventFactory, new FMODBankLoader( fmodSystem, guidRepository, logger ) )
-		{
-			var bankLoadingStrategy = cvarSystem.GetCVar<FMODBankLoadingStrategy>( AudioConstants.CVars.FMOD.FMOD_BANK_LOADING_STRATEGY ) ?? throw new CVarMissing( AudioConstants.CVars.FMOD.FMOD_BANK_LOADING_STRATEGY );
+		public FMODBankRepository( ILoggerService logger, ICVarSystemService cvarSystem, FMOD.Studio.System system, FMODGuidRepository guidRepository ) {
+			var bankLoadingStrategy = cvarSystem.GetCVar<FMODBankLoadingStrategy>( Constants.CVars.Audio.FMOD.BANK_LOADING_STRATEGY ) ?? throw new CVarMissing( AudioConstants.CVars.FMOD.FMOD_BANK_LOADING_STRATEGY );
 			_loadingStrategy = bankLoadingStrategy.Value;
 
-			if ( _loadingStrategy == FMODBankLoadingStrategy.Streaming ) {
+			_logger = logger;
+			_system = system;
 
+			if ( _loadingStrategy == FMODBankLoadingStrategy.Streaming ) {
 			}
 		}
 
 		/*
 		===============
-		LoadBanks
+		LoadBank
 		===============
 		*/
-		private void LoadBanks( ILoggerService logger ) {
-			string path = FilePath.FromResourcePath( BANK_PATH ).OSPath;
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="bankPath"></param>
+		/// <param name="bank"></param>
+		/// <returns></returns>
+		public AudioResult LoadBank( string bankPath, out BankHandle bank ) {
+			bank = new( bankPath.GetHashCode() );
+
+			if ( _cache.TryGetValue( bank, out var resource ) ) {
+				return AudioResult.Success;
+			}
+
 			try {
-				var files = System.IO.Directory.GetFiles( path, ".bank, .strings.bank" );
-				for ( int i = 0; i < files.Length; i++ ) {
-				}
-			} catch ( Exception e ) {
-				logger.PrintError( $"FMODBankRepository.LoadBanks: error loading banks from {path}\n{e}" );
+				FMODValidator.ValidateCall( _system.loadBankFile( FilePath.FromResourcePath( bankPath ).OSPath, FMOD.Studio.LOAD_BANK_FLAGS.NORMAL, out var bankResource ) );
+				_cache[ bank ] = new FMODBankResource( bankResource );
+				_logger.PrintLine( $"FMODBankRepository.LoadBank: loaded bank '{bankPath}'." );
+			} catch ( FMODException e ) {
+				_logger.PrintError( $"FMODBankRepository.LoadBank: failed to load bank '{bankPath}' - {e.Error}\n{e}" );
 				throw;
 			}
+
+			return AudioResult.Success;
+		}
+
+		/*
+		===============
+		UnloadBank
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="bank"></param>
+		/// <returns></returns>
+		public AudioResult UnloadBank( BankHandle bank ) {
+			if ( !_cache.TryGetValue( bank, out var resource ) ) {
+				return AudioResult.Error_ResourceNotFound;
+			}
+
+			return AudioResult.Success;
 		}
 	};
 };

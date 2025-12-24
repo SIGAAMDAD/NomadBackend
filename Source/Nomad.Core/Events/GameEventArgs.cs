@@ -22,7 +22,7 @@ namespace Nomad.Core.Events
     /// </summary>
     /// <typeparam name="TArgs"></typeparam>
     /// <param name="data"></param>
-    public readonly struct GameEventArgs<TArgs>(TArgs data) where TArgs : struct
+    public readonly struct GameEventArgs<TArgs>(in TArgs data) where TArgs : struct
     {
         public TArgs Data { get; } = data;
         public DateTime Timestamp { get; } = DateTime.Now;

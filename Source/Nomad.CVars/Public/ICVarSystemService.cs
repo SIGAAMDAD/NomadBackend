@@ -34,7 +34,7 @@ namespace Nomad.CVars
         /// <typeparam name="T"></typeparam>
         /// <param name="createInfo"></param>
         /// <returns></returns>
-        ICVar<T> Register<T>(CVarCreateInfo<T> createInfo);
+        ICVar<T> Register<T>(in CVarCreateInfo<T> createInfo);
 
         /// <summary>
         ///

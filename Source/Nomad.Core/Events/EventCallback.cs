@@ -20,6 +20,6 @@ namespace Nomad.Core.Events
     /// </summary>
     /// <typeparam name="TArgs"></typeparam>
     /// <param name="eventArgs"></param>
-    public delegate void EventCallback<TArgs>(in GameEventArgs<TArgs> args)
+    public delegate void EventCallback<TArgs>(in TArgs args)
         where TArgs : struct;
 }

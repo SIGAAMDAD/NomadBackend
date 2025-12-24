@@ -30,7 +30,7 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	/// Manages FMOD listener instances.
 	/// </summary>
 
-	internal sealed class FMODListenerService( ILoggerService logger, FMODSystemService system ) : IListenerService {
+	internal sealed class FMODListenerService( ILoggerService logger, FMODDevice system ) : IListenerService {
 		private const int MAX_LISTENERS = 4;
 
 		public int ListenerCount => _listenerCount;
@@ -40,7 +40,7 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		private IListener? _currentListener;
 
 		private readonly FMODListener?[] _listeners = new FMODListener[ MAX_LISTENERS ];
-		private readonly FMODSystemService _system = system;
+		private readonly FMODDevice _system = system;
 		private readonly ILoggerService _logger = logger;
 
 		/*

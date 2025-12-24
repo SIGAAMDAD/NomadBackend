@@ -26,15 +26,15 @@ using System;
 namespace Nomad.Events.Private {
 	/*
 	===================================================================================
-	
+
 	WeakSubscription
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
-	
+
 	internal sealed class WeakSubscription<TArgs, TCallback>( object subscriber, TCallback callback )
 		where TArgs : struct
 		where TCallback : class

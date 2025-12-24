@@ -14,12 +14,11 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using Godot;
-using Nomad.Audio.Fmod.Private.Entities;
 using Nomad.Audio.Fmod.Private.Repositories;
 using Nomad.Audio.Interfaces;
 using Nomad.Audio.ValueObjects;
 
-namespace Nomad.Audio.Fmod.Entities
+namespace Nomad.Audio.Fmod.Private.Entities
 {
     /*
 	===================================================================================
@@ -51,29 +50,56 @@ namespace Nomad.Audio.Fmod.Entities
 
         public float Volume
         {
-            get => _volume;
+            get => _channel != null ? _channel.Volume : 0.0f;
             set
             {
-                if (_volume == value)
+                if (_channel == null)
                 {
                     return;
                 }
-                _volume = value;
-                _channel?.SetVolume(value);
+                _channel.Volume = value;
             }
         }
-        private float _volume = 0.0f;
 
-        public string Category => category;
+        public float Pitch
+        {
+            get => _channel != null ? _channel.Pitch : 0.0f;
+            set
+            {
+                if (_channel == null)
+                {
+                    return;
+                }
+                _channel.Pitch = value;
+            }
+        }
 
-        public AudioSourceStatus Status => _status;
-        private AudioSourceStatus _status = AudioSourceStatus.Stopped;
+        public ChannelGroupHandle Group
+        {
+            get => _channel != null ? _channel.Group : new(0);
+            set
+            {
+                if (_channel == null)
+                {
+                    return;
+                }
+                _channel.Group = value;
+            }
+        }
+
+        public ChannelStatus Status => _status;
+        private ChannelStatus _status = ChannelStatus.Stopped;
 
         private FMODChannel? _channel;
 
-        public void PlaySound(EventId id, float priority = 0.5f)
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="soundPath"></param>
+        /// <param name="priority"></param>
+        public void PlaySound(string soundPath, float priority = 0.5f)
         {
-            _channel = channelRepository.AllocateChannel(id, _position, category, priority, false);
+            _channel = channelRepository.AllocateChannel(new(new(soundPath)), _position, category, priority, false);
         }
     };
 };

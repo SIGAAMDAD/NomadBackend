@@ -74,6 +74,7 @@ namespace Nomad.CVars.Private.Repositories {
 			} catch ( Exception e ) {
 				_writer?.Close();
 				logger.PrintError( $"...Error writing configuration file {configFile}: {e.Message}" );
+				throw;
 			}
 		}
 

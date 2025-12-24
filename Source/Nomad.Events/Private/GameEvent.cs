@@ -1,23 +1,15 @@
 /*
 ===========================================================================
-The Nomad AGPL Source Code
+The Nomad Framework
 Copyright (C) 2025 Noah Van Til
 
-The Nomad Source Code is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v2. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-The Nomad Source Code is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with The Nomad Source Code.  If not, see <http://www.gnu.org/licenses/>.
-
-If you have questions concerning this license or the applicable additional
-terms, you may contact me via email at nyvantil@gmail.com.
+This software is provided "as is", without warranty of any kind,
+express or implied, including but not limited to the warranties
+of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
@@ -25,6 +17,9 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Nomad.Core.Events;
+using Nomad.Core.Logger;
+using Nomad.Core.Util;
 
 namespace Nomad.Events.Private {
 	/*
@@ -67,6 +62,15 @@ namespace Nomad.Events.Private {
 
 		public int Id => _hashCode;
 		private readonly int _hashCode;
+
+		public event EventCallback<TArgs> OnPublished {
+			add => Subscribe( this, value );
+			remove => Unsubscribe( this, value );
+		}
+		public event AsyncEventCallback<TArgs> OnPublishedAsync {
+			add => SubscribeAsync( this, value );
+			remove => UnsubscribeAsync( this, value );
+		}
 
 		private readonly ISubscriptionSet<TArgs> _subscriptions;
 
@@ -152,6 +156,7 @@ namespace Nomad.Events.Private {
 			await _subscriptions.PumpAsync( eventArgs, ct );
 		}
 
+
 		/*
 		===============
 		Subscribe
@@ -160,15 +165,51 @@ namespace Nomad.Events.Private {
 		/// <summary>
 		/// Adds a new subscription to the GameEvent utilizing the <see cref="GameEventBus"/>.
 		/// </summary>
-		/// <param name="subscriber"></param>
 		/// <param name="callback">The lambda or method to call when the event is triggered.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void Subscribe( object subscriber, IGameEvent<TArgs>.EventCallback callback ) {
-			ArgumentNullException.ThrowIfNull( subscriber );
+		public IDisposable Subscribe( EventCallback<TArgs> callback ) {
 			ArgumentNullException.ThrowIfNull( callback );
 
-			_subscriptions.AddSubscription( subscriber, callback );
+			_subscriptions.AddSubscription( this, callback );
+			return this;
+		}
+
+		/*
+		===============
+		Subscribe
+		===============
+		*/
+		/// <summary>
+		/// Adds a new subscription to the GameEvent utilizing the <see cref="GameEventBus"/>.
+		/// </summary>
+		/// <param name="callback">The lambda or method to call when the event is triggered.</param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public IDisposable SubscribeAsync( AsyncEventCallback<TArgs> callback ) {
+			ArgumentNullException.ThrowIfNull( callback );
+
+			_subscriptions.AddSubscriptionAsync( this, callback );
+			return this;
+		}
+
+		/*
+		===============
+		Subscribe
+		===============
+		*/
+		/// <summary>
+		/// Adds a new subscription to the GameEvent utilizing the <see cref="GameEventBus"/>.
+		/// </summary>
+		/// <param name="owner"></param>
+		/// <param name="callback">The lambda or method to call when the event is triggered.</param>
+		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public void Subscribe( object owner, EventCallback<TArgs> callback ) {
+			ArgumentNullException.ThrowIfNull( owner );
+			ArgumentNullException.ThrowIfNull( callback );
+
+			_subscriptions.AddSubscription( owner, callback );
 		}
 
 		/*
@@ -179,15 +220,15 @@ namespace Nomad.Events.Private {
 		/// <summary>
 		/// Adds a new subscription to the GameEvent utilizing the <see cref="GameEventBus"/>.
 		/// </summary>
-		/// <param name="subscriber"></param>
+		/// <param name="owner"></param>
 		/// <param name="callback">The lambda or method to call when the event is triggered.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SubscribeAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback ) {
-			ArgumentNullException.ThrowIfNull( subscriber );
+		public void SubscribeAsync( object owner, AsyncEventCallback<TArgs> callback ) {
+			ArgumentNullException.ThrowIfNull( owner );
 			ArgumentNullException.ThrowIfNull( callback );
 
-			_subscriptions.AddSubscriptionAsync( subscriber, callback );
+			_subscriptions.AddSubscriptionAsync( owner, callback );
 		}
 
 		/*
@@ -198,15 +239,15 @@ namespace Nomad.Events.Private {
 		/// <summary>
 		/// Removes the <paramref name="callback"/> from the GameEvent utilizing the <see cref="GameEventBus"/>.
 		/// </summary>
-		/// <param name="subscriber"></param>
+		/// <param name="owner"></param>
 		/// <param name="callback">The lambda or method to remove from the subscription list.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void Unsubscribe( object subscriber, IGameEvent<TArgs>.EventCallback callback ) {
-			ArgumentNullException.ThrowIfNull( subscriber );
+		public void Unsubscribe( object owner, EventCallback<TArgs> callback ) {
+			ArgumentNullException.ThrowIfNull( owner );
 			ArgumentNullException.ThrowIfNull( callback );
 
-			_subscriptions.RemoveSubscription( subscriber, callback );
+			_subscriptions.RemoveSubscription( owner, callback );
 		}
 
 		/*
@@ -217,15 +258,15 @@ namespace Nomad.Events.Private {
 		/// <summary>
 		/// Removes the <paramref name="callback"/> from the GameEvent utilizing the <see cref="GameEventBus"/>.
 		/// </summary>
-		/// <param name="subscriber"></param>
+		/// <param name="owner"></param>
 		/// <param name="callback">The lambda or method to remove from the subscription list.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void UnsubscribeAsync( object subscriber, IGameEvent<TArgs>.AsyncCallback callback ) {
-			ArgumentNullException.ThrowIfNull( subscriber );
+		public void UnsubscribeAsync( object owner, AsyncEventCallback<TArgs> callback ) {
+			ArgumentNullException.ThrowIfNull( owner );
 			ArgumentNullException.ThrowIfNull( callback );
 
-			_subscriptions.RemoveSubscriptionAsync( subscriber, callback );
+			_subscriptions.RemoveSubscriptionAsync( owner, callback );
 		}
 
 		/*
@@ -236,14 +277,64 @@ namespace Nomad.Events.Private {
 		/// <summary>
 		///
 		/// </summary>
-		/// <param name="subscriber"></param>
+		/// <param name="owner"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void UnsubscribeAll( object subscriber ) {
-			ArgumentNullException.ThrowIfNull( subscriber );
+		public void UnsubscribeAll( object owner ) {
+			ArgumentNullException.ThrowIfNull( owner );
 
-			_subscriptions.RemoveAllForSubscriber( subscriber );
+			_subscriptions.RemoveAllForSubscriber( owner );
 		}
 
-		public virtual EventThreadingPolicy GetDefaultThreadingPolicy() => EventThreadingPolicy.MainThread;
+		/*
+		===============
+		operator +=
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="callback"></param>
+		public void operator +=( EventCallback<TArgs> callback ) {
+			_subscriptions.AddSubscription( this, callback );
+		}
+
+		/*
+		===============
+		operator +=
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="callback"></param>
+		public void operator +=( AsyncEventCallback<TArgs> callback ) {
+			_subscriptions.AddSubscriptionAsync( this, callback );
+		}
+
+		/*
+		===============
+		operator -=
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="callback"></param>
+		public void operator -=( EventCallback<TArgs> callback ) {
+			_subscriptions.RemoveSubscription( this, callback );
+		}
+
+		/*
+		===============
+		operator -=
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="callback"></param>
+		public void operator -=( AsyncEventCallback<TArgs> callback ) {
+			_subscriptions.RemoveSubscriptionAsync( this, callback );
+		}
 	};
 };

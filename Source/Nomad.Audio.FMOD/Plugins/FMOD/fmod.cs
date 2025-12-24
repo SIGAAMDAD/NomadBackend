@@ -13,6 +13,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Godot;
 
 namespace FMOD
 {
@@ -718,47 +719,47 @@ namespace FMOD
         public SOUND_PCMREAD_CALLBACK pcmreadcallback
         {
             set { pcmreadcallback_internal = (value == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value)); }
-            get { return pcmreadcallback_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<SOUND_PCMREAD_CALLBACK>(pcmreadcallback_internal); }
+            readonly get { return pcmreadcallback_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<SOUND_PCMREAD_CALLBACK>(pcmreadcallback_internal); }
         }
         public SOUND_PCMSETPOS_CALLBACK pcmsetposcallback
         {
             set { pcmsetposcallback_internal = (value == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value)); }
-            get { return pcmsetposcallback_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<SOUND_PCMSETPOS_CALLBACK>(pcmsetposcallback_internal); }
+            readonly get { return pcmsetposcallback_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<SOUND_PCMSETPOS_CALLBACK>(pcmsetposcallback_internal); }
         }
         public SOUND_NONBLOCK_CALLBACK nonblockcallback
         {
             set { nonblockcallback_internal = (value == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value)); }
-            get { return nonblockcallback_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<SOUND_NONBLOCK_CALLBACK>(nonblockcallback_internal); }
+            readonly get { return nonblockcallback_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<SOUND_NONBLOCK_CALLBACK>(nonblockcallback_internal); }
         }
         public FILE_OPEN_CALLBACK fileuseropen
         {
             set { fileuseropen_internal = (value == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value)); }
-            get { return fileuseropen_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_OPEN_CALLBACK>(fileuseropen_internal); }
+            readonly get { return fileuseropen_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_OPEN_CALLBACK>(fileuseropen_internal); }
         }
         public FILE_CLOSE_CALLBACK fileuserclose
         {
             set { fileuserclose_internal = (value == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value)); }
-            get { return fileuserclose_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_CLOSE_CALLBACK>(fileuserclose_internal); }
+            readonly get { return fileuserclose_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_CLOSE_CALLBACK>(fileuserclose_internal); }
         }
         public FILE_READ_CALLBACK fileuserread
         {
             set { fileuserread_internal = (value == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value)); }
-            get { return fileuserread_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_READ_CALLBACK>(fileuserread_internal); }
+            readonly get { return fileuserread_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_READ_CALLBACK>(fileuserread_internal); }
         }
         public FILE_SEEK_CALLBACK fileuserseek
         {
             set { fileuserseek_internal = (value == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value)); }
-            get { return fileuserseek_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_SEEK_CALLBACK>(fileuserseek_internal); }
+            readonly get { return fileuserseek_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_SEEK_CALLBACK>(fileuserseek_internal); }
         }
         public FILE_ASYNCREAD_CALLBACK fileuserasyncread
         {
             set { fileuserasyncread_internal = (value == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value)); }
-            get { return fileuserasyncread_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_ASYNCREAD_CALLBACK>(fileuserasyncread_internal); }
+            readonly get { return fileuserasyncread_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_ASYNCREAD_CALLBACK>(fileuserasyncread_internal); }
         }
         public FILE_ASYNCCANCEL_CALLBACK fileuserasynccancel
         {
             set { fileuserasynccancel_internal = (value == null ? IntPtr.Zero : Marshal.GetFunctionPointerForDelegate(value)); }
-            get { return fileuserasynccancel_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_ASYNCCANCEL_CALLBACK>(fileuserasynccancel_internal); }
+            readonly get { return fileuserasynccancel_internal == IntPtr.Zero ? null : Marshal.GetDelegateForFunctionPointer<FILE_ASYNCCANCEL_CALLBACK>(fileuserasynccancel_internal); }
         }
 
     }
@@ -1051,128 +1052,135 @@ namespace FMOD
     */
     public struct System
     {
-        public RESULT release()
+        public readonly RESULT release()
         {
             return FMOD5_System_Release(this.handle);
         }
 
         // Setup functions.
-        public RESULT setOutput(OUTPUTTYPE output)
+        public readonly RESULT setOutput(OUTPUTTYPE output)
         {
             return FMOD5_System_SetOutput(this.handle, output);
         }
-        public RESULT getOutput(out OUTPUTTYPE output)
+        public readonly RESULT getOutput(out OUTPUTTYPE output)
         {
             return FMOD5_System_GetOutput(this.handle, out output);
         }
-        public RESULT getNumDrivers(out int numdrivers)
+        public readonly RESULT getNumDrivers(out int numdrivers)
         {
             return FMOD5_System_GetNumDrivers(this.handle, out numdrivers);
         }
-        public RESULT getDriverInfo(int id, out string name, int namelen, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels)
+        public readonly RESULT getDriverInfo(int id, out ReadOnlyMemory<char> name, int namelen, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels)
         {
-            IntPtr stringMem = Marshal.AllocHGlobal(namelen);
-
-            RESULT result = FMOD5_System_GetDriverInfo(this.handle, id, stringMem, namelen, out guid, out systemrate, out speakermode, out speakermodechannels);
-            using (StringHelper.ThreadSafeEncoding encoding = StringHelper.GetFreeHelper())
+            unsafe
             {
-                name = encoding.stringFromNative(stringMem);
-            }
-            Marshal.FreeHGlobal(stringMem);
+                char* buffer = stackalloc char[namelen];
+                RESULT result = FMOD5_System_GetDriverInfo(this.handle, id, (IntPtr)buffer, namelen, out guid, out systemrate, out speakermode, out speakermodechannels);
 
-            return result;
+                int length = 0;
+                while (*(buffer + length) != 0)
+                {
+                    length++;
+                }
+
+                char[] stringMem = new char[length];
+                Marshal.Copy((IntPtr)buffer, stringMem, 0, length);
+
+                name = new ReadOnlyMemory<char>(stringMem, 0, length);
+                return result;
+            }
         }
-        public RESULT getDriverInfo(int id, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels)
+        public readonly RESULT getDriverInfo(int id, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels)
         {
             return FMOD5_System_GetDriverInfo(this.handle, id, IntPtr.Zero, 0, out guid, out systemrate, out speakermode, out speakermodechannels);
         }
-        public RESULT setDriver(int driver)
+        public readonly RESULT setDriver(int driver)
         {
             return FMOD5_System_SetDriver(this.handle, driver);
         }
-        public RESULT getDriver(out int driver)
+        public readonly RESULT getDriver(out int driver)
         {
             return FMOD5_System_GetDriver(this.handle, out driver);
         }
-        public RESULT setSoftwareChannels(int numsoftwarechannels)
+        public readonly RESULT setSoftwareChannels(int numsoftwarechannels)
         {
             return FMOD5_System_SetSoftwareChannels(this.handle, numsoftwarechannels);
         }
-        public RESULT getSoftwareChannels(out int numsoftwarechannels)
+        public readonly RESULT getSoftwareChannels(out int numsoftwarechannels)
         {
             return FMOD5_System_GetSoftwareChannels(this.handle, out numsoftwarechannels);
         }
-        public RESULT setSoftwareFormat(int samplerate, SPEAKERMODE speakermode, int numrawspeakers)
+        public readonly RESULT setSoftwareFormat(int samplerate, SPEAKERMODE speakermode, int numrawspeakers)
         {
             return FMOD5_System_SetSoftwareFormat(this.handle, samplerate, speakermode, numrawspeakers);
         }
-        public RESULT getSoftwareFormat(out int samplerate, out SPEAKERMODE speakermode, out int numrawspeakers)
+        public readonly RESULT getSoftwareFormat(out int samplerate, out SPEAKERMODE speakermode, out int numrawspeakers)
         {
             return FMOD5_System_GetSoftwareFormat(this.handle, out samplerate, out speakermode, out numrawspeakers);
         }
-        public RESULT setDSPBufferSize(uint bufferlength, int numbuffers)
+        public readonly RESULT setDSPBufferSize(uint bufferlength, int numbuffers)
         {
             return FMOD5_System_SetDSPBufferSize(this.handle, bufferlength, numbuffers);
         }
-        public RESULT getDSPBufferSize(out uint bufferlength, out int numbuffers)
+        public readonly RESULT getDSPBufferSize(out uint bufferlength, out int numbuffers)
         {
             return FMOD5_System_GetDSPBufferSize(this.handle, out bufferlength, out numbuffers);
         }
-        public RESULT setFileSystem(FILE_OPEN_CALLBACK useropen, FILE_CLOSE_CALLBACK userclose, FILE_READ_CALLBACK userread, FILE_SEEK_CALLBACK userseek, FILE_ASYNCREAD_CALLBACK userasyncread, FILE_ASYNCCANCEL_CALLBACK userasynccancel, int blockalign)
+        public readonly RESULT setFileSystem(FILE_OPEN_CALLBACK useropen, FILE_CLOSE_CALLBACK userclose, FILE_READ_CALLBACK userread, FILE_SEEK_CALLBACK userseek, FILE_ASYNCREAD_CALLBACK userasyncread, FILE_ASYNCCANCEL_CALLBACK userasynccancel, int blockalign)
         {
             return FMOD5_System_SetFileSystem(this.handle, useropen, userclose, userread, userseek, userasyncread, userasynccancel, blockalign);
         }
-        public RESULT attachFileSystem(FILE_OPEN_CALLBACK useropen, FILE_CLOSE_CALLBACK userclose, FILE_READ_CALLBACK userread, FILE_SEEK_CALLBACK userseek)
+        public readonly RESULT attachFileSystem(FILE_OPEN_CALLBACK useropen, FILE_CLOSE_CALLBACK userclose, FILE_READ_CALLBACK userread, FILE_SEEK_CALLBACK userseek)
         {
             return FMOD5_System_AttachFileSystem(this.handle, useropen, userclose, userread, userseek);
         }
-        public RESULT setAdvancedSettings(ref ADVANCEDSETTINGS settings)
+        public readonly RESULT setAdvancedSettings(ref ADVANCEDSETTINGS settings)
         {
             settings.cbSize = Marshal.SizeOf<ADVANCEDSETTINGS>();
             return FMOD5_System_SetAdvancedSettings(this.handle, ref settings);
         }
-        public RESULT getAdvancedSettings(ref ADVANCEDSETTINGS settings)
+        public readonly RESULT getAdvancedSettings(ref ADVANCEDSETTINGS settings)
         {
             settings.cbSize = Marshal.SizeOf<ADVANCEDSETTINGS>();
             return FMOD5_System_GetAdvancedSettings(this.handle, ref settings);
         }
-        public RESULT setCallback(SYSTEM_CALLBACK callback, SYSTEM_CALLBACK_TYPE callbackmask = SYSTEM_CALLBACK_TYPE.ALL)
+        public readonly RESULT setCallback(SYSTEM_CALLBACK callback, SYSTEM_CALLBACK_TYPE callbackmask = SYSTEM_CALLBACK_TYPE.ALL)
         {
             return FMOD5_System_SetCallback(this.handle, callback, callbackmask);
         }
 
         // Plug-in support.
-        public RESULT setPluginPath(string path)
+        public readonly RESULT setPluginPath(string path)
         {
             using StringHelper.ThreadSafeEncoding encoder = StringHelper.GetFreeHelper();
             return FMOD5_System_SetPluginPath(this.handle, encoder.byteFromStringUTF8(path));
         }
-        public RESULT loadPlugin(string filename, out uint handle, uint priority = 0)
+        public readonly RESULT loadPlugin(string filename, out uint handle, uint priority = 0)
         {
             using StringHelper.ThreadSafeEncoding encoder = StringHelper.GetFreeHelper();
             return FMOD5_System_LoadPlugin(this.handle, encoder.byteFromStringUTF8(filename), out handle, priority);
         }
-        public RESULT unloadPlugin(uint handle)
+        public readonly RESULT unloadPlugin(uint handle)
         {
             return FMOD5_System_UnloadPlugin(this.handle, handle);
         }
-        public RESULT getNumNestedPlugins(uint handle, out int count)
+        public readonly RESULT getNumNestedPlugins(uint handle, out int count)
         {
             return FMOD5_System_GetNumNestedPlugins(this.handle, handle, out count);
         }
-        public RESULT getNestedPlugin(uint handle, int index, out uint nestedhandle)
+        public readonly RESULT getNestedPlugin(uint handle, int index, out uint nestedhandle)
         {
             return FMOD5_System_GetNestedPlugin(this.handle, handle, index, out nestedhandle);
         }
-        public RESULT getNumPlugins(PLUGINTYPE plugintype, out int numplugins)
+        public readonly RESULT getNumPlugins(PLUGINTYPE plugintype, out int numplugins)
         {
             return FMOD5_System_GetNumPlugins(this.handle, plugintype, out numplugins);
         }
-        public RESULT getPluginHandle(PLUGINTYPE plugintype, int index, out uint handle)
+        public readonly RESULT getPluginHandle(PLUGINTYPE plugintype, int index, out uint handle)
         {
             return FMOD5_System_GetPluginHandle(this.handle, plugintype, index, out handle);
         }
-        public RESULT getPluginInfo(uint handle, out PLUGINTYPE plugintype, out string name, int namelen, out uint version)
+        public readonly RESULT getPluginInfo(uint handle, out PLUGINTYPE plugintype, out string name, int namelen, out uint version)
         {
             IntPtr stringMem = Marshal.AllocHGlobal(namelen);
 
@@ -1185,103 +1193,103 @@ namespace FMOD
 
             return result;
         }
-        public RESULT getPluginInfo(uint handle, out PLUGINTYPE plugintype, out uint version)
+        public readonly RESULT getPluginInfo(uint handle, out PLUGINTYPE plugintype, out uint version)
         {
             return FMOD5_System_GetPluginInfo(this.handle, handle, out plugintype, IntPtr.Zero, 0, out version);
         }
-        public RESULT setOutputByPlugin(uint handle)
+        public readonly RESULT setOutputByPlugin(uint handle)
         {
             return FMOD5_System_SetOutputByPlugin(this.handle, handle);
         }
-        public RESULT getOutputByPlugin(out uint handle)
+        public readonly RESULT getOutputByPlugin(out uint handle)
         {
             return FMOD5_System_GetOutputByPlugin(this.handle, out handle);
         }
-        public RESULT createDSPByPlugin(uint handle, out DSP dsp)
+        public readonly RESULT createDSPByPlugin(uint handle, out DSP dsp)
         {
             return FMOD5_System_CreateDSPByPlugin(this.handle, handle, out dsp.handle);
         }
-        public RESULT getDSPInfoByPlugin(uint handle, out IntPtr description)
+        public readonly RESULT getDSPInfoByPlugin(uint handle, out IntPtr description)
         {
             return FMOD5_System_GetDSPInfoByPlugin(this.handle, handle, out description);
         }
-        public RESULT registerDSP(ref DSP_DESCRIPTION description, out uint handle)
+        public readonly RESULT registerDSP(ref DSP_DESCRIPTION description, out uint handle)
         {
             return FMOD5_System_RegisterDSP(this.handle, ref description, out handle);
         }
 
         // Init/Close.
-        public RESULT init(int maxchannels, INITFLAGS flags, IntPtr extradriverdata)
+        public readonly RESULT init(int maxchannels, INITFLAGS flags, IntPtr extradriverdata)
         {
             return FMOD5_System_Init(this.handle, maxchannels, flags, extradriverdata);
         }
-        public RESULT close()
+        public readonly RESULT close()
         {
             return FMOD5_System_Close(this.handle);
         }
 
         // General post-init system functions.
-        public RESULT update()
+        public readonly RESULT update()
         {
             return FMOD5_System_Update(this.handle);
         }
-        public RESULT setSpeakerPosition(SPEAKER speaker, float x, float y, bool active)
+        public readonly RESULT setSpeakerPosition(SPEAKER speaker, float x, float y, bool active)
         {
             return FMOD5_System_SetSpeakerPosition(this.handle, speaker, x, y, active);
         }
-        public RESULT getSpeakerPosition(SPEAKER speaker, out float x, out float y, out bool active)
+        public readonly RESULT getSpeakerPosition(SPEAKER speaker, out float x, out float y, out bool active)
         {
             return FMOD5_System_GetSpeakerPosition(this.handle, speaker, out x, out y, out active);
         }
-        public RESULT setStreamBufferSize(uint filebuffersize, TIMEUNIT filebuffersizetype)
+        public readonly RESULT setStreamBufferSize(uint filebuffersize, TIMEUNIT filebuffersizetype)
         {
             return FMOD5_System_SetStreamBufferSize(this.handle, filebuffersize, filebuffersizetype);
         }
-        public RESULT getStreamBufferSize(out uint filebuffersize, out TIMEUNIT filebuffersizetype)
+        public readonly RESULT getStreamBufferSize(out uint filebuffersize, out TIMEUNIT filebuffersizetype)
         {
             return FMOD5_System_GetStreamBufferSize(this.handle, out filebuffersize, out filebuffersizetype);
         }
-        public RESULT set3DSettings(float dopplerscale, float distancefactor, float rolloffscale)
+        public readonly RESULT set3DSettings(float dopplerscale, float distancefactor, float rolloffscale)
         {
             return FMOD5_System_Set3DSettings(this.handle, dopplerscale, distancefactor, rolloffscale);
         }
-        public RESULT get3DSettings(out float dopplerscale, out float distancefactor, out float rolloffscale)
+        public readonly RESULT get3DSettings(out float dopplerscale, out float distancefactor, out float rolloffscale)
         {
             return FMOD5_System_Get3DSettings(this.handle, out dopplerscale, out distancefactor, out rolloffscale);
         }
-        public RESULT set3DNumListeners(int numlisteners)
+        public readonly RESULT set3DNumListeners(int numlisteners)
         {
             return FMOD5_System_Set3DNumListeners(this.handle, numlisteners);
         }
-        public RESULT get3DNumListeners(out int numlisteners)
+        public readonly RESULT get3DNumListeners(out int numlisteners)
         {
             return FMOD5_System_Get3DNumListeners(this.handle, out numlisteners);
         }
-        public RESULT set3DListenerAttributes(int listener, ref VECTOR pos, ref VECTOR vel, ref VECTOR forward, ref VECTOR up)
+        public readonly RESULT set3DListenerAttributes(int listener, ref VECTOR pos, ref VECTOR vel, ref VECTOR forward, ref VECTOR up)
         {
             return FMOD5_System_Set3DListenerAttributes(this.handle, listener, ref pos, ref vel, ref forward, ref up);
         }
-        public RESULT get3DListenerAttributes(int listener, out VECTOR pos, out VECTOR vel, out VECTOR forward, out VECTOR up)
+        public readonly RESULT get3DListenerAttributes(int listener, out VECTOR pos, out VECTOR vel, out VECTOR forward, out VECTOR up)
         {
             return FMOD5_System_Get3DListenerAttributes(this.handle, listener, out pos, out vel, out forward, out up);
         }
-        public RESULT set3DRolloffCallback(CB_3D_ROLLOFF_CALLBACK callback)
+        public readonly RESULT set3DRolloffCallback(CB_3D_ROLLOFF_CALLBACK callback)
         {
             return FMOD5_System_Set3DRolloffCallback(this.handle, callback);
         }
-        public RESULT mixerSuspend()
+        public readonly RESULT mixerSuspend()
         {
             return FMOD5_System_MixerSuspend(this.handle);
         }
-        public RESULT mixerResume()
+        public readonly RESULT mixerResume()
         {
             return FMOD5_System_MixerResume(this.handle);
         }
-        public RESULT getDefaultMixMatrix(SPEAKERMODE sourcespeakermode, SPEAKERMODE targetspeakermode, float[] matrix, int matrixhop)
+        public readonly RESULT getDefaultMixMatrix(SPEAKERMODE sourcespeakermode, SPEAKERMODE targetspeakermode, float[] matrix, int matrixhop)
         {
             return FMOD5_System_GetDefaultMixMatrix(this.handle, sourcespeakermode, targetspeakermode, matrix, matrixhop);
         }
-        public RESULT getSpeakerModeChannels(SPEAKERMODE mode, out int channels)
+        public readonly RESULT getSpeakerModeChannels(SPEAKERMODE mode, out int channels)
         {
             return FMOD5_System_GetSpeakerModeChannels(this.handle, mode, out channels);
         }
@@ -1292,42 +1300,42 @@ namespace FMOD
             uint buildnumber;
             return getVersion(out version, out buildnumber);
         }
-        public RESULT getVersion(out uint version, out uint buildnumber)
+        public readonly RESULT getVersion(out uint version, out uint buildnumber)
         {
             return FMOD5_System_GetVersion(this.handle, out version, out buildnumber);
         }
-        public RESULT getOutputHandle(out IntPtr handle)
+        public readonly RESULT getOutputHandle(out IntPtr handle)
         {
             return FMOD5_System_GetOutputHandle(this.handle, out handle);
         }
-        public RESULT getChannelsPlaying(out int channels)
+        public readonly RESULT getChannelsPlaying(out int channels)
         {
             return FMOD5_System_GetChannelsPlaying(this.handle, out channels, IntPtr.Zero);
         }
-        public RESULT getChannelsPlaying(out int channels, out int realchannels)
+        public readonly RESULT getChannelsPlaying(out int channels, out int realchannels)
         {
             return FMOD5_System_GetChannelsPlaying(this.handle, out channels, out realchannels);
         }
-        public RESULT getCPUUsage(out CPU_USAGE usage)
+        public readonly RESULT getCPUUsage(out CPU_USAGE usage)
         {
             return FMOD5_System_GetCPUUsage(this.handle, out usage);
         }
-        public RESULT getFileUsage(out Int64 sampleBytesRead, out Int64 streamBytesRead, out Int64 otherBytesRead)
+        public readonly RESULT getFileUsage(out Int64 sampleBytesRead, out Int64 streamBytesRead, out Int64 otherBytesRead)
         {
             return FMOD5_System_GetFileUsage(this.handle, out sampleBytesRead, out streamBytesRead, out otherBytesRead);
         }
 
         // Sound/DSP/Channel/FX creation and retrieval.
-        public RESULT createSound(string name, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
+        public readonly RESULT createSound(string name, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
         {
             using StringHelper.ThreadSafeEncoding encoder = StringHelper.GetFreeHelper();
             return FMOD5_System_CreateSound(this.handle, encoder.byteFromStringUTF8(name), mode, ref exinfo, out sound.handle);
         }
-        public RESULT createSound(byte[] data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
+        public readonly RESULT createSound(byte[] data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
         {
             return FMOD5_System_CreateSound(this.handle, data, mode, ref exinfo, out sound.handle);
         }
-        public RESULT createSound(IntPtr name_or_data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
+        public readonly RESULT createSound(IntPtr name_or_data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
         {
             return FMOD5_System_CreateSound(this.handle, name_or_data, mode, ref exinfo, out sound.handle);
         }
@@ -1338,16 +1346,16 @@ namespace FMOD
 
             return createSound(name, mode, ref exinfo, out sound);
         }
-        public RESULT createStream(string name, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
+        public readonly RESULT createStream(string name, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
         {
             using StringHelper.ThreadSafeEncoding encoder = StringHelper.GetFreeHelper();
             return FMOD5_System_CreateStream(this.handle, encoder.byteFromStringUTF8(name), mode, ref exinfo, out sound.handle);
         }
-        public RESULT createStream(byte[] data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
+        public readonly RESULT createStream(byte[] data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
         {
             return FMOD5_System_CreateStream(this.handle, data, mode, ref exinfo, out sound.handle);
         }
-        public RESULT createStream(IntPtr name_or_data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
+        public readonly RESULT createStream(IntPtr name_or_data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
         {
             return FMOD5_System_CreateStream(this.handle, name_or_data, mode, ref exinfo, out sound.handle);
         }
@@ -1358,93 +1366,93 @@ namespace FMOD
 
             return createStream(name, mode, ref exinfo, out sound);
         }
-        public RESULT createDSP(ref DSP_DESCRIPTION description, out DSP dsp)
+        public readonly RESULT createDSP(ref DSP_DESCRIPTION description, out DSP dsp)
         {
             return FMOD5_System_CreateDSP(this.handle, ref description, out dsp.handle);
         }
-        public RESULT createDSPByType(DSP_TYPE type, out DSP dsp)
+        public readonly RESULT createDSPByType(DSP_TYPE type, out DSP dsp)
         {
             return FMOD5_System_CreateDSPByType(this.handle, type, out dsp.handle);
         }
-        public RESULT createDSPConnection(DSPCONNECTION_TYPE type, out DSPConnection connection)
+        public readonly RESULT createDSPConnection(DSPCONNECTION_TYPE type, out DSPConnection connection)
         {
             return FMOD5_System_CreateDSPConnection(this.handle, type, out connection.handle);
         }
-        public RESULT createChannelGroup(string name, out ChannelGroup channelgroup)
+        public readonly RESULT createChannelGroup(string name, out ChannelGroup channelgroup)
         {
             using StringHelper.ThreadSafeEncoding encoder = StringHelper.GetFreeHelper();
             return FMOD5_System_CreateChannelGroup(this.handle, encoder.byteFromStringUTF8(name), out channelgroup.handle);
         }
-        public RESULT createSoundGroup(string name, out SoundGroup soundgroup)
+        public readonly RESULT createSoundGroup(string name, out SoundGroup soundgroup)
         {
             using StringHelper.ThreadSafeEncoding encoder = StringHelper.GetFreeHelper();
             return FMOD5_System_CreateSoundGroup(this.handle, encoder.byteFromStringUTF8(name), out soundgroup.handle);
         }
-        public RESULT createReverb3D(out Reverb3D reverb)
+        public readonly RESULT createReverb3D(out Reverb3D reverb)
         {
             return FMOD5_System_CreateReverb3D(this.handle, out reverb.handle);
         }
-        public RESULT playSound(Sound sound, ChannelGroup channelgroup, bool paused, out Channel channel)
+        public readonly RESULT playSound(Sound sound, ChannelGroup channelgroup, bool paused, out Channel channel)
         {
             return FMOD5_System_PlaySound(this.handle, sound.handle, channelgroup.handle, paused, out channel.handle);
         }
-        public RESULT playDSP(DSP dsp, ChannelGroup channelgroup, bool paused, out Channel channel)
+        public readonly RESULT playDSP(DSP dsp, ChannelGroup channelgroup, bool paused, out Channel channel)
         {
             return FMOD5_System_PlayDSP(this.handle, dsp.handle, channelgroup.handle, paused, out channel.handle);
         }
-        public RESULT getChannel(int channelid, out Channel channel)
+        public readonly RESULT getChannel(int channelid, out Channel channel)
         {
             return FMOD5_System_GetChannel(this.handle, channelid, out channel.handle);
         }
-        public RESULT getDSPInfoByType(DSP_TYPE type, out IntPtr description)
+        public readonly RESULT getDSPInfoByType(DSP_TYPE type, out IntPtr description)
         {
             return FMOD5_System_GetDSPInfoByType(this.handle, type, out description);
         }
-        public RESULT getMasterChannelGroup(out ChannelGroup channelgroup)
+        public readonly RESULT getMasterChannelGroup(out ChannelGroup channelgroup)
         {
             return FMOD5_System_GetMasterChannelGroup(this.handle, out channelgroup.handle);
         }
-        public RESULT getMasterSoundGroup(out SoundGroup soundgroup)
+        public readonly RESULT getMasterSoundGroup(out SoundGroup soundgroup)
         {
             return FMOD5_System_GetMasterSoundGroup(this.handle, out soundgroup.handle);
         }
 
         // Routing to ports.
-        public RESULT attachChannelGroupToPort(PORT_TYPE portType, ulong portIndex, ChannelGroup channelgroup, bool passThru = false)
+        public readonly RESULT attachChannelGroupToPort(PORT_TYPE portType, ulong portIndex, ChannelGroup channelgroup, bool passThru = false)
         {
             return FMOD5_System_AttachChannelGroupToPort(this.handle, portType, portIndex, channelgroup.handle, passThru);
         }
-        public RESULT detachChannelGroupFromPort(ChannelGroup channelgroup)
+        public readonly RESULT detachChannelGroupFromPort(ChannelGroup channelgroup)
         {
             return FMOD5_System_DetachChannelGroupFromPort(this.handle, channelgroup.handle);
         }
 
         // Reverb api.
-        public RESULT setReverbProperties(int instance, ref REVERB_PROPERTIES prop)
+        public readonly RESULT setReverbProperties(int instance, ref REVERB_PROPERTIES prop)
         {
             return FMOD5_System_SetReverbProperties(this.handle, instance, ref prop);
         }
-        public RESULT getReverbProperties(int instance, out REVERB_PROPERTIES prop)
+        public readonly RESULT getReverbProperties(int instance, out REVERB_PROPERTIES prop)
         {
             return FMOD5_System_GetReverbProperties(this.handle, instance, out prop);
         }
 
         // System level DSP functionality.
-        public RESULT lockDSP()
+        public readonly RESULT lockDSP()
         {
             return FMOD5_System_LockDSP(this.handle);
         }
-        public RESULT unlockDSP()
+        public readonly RESULT unlockDSP()
         {
             return FMOD5_System_UnlockDSP(this.handle);
         }
 
         // Recording api
-        public RESULT getRecordNumDrivers(out int numdrivers, out int numconnected)
+        public readonly RESULT getRecordNumDrivers(out int numdrivers, out int numconnected)
         {
             return FMOD5_System_GetRecordNumDrivers(this.handle, out numdrivers, out numconnected);
         }
-        public RESULT getRecordDriverInfo(int id, out string name, int namelen, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels, out DRIVER_STATE state)
+        public readonly RESULT getRecordDriverInfo(int id, out string name, int namelen, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels, out DRIVER_STATE state)
         {
             IntPtr stringMem = Marshal.AllocHGlobal(namelen);
 
@@ -1458,56 +1466,56 @@ namespace FMOD
 
             return result;
         }
-        public RESULT getRecordDriverInfo(int id, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels, out DRIVER_STATE state)
+        public readonly RESULT getRecordDriverInfo(int id, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels, out DRIVER_STATE state)
         {
             return FMOD5_System_GetRecordDriverInfo(this.handle, id, IntPtr.Zero, 0, out guid, out systemrate, out speakermode, out speakermodechannels, out state);
         }
-        public RESULT getRecordPosition(int id, out uint position)
+        public readonly RESULT getRecordPosition(int id, out uint position)
         {
             return FMOD5_System_GetRecordPosition(this.handle, id, out position);
         }
-        public RESULT recordStart(int id, Sound sound, bool loop)
+        public readonly RESULT recordStart(int id, Sound sound, bool loop)
         {
             return FMOD5_System_RecordStart(this.handle, id, sound.handle, loop);
         }
-        public RESULT recordStop(int id)
+        public readonly RESULT recordStop(int id)
         {
             return FMOD5_System_RecordStop(this.handle, id);
         }
-        public RESULT isRecording(int id, out bool recording)
+        public readonly RESULT isRecording(int id, out bool recording)
         {
             return FMOD5_System_IsRecording(this.handle, id, out recording);
         }
 
         // Geometry api
-        public RESULT createGeometry(int maxpolygons, int maxvertices, out Geometry geometry)
+        public readonly RESULT createGeometry(int maxpolygons, int maxvertices, out Geometry geometry)
         {
             return FMOD5_System_CreateGeometry(this.handle, maxpolygons, maxvertices, out geometry.handle);
         }
-        public RESULT setGeometrySettings(float maxworldsize)
+        public readonly RESULT setGeometrySettings(float maxworldsize)
         {
             return FMOD5_System_SetGeometrySettings(this.handle, maxworldsize);
         }
-        public RESULT getGeometrySettings(out float maxworldsize)
+        public readonly RESULT getGeometrySettings(out float maxworldsize)
         {
             return FMOD5_System_GetGeometrySettings(this.handle, out maxworldsize);
         }
-        public RESULT loadGeometry(IntPtr data, int datasize, out Geometry geometry)
+        public readonly RESULT loadGeometry(IntPtr data, int datasize, out Geometry geometry)
         {
             return FMOD5_System_LoadGeometry(this.handle, data, datasize, out geometry.handle);
         }
-        public RESULT getGeometryOcclusion(ref VECTOR listener, ref VECTOR source, out float direct, out float reverb)
+        public readonly RESULT getGeometryOcclusion(ref VECTOR listener, ref VECTOR source, out float direct, out float reverb)
         {
             return FMOD5_System_GetGeometryOcclusion(this.handle, ref listener, ref source, out direct, out reverb);
         }
 
         // Network functions
-        public RESULT setNetworkProxy(string proxy)
+        public readonly RESULT setNetworkProxy(string proxy)
         {
             using StringHelper.ThreadSafeEncoding encoder = StringHelper.GetFreeHelper();
             return FMOD5_System_SetNetworkProxy(this.handle, encoder.byteFromStringUTF8(proxy));
         }
-        public RESULT getNetworkProxy(out string proxy, int proxylen)
+        public readonly RESULT getNetworkProxy(out string proxy, int proxylen)
         {
             IntPtr stringMem = Marshal.AllocHGlobal(proxylen);
 
@@ -1520,21 +1528,21 @@ namespace FMOD
 
             return result;
         }
-        public RESULT setNetworkTimeout(int timeout)
+        public readonly RESULT setNetworkTimeout(int timeout)
         {
             return FMOD5_System_SetNetworkTimeout(this.handle, timeout);
         }
-        public RESULT getNetworkTimeout(out int timeout)
+        public readonly RESULT getNetworkTimeout(out int timeout)
         {
             return FMOD5_System_GetNetworkTimeout(this.handle, out timeout);
         }
 
         // Userdata set/get
-        public RESULT setUserData(IntPtr userdata)
+        public readonly RESULT setUserData(IntPtr userdata)
         {
             return FMOD5_System_SetUserData(this.handle, userdata);
         }
-        public RESULT getUserData(out IntPtr userdata)
+        public readonly RESULT getUserData(out IntPtr userdata)
         {
             return FMOD5_System_GetUserData(this.handle, out userdata);
         }
@@ -1735,7 +1743,7 @@ namespace FMOD
         public IntPtr handle;
 
         public System(IntPtr ptr) { this.handle = ptr; }
-        public bool hasHandle() { return this.handle != IntPtr.Zero; }
+        public readonly bool hasHandle() { return this.handle != IntPtr.Zero; }
         public void clearHandle() { this.handle = IntPtr.Zero; }
 
         #endregion
@@ -1747,66 +1755,66 @@ namespace FMOD
     */
     public struct Sound
     {
-        public RESULT release()
+        public readonly RESULT release()
         {
             return FMOD5_Sound_Release(this.handle);
         }
-        public RESULT getSystemObject(out System system)
+        public readonly RESULT getSystemObject(out System system)
         {
             return FMOD5_Sound_GetSystemObject(this.handle, out system.handle);
         }
 
         // Standard sound manipulation functions.
-        public RESULT @lock(uint offset, uint length, out IntPtr ptr1, out IntPtr ptr2, out uint len1, out uint len2)
+        public readonly RESULT @lock(uint offset, uint length, out IntPtr ptr1, out IntPtr ptr2, out uint len1, out uint len2)
         {
             return FMOD5_Sound_Lock(this.handle, offset, length, out ptr1, out ptr2, out len1, out len2);
         }
-        public RESULT unlock(IntPtr ptr1, IntPtr ptr2, uint len1, uint len2)
+        public readonly RESULT unlock(IntPtr ptr1, IntPtr ptr2, uint len1, uint len2)
         {
             return FMOD5_Sound_Unlock(this.handle, ptr1, ptr2, len1, len2);
         }
-        public RESULT setDefaults(float frequency, int priority)
+        public readonly RESULT setDefaults(float frequency, int priority)
         {
             return FMOD5_Sound_SetDefaults(this.handle, frequency, priority);
         }
-        public RESULT getDefaults(out float frequency, out int priority)
+        public readonly RESULT getDefaults(out float frequency, out int priority)
         {
             return FMOD5_Sound_GetDefaults(this.handle, out frequency, out priority);
         }
-        public RESULT set3DMinMaxDistance(float min, float max)
+        public readonly RESULT set3DMinMaxDistance(float min, float max)
         {
             return FMOD5_Sound_Set3DMinMaxDistance(this.handle, min, max);
         }
-        public RESULT get3DMinMaxDistance(out float min, out float max)
+        public readonly RESULT get3DMinMaxDistance(out float min, out float max)
         {
             return FMOD5_Sound_Get3DMinMaxDistance(this.handle, out min, out max);
         }
-        public RESULT set3DConeSettings(float insideconeangle, float outsideconeangle, float outsidevolume)
+        public readonly RESULT set3DConeSettings(float insideconeangle, float outsideconeangle, float outsidevolume)
         {
             return FMOD5_Sound_Set3DConeSettings(this.handle, insideconeangle, outsideconeangle, outsidevolume);
         }
-        public RESULT get3DConeSettings(out float insideconeangle, out float outsideconeangle, out float outsidevolume)
+        public readonly RESULT get3DConeSettings(out float insideconeangle, out float outsideconeangle, out float outsidevolume)
         {
             return FMOD5_Sound_Get3DConeSettings(this.handle, out insideconeangle, out outsideconeangle, out outsidevolume);
         }
-        public RESULT set3DCustomRolloff(ref VECTOR points, int numpoints)
+        public readonly RESULT set3DCustomRolloff(ref VECTOR points, int numpoints)
         {
             return FMOD5_Sound_Set3DCustomRolloff(this.handle, ref points, numpoints);
         }
-        public RESULT get3DCustomRolloff(out IntPtr points, out int numpoints)
+        public readonly RESULT get3DCustomRolloff(out IntPtr points, out int numpoints)
         {
             return FMOD5_Sound_Get3DCustomRolloff(this.handle, out points, out numpoints);
         }
 
-        public RESULT getSubSound(int index, out Sound subsound)
+        public readonly RESULT getSubSound(int index, out Sound subsound)
         {
             return FMOD5_Sound_GetSubSound(this.handle, index, out subsound.handle);
         }
-        public RESULT getSubSoundParent(out Sound parentsound)
+        public readonly RESULT getSubSoundParent(out Sound parentsound)
         {
             return FMOD5_Sound_GetSubSoundParent(this.handle, out parentsound.handle);
         }
-        public RESULT getName(out string name, int namelen)
+        public readonly RESULT getName(out string name, int namelen)
         {
             IntPtr stringMem = Marshal.AllocHGlobal(namelen);
 
@@ -1819,62 +1827,62 @@ namespace FMOD
 
             return result;
         }
-        public RESULT getLength(out uint length, TIMEUNIT lengthtype)
+        public readonly RESULT getLength(out uint length, TIMEUNIT lengthtype)
         {
             return FMOD5_Sound_GetLength(this.handle, out length, lengthtype);
         }
-        public RESULT getFormat(out SOUND_TYPE type, out SOUND_FORMAT format, out int channels, out int bits)
+        public readonly RESULT getFormat(out SOUND_TYPE type, out SOUND_FORMAT format, out int channels, out int bits)
         {
             return FMOD5_Sound_GetFormat(this.handle, out type, out format, out channels, out bits);
         }
-        public RESULT getNumSubSounds(out int numsubsounds)
+        public readonly RESULT getNumSubSounds(out int numsubsounds)
         {
             return FMOD5_Sound_GetNumSubSounds(this.handle, out numsubsounds);
         }
-        public RESULT getNumTags(out int numtags, out int numtagsupdated)
+        public readonly RESULT getNumTags(out int numtags, out int numtagsupdated)
         {
             return FMOD5_Sound_GetNumTags(this.handle, out numtags, out numtagsupdated);
         }
-        public RESULT getTag(string name, int index, out TAG tag)
+        public readonly RESULT getTag(string name, int index, out TAG tag)
         {
             using StringHelper.ThreadSafeEncoding encoder = StringHelper.GetFreeHelper();
             return FMOD5_Sound_GetTag(this.handle, encoder.byteFromStringUTF8(name), index, out tag);
         }
-        public RESULT getOpenState(out OPENSTATE openstate, out uint percentbuffered, out bool starving, out bool diskbusy)
+        public readonly RESULT getOpenState(out OPENSTATE openstate, out uint percentbuffered, out bool starving, out bool diskbusy)
         {
             return FMOD5_Sound_GetOpenState(this.handle, out openstate, out percentbuffered, out starving, out diskbusy);
         }
-        public RESULT readData(byte[] buffer)
+        public readonly RESULT readData(byte[] buffer)
         {
             return FMOD5_Sound_ReadData(this.handle, buffer, (uint)buffer.Length, IntPtr.Zero);
         }
-        public RESULT readData(byte[] buffer, out uint read)
+        public readonly RESULT readData(byte[] buffer, out uint read)
         {
             return FMOD5_Sound_ReadData(this.handle, buffer, (uint)buffer.Length, out read);
         }
-        public RESULT seekData(uint pcm)
+        public readonly RESULT seekData(uint pcm)
         {
             return FMOD5_Sound_SeekData(this.handle, pcm);
         }
-        public RESULT setSoundGroup(SoundGroup soundgroup)
+        public readonly RESULT setSoundGroup(SoundGroup soundgroup)
         {
             return FMOD5_Sound_SetSoundGroup(this.handle, soundgroup.handle);
         }
-        public RESULT getSoundGroup(out SoundGroup soundgroup)
+        public readonly RESULT getSoundGroup(out SoundGroup soundgroup)
         {
             return FMOD5_Sound_GetSoundGroup(this.handle, out soundgroup.handle);
         }
 
         // Synchronization point API.  These points can come from markers embedded in wav files, and can also generate channel callbacks.
-        public RESULT getNumSyncPoints(out int numsyncpoints)
+        public readonly RESULT getNumSyncPoints(out int numsyncpoints)
         {
             return FMOD5_Sound_GetNumSyncPoints(this.handle, out numsyncpoints);
         }
-        public RESULT getSyncPoint(int index, out IntPtr point)
+        public readonly RESULT getSyncPoint(int index, out IntPtr point)
         {
             return FMOD5_Sound_GetSyncPoint(this.handle, index, out point);
         }
-        public RESULT getSyncPointInfo(IntPtr point, out string name, int namelen, out uint offset, TIMEUNIT offsettype)
+        public readonly RESULT getSyncPointInfo(IntPtr point, out string name, int namelen, out uint offset, TIMEUNIT offsettype)
         {
             IntPtr stringMem = Marshal.AllocHGlobal(namelen);
 
@@ -1887,74 +1895,74 @@ namespace FMOD
 
             return result;
         }
-        public RESULT getSyncPointInfo(IntPtr point, out uint offset, TIMEUNIT offsettype)
+        public readonly RESULT getSyncPointInfo(IntPtr point, out uint offset, TIMEUNIT offsettype)
         {
             return FMOD5_Sound_GetSyncPointInfo(this.handle, point, IntPtr.Zero, 0, out offset, offsettype);
         }
-        public RESULT addSyncPoint(uint offset, TIMEUNIT offsettype, string name, out IntPtr point)
+        public readonly RESULT addSyncPoint(uint offset, TIMEUNIT offsettype, string name, out IntPtr point)
         {
             using StringHelper.ThreadSafeEncoding encoder = StringHelper.GetFreeHelper();
             return FMOD5_Sound_AddSyncPoint(this.handle, offset, offsettype, encoder.byteFromStringUTF8(name), out point);
         }
-        public RESULT deleteSyncPoint(IntPtr point)
+        public readonly RESULT deleteSyncPoint(IntPtr point)
         {
             return FMOD5_Sound_DeleteSyncPoint(this.handle, point);
         }
 
         // Functions also in Channel class but here they are the 'default' to save having to change it in Channel all the time.
-        public RESULT setMode(MODE mode)
+        public readonly RESULT setMode(MODE mode)
         {
             return FMOD5_Sound_SetMode(this.handle, mode);
         }
-        public RESULT getMode(out MODE mode)
+        public readonly RESULT getMode(out MODE mode)
         {
             return FMOD5_Sound_GetMode(this.handle, out mode);
         }
-        public RESULT setLoopCount(int loopcount)
+        public readonly RESULT setLoopCount(int loopcount)
         {
             return FMOD5_Sound_SetLoopCount(this.handle, loopcount);
         }
-        public RESULT getLoopCount(out int loopcount)
+        public readonly RESULT getLoopCount(out int loopcount)
         {
             return FMOD5_Sound_GetLoopCount(this.handle, out loopcount);
         }
-        public RESULT setLoopPoints(uint loopstart, TIMEUNIT loopstarttype, uint loopend, TIMEUNIT loopendtype)
+        public readonly RESULT setLoopPoints(uint loopstart, TIMEUNIT loopstarttype, uint loopend, TIMEUNIT loopendtype)
         {
             return FMOD5_Sound_SetLoopPoints(this.handle, loopstart, loopstarttype, loopend, loopendtype);
         }
-        public RESULT getLoopPoints(out uint loopstart, TIMEUNIT loopstarttype, out uint loopend, TIMEUNIT loopendtype)
+        public readonly RESULT getLoopPoints(out uint loopstart, TIMEUNIT loopstarttype, out uint loopend, TIMEUNIT loopendtype)
         {
             return FMOD5_Sound_GetLoopPoints(this.handle, out loopstart, loopstarttype, out loopend, loopendtype);
         }
 
         // For MOD/S3M/XM/IT/MID sequenced formats only.
-        public RESULT getMusicNumChannels(out int numchannels)
+        public readonly RESULT getMusicNumChannels(out int numchannels)
         {
             return FMOD5_Sound_GetMusicNumChannels(this.handle, out numchannels);
         }
-        public RESULT setMusicChannelVolume(int channel, float volume)
+        public readonly RESULT setMusicChannelVolume(int channel, float volume)
         {
             return FMOD5_Sound_SetMusicChannelVolume(this.handle, channel, volume);
         }
-        public RESULT getMusicChannelVolume(int channel, out float volume)
+        public readonly RESULT getMusicChannelVolume(int channel, out float volume)
         {
             return FMOD5_Sound_GetMusicChannelVolume(this.handle, channel, out volume);
         }
-        public RESULT setMusicSpeed(float speed)
+        public readonly RESULT setMusicSpeed(float speed)
         {
             return FMOD5_Sound_SetMusicSpeed(this.handle, speed);
         }
-        public RESULT getMusicSpeed(out float speed)
+        public readonly RESULT getMusicSpeed(out float speed)
         {
             return FMOD5_Sound_GetMusicSpeed(this.handle, out speed);
         }
 
         // Userdata set/get.
-        public RESULT setUserData(IntPtr userdata)
+        public readonly RESULT setUserData(IntPtr userdata)
         {
             return FMOD5_Sound_SetUserData(this.handle, userdata);
         }
-        public RESULT getUserData(out IntPtr userdata)
+        public readonly RESULT getUserData(out IntPtr userdata)
         {
             return FMOD5_Sound_GetUserData(this.handle, out userdata);
         }
@@ -2055,7 +2063,7 @@ namespace FMOD
         public IntPtr handle;
 
         public Sound(IntPtr ptr) { this.handle = ptr; }
-        public bool hasHandle() { return this.handle != IntPtr.Zero; }
+        public readonly bool hasHandle() { return this.handle != IntPtr.Zero; }
         public void clearHandle() { this.handle = IntPtr.Zero; }
 
         #endregion
@@ -2148,326 +2156,326 @@ namespace FMOD
     public struct Channel : IChannelControl
     {
         // Channel specific control functionality.
-        public RESULT setFrequency(float frequency)
+        public readonly RESULT setFrequency(float frequency)
         {
             return FMOD5_Channel_SetFrequency(this.handle, frequency);
         }
-        public RESULT getFrequency(out float frequency)
+        public readonly RESULT getFrequency(out float frequency)
         {
             return FMOD5_Channel_GetFrequency(this.handle, out frequency);
         }
-        public RESULT setPriority(int priority)
+        public readonly RESULT setPriority(int priority)
         {
             return FMOD5_Channel_SetPriority(this.handle, priority);
         }
-        public RESULT getPriority(out int priority)
+        public readonly RESULT getPriority(out int priority)
         {
             return FMOD5_Channel_GetPriority(this.handle, out priority);
         }
-        public RESULT setPosition(uint position, TIMEUNIT postype)
+        public readonly RESULT setPosition(uint position, TIMEUNIT postype)
         {
             return FMOD5_Channel_SetPosition(this.handle, position, postype);
         }
-        public RESULT getPosition(out uint position, TIMEUNIT postype)
+        public readonly RESULT getPosition(out uint position, TIMEUNIT postype)
         {
             return FMOD5_Channel_GetPosition(this.handle, out position, postype);
         }
-        public RESULT setChannelGroup(ChannelGroup channelgroup)
+        public readonly RESULT setChannelGroup(ChannelGroup channelgroup)
         {
             return FMOD5_Channel_SetChannelGroup(this.handle, channelgroup.handle);
         }
-        public RESULT getChannelGroup(out ChannelGroup channelgroup)
+        public readonly RESULT getChannelGroup(out ChannelGroup channelgroup)
         {
             return FMOD5_Channel_GetChannelGroup(this.handle, out channelgroup.handle);
         }
-        public RESULT setLoopCount(int loopcount)
+        public readonly RESULT setLoopCount(int loopcount)
         {
             return FMOD5_Channel_SetLoopCount(this.handle, loopcount);
         }
-        public RESULT getLoopCount(out int loopcount)
+        public readonly RESULT getLoopCount(out int loopcount)
         {
             return FMOD5_Channel_GetLoopCount(this.handle, out loopcount);
         }
-        public RESULT setLoopPoints(uint loopstart, TIMEUNIT loopstarttype, uint loopend, TIMEUNIT loopendtype)
+        public readonly RESULT setLoopPoints(uint loopstart, TIMEUNIT loopstarttype, uint loopend, TIMEUNIT loopendtype)
         {
             return FMOD5_Channel_SetLoopPoints(this.handle, loopstart, loopstarttype, loopend, loopendtype);
         }
-        public RESULT getLoopPoints(out uint loopstart, TIMEUNIT loopstarttype, out uint loopend, TIMEUNIT loopendtype)
+        public readonly RESULT getLoopPoints(out uint loopstart, TIMEUNIT loopstarttype, out uint loopend, TIMEUNIT loopendtype)
         {
             return FMOD5_Channel_GetLoopPoints(this.handle, out loopstart, loopstarttype, out loopend, loopendtype);
         }
 
         // Information only functions.
-        public RESULT isVirtual(out bool isvirtual)
+        public readonly RESULT isVirtual(out bool isvirtual)
         {
             return FMOD5_Channel_IsVirtual(this.handle, out isvirtual);
         }
-        public RESULT getCurrentSound(out Sound sound)
+        public readonly RESULT getCurrentSound(out Sound sound)
         {
             return FMOD5_Channel_GetCurrentSound(this.handle, out sound.handle);
         }
-        public RESULT getIndex(out int index)
+        public readonly RESULT getIndex(out int index)
         {
             return FMOD5_Channel_GetIndex(this.handle, out index);
         }
 
-        public RESULT getSystemObject(out System system)
+        public readonly RESULT getSystemObject(out System system)
         {
             return FMOD5_Channel_GetSystemObject(this.handle, out system.handle);
         }
 
         // General control functionality for Channels and ChannelGroups.
-        public RESULT stop()
+        public readonly RESULT stop()
         {
             return FMOD5_Channel_Stop(this.handle);
         }
-        public RESULT setPaused(bool paused)
+        public readonly RESULT setPaused(bool paused)
         {
             return FMOD5_Channel_SetPaused(this.handle, paused);
         }
-        public RESULT getPaused(out bool paused)
+        public readonly RESULT getPaused(out bool paused)
         {
             return FMOD5_Channel_GetPaused(this.handle, out paused);
         }
-        public RESULT setVolume(float volume)
+        public readonly RESULT setVolume(float volume)
         {
             return FMOD5_Channel_SetVolume(this.handle, volume);
         }
-        public RESULT getVolume(out float volume)
+        public readonly RESULT getVolume(out float volume)
         {
             return FMOD5_Channel_GetVolume(this.handle, out volume);
         }
-        public RESULT setVolumeRamp(bool ramp)
+        public readonly RESULT setVolumeRamp(bool ramp)
         {
             return FMOD5_Channel_SetVolumeRamp(this.handle, ramp);
         }
-        public RESULT getVolumeRamp(out bool ramp)
+        public readonly RESULT getVolumeRamp(out bool ramp)
         {
             return FMOD5_Channel_GetVolumeRamp(this.handle, out ramp);
         }
-        public RESULT getAudibility(out float audibility)
+        public readonly RESULT getAudibility(out float audibility)
         {
             return FMOD5_Channel_GetAudibility(this.handle, out audibility);
         }
-        public RESULT setPitch(float pitch)
+        public readonly RESULT setPitch(float pitch)
         {
             return FMOD5_Channel_SetPitch(this.handle, pitch);
         }
-        public RESULT getPitch(out float pitch)
+        public readonly RESULT getPitch(out float pitch)
         {
             return FMOD5_Channel_GetPitch(this.handle, out pitch);
         }
-        public RESULT setMute(bool mute)
+        public readonly RESULT setMute(bool mute)
         {
             return FMOD5_Channel_SetMute(this.handle, mute);
         }
-        public RESULT getMute(out bool mute)
+        public readonly RESULT getMute(out bool mute)
         {
             return FMOD5_Channel_GetMute(this.handle, out mute);
         }
-        public RESULT setReverbProperties(int instance, float wet)
+        public readonly RESULT setReverbProperties(int instance, float wet)
         {
             return FMOD5_Channel_SetReverbProperties(this.handle, instance, wet);
         }
-        public RESULT getReverbProperties(int instance, out float wet)
+        public readonly RESULT getReverbProperties(int instance, out float wet)
         {
             return FMOD5_Channel_GetReverbProperties(this.handle, instance, out wet);
         }
-        public RESULT setLowPassGain(float gain)
+        public readonly RESULT setLowPassGain(float gain)
         {
             return FMOD5_Channel_SetLowPassGain(this.handle, gain);
         }
-        public RESULT getLowPassGain(out float gain)
+        public readonly RESULT getLowPassGain(out float gain)
         {
             return FMOD5_Channel_GetLowPassGain(this.handle, out gain);
         }
-        public RESULT setMode(MODE mode)
+        public readonly RESULT setMode(MODE mode)
         {
             return FMOD5_Channel_SetMode(this.handle, mode);
         }
-        public RESULT getMode(out MODE mode)
+        public readonly RESULT getMode(out MODE mode)
         {
             return FMOD5_Channel_GetMode(this.handle, out mode);
         }
-        public RESULT setCallback(CHANNELCONTROL_CALLBACK callback)
+        public readonly RESULT setCallback(CHANNELCONTROL_CALLBACK callback)
         {
             return FMOD5_Channel_SetCallback(this.handle, callback);
         }
-        public RESULT isPlaying(out bool isplaying)
+        public readonly RESULT isPlaying(out bool isplaying)
         {
             return FMOD5_Channel_IsPlaying(this.handle, out isplaying);
         }
 
         // Note all 'set' functions alter a final matrix, this is why the only get function is getMixMatrix, to avoid other get functions returning incorrect/obsolete values.
-        public RESULT setPan(float pan)
+        public readonly RESULT setPan(float pan)
         {
             return FMOD5_Channel_SetPan(this.handle, pan);
         }
-        public RESULT setMixLevelsOutput(float frontleft, float frontright, float center, float lfe, float surroundleft, float surroundright, float backleft, float backright)
+        public readonly RESULT setMixLevelsOutput(float frontleft, float frontright, float center, float lfe, float surroundleft, float surroundright, float backleft, float backright)
         {
             return FMOD5_Channel_SetMixLevelsOutput(this.handle, frontleft, frontright, center, lfe, surroundleft, surroundright, backleft, backright);
         }
-        public RESULT setMixLevelsInput(float[] levels, int numlevels)
+        public readonly RESULT setMixLevelsInput(float[] levels, int numlevels)
         {
             return FMOD5_Channel_SetMixLevelsInput(this.handle, levels, numlevels);
         }
-        public RESULT setMixMatrix(float[] matrix, int outchannels, int inchannels, int inchannel_hop = 0)
+        public readonly RESULT setMixMatrix(float[] matrix, int outchannels, int inchannels, int inchannel_hop = 0)
         {
             return FMOD5_Channel_SetMixMatrix(this.handle, matrix, outchannels, inchannels, inchannel_hop);
         }
-        public RESULT getMixMatrix(float[] matrix, out int outchannels, out int inchannels, int inchannel_hop = 0)
+        public readonly RESULT getMixMatrix(float[] matrix, out int outchannels, out int inchannels, int inchannel_hop = 0)
         {
             return FMOD5_Channel_GetMixMatrix(this.handle, matrix, out outchannels, out inchannels, inchannel_hop);
         }
 
         // Clock based functionality.
-        public RESULT getDSPClock(out ulong dspclock, out ulong parentclock)
+        public readonly RESULT getDSPClock(out ulong dspclock, out ulong parentclock)
         {
             return FMOD5_Channel_GetDSPClock(this.handle, out dspclock, out parentclock);
         }
-        public RESULT setDelay(ulong dspclock_start, ulong dspclock_end, bool stopchannels = true)
+        public readonly RESULT setDelay(ulong dspclock_start, ulong dspclock_end, bool stopchannels = true)
         {
             return FMOD5_Channel_SetDelay(this.handle, dspclock_start, dspclock_end, stopchannels);
         }
-        public RESULT getDelay(out ulong dspclock_start, out ulong dspclock_end)
+        public readonly RESULT getDelay(out ulong dspclock_start, out ulong dspclock_end)
         {
             return FMOD5_Channel_GetDelay(this.handle, out dspclock_start, out dspclock_end, IntPtr.Zero);
         }
-        public RESULT getDelay(out ulong dspclock_start, out ulong dspclock_end, out bool stopchannels)
+        public readonly RESULT getDelay(out ulong dspclock_start, out ulong dspclock_end, out bool stopchannels)
         {
             return FMOD5_Channel_GetDelay(this.handle, out dspclock_start, out dspclock_end, out stopchannels);
         }
-        public RESULT addFadePoint(ulong dspclock, float volume)
+        public readonly RESULT addFadePoint(ulong dspclock, float volume)
         {
             return FMOD5_Channel_AddFadePoint(this.handle, dspclock, volume);
         }
-        public RESULT setFadePointRamp(ulong dspclock, float volume)
+        public readonly RESULT setFadePointRamp(ulong dspclock, float volume)
         {
             return FMOD5_Channel_SetFadePointRamp(this.handle, dspclock, volume);
         }
-        public RESULT removeFadePoints(ulong dspclock_start, ulong dspclock_end)
+        public readonly RESULT removeFadePoints(ulong dspclock_start, ulong dspclock_end)
         {
             return FMOD5_Channel_RemoveFadePoints(this.handle, dspclock_start, dspclock_end);
         }
-        public RESULT getFadePoints(ref uint numpoints, ulong[] point_dspclock, float[] point_volume)
+        public readonly RESULT getFadePoints(ref uint numpoints, ulong[] point_dspclock, float[] point_volume)
         {
             return FMOD5_Channel_GetFadePoints(this.handle, ref numpoints, point_dspclock, point_volume);
         }
 
         // DSP effects.
-        public RESULT getDSP(int index, out DSP dsp)
+        public readonly RESULT getDSP(int index, out DSP dsp)
         {
             return FMOD5_Channel_GetDSP(this.handle, index, out dsp.handle);
         }
-        public RESULT addDSP(int index, DSP dsp)
+        public readonly RESULT addDSP(int index, DSP dsp)
         {
             return FMOD5_Channel_AddDSP(this.handle, index, dsp.handle);
         }
-        public RESULT removeDSP(DSP dsp)
+        public readonly RESULT removeDSP(DSP dsp)
         {
             return FMOD5_Channel_RemoveDSP(this.handle, dsp.handle);
         }
-        public RESULT getNumDSPs(out int numdsps)
+        public readonly RESULT getNumDSPs(out int numdsps)
         {
             return FMOD5_Channel_GetNumDSPs(this.handle, out numdsps);
         }
-        public RESULT setDSPIndex(DSP dsp, int index)
+        public readonly RESULT setDSPIndex(DSP dsp, int index)
         {
             return FMOD5_Channel_SetDSPIndex(this.handle, dsp.handle, index);
         }
-        public RESULT getDSPIndex(DSP dsp, out int index)
+        public readonly RESULT getDSPIndex(DSP dsp, out int index)
         {
             return FMOD5_Channel_GetDSPIndex(this.handle, dsp.handle, out index);
         }
 
         // 3D functionality.
-        public RESULT set3DAttributes(ref VECTOR pos, ref VECTOR vel)
+        public readonly RESULT set3DAttributes(ref VECTOR pos, ref VECTOR vel)
         {
             return FMOD5_Channel_Set3DAttributes(this.handle, ref pos, ref vel);
         }
-        public RESULT get3DAttributes(out VECTOR pos, out VECTOR vel)
+        public readonly RESULT get3DAttributes(out VECTOR pos, out VECTOR vel)
         {
             return FMOD5_Channel_Get3DAttributes(this.handle, out pos, out vel);
         }
-        public RESULT set3DMinMaxDistance(float mindistance, float maxdistance)
+        public readonly RESULT set3DMinMaxDistance(float mindistance, float maxdistance)
         {
             return FMOD5_Channel_Set3DMinMaxDistance(this.handle, mindistance, maxdistance);
         }
-        public RESULT get3DMinMaxDistance(out float mindistance, out float maxdistance)
+        public readonly RESULT get3DMinMaxDistance(out float mindistance, out float maxdistance)
         {
             return FMOD5_Channel_Get3DMinMaxDistance(this.handle, out mindistance, out maxdistance);
         }
-        public RESULT set3DConeSettings(float insideconeangle, float outsideconeangle, float outsidevolume)
+        public readonly RESULT set3DConeSettings(float insideconeangle, float outsideconeangle, float outsidevolume)
         {
             return FMOD5_Channel_Set3DConeSettings(this.handle, insideconeangle, outsideconeangle, outsidevolume);
         }
-        public RESULT get3DConeSettings(out float insideconeangle, out float outsideconeangle, out float outsidevolume)
+        public readonly RESULT get3DConeSettings(out float insideconeangle, out float outsideconeangle, out float outsidevolume)
         {
             return FMOD5_Channel_Get3DConeSettings(this.handle, out insideconeangle, out outsideconeangle, out outsidevolume);
         }
-        public RESULT set3DConeOrientation(ref VECTOR orientation)
+        public readonly RESULT set3DConeOrientation(ref VECTOR orientation)
         {
             return FMOD5_Channel_Set3DConeOrientation(this.handle, ref orientation);
         }
-        public RESULT get3DConeOrientation(out VECTOR orientation)
+        public readonly RESULT get3DConeOrientation(out VECTOR orientation)
         {
             return FMOD5_Channel_Get3DConeOrientation(this.handle, out orientation);
         }
-        public RESULT set3DCustomRolloff(ref VECTOR points, int numpoints)
+        public readonly RESULT set3DCustomRolloff(ref VECTOR points, int numpoints)
         {
             return FMOD5_Channel_Set3DCustomRolloff(this.handle, ref points, numpoints);
         }
-        public RESULT get3DCustomRolloff(out IntPtr points, out int numpoints)
+        public readonly RESULT get3DCustomRolloff(out IntPtr points, out int numpoints)
         {
             return FMOD5_Channel_Get3DCustomRolloff(this.handle, out points, out numpoints);
         }
-        public RESULT set3DOcclusion(float directocclusion, float reverbocclusion)
+        public readonly RESULT set3DOcclusion(float directocclusion, float reverbocclusion)
         {
             return FMOD5_Channel_Set3DOcclusion(this.handle, directocclusion, reverbocclusion);
         }
-        public RESULT get3DOcclusion(out float directocclusion, out float reverbocclusion)
+        public readonly RESULT get3DOcclusion(out float directocclusion, out float reverbocclusion)
         {
             return FMOD5_Channel_Get3DOcclusion(this.handle, out directocclusion, out reverbocclusion);
         }
-        public RESULT set3DSpread(float angle)
+        public readonly RESULT set3DSpread(float angle)
         {
             return FMOD5_Channel_Set3DSpread(this.handle, angle);
         }
-        public RESULT get3DSpread(out float angle)
+        public readonly RESULT get3DSpread(out float angle)
         {
             return FMOD5_Channel_Get3DSpread(this.handle, out angle);
         }
-        public RESULT set3DLevel(float level)
+        public readonly RESULT set3DLevel(float level)
         {
             return FMOD5_Channel_Set3DLevel(this.handle, level);
         }
-        public RESULT get3DLevel(out float level)
+        public readonly RESULT get3DLevel(out float level)
         {
             return FMOD5_Channel_Get3DLevel(this.handle, out level);
         }
-        public RESULT set3DDopplerLevel(float level)
+        public readonly RESULT set3DDopplerLevel(float level)
         {
             return FMOD5_Channel_Set3DDopplerLevel(this.handle, level);
         }
-        public RESULT get3DDopplerLevel(out float level)
+        public readonly RESULT get3DDopplerLevel(out float level)
         {
             return FMOD5_Channel_Get3DDopplerLevel(this.handle, out level);
         }
-        public RESULT set3DDistanceFilter(bool custom, float customLevel, float centerFreq)
+        public readonly RESULT set3DDistanceFilter(bool custom, float customLevel, float centerFreq)
         {
             return FMOD5_Channel_Set3DDistanceFilter(this.handle, custom, customLevel, centerFreq);
         }
-        public RESULT get3DDistanceFilter(out bool custom, out float customLevel, out float centerFreq)
+        public readonly RESULT get3DDistanceFilter(out bool custom, out float customLevel, out float centerFreq)
         {
             return FMOD5_Channel_Get3DDistanceFilter(this.handle, out custom, out customLevel, out centerFreq);
         }
 
         // Userdata set/get.
-        public RESULT setUserData(IntPtr userdata)
+        public readonly RESULT setUserData(IntPtr userdata)
         {
             return FMOD5_Channel_SetUserData(this.handle, userdata);
         }
-        public RESULT getUserData(out IntPtr userdata)
+        public readonly RESULT getUserData(out IntPtr userdata)
         {
             return FMOD5_Channel_GetUserData(this.handle, out userdata);
         }
@@ -2634,7 +2642,7 @@ namespace FMOD
         public IntPtr handle;
 
         public Channel(IntPtr ptr) { this.handle = ptr; }
-        public bool hasHandle() { return this.handle != IntPtr.Zero; }
+        public readonly bool hasHandle() { return this.handle != IntPtr.Zero; }
         public void clearHandle() { this.handle = IntPtr.Zero; }
 
         #endregion
@@ -2645,35 +2653,35 @@ namespace FMOD
     */
     public struct ChannelGroup : IChannelControl
     {
-        public RESULT release()
+        public readonly RESULT release()
         {
             return FMOD5_ChannelGroup_Release(this.handle);
         }
 
         // Nested channel groups.
-        public RESULT addGroup(ChannelGroup group, bool propagatedspclock = true)
+        public readonly RESULT addGroup(ChannelGroup group, bool propagatedspclock = true)
         {
             return FMOD5_ChannelGroup_AddGroup(this.handle, group.handle, propagatedspclock, IntPtr.Zero);
         }
-        public RESULT addGroup(ChannelGroup group, bool propagatedspclock, out DSPConnection connection)
+        public readonly RESULT addGroup(ChannelGroup group, bool propagatedspclock, out DSPConnection connection)
         {
             return FMOD5_ChannelGroup_AddGroup(this.handle, group.handle, propagatedspclock, out connection.handle);
         }
-        public RESULT getNumGroups(out int numgroups)
+        public readonly RESULT getNumGroups(out int numgroups)
         {
             return FMOD5_ChannelGroup_GetNumGroups(this.handle, out numgroups);
         }
-        public RESULT getGroup(int index, out ChannelGroup group)
+        public readonly RESULT getGroup(int index, out ChannelGroup group)
         {
             return FMOD5_ChannelGroup_GetGroup(this.handle, index, out group.handle);
         }
-        public RESULT getParentGroup(out ChannelGroup group)
+        public readonly RESULT getParentGroup(out ChannelGroup group)
         {
             return FMOD5_ChannelGroup_GetParentGroup(this.handle, out group.handle);
         }
 
         // Information only functions.
-        public RESULT getName(out string name, int namelen)
+        public readonly RESULT getName(out string name, int namelen)
         {
             IntPtr stringMem = Marshal.AllocHGlobal(namelen);
 
@@ -2686,272 +2694,272 @@ namespace FMOD
 
             return result;
         }
-        public RESULT getNumChannels(out int numchannels)
+        public readonly RESULT getNumChannels(out int numchannels)
         {
             return FMOD5_ChannelGroup_GetNumChannels(this.handle, out numchannels);
         }
-        public RESULT getChannel(int index, out Channel channel)
+        public readonly RESULT getChannel(int index, out Channel channel)
         {
             return FMOD5_ChannelGroup_GetChannel(this.handle, index, out channel.handle);
         }
 
-        public RESULT getSystemObject(out System system)
+        public readonly RESULT getSystemObject(out System system)
         {
             return FMOD5_ChannelGroup_GetSystemObject(this.handle, out system.handle);
         }
 
         // General control functionality for Channels and ChannelGroups.
-        public RESULT stop()
+        public readonly RESULT stop()
         {
             return FMOD5_ChannelGroup_Stop(this.handle);
         }
-        public RESULT setPaused(bool paused)
+        public readonly RESULT setPaused(bool paused)
         {
             return FMOD5_ChannelGroup_SetPaused(this.handle, paused);
         }
-        public RESULT getPaused(out bool paused)
+        public readonly RESULT getPaused(out bool paused)
         {
             return FMOD5_ChannelGroup_GetPaused(this.handle, out paused);
         }
-        public RESULT setVolume(float volume)
+        public readonly RESULT setVolume(float volume)
         {
             return FMOD5_ChannelGroup_SetVolume(this.handle, volume);
         }
-        public RESULT getVolume(out float volume)
+        public readonly RESULT getVolume(out float volume)
         {
             return FMOD5_ChannelGroup_GetVolume(this.handle, out volume);
         }
-        public RESULT setVolumeRamp(bool ramp)
+        public readonly RESULT setVolumeRamp(bool ramp)
         {
             return FMOD5_ChannelGroup_SetVolumeRamp(this.handle, ramp);
         }
-        public RESULT getVolumeRamp(out bool ramp)
+        public readonly RESULT getVolumeRamp(out bool ramp)
         {
             return FMOD5_ChannelGroup_GetVolumeRamp(this.handle, out ramp);
         }
-        public RESULT getAudibility(out float audibility)
+        public readonly RESULT getAudibility(out float audibility)
         {
             return FMOD5_ChannelGroup_GetAudibility(this.handle, out audibility);
         }
-        public RESULT setPitch(float pitch)
+        public readonly RESULT setPitch(float pitch)
         {
             return FMOD5_ChannelGroup_SetPitch(this.handle, pitch);
         }
-        public RESULT getPitch(out float pitch)
+        public readonly RESULT getPitch(out float pitch)
         {
             return FMOD5_ChannelGroup_GetPitch(this.handle, out pitch);
         }
-        public RESULT setMute(bool mute)
+        public readonly RESULT setMute(bool mute)
         {
             return FMOD5_ChannelGroup_SetMute(this.handle, mute);
         }
-        public RESULT getMute(out bool mute)
+        public readonly RESULT getMute(out bool mute)
         {
             return FMOD5_ChannelGroup_GetMute(this.handle, out mute);
         }
-        public RESULT setReverbProperties(int instance, float wet)
+        public readonly RESULT setReverbProperties(int instance, float wet)
         {
             return FMOD5_ChannelGroup_SetReverbProperties(this.handle, instance, wet);
         }
-        public RESULT getReverbProperties(int instance, out float wet)
+        public readonly RESULT getReverbProperties(int instance, out float wet)
         {
             return FMOD5_ChannelGroup_GetReverbProperties(this.handle, instance, out wet);
         }
-        public RESULT setLowPassGain(float gain)
+        public readonly RESULT setLowPassGain(float gain)
         {
             return FMOD5_ChannelGroup_SetLowPassGain(this.handle, gain);
         }
-        public RESULT getLowPassGain(out float gain)
+        public readonly RESULT getLowPassGain(out float gain)
         {
             return FMOD5_ChannelGroup_GetLowPassGain(this.handle, out gain);
         }
-        public RESULT setMode(MODE mode)
+        public readonly RESULT setMode(MODE mode)
         {
             return FMOD5_ChannelGroup_SetMode(this.handle, mode);
         }
-        public RESULT getMode(out MODE mode)
+        public readonly RESULT getMode(out MODE mode)
         {
             return FMOD5_ChannelGroup_GetMode(this.handle, out mode);
         }
-        public RESULT setCallback(CHANNELCONTROL_CALLBACK callback)
+        public readonly RESULT setCallback(CHANNELCONTROL_CALLBACK callback)
         {
             return FMOD5_ChannelGroup_SetCallback(this.handle, callback);
         }
-        public RESULT isPlaying(out bool isplaying)
+        public readonly RESULT isPlaying(out bool isplaying)
         {
             return FMOD5_ChannelGroup_IsPlaying(this.handle, out isplaying);
         }
 
         // Note all 'set' functions alter a final matrix, this is why the only get function is getMixMatrix, to avoid other get functions returning incorrect/obsolete values.
-        public RESULT setPan(float pan)
+        public readonly RESULT setPan(float pan)
         {
             return FMOD5_ChannelGroup_SetPan(this.handle, pan);
         }
-        public RESULT setMixLevelsOutput(float frontleft, float frontright, float center, float lfe, float surroundleft, float surroundright, float backleft, float backright)
+        public readonly RESULT setMixLevelsOutput(float frontleft, float frontright, float center, float lfe, float surroundleft, float surroundright, float backleft, float backright)
         {
             return FMOD5_ChannelGroup_SetMixLevelsOutput(this.handle, frontleft, frontright, center, lfe, surroundleft, surroundright, backleft, backright);
         }
-        public RESULT setMixLevelsInput(float[] levels, int numlevels)
+        public readonly RESULT setMixLevelsInput(float[] levels, int numlevels)
         {
             return FMOD5_ChannelGroup_SetMixLevelsInput(this.handle, levels, numlevels);
         }
-        public RESULT setMixMatrix(float[] matrix, int outchannels, int inchannels, int inchannel_hop)
+        public readonly RESULT setMixMatrix(float[] matrix, int outchannels, int inchannels, int inchannel_hop)
         {
             return FMOD5_ChannelGroup_SetMixMatrix(this.handle, matrix, outchannels, inchannels, inchannel_hop);
         }
-        public RESULT getMixMatrix(float[] matrix, out int outchannels, out int inchannels, int inchannel_hop)
+        public readonly RESULT getMixMatrix(float[] matrix, out int outchannels, out int inchannels, int inchannel_hop)
         {
             return FMOD5_ChannelGroup_GetMixMatrix(this.handle, matrix, out outchannels, out inchannels, inchannel_hop);
         }
 
         // Clock based functionality.
-        public RESULT getDSPClock(out ulong dspclock, out ulong parentclock)
+        public readonly RESULT getDSPClock(out ulong dspclock, out ulong parentclock)
         {
             return FMOD5_ChannelGroup_GetDSPClock(this.handle, out dspclock, out parentclock);
         }
-        public RESULT setDelay(ulong dspclock_start, ulong dspclock_end, bool stopchannels)
+        public readonly RESULT setDelay(ulong dspclock_start, ulong dspclock_end, bool stopchannels)
         {
             return FMOD5_ChannelGroup_SetDelay(this.handle, dspclock_start, dspclock_end, stopchannels);
         }
-        public RESULT getDelay(out ulong dspclock_start, out ulong dspclock_end)
+        public readonly RESULT getDelay(out ulong dspclock_start, out ulong dspclock_end)
         {
             return FMOD5_ChannelGroup_GetDelay(this.handle, out dspclock_start, out dspclock_end, IntPtr.Zero);
         }
-        public RESULT getDelay(out ulong dspclock_start, out ulong dspclock_end, out bool stopchannels)
+        public readonly RESULT getDelay(out ulong dspclock_start, out ulong dspclock_end, out bool stopchannels)
         {
             return FMOD5_ChannelGroup_GetDelay(this.handle, out dspclock_start, out dspclock_end, out stopchannels);
         }
-        public RESULT addFadePoint(ulong dspclock, float volume)
+        public readonly RESULT addFadePoint(ulong dspclock, float volume)
         {
             return FMOD5_ChannelGroup_AddFadePoint(this.handle, dspclock, volume);
         }
-        public RESULT setFadePointRamp(ulong dspclock, float volume)
+        public readonly RESULT setFadePointRamp(ulong dspclock, float volume)
         {
             return FMOD5_ChannelGroup_SetFadePointRamp(this.handle, dspclock, volume);
         }
-        public RESULT removeFadePoints(ulong dspclock_start, ulong dspclock_end)
+        public readonly RESULT removeFadePoints(ulong dspclock_start, ulong dspclock_end)
         {
             return FMOD5_ChannelGroup_RemoveFadePoints(this.handle, dspclock_start, dspclock_end);
         }
-        public RESULT getFadePoints(ref uint numpoints, ulong[] point_dspclock, float[] point_volume)
+        public readonly RESULT getFadePoints(ref uint numpoints, ulong[] point_dspclock, float[] point_volume)
         {
             return FMOD5_ChannelGroup_GetFadePoints(this.handle, ref numpoints, point_dspclock, point_volume);
         }
 
         // DSP effects.
-        public RESULT getDSP(int index, out DSP dsp)
+        public readonly RESULT getDSP(int index, out DSP dsp)
         {
             return FMOD5_ChannelGroup_GetDSP(this.handle, index, out dsp.handle);
         }
-        public RESULT addDSP(int index, DSP dsp)
+        public readonly RESULT addDSP(int index, DSP dsp)
         {
             return FMOD5_ChannelGroup_AddDSP(this.handle, index, dsp.handle);
         }
-        public RESULT removeDSP(DSP dsp)
+        public readonly RESULT removeDSP(DSP dsp)
         {
             return FMOD5_ChannelGroup_RemoveDSP(this.handle, dsp.handle);
         }
-        public RESULT getNumDSPs(out int numdsps)
+        public readonly RESULT getNumDSPs(out int numdsps)
         {
             return FMOD5_ChannelGroup_GetNumDSPs(this.handle, out numdsps);
         }
-        public RESULT setDSPIndex(DSP dsp, int index)
+        public readonly RESULT setDSPIndex(DSP dsp, int index)
         {
             return FMOD5_ChannelGroup_SetDSPIndex(this.handle, dsp.handle, index);
         }
-        public RESULT getDSPIndex(DSP dsp, out int index)
+        public readonly RESULT getDSPIndex(DSP dsp, out int index)
         {
             return FMOD5_ChannelGroup_GetDSPIndex(this.handle, dsp.handle, out index);
         }
 
         // 3D functionality.
-        public RESULT set3DAttributes(ref VECTOR pos, ref VECTOR vel)
+        public readonly RESULT set3DAttributes(ref VECTOR pos, ref VECTOR vel)
         {
             return FMOD5_ChannelGroup_Set3DAttributes(this.handle, ref pos, ref vel);
         }
-        public RESULT get3DAttributes(out VECTOR pos, out VECTOR vel)
+        public readonly RESULT get3DAttributes(out VECTOR pos, out VECTOR vel)
         {
             return FMOD5_ChannelGroup_Get3DAttributes(this.handle, out pos, out vel);
         }
-        public RESULT set3DMinMaxDistance(float mindistance, float maxdistance)
+        public readonly RESULT set3DMinMaxDistance(float mindistance, float maxdistance)
         {
             return FMOD5_ChannelGroup_Set3DMinMaxDistance(this.handle, mindistance, maxdistance);
         }
-        public RESULT get3DMinMaxDistance(out float mindistance, out float maxdistance)
+        public readonly RESULT get3DMinMaxDistance(out float mindistance, out float maxdistance)
         {
             return FMOD5_ChannelGroup_Get3DMinMaxDistance(this.handle, out mindistance, out maxdistance);
         }
-        public RESULT set3DConeSettings(float insideconeangle, float outsideconeangle, float outsidevolume)
+        public readonly RESULT set3DConeSettings(float insideconeangle, float outsideconeangle, float outsidevolume)
         {
             return FMOD5_ChannelGroup_Set3DConeSettings(this.handle, insideconeangle, outsideconeangle, outsidevolume);
         }
-        public RESULT get3DConeSettings(out float insideconeangle, out float outsideconeangle, out float outsidevolume)
+        public readonly RESULT get3DConeSettings(out float insideconeangle, out float outsideconeangle, out float outsidevolume)
         {
             return FMOD5_ChannelGroup_Get3DConeSettings(this.handle, out insideconeangle, out outsideconeangle, out outsidevolume);
         }
-        public RESULT set3DConeOrientation(ref VECTOR orientation)
+        public readonly RESULT set3DConeOrientation(ref VECTOR orientation)
         {
             return FMOD5_ChannelGroup_Set3DConeOrientation(this.handle, ref orientation);
         }
-        public RESULT get3DConeOrientation(out VECTOR orientation)
+        public readonly RESULT get3DConeOrientation(out VECTOR orientation)
         {
             return FMOD5_ChannelGroup_Get3DConeOrientation(this.handle, out orientation);
         }
-        public RESULT set3DCustomRolloff(ref VECTOR points, int numpoints)
+        public readonly RESULT set3DCustomRolloff(ref VECTOR points, int numpoints)
         {
             return FMOD5_ChannelGroup_Set3DCustomRolloff(this.handle, ref points, numpoints);
         }
-        public RESULT get3DCustomRolloff(out IntPtr points, out int numpoints)
+        public readonly RESULT get3DCustomRolloff(out IntPtr points, out int numpoints)
         {
             return FMOD5_ChannelGroup_Get3DCustomRolloff(this.handle, out points, out numpoints);
         }
-        public RESULT set3DOcclusion(float directocclusion, float reverbocclusion)
+        public readonly RESULT set3DOcclusion(float directocclusion, float reverbocclusion)
         {
             return FMOD5_ChannelGroup_Set3DOcclusion(this.handle, directocclusion, reverbocclusion);
         }
-        public RESULT get3DOcclusion(out float directocclusion, out float reverbocclusion)
+        public readonly RESULT get3DOcclusion(out float directocclusion, out float reverbocclusion)
         {
             return FMOD5_ChannelGroup_Get3DOcclusion(this.handle, out directocclusion, out reverbocclusion);
         }
-        public RESULT set3DSpread(float angle)
+        public readonly RESULT set3DSpread(float angle)
         {
             return FMOD5_ChannelGroup_Set3DSpread(this.handle, angle);
         }
-        public RESULT get3DSpread(out float angle)
+        public readonly RESULT get3DSpread(out float angle)
         {
             return FMOD5_ChannelGroup_Get3DSpread(this.handle, out angle);
         }
-        public RESULT set3DLevel(float level)
+        public readonly RESULT set3DLevel(float level)
         {
             return FMOD5_ChannelGroup_Set3DLevel(this.handle, level);
         }
-        public RESULT get3DLevel(out float level)
+        public readonly RESULT get3DLevel(out float level)
         {
             return FMOD5_ChannelGroup_Get3DLevel(this.handle, out level);
         }
-        public RESULT set3DDopplerLevel(float level)
+        public readonly RESULT set3DDopplerLevel(float level)
         {
             return FMOD5_ChannelGroup_Set3DDopplerLevel(this.handle, level);
         }
-        public RESULT get3DDopplerLevel(out float level)
+        public readonly RESULT get3DDopplerLevel(out float level)
         {
             return FMOD5_ChannelGroup_Get3DDopplerLevel(this.handle, out level);
         }
-        public RESULT set3DDistanceFilter(bool custom, float customLevel, float centerFreq)
+        public readonly RESULT set3DDistanceFilter(bool custom, float customLevel, float centerFreq)
         {
             return FMOD5_ChannelGroup_Set3DDistanceFilter(this.handle, custom, customLevel, centerFreq);
         }
-        public RESULT get3DDistanceFilter(out bool custom, out float customLevel, out float centerFreq)
+        public readonly RESULT get3DDistanceFilter(out bool custom, out float customLevel, out float centerFreq)
         {
             return FMOD5_ChannelGroup_Get3DDistanceFilter(this.handle, out custom, out customLevel, out centerFreq);
         }
 
         // Userdata set/get.
-        public RESULT setUserData(IntPtr userdata)
+        public readonly RESULT setUserData(IntPtr userdata)
         {
             return FMOD5_ChannelGroup_SetUserData(this.handle, userdata);
         }
-        public RESULT getUserData(out IntPtr userdata)
+        public readonly RESULT getUserData(out IntPtr userdata)
         {
             return FMOD5_ChannelGroup_GetUserData(this.handle, out userdata);
         }
@@ -3106,7 +3114,7 @@ namespace FMOD
         public IntPtr handle;
 
         public ChannelGroup(IntPtr ptr) { this.handle = ptr; }
-        public bool hasHandle() { return this.handle != IntPtr.Zero; }
+        public readonly bool hasHandle() { return this.handle != IntPtr.Zero; }
         public void clearHandle() { this.handle = IntPtr.Zero; }
 
         #endregion
@@ -3117,56 +3125,56 @@ namespace FMOD
     */
     public struct SoundGroup
     {
-        public RESULT release()
+        public readonly RESULT release()
         {
             return FMOD5_SoundGroup_Release(this.handle);
         }
 
-        public RESULT getSystemObject(out System system)
+        public readonly RESULT getSystemObject(out System system)
         {
             return FMOD5_SoundGroup_GetSystemObject(this.handle, out system.handle);
         }
 
         // SoundGroup control functions.
-        public RESULT setMaxAudible(int maxaudible)
+        public readonly RESULT setMaxAudible(int maxaudible)
         {
             return FMOD5_SoundGroup_SetMaxAudible(this.handle, maxaudible);
         }
-        public RESULT getMaxAudible(out int maxaudible)
+        public readonly RESULT getMaxAudible(out int maxaudible)
         {
             return FMOD5_SoundGroup_GetMaxAudible(this.handle, out maxaudible);
         }
-        public RESULT setMaxAudibleBehavior(SOUNDGROUP_BEHAVIOR behavior)
+        public readonly RESULT setMaxAudibleBehavior(SOUNDGROUP_BEHAVIOR behavior)
         {
             return FMOD5_SoundGroup_SetMaxAudibleBehavior(this.handle, behavior);
         }
-        public RESULT getMaxAudibleBehavior(out SOUNDGROUP_BEHAVIOR behavior)
+        public readonly RESULT getMaxAudibleBehavior(out SOUNDGROUP_BEHAVIOR behavior)
         {
             return FMOD5_SoundGroup_GetMaxAudibleBehavior(this.handle, out behavior);
         }
-        public RESULT setMuteFadeSpeed(float speed)
+        public readonly RESULT setMuteFadeSpeed(float speed)
         {
             return FMOD5_SoundGroup_SetMuteFadeSpeed(this.handle, speed);
         }
-        public RESULT getMuteFadeSpeed(out float speed)
+        public readonly RESULT getMuteFadeSpeed(out float speed)
         {
             return FMOD5_SoundGroup_GetMuteFadeSpeed(this.handle, out speed);
         }
-        public RESULT setVolume(float volume)
+        public readonly RESULT setVolume(float volume)
         {
             return FMOD5_SoundGroup_SetVolume(this.handle, volume);
         }
-        public RESULT getVolume(out float volume)
+        public readonly RESULT getVolume(out float volume)
         {
             return FMOD5_SoundGroup_GetVolume(this.handle, out volume);
         }
-        public RESULT stop()
+        public readonly RESULT stop()
         {
             return FMOD5_SoundGroup_Stop(this.handle);
         }
 
         // Information only functions.
-        public RESULT getName(out string name, int namelen)
+        public readonly RESULT getName(out string name, int namelen)
         {
             IntPtr stringMem = Marshal.AllocHGlobal(namelen);
 
@@ -3179,25 +3187,25 @@ namespace FMOD
 
             return result;
         }
-        public RESULT getNumSounds(out int numsounds)
+        public readonly RESULT getNumSounds(out int numsounds)
         {
             return FMOD5_SoundGroup_GetNumSounds(this.handle, out numsounds);
         }
-        public RESULT getSound(int index, out Sound sound)
+        public readonly RESULT getSound(int index, out Sound sound)
         {
             return FMOD5_SoundGroup_GetSound(this.handle, index, out sound.handle);
         }
-        public RESULT getNumPlaying(out int numplaying)
+        public readonly RESULT getNumPlaying(out int numplaying)
         {
             return FMOD5_SoundGroup_GetNumPlaying(this.handle, out numplaying);
         }
 
         // Userdata set/get.
-        public RESULT setUserData(IntPtr userdata)
+        public readonly RESULT setUserData(IntPtr userdata)
         {
             return FMOD5_SoundGroup_SetUserData(this.handle, userdata);
         }
-        public RESULT getUserData(out IntPtr userdata)
+        public readonly RESULT getUserData(out IntPtr userdata)
         {
             return FMOD5_SoundGroup_GetUserData(this.handle, out userdata);
         }
@@ -3244,7 +3252,7 @@ namespace FMOD
         public IntPtr handle;
 
         public SoundGroup(IntPtr ptr) { this.handle = ptr; }
-        public bool hasHandle() { return this.handle != IntPtr.Zero; }
+        public readonly bool hasHandle() { return this.handle != IntPtr.Zero; }
         public void clearHandle() { this.handle = IntPtr.Zero; }
 
         #endregion
@@ -3255,154 +3263,154 @@ namespace FMOD
     */
     public struct DSP
     {
-        public RESULT release()
+        public readonly RESULT release()
         {
             return FMOD5_DSP_Release(this.handle);
         }
-        public RESULT getSystemObject(out System system)
+        public readonly RESULT getSystemObject(out System system)
         {
             return FMOD5_DSP_GetSystemObject(this.handle, out system.handle);
         }
 
         // Connection / disconnection / input and output enumeration.
-        public RESULT addInput(DSP input)
+        public readonly RESULT addInput(DSP input)
         {
             return FMOD5_DSP_AddInput(this.handle, input.handle, IntPtr.Zero, DSPCONNECTION_TYPE.STANDARD);
         }
-        public RESULT addInput(DSP input, out DSPConnection connection, DSPCONNECTION_TYPE type = DSPCONNECTION_TYPE.STANDARD)
+        public readonly RESULT addInput(DSP input, out DSPConnection connection, DSPCONNECTION_TYPE type = DSPCONNECTION_TYPE.STANDARD)
         {
             return FMOD5_DSP_AddInput(this.handle, input.handle, out connection.handle, type);
         }
-        public RESULT addInputPreallocated(DSP input, DSPConnection connection)
+        public readonly RESULT addInputPreallocated(DSP input, DSPConnection connection)
         {
             return FMOD5_DSP_AddInput(this.handle, input.handle, out connection.handle, DSPCONNECTION_TYPE.PREALLOCATED);
         }
-        public RESULT disconnectFrom(DSP target, DSPConnection connection)
+        public readonly RESULT disconnectFrom(DSP target, DSPConnection connection)
         {
             return FMOD5_DSP_DisconnectFrom(this.handle, target.handle, connection.handle);
         }
-        public RESULT disconnectAll(bool inputs, bool outputs)
+        public readonly RESULT disconnectAll(bool inputs, bool outputs)
         {
             return FMOD5_DSP_DisconnectAll(this.handle, inputs, outputs);
         }
-        public RESULT getNumInputs(out int numinputs)
+        public readonly RESULT getNumInputs(out int numinputs)
         {
             return FMOD5_DSP_GetNumInputs(this.handle, out numinputs);
         }
-        public RESULT getNumOutputs(out int numoutputs)
+        public readonly RESULT getNumOutputs(out int numoutputs)
         {
             return FMOD5_DSP_GetNumOutputs(this.handle, out numoutputs);
         }
-        public RESULT getInput(int index, out DSP input, out DSPConnection inputconnection)
+        public readonly RESULT getInput(int index, out DSP input, out DSPConnection inputconnection)
         {
             return FMOD5_DSP_GetInput(this.handle, index, out input.handle, out inputconnection.handle);
         }
-        public RESULT getOutput(int index, out DSP output, out DSPConnection outputconnection)
+        public readonly RESULT getOutput(int index, out DSP output, out DSPConnection outputconnection)
         {
             return FMOD5_DSP_GetOutput(this.handle, index, out output.handle, out outputconnection.handle);
         }
 
         // DSP unit control.
-        public RESULT setActive(bool active)
+        public readonly RESULT setActive(bool active)
         {
             return FMOD5_DSP_SetActive(this.handle, active);
         }
-        public RESULT getActive(out bool active)
+        public readonly RESULT getActive(out bool active)
         {
             return FMOD5_DSP_GetActive(this.handle, out active);
         }
-        public RESULT setBypass(bool bypass)
+        public readonly RESULT setBypass(bool bypass)
         {
             return FMOD5_DSP_SetBypass(this.handle, bypass);
         }
-        public RESULT getBypass(out bool bypass)
+        public readonly RESULT getBypass(out bool bypass)
         {
             return FMOD5_DSP_GetBypass(this.handle, out bypass);
         }
-        public RESULT setWetDryMix(float prewet, float postwet, float dry)
+        public readonly RESULT setWetDryMix(float prewet, float postwet, float dry)
         {
             return FMOD5_DSP_SetWetDryMix(this.handle, prewet, postwet, dry);
         }
-        public RESULT getWetDryMix(out float prewet, out float postwet, out float dry)
+        public readonly RESULT getWetDryMix(out float prewet, out float postwet, out float dry)
         {
             return FMOD5_DSP_GetWetDryMix(this.handle, out prewet, out postwet, out dry);
         }
-        public RESULT setChannelFormat(CHANNELMASK channelmask, int numchannels, SPEAKERMODE source_speakermode)
+        public readonly RESULT setChannelFormat(CHANNELMASK channelmask, int numchannels, SPEAKERMODE source_speakermode)
         {
             return FMOD5_DSP_SetChannelFormat(this.handle, channelmask, numchannels, source_speakermode);
         }
-        public RESULT getChannelFormat(out CHANNELMASK channelmask, out int numchannels, out SPEAKERMODE source_speakermode)
+        public readonly RESULT getChannelFormat(out CHANNELMASK channelmask, out int numchannels, out SPEAKERMODE source_speakermode)
         {
             return FMOD5_DSP_GetChannelFormat(this.handle, out channelmask, out numchannels, out source_speakermode);
         }
-        public RESULT getOutputChannelFormat(CHANNELMASK inmask, int inchannels, SPEAKERMODE inspeakermode, out CHANNELMASK outmask, out int outchannels, out SPEAKERMODE outspeakermode)
+        public readonly RESULT getOutputChannelFormat(CHANNELMASK inmask, int inchannels, SPEAKERMODE inspeakermode, out CHANNELMASK outmask, out int outchannels, out SPEAKERMODE outspeakermode)
         {
             return FMOD5_DSP_GetOutputChannelFormat(this.handle, inmask, inchannels, inspeakermode, out outmask, out outchannels, out outspeakermode);
         }
-        public RESULT reset()
+        public readonly RESULT reset()
         {
             return FMOD5_DSP_Reset(this.handle);
         }
-        public RESULT setCallback(DSP_CALLBACK callback)
+        public readonly RESULT setCallback(DSP_CALLBACK callback)
         {
             return FMOD5_DSP_SetCallback(this.handle, callback);
         }
 
         // DSP parameter control.
-        public RESULT setParameterFloat(int index, float value)
+        public readonly RESULT setParameterFloat(int index, float value)
         {
             return FMOD5_DSP_SetParameterFloat(this.handle, index, value);
         }
-        public RESULT setParameterInt(int index, int value)
+        public readonly RESULT setParameterInt(int index, int value)
         {
             return FMOD5_DSP_SetParameterInt(this.handle, index, value);
         }
-        public RESULT setParameterBool(int index, bool value)
+        public readonly RESULT setParameterBool(int index, bool value)
         {
             return FMOD5_DSP_SetParameterBool(this.handle, index, value);
         }
-        public RESULT setParameterData(int index, byte[] data)
+        public readonly RESULT setParameterData(int index, byte[] data)
         {
             return FMOD5_DSP_SetParameterData(this.handle, index, data, data == null ? 0 : (uint)data.Length);
         }
-        public RESULT getParameterFloat(int index, out float value)
+        public readonly RESULT getParameterFloat(int index, out float value)
         {
             return FMOD5_DSP_GetParameterFloat(this.handle, index, out value, IntPtr.Zero, 0);
         }
-        public RESULT getParameterInt(int index, out int value)
+        public readonly RESULT getParameterInt(int index, out int value)
         {
             return FMOD5_DSP_GetParameterInt(this.handle, index, out value, IntPtr.Zero, 0);
         }
-        public RESULT getParameterBool(int index, out bool value)
+        public readonly RESULT getParameterBool(int index, out bool value)
         {
             return FMOD5_DSP_GetParameterBool(this.handle, index, out value, IntPtr.Zero, 0);
         }
-        public RESULT getParameterData(int index, out IntPtr data, out uint length)
+        public readonly RESULT getParameterData(int index, out IntPtr data, out uint length)
         {
             return FMOD5_DSP_GetParameterData(this.handle, index, out data, out length, IntPtr.Zero, 0);
         }
-        public RESULT getNumParameters(out int numparams)
+        public readonly RESULT getNumParameters(out int numparams)
         {
             return FMOD5_DSP_GetNumParameters(this.handle, out numparams);
         }
-        public RESULT getParameterInfo(int index, out DSP_PARAMETER_DESC desc)
+        public readonly RESULT getParameterInfo(int index, out DSP_PARAMETER_DESC desc)
         {
             IntPtr descPtr;
             RESULT result = FMOD5_DSP_GetParameterInfo(this.handle, index, out descPtr);
             desc = (DSP_PARAMETER_DESC)Marshal.PtrToStructure<DSP_PARAMETER_DESC>(descPtr);
             return result;
         }
-        public RESULT getDataParameterIndex(int datatype, out int index)
+        public readonly RESULT getDataParameterIndex(int datatype, out int index)
         {
             return FMOD5_DSP_GetDataParameterIndex(this.handle, datatype, out index);
         }
-        public RESULT showConfigDialog(IntPtr hwnd, bool show)
+        public readonly RESULT showConfigDialog(IntPtr hwnd, bool show)
         {
             return FMOD5_DSP_ShowConfigDialog(this.handle, hwnd, show);
         }
 
         //  DSP attributes.
-        public RESULT getInfo(out string name, out uint version, out int channels, out int configwidth, out int configheight)
+        public readonly RESULT getInfo(out string name, out uint version, out int channels, out int configwidth, out int configheight)
         {
             IntPtr nameMem = Marshal.AllocHGlobal(32);
 
@@ -3414,53 +3422,53 @@ namespace FMOD
             Marshal.FreeHGlobal(nameMem);
             return result;
         }
-        public RESULT getInfo(out uint version, out int channels, out int configwidth, out int configheight)
+        public readonly RESULT getInfo(out uint version, out int channels, out int configwidth, out int configheight)
         {
             return FMOD5_DSP_GetInfo(this.handle, IntPtr.Zero, out version, out channels, out configwidth, out configheight); ;
         }
-        public RESULT getType(out DSP_TYPE type)
+        public readonly RESULT getType(out DSP_TYPE type)
         {
             return FMOD5_DSP_GetType(this.handle, out type);
         }
-        public RESULT getIdle(out bool idle)
+        public readonly RESULT getIdle(out bool idle)
         {
             return FMOD5_DSP_GetIdle(this.handle, out idle);
         }
 
         // Userdata set/get.
-        public RESULT setUserData(IntPtr userdata)
+        public readonly RESULT setUserData(IntPtr userdata)
         {
             return FMOD5_DSP_SetUserData(this.handle, userdata);
         }
-        public RESULT getUserData(out IntPtr userdata)
+        public readonly RESULT getUserData(out IntPtr userdata)
         {
             return FMOD5_DSP_GetUserData(this.handle, out userdata);
         }
 
         // Metering.
-        public RESULT setMeteringEnabled(bool inputEnabled, bool outputEnabled)
+        public readonly RESULT setMeteringEnabled(bool inputEnabled, bool outputEnabled)
         {
             return FMOD5_DSP_SetMeteringEnabled(this.handle, inputEnabled, outputEnabled);
         }
-        public RESULT getMeteringEnabled(out bool inputEnabled, out bool outputEnabled)
+        public readonly RESULT getMeteringEnabled(out bool inputEnabled, out bool outputEnabled)
         {
             return FMOD5_DSP_GetMeteringEnabled(this.handle, out inputEnabled, out outputEnabled);
         }
 
-        public RESULT getMeteringInfo(IntPtr zero, out DSP_METERING_INFO outputInfo)
+        public readonly RESULT getMeteringInfo(IntPtr zero, out DSP_METERING_INFO outputInfo)
         {
             return FMOD5_DSP_GetMeteringInfo(this.handle, zero, out outputInfo);
         }
-        public RESULT getMeteringInfo(out DSP_METERING_INFO inputInfo, IntPtr zero)
+        public readonly RESULT getMeteringInfo(out DSP_METERING_INFO inputInfo, IntPtr zero)
         {
             return FMOD5_DSP_GetMeteringInfo(this.handle, out inputInfo, zero);
         }
-        public RESULT getMeteringInfo(out DSP_METERING_INFO inputInfo, out DSP_METERING_INFO outputInfo)
+        public readonly RESULT getMeteringInfo(out DSP_METERING_INFO inputInfo, out DSP_METERING_INFO outputInfo)
         {
             return FMOD5_DSP_GetMeteringInfo(this.handle, out inputInfo, out outputInfo);
         }
 
-        public RESULT getCPUUsage(out uint exclusive, out uint inclusive)
+        public readonly RESULT getCPUUsage(out uint exclusive, out uint inclusive)
         {
             return FMOD5_DSP_GetCPUUsage(this.handle, out exclusive, out inclusive);
         }
@@ -3563,7 +3571,7 @@ namespace FMOD
         public IntPtr handle;
 
         public DSP(IntPtr ptr) { this.handle = ptr; }
-        public bool hasHandle() { return this.handle != IntPtr.Zero; }
+        public readonly bool hasHandle() { return this.handle != IntPtr.Zero; }
         public void clearHandle() { this.handle = IntPtr.Zero; }
 
         #endregion
@@ -3574,41 +3582,41 @@ namespace FMOD
     */
     public struct DSPConnection
     {
-        public RESULT getInput(out DSP input)
+        public readonly RESULT getInput(out DSP input)
         {
             return FMOD5_DSPConnection_GetInput(this.handle, out input.handle);
         }
-        public RESULT getOutput(out DSP output)
+        public readonly RESULT getOutput(out DSP output)
         {
             return FMOD5_DSPConnection_GetOutput(this.handle, out output.handle);
         }
-        public RESULT setMix(float volume)
+        public readonly RESULT setMix(float volume)
         {
             return FMOD5_DSPConnection_SetMix(this.handle, volume);
         }
-        public RESULT getMix(out float volume)
+        public readonly RESULT getMix(out float volume)
         {
             return FMOD5_DSPConnection_GetMix(this.handle, out volume);
         }
-        public RESULT setMixMatrix(float[] matrix, int outchannels, int inchannels, int inchannel_hop = 0)
+        public readonly RESULT setMixMatrix(float[] matrix, int outchannels, int inchannels, int inchannel_hop = 0)
         {
             return FMOD5_DSPConnection_SetMixMatrix(this.handle, matrix, outchannels, inchannels, inchannel_hop);
         }
-        public RESULT getMixMatrix(float[] matrix, out int outchannels, out int inchannels, int inchannel_hop = 0)
+        public readonly RESULT getMixMatrix(float[] matrix, out int outchannels, out int inchannels, int inchannel_hop = 0)
         {
             return FMOD5_DSPConnection_GetMixMatrix(this.handle, matrix, out outchannels, out inchannels, inchannel_hop);
         }
-        public RESULT getType(out DSPCONNECTION_TYPE type)
+        public readonly RESULT getType(out DSPCONNECTION_TYPE type)
         {
             return FMOD5_DSPConnection_GetType(this.handle, out type);
         }
 
         // Userdata set/get.
-        public RESULT setUserData(IntPtr userdata)
+        public readonly RESULT setUserData(IntPtr userdata)
         {
             return FMOD5_DSPConnection_SetUserData(this.handle, userdata);
         }
-        public RESULT getUserData(out IntPtr userdata)
+        public readonly RESULT getUserData(out IntPtr userdata)
         {
             return FMOD5_DSPConnection_GetUserData(this.handle, out userdata);
         }
@@ -3639,7 +3647,7 @@ namespace FMOD
         public IntPtr handle;
 
         public DSPConnection(IntPtr ptr) { this.handle = ptr; }
-        public bool hasHandle() { return this.handle != IntPtr.Zero; }
+        public readonly bool hasHandle() { return this.handle != IntPtr.Zero; }
         public void clearHandle() { this.handle = IntPtr.Zero; }
 
         #endregion
@@ -3650,89 +3658,89 @@ namespace FMOD
     */
     public struct Geometry
     {
-        public RESULT release()
+        public readonly RESULT release()
         {
             return FMOD5_Geometry_Release(this.handle);
         }
 
         // Polygon manipulation.
-        public RESULT addPolygon(float directocclusion, float reverbocclusion, bool doublesided, int numvertices, VECTOR[] vertices, out int polygonindex)
+        public readonly RESULT addPolygon(float directocclusion, float reverbocclusion, bool doublesided, int numvertices, VECTOR[] vertices, out int polygonindex)
         {
             return FMOD5_Geometry_AddPolygon(this.handle, directocclusion, reverbocclusion, doublesided, numvertices, vertices, out polygonindex);
         }
-        public RESULT getNumPolygons(out int numpolygons)
+        public readonly RESULT getNumPolygons(out int numpolygons)
         {
             return FMOD5_Geometry_GetNumPolygons(this.handle, out numpolygons);
         }
-        public RESULT getMaxPolygons(out int maxpolygons, out int maxvertices)
+        public readonly RESULT getMaxPolygons(out int maxpolygons, out int maxvertices)
         {
             return FMOD5_Geometry_GetMaxPolygons(this.handle, out maxpolygons, out maxvertices);
         }
-        public RESULT getPolygonNumVertices(int index, out int numvertices)
+        public readonly RESULT getPolygonNumVertices(int index, out int numvertices)
         {
             return FMOD5_Geometry_GetPolygonNumVertices(this.handle, index, out numvertices);
         }
-        public RESULT setPolygonVertex(int index, int vertexindex, ref VECTOR vertex)
+        public readonly RESULT setPolygonVertex(int index, int vertexindex, ref VECTOR vertex)
         {
             return FMOD5_Geometry_SetPolygonVertex(this.handle, index, vertexindex, ref vertex);
         }
-        public RESULT getPolygonVertex(int index, int vertexindex, out VECTOR vertex)
+        public readonly RESULT getPolygonVertex(int index, int vertexindex, out VECTOR vertex)
         {
             return FMOD5_Geometry_GetPolygonVertex(this.handle, index, vertexindex, out vertex);
         }
-        public RESULT setPolygonAttributes(int index, float directocclusion, float reverbocclusion, bool doublesided)
+        public readonly RESULT setPolygonAttributes(int index, float directocclusion, float reverbocclusion, bool doublesided)
         {
             return FMOD5_Geometry_SetPolygonAttributes(this.handle, index, directocclusion, reverbocclusion, doublesided);
         }
-        public RESULT getPolygonAttributes(int index, out float directocclusion, out float reverbocclusion, out bool doublesided)
+        public readonly RESULT getPolygonAttributes(int index, out float directocclusion, out float reverbocclusion, out bool doublesided)
         {
             return FMOD5_Geometry_GetPolygonAttributes(this.handle, index, out directocclusion, out reverbocclusion, out doublesided);
         }
 
         // Object manipulation.
-        public RESULT setActive(bool active)
+        public readonly RESULT setActive(bool active)
         {
             return FMOD5_Geometry_SetActive(this.handle, active);
         }
-        public RESULT getActive(out bool active)
+        public readonly RESULT getActive(out bool active)
         {
             return FMOD5_Geometry_GetActive(this.handle, out active);
         }
-        public RESULT setRotation(ref VECTOR forward, ref VECTOR up)
+        public readonly RESULT setRotation(ref VECTOR forward, ref VECTOR up)
         {
             return FMOD5_Geometry_SetRotation(this.handle, ref forward, ref up);
         }
-        public RESULT getRotation(out VECTOR forward, out VECTOR up)
+        public readonly RESULT getRotation(out VECTOR forward, out VECTOR up)
         {
             return FMOD5_Geometry_GetRotation(this.handle, out forward, out up);
         }
-        public RESULT setPosition(ref VECTOR position)
+        public readonly RESULT setPosition(ref VECTOR position)
         {
             return FMOD5_Geometry_SetPosition(this.handle, ref position);
         }
-        public RESULT getPosition(out VECTOR position)
+        public readonly RESULT getPosition(out VECTOR position)
         {
             return FMOD5_Geometry_GetPosition(this.handle, out position);
         }
-        public RESULT setScale(ref VECTOR scale)
+        public readonly RESULT setScale(ref VECTOR scale)
         {
             return FMOD5_Geometry_SetScale(this.handle, ref scale);
         }
-        public RESULT getScale(out VECTOR scale)
+        public readonly RESULT getScale(out VECTOR scale)
         {
             return FMOD5_Geometry_GetScale(this.handle, out scale);
         }
-        public RESULT save(IntPtr data, out int datasize)
+        public readonly RESULT save(IntPtr data, out int datasize)
         {
             return FMOD5_Geometry_Save(this.handle, data, out datasize);
         }
 
         // Userdata set/get.
-        public RESULT setUserData(IntPtr userdata)
+        public readonly RESULT setUserData(IntPtr userdata)
         {
             return FMOD5_Geometry_SetUserData(this.handle, userdata);
         }
-        public RESULT getUserData(out IntPtr userdata)
+        public readonly RESULT getUserData(out IntPtr userdata)
         {
             return FMOD5_Geometry_GetUserData(this.handle, out userdata);
         }
@@ -3785,7 +3793,7 @@ namespace FMOD
         public IntPtr handle;
 
         public Geometry(IntPtr ptr) { this.handle = ptr; }
-        public bool hasHandle() { return this.handle != IntPtr.Zero; }
+        public readonly bool hasHandle() { return this.handle != IntPtr.Zero; }
         public void clearHandle() { this.handle = IntPtr.Zero; }
 
         #endregion
@@ -3796,43 +3804,43 @@ namespace FMOD
     */
     public struct Reverb3D
     {
-        public RESULT release()
+        public readonly RESULT release()
         {
             return FMOD5_Reverb3D_Release(this.handle);
         }
 
         // Reverb manipulation.
-        public RESULT set3DAttributes(ref VECTOR position, float mindistance, float maxdistance)
+        public readonly RESULT set3DAttributes(ref VECTOR position, float mindistance, float maxdistance)
         {
             return FMOD5_Reverb3D_Set3DAttributes(this.handle, ref position, mindistance, maxdistance);
         }
-        public RESULT get3DAttributes(ref VECTOR position, ref float mindistance, ref float maxdistance)
+        public readonly RESULT get3DAttributes(ref VECTOR position, ref float mindistance, ref float maxdistance)
         {
             return FMOD5_Reverb3D_Get3DAttributes(this.handle, ref position, ref mindistance, ref maxdistance);
         }
-        public RESULT setProperties(ref REVERB_PROPERTIES properties)
+        public readonly RESULT setProperties(ref REVERB_PROPERTIES properties)
         {
             return FMOD5_Reverb3D_SetProperties(this.handle, ref properties);
         }
-        public RESULT getProperties(ref REVERB_PROPERTIES properties)
+        public readonly RESULT getProperties(ref REVERB_PROPERTIES properties)
         {
             return FMOD5_Reverb3D_GetProperties(this.handle, ref properties);
         }
-        public RESULT setActive(bool active)
+        public readonly RESULT setActive(bool active)
         {
             return FMOD5_Reverb3D_SetActive(this.handle, active);
         }
-        public RESULT getActive(out bool active)
+        public readonly RESULT getActive(out bool active)
         {
             return FMOD5_Reverb3D_GetActive(this.handle, out active);
         }
 
         // Userdata set/get.
-        public RESULT setUserData(IntPtr userdata)
+        public readonly RESULT setUserData(IntPtr userdata)
         {
             return FMOD5_Reverb3D_SetUserData(this.handle, userdata);
         }
-        public RESULT getUserData(out IntPtr userdata)
+        public readonly RESULT getUserData(out IntPtr userdata)
         {
             return FMOD5_Reverb3D_GetUserData(this.handle, out userdata);
         }
@@ -3863,7 +3871,7 @@ namespace FMOD
         public IntPtr handle;
 
         public Reverb3D(IntPtr ptr) { this.handle = ptr; }
-        public bool hasHandle() { return this.handle != IntPtr.Zero; }
+        public readonly bool hasHandle() { return this.handle != IntPtr.Zero; }
         public void clearHandle() { this.handle = IntPtr.Zero; }
 
         #endregion
@@ -3914,7 +3922,7 @@ namespace FMOD
             unsafe
             {
                 ReadOnlySpan<byte> cmp1 = new ReadOnlySpan<byte>((void*)nativeUtf8Ptr, comparison.Length);
-                return cmp1.SequenceEqual( new ReadOnlySpan<byte>( comparison, 0, comparison.Length ) ) ? true : Marshal.ReadByte( nativeUtf8Ptr, comparison.Length ) != 0;
+                return cmp1.SequenceEqual(new ReadOnlySpan<byte>(comparison, 0, comparison.Length)) ? true : Marshal.ReadByte(nativeUtf8Ptr, comparison.Length) != 0;
             }
         }
     }

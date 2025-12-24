@@ -38,9 +38,96 @@ namespace Nomad.Core.Events
         event EventCallback<TArgs> OnPublished;
         event AsyncEventCallback<TArgs> OnPublishedAsync;
 
-        IDisposable SubscribeAsync(AsyncEventCallback<TArgs> asyncCallback, object? owner = null);
-        IDisposable Subscribe(EventCallback<TArgs> callback, object? owner = null);
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// The subscription's lifetime is determined by the owning event's lifetime.
+        /// </remarks>
+        /// <param name="asyncCallback"></param>
+        /// <returns></returns>
+        IDisposable SubscribeAsync(AsyncEventCallback<TArgs> asyncCallback);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// The subscription's lifetime is determined by the owning event's lifetime.
+        /// </remarks>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        IDisposable Subscribe(EventCallback<TArgs> callback);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="eventArgs"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
         Task PublishAsync(TArgs eventArgs, CancellationToken ct = default);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="eventArgs"></param>
         void Publish(in TArgs eventArgs);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="asyncCallback"></param>
+        void SubscribeAsync(object owner, AsyncEventCallback<TArgs> asyncCallback);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="callback"></param>
+        void Subscribe(object owner, EventCallback<TArgs> callback);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="asyncCallback"></param>
+        void UnsubscribeAsync(object owner, AsyncEventCallback<TArgs> asyncCallback);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="callback"></param>
+        void Unsubscribe(object owner, EventCallback<TArgs> callback);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="owner"></param>
+        void UnsubscribeAll(object owner);
+
+        /// <summary>
+        /// Event subscription operator.
+        /// </summary>
+        /// <param name="callback"></param>
+        void operator +=(EventCallback<TArgs> other);
+
+        /// <summary>
+        /// Event subscription operator.
+        /// </summary>
+        /// <param name="callback"></param>
+        void operator +=(AsyncEventCallback<TArgs> other);
+
+        /// <summary>
+        /// Event subscription operator.
+        /// </summary>
+        /// <param name="callback"></param>
+        void operator -=(EventCallback<TArgs> other);
+
+        /// <summary>
+        /// Event subscription operator.
+        /// </summary>
+        /// <param name="callback"></param>
+        void operator -=(AsyncEventCallback<TArgs> other);
     }
 }

@@ -14,15 +14,14 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using Nomad.Core.Abstractions;
-using Nomad.Core.Util;
 
 namespace Nomad.Audio.ValueObjects
 {
     public record SoundCategory(
-        InternString Name = new(),
-        int MaxSimultaneous = 4,
-        float PriorityScale = 1.0f,
-        float StealProtectionTime = 0.5f, // in seconds
+        string Name = "",
+        int MaxSimultaneous = 8,
+        float PriorityScale = 1.5f,
+        float StealProtectionTime = 0.2f, // in seconds
         bool AllowStealingFromSameCategory = true
     ) : IValueObject<SoundCategory>;
 }

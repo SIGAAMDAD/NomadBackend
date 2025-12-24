@@ -13,6 +13,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
+using System.Collections.Generic;
+
 namespace Nomad.CVars
 {
     /// <summary>
@@ -31,6 +33,13 @@ namespace Nomad.CVars
         /// <summary>
         ///
         /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        ICVar? GetCVar(string name);
+
+        /// <summary>
+        ///
+        /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="name"></param>
         /// <returns></returns>
@@ -42,5 +51,11 @@ namespace Nomad.CVars
         /// <param name="name"></param>
         /// <returns></returns>
         bool CVarExists(string name);
+
+        /// <summary>
+        /// Returns a list of all the currently registered CVars.
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<ICVar> GetCVars();
     }
 }

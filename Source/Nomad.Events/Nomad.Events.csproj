@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Nomad.Core\NomadCore.csproj" />
+    <ProjectReference Include="..\Nomad.Core\Nomad.Core.csproj" />
   </ItemGroup>
 
 </Project>

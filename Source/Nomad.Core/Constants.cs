@@ -19,7 +19,7 @@ namespace Nomad.Core
     {
         public static class CVars
         {
-            public static class Audio
+            public static partial class Audio
             {
                 public const string EFFECTS_VOLUME = "audio.EffectsVolume";
                 public const string EFFECTS_ON = "audio.EffectsOn";
@@ -46,14 +46,28 @@ namespace Nomad.Core
                 {
                     public const string STREAM_BUFFER_SIZE = "audio.fmod.StreamBufferSize";
                     public const string DSP_BUFFER_SIZE = "audio.fmod.DSPBufferSize";
+                    public const string DSP_BUFFER_COUNT = "audio.fmod.DSPBufferCount";
                     public const string LOGGING = "audio.fmod.LoggingEnabled";
                     public const string BANK_LOADING_STRATEGY = "audio.fmod.BankLoadingStrategy";
                 }
             }
-            public static class Graphics
+            public static partial class Graphics
             {
+                public const string SHADOW_FILTER_TYPE = "r.ShadowFilterType";
+                public const string SHADOW_FILTER_SMOOTH = "r.ShadowFilterSmooth";
+                public const string FORCE_VERTEX_SHADING = "r.ForceVertexShading";
+                public const string PHYSICALLY_BASED_RENDERING = "r.PhysicallyBasedRendering";
             }
-            public static class Accessibility
+            public static partial class Display
+            {
+                public const string WINDOW_MODE = "display.WindowMode";
+                public const string WINDOW_RESOLUTION = "display.WindowResolution";
+                public const string ANTI_ALIASING = "display.AntiAliasing";
+                public const string MAX_FPS = "display.MaxFps";
+                public const string SEPARATE_RENDERING_THREAD = "r.SeparateRenderingThread";
+                public const string VSYNC_MODE = "display.VSyncMode";
+            }
+            public static partial class Accessibility
             {
                 public const string HAPTIC_STRENGTH = "input.HapticStrength";
                 public const string HAPTIC_ENABLED = "input.HapticEnabled";
@@ -63,7 +77,7 @@ namespace Nomad.Core
                 public const string AUTO_AIM_MODE = "accessibility.AutoAimMode";
                 public const string TEXT_TO_SPEECH = "accessibility.TextToSpeech";
             }
-            public static class Console
+            public static partial class Console
             {
                 public const string DEFAULT_CONFIG_FILE = "console.DefaultConfig";
                 public const string CONSOLE_LOG_LEVEL = "console.LogLevel";
@@ -71,7 +85,7 @@ namespace Nomad.Core
         }
         public static class Events
         {
-            public static class Console
+            public static partial class Console
             {
                 public const string CONSOLE_OPENED_EVENT = "ConsoleSystem:ConsoleOpened";
                 public const string CONSOLE_CLOSED_EVENT = "ConsoleSystem:ConsoleClosed";
@@ -84,12 +98,16 @@ namespace Nomad.Core
                 public const string UNKNOWN_COMMAND_EVENT = "ConsoleSystem:UnknownCommand";
                 public const string COMMAND_EXECUTED_EVENT = "ConsoleSystem:CommandExecuted";
             }
-            public static class ResourceCache
+            public static partial class ResourceCache
             {
                 public const string RESOURCE_LOADED_EVENT = "ResourceCache:ResourceLoaded";
                 public const string RESOURCE_LOAD_FAILED_EVENT = "ResourceCache:ResourceLoadFailed";
                 public const string RESOURCE_LOAD_PROGRESS_EVENT = "ResourceCache:ResourceLoadProgress";
                 public const string RESOURCE_UNLOADED_EVENT = "ResourceCache:ResourceUnloaded";
+            }
+            public static partial class CVars
+            {
+                public const string CVAR_VALUE_CHANGED_EVENT = "CVarSystem:CVarValueChanged";
             }
         }
         public static class Audio

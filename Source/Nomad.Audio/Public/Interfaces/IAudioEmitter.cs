@@ -18,14 +18,17 @@ using Nomad.Audio.ValueObjects;
 
 namespace Nomad.Audio.Interfaces
 {
+    /// <summary>
+    ///
+    /// </summary>
     public interface IAudioEmitter
     {
         Vector2 Positon { get; set; }
         float Volume { get; set; }
-        string Category { get; }
+        float Pitch { get; set; }
+        ChannelGroupHandle Group { get; }
+        ChannelStatus Status { get; }
 
-        AudioSourceStatus Status { get; }
-
-        void PlaySound(EventId name, float priority = 0.5f);
+        void PlaySound(string soundPath, float priority = 0.5f);
     }
 }

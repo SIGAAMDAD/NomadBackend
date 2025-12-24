@@ -35,10 +35,6 @@ namespace FMOD
 	[SuppressUnmanagedCodeSecurity]
 	public static unsafe class FMODNative
 	{
-		private readonly struct FMODProc
-		{
-
-		}
 		private static delegate* unmanaged[Cdecl]<Studio.System**, uint, RESULT> _studio_systemCreate;
 		private static delegate* unmanaged[Cdecl]<Studio.System*, RESULT> _studio_systemUpdate;
 		private static delegate* unmanaged[Cdecl]<Studio.System*, RESULT> _studio_systemRelease;
