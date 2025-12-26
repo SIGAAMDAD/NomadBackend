@@ -36,9 +36,8 @@ namespace Nomad.Audio.ValueObjects
         /// <param name="other"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Equals(ChannelGroupHandle other)
-        {
-            return other._value == _value;
-        }
+        public bool Equals(ChannelGroupHandle other) => other._value == _value;
+
+        public static implicit operator uint(ChannelGroupHandle handle) => handle._value;
     }
 }

@@ -13,6 +13,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
+using System;
+using System.Collections.Generic;
 using Nomad.Audio.Fmod.Private.Repositories.Loaders;
 using Nomad.Audio.Fmod.Private.Services;
 using Nomad.Audio.Fmod.Private.ValueObjects;
@@ -22,8 +24,13 @@ using Nomad.Core.Logger;
 using Nomad.ResourceCache;
 
 namespace Nomad.Audio.Fmod.Private.Repositories {
-	internal sealed class FMODEventRepository( ILoggerService logger, IGameEventRegistryService eventFactory, FMODDevice fmodSystem, FMODGuidRepository guidRepository )
-		: BaseCache<FMODEventResource, EventId>( logger, eventFactory, new FMODEventLoader( fmodSystem, guidRepository, logger ) )
-	{
+	internal sealed class FMODEventRepository : IDisposable {
+		private readonly Dictionary<EventHandle, FMODEventResource> _eventCache = new();
+
+		public FMODEventRepository() {
+		}
+
+		public void Dispose() {
+		}
 	};
 };

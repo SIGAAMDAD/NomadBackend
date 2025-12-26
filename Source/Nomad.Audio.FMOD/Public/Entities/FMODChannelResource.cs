@@ -15,7 +15,6 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using Godot;
-using System.Runtime.CompilerServices;
 using Nomad.Core.Abstractions;
 
 namespace Nomad.Audio.Fmod.Entities
@@ -31,64 +30,108 @@ namespace Nomad.Audio.Fmod.Entities
     ///
     /// </summary>
 
-    internal readonly record struct FMODChannelResource : IDisposable, IValueObject<FMODChannelResource>
+    internal readonly record struct FMODChannelResource(FMOD.Studio.EventInstance instance) : IDisposable, IValueObject<FMODChannelResource>
     {
-        private readonly FMOD.Studio.EventInstance _instance;
-
-        public FMODChannelResource(FMOD.Studio.EventInstance instance)
+        public FMOD.Studio.PLAYBACK_STATE PlaybackState
         {
-            _instance = instance;
+            get
+            {
+                FMODValidator.ValidateCall(instance.getPlaybackState(out FMOD.Studio.PLAYBACK_STATE state));
+                return state;
+            }
         }
+        public uint ListenerMask
+        {
+            get
+            {
+                FMODValidator.ValidateCall(instance.getListenerMask(out uint mask));
+                return mask;
+            }
+            set
+            {
+                FMODValidator.ValidateCall(instance.setListenerMask(value));
+            }
+        }
+        public Vector2 Position
+        {
+            get
+            {
+                FMODValidator.ValidateCall(instance.get3DAttributes(out FMOD.ATTRIBUTES_3D attributes));
+                return new Vector2() { X = attributes.position.x, Y = attributes.position.y };
+            }
+            set
+            {
+                FMODValidator.ValidateCall(instance.set3DAttributes(
+                    new FMOD.ATTRIBUTES_3D
+                    {
+                        position = new FMOD.VECTOR
+                        {
+                            x = value.X,
+                            y = value.Y,
+                            z = 1.0f,
+                        }
+                    }
+                ));
+            }
+        }
+        public float Volume
+        {
+            get
+            {
+                FMODValidator.ValidateCall(instance.getVolume(out float volume));
+                return volume;
+            }
+            set
+            {
+                FMODValidator.ValidateCall(instance.setVolume(value));
+            }
+        }
+        public float Pitch
+        {
+            get
+            {
+                FMODValidator.ValidateCall(instance.getPitch(out float pitch));
+                return pitch;
+            }
+            set
+            {
+                FMODValidator.ValidateCall(instance.setPitch(value));
+            }
+        }
+
+        public FMOD.Studio.MEMORY_USAGE MemoryUsage
+        {
+            get
+            {
+                FMODValidator.ValidateCall(instance.getMemoryUsage(out FMOD.Studio.MEMORY_USAGE memoryUsage));
+                return memoryUsage;
+            }
+        }
+        public FMOD.Studio.EventDescription Description
+        {
+            get
+            {
+                FMODValidator.ValidateCall(instance.getDescription(out FMOD.Studio.EventDescription description));
+                return description;
+            }
+        }
+        public bool IsPlaying => PlaybackState == FMOD.Studio.PLAYBACK_STATE.PLAYING;
 
         /*
 		===============
 		Dispose
 		===============
 		*/
+        /// <summary>
+        /// Clears the unmanaged FMOD EventInstance.
+        /// </summary>
         public void Dispose()
         {
-            if (_instance.isValid())
+            if (instance.isValid())
             {
-                _instance.release();
-                _instance.clearHandle();
+                FMODValidator.ValidateCall(instance.release());
+                instance.clearHandle();
             }
-        }
-
-        /*
-		===============
-		GetPlaybackState
-		===============
-		*/
-        public FMOD.Studio.PLAYBACK_STATE GetPlaybackState()
-        {
-            if (!_instance.isValid())
-            {
-                return FMOD.Studio.PLAYBACK_STATE.STOPPED;
-            }
-            FMODValidator.ValidateCall(_instance.getPlaybackState(out var state));
-            return state;
-        }
-
-        /*
-		===============
-		SetPosition
-		===============
-		*/
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetPosition(Vector2 position)
-        {
-            _instance.set3DAttributes(new FMOD.ATTRIBUTES_3D { position = new FMOD.VECTOR { x = position.X, y = position.Y, z = 0.0f } });
-        }
-
-        /*
-		===============
-		SetVolume
-		===============
-		*/
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetVolume(float volume)
-        {
-            _instance.setVolume(volume);
         }
     };
 };

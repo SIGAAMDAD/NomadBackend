@@ -14,35 +14,30 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
-using Godot;
 
-namespace Nomad.Audio.Interfaces
+namespace Nomad.Core.Util
 {
-    /// <summary>
-    ///
-    /// </summary>
-    public interface IListenerService : IDisposable
+    public static class StringExtensions
     {
         /// <summary>
-        /// The current number of active listeners.
-        /// </summary>
-        int ListenerCount { get; }
-
-        /// <summary>
         ///
         /// </summary>
-        Vector2 ActiveListener { get; }
+        /// <param name="filename"></param>
+        /// <param name="seed"></param>
+        /// <returns></returns>
+        public static uint HashFileName(this string filename, int seed = 0)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(filename);
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="listenerIndex"></param>
-        /// <param name="position"></param>
-        void SetListenerPosition(int listenerIndex, Vector2 position);
+            int length = filename.Length;
+            Span<byte> hash = stackalloc byte[length];
+            for (int i = 0; i < length; i++)
+            {
+                char c = filename[i];
+                hash[i] = (byte)(c >= 'A' && c <= 'Z' ? c + 32 : c);
+            }
 
-        /// <summary>
-        ///
-        /// </summary>
-        void ClearListeners();
+            return System.IO.Hashing.XxHash32.HashToUInt32(hash, seed);
+        }
     }
 }

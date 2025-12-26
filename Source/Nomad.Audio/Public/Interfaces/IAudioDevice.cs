@@ -41,10 +41,12 @@ namespace Nomad.Audio.Interfaces
 
         AudioResult SetParameterValue(EventHandle eventHandle, string parameterName, float value);
 
-        AudioResult GetChannelGroup(string groupname, out ChannelHandle group);
-        AudioResult StopChannelGroup(ChannelHandle group);
-        AudioResult SetChannelGroupVolume(ChannelHandle group, float value);
-        AudioResult SetChannelGroupPitch(ChannelHandle group, float pitch);
+        AudioResult CreateChannelGroup(SoundCategory category, out ChannelGroupHandle group);
+        AudioResult GetChannelGroup(string groupname, out ChannelGroupHandle group);
+        AudioResult StopChannelGroup(ChannelGroupHandle group);
+        AudioResult SetChannelGroupVolume(ChannelGroupHandle group, float value);
+        AudioResult SetChannelGroupPitch(ChannelGroupHandle group, float pitch);
+        AudioResult SetChannelGroupMute(ChannelGroupHandle group, bool mute);
 
         AudioResult SetListenerPosition(int listenerIndex, Vector2 position);
     }

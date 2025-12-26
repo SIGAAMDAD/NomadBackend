@@ -16,6 +16,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using Godot;
 using Nomad.Audio.Fmod.Private.Entities;
 using Nomad.Audio.Fmod.Private.Exceptions;
+using Nomad.Audio.Fmod.Private.ValueObjects;
 using Nomad.Audio.Interfaces;
 using Nomad.Audio.ValueObjects;
 using Nomad.Core;
@@ -49,9 +50,10 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 
 		private readonly List<FMODChannel> _allocatedChannels;
 		private readonly Queue<int> _freeChannelIds;
-		private readonly Dictionary<InternString, SoundCategory> _categories = new Dictionary<InternString, SoundCategory>();
 		private readonly Dictionary<EventId, float> _lastPlayTimes = new Dictionary<EventId, float>();
 		private readonly Dictionary<EventId, int> _consecutiveStealCounts = new Dictionary<EventId, int>();
+
+		private readonly FMODBusRepository _busRepository;
 
 		private bool _shouldDecay = false;
 		private float _timePenaltyMultiplier = 0.5f;
@@ -65,7 +67,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		private float _distanceFalloffEnd = 100.0f;
 		private float _effectsVolume = 0.0f;
 
-		private readonly IResourceCacheService<IEventResource, EventId> _eventRepository;
+		private readonly IResourceCacheService<FMODEventResource, EventId> _eventRepository;
 		private readonly FMODGuidRepository _guidRepository;
 		private readonly ILoggerService _logger;
 		private readonly IListenerService _listenerService;
@@ -78,10 +80,11 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		===============
 		*/
 		public FMODChannelRepository( ILoggerService logger, ICVarSystemService cvarSystem, IListenerService listenerService,
-			IResourceCacheService<IEventResource, EventId> eventRepository, FMODGuidRepository guidRepository )
+			IResourceCacheService<FMODEventResource, EventId> eventRepository, FMODGuidRepository guidRepository, FMODBusRepository busRepository )
 		{
 			_logger = logger;
 			_listenerService = listenerService;
+			_busRepository = busRepository;
 
 			InitConfig( cvarSystem );
 
@@ -93,14 +96,6 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 			}
 			_eventRepository = eventRepository;
 			_guidRepository = guidRepository;
-
-			_categories[ new( "SoundCategory:UI" ) ] = new SoundCategory {
-				Name = "SoundCategory:UI",
-				MaxSimultaneous = 4,
-				PriorityScale = 1.5f,
-				StealProtectionTime = 0.2f,
-				AllowStealingFromSameCategory = false
-			};
 		}
 
 		/*
@@ -110,9 +105,9 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		*/
 		public void Dispose() {
 			_freeChannelIds.Clear();
-			_categories.Clear();
 			_lastPlayTimes.Clear();
 			_consecutiveStealCounts.Clear();
+			_busRepository.Dispose();
 		}
 
 		/*
@@ -133,7 +128,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 			string category = "SoundCategory:Default", float basePriority = 0.5f,
 			bool isEssential = false )
 		{
-			var categoryName = new InternString( category );
+
 			if ( !_categories.TryGetValue( categoryName, out var config ) ) {
 				throw new MissingChannelCategory( category );
 			}
@@ -207,10 +202,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		===============
 		*/
 		private void UpdatePriorities() {
-			if ( _listenerService.ActiveListener == null ) {
-				return;
-			}
-			Vector2 listenerPos = _listenerService.ActiveListener.Position;
+			Vector2 listenerPos = _listenerService.ActiveListener;
 
 			for ( int i = 0; i < _allocatedChannels.Count; i++ ) {
 				var channel = _allocatedChannels[ i ];
@@ -290,11 +282,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// <param name="category"></param>
 		/// <returns></returns>
 		private float CalculateActualPriority( EventId id, Vector2 position, float basePriority, SoundCategory category ) {
-			float distance = 0.0f;
-			if ( _listenerService.ActiveListener != null ) {
-				Vector2 listenerPos = _listenerService.ActiveListener.Position;
-				distance = position.DistanceTo( listenerPos );
-			}
+			float distance = position.DistanceTo( _listenerService.ActiveListener );
 			float distanceFactor = CalculateDistanceFactor( distance );
 
 			// prevent spamming
@@ -466,12 +454,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// <param name="category"></param>
 		/// <returns></returns>
 		private float CalculateStealScore( FMODChannel candidate, float newPriority, SoundCategory category ) {
-			float distance = 0.0f;
-			if ( _listenerService.ActiveListener != null ) {
-				Vector2 listenerPos = _listenerService.ActiveListener.Position;
-				distance = candidate.Position.DistanceTo( listenerPos );
-			}
-
+			float distance = candidate.Position.DistanceTo( _listenerService.ActiveListener );
 			float priorityDiff = newPriority - candidate.CurrentPriority;
 			float ageFactor = Math.Min( candidate.Age / 5.0f, 1.0f );
 			float distanceFactor = 1.0f - CalculateDistanceFactor( distance );
@@ -571,12 +554,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		private FMOD.Studio.EventInstance CreateSoundInstance( EventId id, Vector2 position, int channelId ) {
 			var cached = _eventRepository.GetCached( id ) ?? throw new Exception( $"Couldn't find event description for '{id.Name}'" );
 			cached.Get( out var description );
-
-			if ( description is not FMODEventResource eventResource ) {
-				throw new InvalidCastException();
-			}
-
-			FMODValidator.ValidateCall( eventResource.Handle.createInstance( out var instance ) );
+			FMODValidator.ValidateCall( description.Handle.createInstance( out var instance ) );
 
 			FMOD.ATTRIBUTES_3D attributes = new FMOD.ATTRIBUTES_3D { };
 			attributes.position = new FMOD.VECTOR { x = position.X, y = position.Y, z = 0.0f };
@@ -630,7 +608,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="category"></param>
 		/// <returns></returns>
-		private int CountSoundsInCategory( InternString category ) {
+		private int CountSoundsInCategory( ReadOnlyMemory<char> category ) {
 			int count = 0;
 			for ( int i = 0; i < _allocatedChannels.Count; i++ ) {
 				var channel = _allocatedChannels[ i ];

@@ -14,7 +14,6 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
-using System.Security;
 using Nomad.Audio.ValueObjects;
 
 namespace Nomad.Audio.Fmod.Private.Entities {
@@ -30,7 +29,7 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 	/// </summary>
 
 	internal sealed class FMODChannelGroup : IDisposable {
-		public readonly ChannelHandle Hash;
+		public readonly SoundCategory Category;
 
 		public float Volume {
 			get => _volume;
@@ -39,7 +38,7 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 					return;
 				}
 				_volume = value;
-				_handle.setVolume( value );
+				FMODValidator.ValidateCall( _group.setVolume( value ) );
 			}
 		}
 		private float _volume = 1.0f;
@@ -51,7 +50,7 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 					return;
 				}
 				_pitch = value;
-				_handle.setPitch( value );
+				FMODValidator.ValidateCall( _group.setPitch( value ) );
 			}
 		}
 		private float _pitch = 1.0f;
@@ -63,12 +62,23 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 					return;
 				}
 				_muted = value;
-				_handle.setMute( value );
+				FMODValidator.ValidateCall( _group.setMute( value ) );
 			}
 		}
 		private bool _muted = false;
 
-		private readonly FMOD.ChannelGroup _handle;
+		/// <summary>
+		/// Gets the memory usage of the bus.
+		/// </summary>
+		public FMOD.Studio.MEMORY_USAGE MemoryUsage {
+			get {
+				FMODValidator.ValidateCall( _bus.getMemoryUsage( out var memoryUsage ) );
+				return memoryUsage;
+			}
+		}
+
+		private readonly FMOD.ChannelGroup _group;
+		private readonly FMOD.Studio.Bus _bus;
 
 		private bool _isDisposed = false;
 
@@ -80,11 +90,11 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// <summary>
 		/// Creates an FMODChannelGroup.
 		/// </summary>
-		/// <param name="name">The name of the group.</param>
+		/// <param name="category"></param>
 		/// <param name="system">The core FMOD system.</param>
-		public FMODChannelGroup( string name, FMOD.System system ) {
-			FMODValidator.ValidateCall( system.createChannelGroup( name, out _handle ) );
-			Hash = new( name.GetHashCode() );
+		public FMODChannelGroup( SoundCategory category, FMOD.Studio.System system ) {
+			system.getBus( category.Name, out _bus );
+			FMODValidator.ValidateCall( _bus.getChannelGroup( out _group ) );
 		}
 
 		/*
@@ -107,8 +117,13 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 			}
 
 			_isDisposed = true;
-			FMODValidator.ValidateCall( _handle.release() );
-			_handle.clearHandle();
+
+			if ( _bus.isValid() ) {
+				FMODValidator.ValidateCall( _bus.stopAllEvents( FMOD.Studio.STOP_MODE.IMMEDIATE ) );
+				FMODValidator.ValidateCall( _group.release() );
+				_group.clearHandle();
+				_bus.clearHandle();
+			}
 
 			GC.SuppressFinalize( this );
 		}

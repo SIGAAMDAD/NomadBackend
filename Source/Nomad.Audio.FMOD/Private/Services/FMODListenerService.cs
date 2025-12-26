@@ -14,9 +14,11 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using Nomad.Audio.Fmod.Private.Entities;
-using Nomad.Audio.Fmod.Private.Exceptions;
 using Nomad.Audio.Interfaces;
 using Nomad.Core.Logger;
+using Godot;
+using System;
+using System.Collections.Generic;
 
 namespace Nomad.Audio.Fmod.Private.Services {
 	/*
@@ -30,18 +32,35 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	/// Manages FMOD listener instances.
 	/// </summary>
 
-	internal sealed class FMODListenerService( ILoggerService logger, FMODDevice system ) : IListenerService {
+	internal sealed class FMODListenerService : IListenerService {
 		private const int MAX_LISTENERS = 4;
 
 		public int ListenerCount => _listenerCount;
 		private int _listenerCount = 0;
 
-		public IListener? ActiveListener => _currentListener;
-		private IListener? _currentListener;
+		public Vector2 ActiveListener => _currentListener.Position;
+		private FMODListener _currentListener;
 
 		private readonly FMODListener?[] _listeners = new FMODListener[ MAX_LISTENERS ];
-		private readonly FMODDevice _system = system;
-		private readonly ILoggerService _logger = logger;
+		private readonly FMODDevice _system;
+		private readonly ILoggerService _logger;
+
+		/*
+		===============
+		FMODListenerService
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="logger"></param>
+		/// <param name="system"></param>
+		public FMODListenerService( ILoggerService logger, FMODDevice system ) {
+			_system = system;
+			_logger = logger;
+
+			CreateDefaultListener();
+		}
 
 		/*
 		===============
@@ -54,33 +73,23 @@ namespace Nomad.Audio.Fmod.Private.Services {
 
 		/*
 		===============
-		AddListener
+		SetListenerPosition
 		===============
 		*/
 		/// <summary>
-		/// Allocates a new FMOD listener instance.
+		///
 		/// </summary>
-		/// <param name="entity"></param>
-		/// <returns></returns>
-		/// <exception cref="TooManyListenersException"></exception>
-		public IListener AddListener() {
-			if ( _listenerCount >= _listeners.Length ) {
-				throw new TooManyListenersException();
+		/// <param name="listenerIndex"></param>
+		/// <param name="position"></param>
+		public void SetListenerPosition( int listenerIndex, Vector2 position ) {
+			ArgumentOutOfRangeException.ThrowIfLessThan( listenerIndex, 0, nameof( listenerIndex ) );
+			ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual( listenerIndex, MAX_LISTENERS, nameof( listenerIndex ) );
+
+			if ( listenerIndex > _listenerCount ) {
+				FMODValidator.ValidateCall( _system.StudioSystem.setNumListeners( listenerIndex ) );
+				_listeners[ listenerIndex ] = new FMODListener( _system.StudioSystem, listenerIndex ) { Position = position };
 			}
-
-			_logger.PrintLine( $"FMODListenerService.AddListener: allocating listener..." );
-
-			lock ( _listeners ) {
-				var listener = new FMODListener( _system.StudioSystem, _listenerCount );
-				_listeners[ _listenerCount++ ] = listener;
-
-				// assign the active listener if we haven't already
-				_currentListener ??= listener;
-
-				_system.StudioSystem.setNumListeners( _listenerCount );
-
-				return listener;
-			}
+			_listeners[ listenerIndex ].Position = position;
 		}
 
 		/*
@@ -101,23 +110,23 @@ namespace Nomad.Audio.Fmod.Private.Services {
 				_system.StudioSystem.setNumListeners( 0 );
 				_listenerCount = 0;
 			}
+			CreateDefaultListener();
 		}
 
 		/*
 		===============
-		SetActiveListener
+		CreateDefaultListener
 		===============
 		*/
 		/// <summary>
-		///
+		/// Creates the default listener.
 		/// </summary>
-		/// <param name="listener"></param>
-		/// <returns></returns>
-		public IListener SetActiveListener( IListener listener ) {
-			_logger.PrintLine( $"FMODListenerService.SetActiveListener: setting new listener..." );
+		private void CreateDefaultListener() {
+			_currentListener = new FMODListener( _system.StudioSystem, 0 ) { Position = Vector2.Zero };
+			_listeners[ 0 ] = _currentListener;
+			_listenerCount++;
 
-			_currentListener = listener;
-			return listener;
+			_system.StudioSystem.setNumListeners( 1 );
 		}
 	};
 };
