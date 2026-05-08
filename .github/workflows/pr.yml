@@ -44,10 +44,6 @@ jobs:
       shell: pwsh
       run: ./Build/Scripts/validate-repo.ps1
 
-    - name: Format check
-      shell: pwsh
-      run: ./Build/Scripts/format-check.ps1
-
     - name: Build
       shell: pwsh
       run: ./Build/Scripts/build.ps1

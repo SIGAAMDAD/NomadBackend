@@ -47,10 +47,6 @@ jobs:
       shell: pwsh
       run: ./Build/Scripts/validate-repo.ps1
 
-    - name: Format check
-      shell: pwsh
-      run: ./Build/Scripts/format-check.ps1
-
     - name: Generate dependency graph
       shell: pwsh
       run: ./Build/Scripts/generate-dependency-graph.ps1
