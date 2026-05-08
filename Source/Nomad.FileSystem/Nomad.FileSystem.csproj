@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>NomadFramework.FileSystem</PackageId>
-    <IsNomadTrimmable>true</IsNomadTrimmable>
   </PropertyGroup>
 
   <ItemGroup>

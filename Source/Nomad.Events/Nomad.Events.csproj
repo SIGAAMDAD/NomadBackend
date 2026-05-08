@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>NomadFramework.Events</PackageId>
-    <IsNomadTrimmable>true</IsNomadTrimmable>
     <EnableEventDebug>true</EnableEventDebug>
   </PropertyGroup>
 
