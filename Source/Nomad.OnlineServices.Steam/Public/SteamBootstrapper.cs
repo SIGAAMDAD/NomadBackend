@@ -47,7 +47,10 @@ namespace Nomad.OnlineServices.Steam
         public void Initialize(IServiceRegistry registry, IServiceLocator locator)
         {
 #if NET5_0_OR_GREATER
-            InteropAssemblyResolver.Hook(typeof(SteamAPI).Assembly, "steam_api", "libsteam_api", "steam_api64");
+            var steamworksAssembly = typeof(SteamAPI).Assembly;
+            InteropAssemblyResolver.Hook(steamworksAssembly, "steam_api", "libsteam_api", "steam_api64");
+            InteropAssemblyResolver.Hook(steamworksAssembly, "steam_api64", "libsteam_api", "steam_api64");
+            InteropAssemblyResolver.Hook(steamworksAssembly, "libsteam_api", "libsteam_api", "steam_api64");
 #endif
             var logger = locator.GetService<ILoggerService>();
             _service = new SteamService(

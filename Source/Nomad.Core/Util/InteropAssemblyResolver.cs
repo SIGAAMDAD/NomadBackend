@@ -53,7 +53,7 @@ namespace Nomad.Core.Util
                 _hooks[assembly] = resolvers;
                 NativeLibrary.SetDllImportResolver(assembly, Resolve);
             }
-            resolvers.Add(libraryName, (libraryNameLinux, libraryNameWindows));
+            resolvers[libraryName] = (libraryNameLinux, libraryNameWindows);
         }
 
         /// <summary>
@@ -61,7 +61,8 @@ namespace Nomad.Core.Util
         /// </summary>
         /// <remarks>
         /// This method is called automatically by the runtime when a DLLImport cannot be resolved.
-        /// It searches for the library in the application's base directory and current directory.
+        /// It searches for the library in the application's base directory, the importing assembly's directory,
+        /// and the current directory.
         /// </remarks>
         /// <param name="libraryName">The generic library name being imported.</param>
         /// <param name="assembly">The assembly performing the import.</param>
@@ -84,19 +85,37 @@ namespace Nomad.Core.Util
                 OperatingSystem.IsMacOS() ? $"{library.Item1}.dylib" :
                 throw new PlatformNotSupportedException();
 
-            string fullPath = Path.Combine(AppContext.BaseDirectory, fileName);
-            if (File.Exists(fullPath))
+            foreach (string directory in GetSearchDirectories(assembly))
             {
-                return GetLibrary(fullPath);
+                string fullPath = Path.Combine(directory, fileName);
+                if (File.Exists(fullPath))
+                {
+                    return GetLibrary(fullPath);
+                }
             }
 
-            fullPath = Path.Combine(Environment.CurrentDirectory, fileName);
-            return File.Exists(fullPath) ? GetLibrary(fullPath) : IntPtr.Zero;
+            return IntPtr.Zero;
         }
 
         private static IntPtr GetLibrary(string path)
         {
             return NativeLibrary.Load(path);
+        }
+
+        private static IEnumerable<string> GetSearchDirectories(Assembly assembly)
+        {
+            if (!string.IsNullOrEmpty(AppContext.BaseDirectory))
+            {
+                yield return AppContext.BaseDirectory;
+            }
+
+            string? assemblyDirectory = Path.GetDirectoryName(assembly.Location);
+            if (!string.IsNullOrEmpty(assemblyDirectory))
+            {
+                yield return assemblyDirectory;
+            }
+
+            yield return Environment.CurrentDirectory;
         }
     }
 }
