@@ -33,5 +33,5 @@
          LinkBase="Nomad.EngineTemplates" />
    </ItemGroup>
 
-   <Import Project="build/Nomad.NativeAssets.targets" />
+   <Import Project="Build/Nomad.NativeAssets.targets" />
 </Project>
