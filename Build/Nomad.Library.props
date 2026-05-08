@@ -1,0 +1,43 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Noah Van Til</Authors>
+    <Company>GDR Software</Company>
+    <Description></Description>
+
+    <Version Condition="'$(Version)' == ''">0.1.0-alpha1</Version>
+
+    <PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+    <PackageTags>dotnet;library;framework;game-development;godot;unity</PackageTags>
+    <PackageProjectUrl>https://github.com/SIGAAMDAD/NomadFramework.git</PackageProjectUrl>
+
+    <RepositoryUrl>https://github.com/SIGAAMDAD/NomadFramework.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryBranch>main</RepositoryBranch>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageIcon>NomadFramework.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <TieredCompilation>true</TieredCompilation>
+    <Deterministic>true</Deterministic>
+    <UseSharedCompilation>true</UseSharedCompilation>
+    <Optimize>true</Optimize>
+    <SkipLocalsInit>true</SkipLocalsInit>
+    <BuildInParellel>true</BuildInParellel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\NomadFramework.png"
+          Pack="true"
+          PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)..\README.md"
+          Pack="true"
+          PackagePath="\" />
+  </ItemGroup>
+</Project>

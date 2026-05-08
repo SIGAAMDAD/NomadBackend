@@ -27,7 +27,8 @@ using Nomad.Core.Memory.Buffers;
 using Nomad.Core.OnlineServices;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Services {
+namespace Nomad.OnlineServices.Steam.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -39,12 +40,14 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 	///
 	/// </summary>
 
-	internal sealed class SteamCloudStorageService : ICloudStorageService {
+	internal sealed class SteamCloudStorageService : ICloudStorageService
+	{
 		private static bool IsEnabled => SteamRemoteStorage.IsCloudEnabledForApp() && SteamRemoteStorage.IsCloudEnabledForAccount();
 
 		public bool SupportsCloudStorage => true;
 
-		public struct CloudFile {
+		public struct CloudFile
+		{
 			public int Size { get; set; }
 			public DateTime CloudAccessTime { get; set; }
 			public DateTime LocalAccessTime { get; set; }
@@ -72,7 +75,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// </summary>
 		/// <param name="logger">The logger service to use for logging.</param>
 		/// <param name="fileSystem"></param>
-		public SteamCloudStorageService( ILoggerService logger, IFileSystem fileSystem ) {
+		public SteamCloudStorageService( ILoggerService logger, IFileSystem fileSystem )
+		{
 			ArgumentGuard.ThrowIfNull( logger );
 			ArgumentGuard.ThrowIfNull( fileSystem );
 
@@ -92,7 +96,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_fileChangeResult?.Dispose();
 				_category?.Dispose();
@@ -111,7 +116,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// </summary>
 		/// <param name="pCallback"></param>
 		/// <param name="bIOFailure"></param>
-		private void OnFileChange( RemoteStorageLocalFileChange_t pCallback, bool bIOFailure ) {
+		private void OnFileChange( RemoteStorageLocalFileChange_t pCallback, bool bIOFailure )
+		{
 		}
 
 		/*
@@ -122,7 +128,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		private void InitializeCloudFileCache() {
+		private void InitializeCloudFileCache()
+		{
 			int fileCount = SteamRemoteStorage.GetFileCount();
 
 			for ( int i = 0; i < fileCount; i++ ) {
@@ -136,7 +143,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 			}
 		}
 
-		public async Task<CloudFile[]> ListFilesAsync( CancellationToken ct = default ) {
+		public async Task<CloudFile[]> ListFilesAsync( CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			return _cloudFiles.Values.ToArray();
 		}
@@ -152,7 +160,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// <param name="fileName"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public async Task<bool> FileExists( string fileName, CancellationToken ct = default ) {
+		public async Task<bool> FileExists( string fileName, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			return _cloudFiles.ContainsKey( fileName );
 		}
@@ -167,7 +176,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// </summary>
 		/// <param name="fileName"></param>
 		/// <returns></returns>
-		public async ValueTask ResolveConflict( string fileName ) {
+		public async ValueTask ResolveConflict( string fileName )
+		{
 			if ( !_cloudFiles.TryGetValue( fileName, out var cloudFile ) ) {
 				_category.PrintError( $"No such cloud file named '{fileName}'!" );
 				return;
@@ -187,7 +197,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// Synchronizes local files with cloud storage.
 		/// </summary>
 		/// <returns></returns>
-		public async ValueTask Synchronize() {
+		public async ValueTask Synchronize()
+		{
 			if ( !IsEnabled ) {
 				_category.PrintWarning( "Cloud storage is not enabled for this application." );
 				return;
@@ -214,38 +225,46 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// </summary>
 		/// <param name="fileName"></param>
 		/// <returns></returns>
-		public async ValueTask WriteFile( string fileName ) {
+		public async ValueTask WriteFile( string fileName )
+		{
 			using var buffer = await _fileSystem.LoadFileAsync( fileName );
 			SteamRemoteStorage.FileWriteAsync( fileName, buffer.ToArray(), (uint)buffer.Length );
 
 			await Synchronize();
 		}
 
-		public ValueTask<bool> FileExists( string fileName ) {
+		public ValueTask<bool> FileExists( string fileName )
+		{
 			throw new NotImplementedException();
 		}
 
-		public ValueTask ResolveConflict( string fileName, IBufferHandle localData, IBufferHandle cloudData ) {
+		public ValueTask ResolveConflict( string fileName, IBufferHandle localData, IBufferHandle cloudData )
+		{
 			throw new NotImplementedException();
 		}
 
-		public Task<bool> FileExistsAsync( string path, CancellationToken ct = default ) {
+		public Task<bool> FileExistsAsync( string path, CancellationToken ct = default )
+		{
 			throw new NotImplementedException();
 		}
 
-		public Task<IFileReadStream> OpenReadAsync( string path, CancellationToken ct = default ) {
+		public Task<IFileReadStream> OpenReadAsync( string path, CancellationToken ct = default )
+		{
 			throw new NotImplementedException();
 		}
 
-		public Task WriteAsync( string path, IBufferHandle data, CancellationToken ct = default ) {
+		public Task WriteAsync( string path, IBufferHandle data, CancellationToken ct = default )
+		{
 			throw new NotImplementedException();
 		}
 
-		public Task<bool> DeleteAsync( string path, CancellationToken ct = default ) {
+		public Task<bool> DeleteAsync( string path, CancellationToken ct = default )
+		{
 			throw new NotImplementedException();
 		}
 
-		public Task SyncAsync( CancellationToken ct = default ) {
+		public Task SyncAsync( CancellationToken ct = default )
+		{
 			throw new NotImplementedException();
 		}
 	};

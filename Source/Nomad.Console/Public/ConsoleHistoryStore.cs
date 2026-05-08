@@ -20,7 +20,7 @@ using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.FileSystem;
 using Nomad.Core.Memory.Buffers;
 
-namespace Nomad.Console.Private
+namespace Nomad.Console
 {
     public sealed class ConsoleHistoryStore : IConsoleHistoryStore
     {

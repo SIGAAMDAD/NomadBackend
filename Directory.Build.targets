@@ -1,8 +1,37 @@
 <Project>
-  <Import Project="Build/Targets/Nomad.Testing.targets" />
-  <Import Project="Build/Targets/Nomad.SourceGeneration.targets" />
-  <Import Project="Build/Targets/Nomad.EngineAdapters.targets" />
-  <Import Project="Build/Targets/Nomad.Packaging.targets" />
-  <Import Project="Build/Targets/Nomad.Validation.targets"
-          Condition="'$(NomadEnableLayoutValidation)' == 'true'" />
+   <!--
+    This file is imported late.
+    It may safely react to properties set inside individual .csproj files.
+  -->
+
+   <PropertyGroup Condition="'$(EnableEventDebug)' == 'true' and '$(Configuration)' == 'Debug'">
+      <DefineConstants>$(DefineConstants);EVENT_DEBUG</DefineConstants>
+   </PropertyGroup>
+
+   <PropertyGroup
+      Condition="'$(IsNomadTrimmable)' == 'true' and ('$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net8.0')">
+      <IsTrimmable>true</IsTrimmable>
+   </PropertyGroup>
+
+   <PropertyGroup Condition="'$(UseEmbeddedDebugSymbols)' == 'true'">
+      <DebugType>embedded</DebugType>
+      <DebugSymbols>true</DebugSymbols>
+   </PropertyGroup>
+
+   <ItemGroup
+      Condition="'$(UseNomadSourceGenerators)' == 'true' and '$(MSBuildProjectName)' != 'Nomad.SourceGenerators'">
+      <ProjectReference
+         Include="$(MSBuildThisFileDirectory)Source/Nomad.SourceGenerators/Nomad.SourceGenerators.csproj"
+         OutputItemType="Analyzer"
+         ReferenceOutputAssembly="false"
+         PrivateAssets="all" />
+   </ItemGroup>
+
+   <ItemGroup Condition="'$(LinkNomadEngineTemplates)' == 'true'">
+      <Compile Include="$(MSBuildThisFileDirectory)Source/Nomad.EngineTemplates/**/*.cs"
+         Exclude="$(MSBuildThisFileDirectory)Source/Nomad.EngineTemplates/bin/**/*.cs;$(MSBuildThisFileDirectory)Source/Nomad.EngineTemplates/obj/**/*.cs"
+         LinkBase="Nomad.EngineTemplates" />
+   </ItemGroup>
+
+   <Import Project="build/Nomad.NativeAssets.targets" />
 </Project>

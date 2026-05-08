@@ -19,7 +19,8 @@ using Nomad.Core.OnlineServices;
 using Nomad.Core.Util;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
+namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -31,8 +32,10 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 	/// The Steam achievement information value object.
 	/// </summary>
 
-	internal sealed class SteamAchievementInfo : IAchievementInfo {
-		private record AchievementProgress {
+	internal sealed class SteamAchievementInfo : IAchievementInfo
+	{
+		private record AchievementProgress
+		{
 			public InternString StatId;
 			public float Progress;
 			public float MinProgress;
@@ -63,7 +66,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 		/// Creates a new SteamAchievementInfo instance.
 		/// </summary>
 		/// <param name="name">The name of the achievement.</param>
-		public SteamAchievementInfo( string name ) {
+		public SteamAchievementInfo( string name )
+		{
 			_name = new InternString( name );
 			SteamUserStats.GetAchievementAndUnlockTime( _name, out _achieved, out uint unlockedTime );
 
@@ -92,7 +96,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 		/// </summary>
 		/// <param name="hIconHandle">The achievement icon.</param>
 		/// <param name="service"></param>
-		public void SetIcon( int hIconHandle, IEngineService service ) {
+		public void SetIcon( int hIconHandle, IEngineService service )
+		{
 			SteamUtils.GetImageSize( hIconHandle, out uint width, out uint height );
 
 			byte[] imageBuffer = new byte[width * height * 4];

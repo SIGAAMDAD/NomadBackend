@@ -1,13 +1,18 @@
 <Solution>
+  <Project Path="Source/Nomad.Audio/Nomad.Audio.csproj" />
   <Project Path="Source/Nomad.Audio.FMOD/Nomad.Audio.FMOD.csproj" />
   <Project Path="Source/Nomad.Console/Nomad.Console.csproj" />
   <Project Path="Source/Nomad.Core/Nomad.Core.csproj" />
   <Project Path="Source/Nomad.CVars/Nomad.CVars.csproj" />
+  <Project Path="Source/Nomad.EngineTemplates/Nomad.EngineTemplates.csproj" />
+  <Project Path="Source/Nomad.EngineUtils.Godot/Nomad.EngineUtils.Godot.csproj" />
+  <Project Path="Source/Nomad.EngineUtils.Settings/Nomad.EngineUtils.Settings.csproj" />
   <Project Path="Source/Nomad.Events/Nomad.Events.csproj" />
   <Project Path="Source/Nomad.FileSystem/Nomad.FileSystem.csproj" />
   <Project Path="Source/Nomad.Input/Nomad.Input.csproj" />
   <Project Path="Source/Nomad.Logger/Nomad.Logger.csproj" />
   <Project Path="Source/Nomad.OnlineServices.Steam/Nomad.OnlineServices.Steam.csproj" />
+  <Project Path="Source/Nomad.ResourceCache/Nomad.ResourceCache.csproj" />
   <Project Path="Source/Nomad.Save/Nomad.Save.csproj" />
   <Project Path="Source/Nomad.SourceGenerators/Nomad.SourceGenerators.csproj" />
 </Solution>

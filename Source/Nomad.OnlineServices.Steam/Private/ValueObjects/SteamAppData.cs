@@ -15,7 +15,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
+namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+{
 	/*
 	===================================================================================
 	
@@ -27,7 +28,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 	/// 
 	/// </summary>
 
-	internal record SteamAppData {
+	internal record SteamAppData
+	{
 		public AppId_t AppId { get; init; }
 	};
 };

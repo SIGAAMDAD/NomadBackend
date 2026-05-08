@@ -21,7 +21,7 @@ using Nomad.Core.Events;
 namespace Nomad.Core.OnlineServices
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public interface INetworkSessionService
     {
@@ -35,11 +35,16 @@ namespace Nomad.Core.OnlineServices
         IGameEvent<PeerId> PeerDisconnected { get; }
 
         Task<bool> StartHostAsync(LobbyInfo info, CancellationToken ct = default);
-        Task<bool> JoinAsClientAsync(Guid info, CancellationToken ct = default);
+        Task<bool> JoinAsClientAsync(Guid id, CancellationToken ct = default);
         Task StopAsync(CancellationToken ct = default);
 
-        Task SendToHostAsync<TMessage>(TMessage message, CancellationToken ct = default);
-        Task SendToPeerAsync<TMessage>(PeerId peerId, TMessage message, CancellationToken ct = default);
-        Task BroadcastAsync<TMessage>(TMessage message, CancellationToken ct = default);
+        ValueTask SendToHostAsync<TMessage>(TMessage message, CancellationToken ct = default)
+            where TMessage : struct;
+
+        ValueTask SendToPeerAsync<TMessage>(PeerId peerId, TMessage message, CancellationToken ct = default)
+            where TMessage : struct;
+
+        ValueTask BroadcastAsync<TMessage>(TMessage message, CancellationToken ct = default)
+            where TMessage : struct;
     }
 }

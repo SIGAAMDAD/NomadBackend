@@ -1,19 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>NomadFramework.Logger</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>Structured logging and diagnostic sink module for NomadFramework.</Description>
-
-    <NomadValidateAsModule>true</NomadValidateAsModule>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0' Or '$(TargetFramework)' == 'net8.0'">
-    <IsTrimmable>true</IsTrimmable>
+    <IsNomadTrimmable>true</IsNomadTrimmable>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Nomad.Core\Nomad.Core.csproj" />
   </ItemGroup>
-
 </Project>

@@ -1,12 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>NomadFramework.EngineTemplates</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>Reusable engine integration template types for NomadFramework.</Description>
-
-    <NomadValidateAsModule>true</NomadValidateAsModule>
-    <NomadUseSourceGenerators>true</NomadUseSourceGenerators>
+    <UseNomadSourceGenerators>true</UseNomadSourceGenerators>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
@@ -17,5 +12,4 @@
     <ProjectReference Include="..\Nomad.Core\Nomad.Core.csproj" />
     <ProjectReference Include="..\Nomad.Events\Nomad.Events.csproj" />
   </ItemGroup>
-
 </Project>

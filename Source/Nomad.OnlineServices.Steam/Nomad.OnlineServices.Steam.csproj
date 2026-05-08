@@ -1,11 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>NomadFramework.OnlineServices.Steam</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>Steamworks.NET online services adapter for NomadFramework.</Description>
-
-    <NomadUseSourceGenerators>true</NomadUseSourceGenerators>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,34 +11,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Condition="'$(NomadIsWindows)' == 'true'" Include="steam_api64.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
-
-    <Content Condition="'$(NomadIsWindows)' == 'true'" Include="steam_api.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
-
-    <Content Condition="'$(NomadIsLinux)' == 'true'" Include="libsteam_api.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
-
-    <Content Condition="'$(NomadIsLinux)' == 'true'" Include="steam_api64.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
-
-    <Content Condition="'$(NomadIsLinux)' == 'true'" Include="steam_api.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
+    <NomadNativeAsset Include="steam_api64.dll" HostOS="Windows" RuntimeIdentifier="win-x64" />
+    <NomadNativeAsset Include="steam_api.dll" HostOS="Windows" RuntimeIdentifier="win-x86" />
+    <NomadNativeAsset Include="libsteam_api.so" HostOS="Linux" RuntimeIdentifier="linux-x64" />
+    <NomadNativeAsset Include="steam_api64.so" HostOS="Linux" RuntimeIdentifier="linux-x64" />
+    <NomadNativeAsset Include="steam_api.so" HostOS="Linux" RuntimeIdentifier="linux-x64" />
 
     <Reference Include="Steamworks.NET">
       <HintPath>Steamworks.NET.dll</HintPath>
+      <Private>true</Private>
     </Reference>
   </ItemGroup>
-
 </Project>

@@ -21,7 +21,8 @@ using Nomad.Core.OnlineServices;
 using Nomad.Core.Util;
 using Nomad.OnlineServices.Steam.Private.Repositories;
 
-namespace Nomad.OnlineServices.Steam.Private.Services {
+namespace Nomad.OnlineServices.Steam.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -33,7 +34,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 	///
 	/// </summary>
 
-	internal sealed class SteamAchievementService : IAchievementService {
+	internal sealed class SteamAchievementService : IAchievementService
+	{
 		public bool SupportsAchievements => true;
 
 		public int NumAchievements => _statsRepository.NumAchievements;
@@ -61,7 +63,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// <param name="statsRepository"></param>
 		/// <param name="logger"></param>
 		/// <param name="eventFactory"></param>
-		public SteamAchievementService( SteamStatsRepository statsRepository, ILoggerService logger, IGameEventRegistryService eventFactory ) {
+		public SteamAchievementService( SteamStatsRepository statsRepository, ILoggerService logger, IGameEventRegistryService eventFactory )
+		{
 			_statsRepository = statsRepository;
 			_logger = logger;
 			_category = _logger.CreateCategory( nameof( SteamAchievementService ), LogLevel.Info, true );
@@ -81,7 +84,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_unlocked?.Dispose();
 				_progressChanged?.Dispose();
@@ -153,7 +157,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// <param name="achievementId"></param>
 		/// <param name="current"></param>
 		/// <param name="max"></param>
-		private void OnAchievementProgressChanged( string achievementId, float current, float max ) {
+		private void OnAchievementProgressChanged( string achievementId, float current, float max )
+		{
 			_progressChanged.Publish( new AchievementProgressChangedEventArgs( new InternString( achievementId ), current ) );
 		}
 
@@ -166,7 +171,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="achievementId"></param>
-		private void OnAchievementUnlocked( string achievementId ) {
+		private void OnAchievementUnlocked( string achievementId )
+		{
 			_unlocked.Publish( new AchievementUnlockedEventArgs( new InternString( achievementId ) ) );
 		}
 	};

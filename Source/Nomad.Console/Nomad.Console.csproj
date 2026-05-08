@@ -1,13 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>NomadFramework.Console</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>Runtime command console, command line, and command history module for NomadFramework.</Description>
-
-    <NomadValidateAsModule>true</NomadValidateAsModule>
-    <NomadUseSourceGenerators>true</NomadUseSourceGenerators>
-
+    <UseNomadSourceGenerators>true</UseNomadSourceGenerators>
     <NoWarn>$(NoWarn);CA1308</NoWarn>
   </PropertyGroup>
 
@@ -17,5 +11,4 @@
     <ProjectReference Include="..\Nomad.CVars\Nomad.CVars.csproj" />
     <ProjectReference Include="..\Nomad.Events\Nomad.Events.csproj" />
   </ItemGroup>
-
 </Project>

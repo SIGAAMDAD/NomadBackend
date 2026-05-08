@@ -1,19 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-
-    <IsTool>true</IsTool>
     <IsPackable>false</IsPackable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 
-    <AssemblyName>Nomad.SourceGenerators</AssemblyName>
-    <RootNamespace>Nomad.SourceGenerators</RootNamespace>
-
-    <NoWarn>$(NoWarn);CA1506;CA1502</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
 
@@ -21,13 +12,13 @@
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <NoWarn>$(NoWarn);RS2008</NoWarn>
+    <AssemblyName>Nomad.SourceGenerators</AssemblyName>
+    <RootNamespace>Nomad.SourceGenerators</RootNamespace>
+
+    <NoWarn>$(NoWarn);RS2008;CA1502;CA1506</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"
-                      Version="5.3.0"
-                      PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
   </ItemGroup>
-
 </Project>

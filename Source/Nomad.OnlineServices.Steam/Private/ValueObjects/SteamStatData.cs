@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System.Runtime.InteropServices;
 using Nomad.Core.Util;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
+namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+{
 	/*
 	===================================================================================
 	
@@ -28,9 +29,11 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 	/// Stores stat data for a steam value.
 	/// </summary>
 
-	internal record SteamStatData {
+	internal record SteamStatData
+	{
 		[StructLayout( LayoutKind.Explicit, Pack = 1, Size = 4 )]
-		public struct Data {
+		public struct Data
+		{
 			[FieldOffset( 0 )] public float FloatValue;
 			[FieldOffset( 0 )] public int IntValue;
 		};

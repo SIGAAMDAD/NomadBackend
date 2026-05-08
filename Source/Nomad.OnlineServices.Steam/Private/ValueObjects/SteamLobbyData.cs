@@ -18,7 +18,8 @@ using System.Collections.Generic;
 using Nomad.Core.OnlineServices;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
+namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -30,7 +31,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 	///
 	/// </summary>
 
-	internal sealed class SteamLobbyData {
+	internal sealed class SteamLobbyData
+	{
 		public string? Name => _info.Name;
 		public string? GameMode => _info.GameMode;
 		public string? Map => _info.Map;
@@ -62,7 +64,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 		/// <param name="id"></param>
 		/// <param name="info"></param>
 		/// <param name="guid"></param>
-		public SteamLobbyData( CSteamID id, LobbyInfo info, Guid guid ) {
+		public SteamLobbyData( CSteamID id, LobbyInfo info, Guid guid )
+		{
 			_id = id;
 			_info = info;
 			_guid = guid;
@@ -76,7 +79,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 		/// <summary>
 		///
 		/// </summary>
-		public void Update() {
+		public void Update()
+		{
 			_info = _info with {
 				Name = SteamMatchmaking.GetLobbyData( _id, nameof( LobbyInfo.Name ) ),
 				Map = SteamMatchmaking.GetLobbyData( _id, nameof( LobbyInfo.Map ) ),
@@ -96,7 +100,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 		/// </summary>
 		/// <param name="id">The lobby's unique <see cref="CSteamID"/>.</param>
 		/// <returns></returns>
-		public static LobbyInfo GetInfo( CSteamID id ) {
+		public static LobbyInfo GetInfo( CSteamID id )
+		{
 			return new LobbyInfo {
 				Name = SteamMatchmaking.GetLobbyData( id, nameof( LobbyInfo.Name ) ),
 				Map = SteamMatchmaking.GetLobbyData( id, nameof( LobbyInfo.Map ) ),

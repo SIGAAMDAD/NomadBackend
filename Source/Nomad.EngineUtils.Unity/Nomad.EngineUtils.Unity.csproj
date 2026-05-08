@@ -1,17 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <Import Project="unity.props" Condition="'$(UnityBuild)' == 'true'" />
-
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1</TargetFrameworks>
-
-    <NomadEngineAdapter>true</NomadEngineAdapter>
-    <NomadEngine>Unity</NomadEngine>
-    <NomadValidateAsModule>true</NomadValidateAsModule>
-
     <PackageId>NomadFramework.EngineUtils.Unity</PackageId>
     <Version>0.1.0-alpha1</Version>
-    <Description>Unity engine adapter module for NomadFramework.</Description>
+
+    <EmitCompilerGeneratedFiles Condition="'$(Configuration)' == 'Debug'">true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath Condition="'$(Configuration)' == 'Debug'">$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,5 +12,4 @@
     <ProjectReference Include="..\Nomad.Core\Nomad.Core.csproj" />
     <ProjectReference Include="..\Nomad.Events\Nomad.Events.csproj" />
   </ItemGroup>
-
 </Project>

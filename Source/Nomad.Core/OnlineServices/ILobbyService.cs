@@ -16,6 +16,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Nomad.Core.Events;
 
 namespace Nomad.Core.OnlineServices
 {
@@ -25,19 +26,42 @@ namespace Nomad.Core.OnlineServices
     public interface ILobbyService : IDisposable
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         bool IsInLobby { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         bool IsLobbyLeader { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         LobbyInfo? Current { get; }
+
+        /// <summary>
+        /// Event that triggers upon receiving the results of attempting to join a network lobby.
+        /// </summary>
+        [Event(nameSpace: "Nomad.Core.OnlineServices", PayloadName = "LobbyJoinedResultEventArgs")]
+        [EventPayload("Id", typeof(Guid))]
+        IGameEvent<LobbyJoinedResultEventArgs> LobbyJoined { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        [Event(nameSpace: "Nomad.Core.OnlineServices", PayloadName = "LobbyLeaveResultEventArgs")]
+        [EventPayload("Id", typeof(Guid), Order = 1)]
+        [EventPayload("Reason", typeof(LobbyLeaveReason), Order = 2)]
+        IGameEvent<LobbyLeaveResultEventArgs> LobbyLeft { get; }
+
+        /// <summary>
+        /// Event that triggers upon a lobby's creation. We should only be receiving this event if our machine is the host.
+        /// </summary>
+        [Event(nameSpace: "Nomad.Core.OnlineServices", PayloadName = "LobbyStartResultEventArgs")]
+        [EventPayload("Success", typeof(bool), Order = 1)]
+        [EventPayload("Id", typeof(Guid), Order = 2)]
+        IGameEvent<LobbyStartResultEventArgs> LobbyStarted { get; }
 
         /// <summary>
         /// Creates a new lobby with the provided parameters

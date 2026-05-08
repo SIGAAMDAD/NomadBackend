@@ -19,7 +19,8 @@ using System.Threading.Tasks;
 using Nomad.Core.Logger;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Services {
+namespace Nomad.OnlineServices.Steam.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -32,7 +33,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 	/// </summary>
 
 	internal sealed class SteamAsyncCallResultDispatcher<TCallbackArgs, TResult> : IDisposable
-		where TCallbackArgs : struct {
+		where TCallbackArgs : struct
+	{
 		private readonly CallResult<TCallbackArgs> _callback;
 
 		private readonly object _requestLock = new object();
@@ -51,7 +53,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public SteamAsyncCallResultDispatcher() {
+		public SteamAsyncCallResultDispatcher()
+		{
 			_mainContext = SynchronizationContext.Current ?? new SynchronizationContext();
 			_callback = CallResult<TCallbackArgs>.Create( OnCallback );
 		}
@@ -64,7 +67,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				// kill the retrieval thread if there is any
 				lock ( _requestLock ) {
@@ -89,7 +93,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// <param name="steamCallback"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public async Task<TResult> Invoke( Func<TCallbackArgs, TResult> callback, Action? steamCallback = null, CancellationToken ct = default ) {
+		public async Task<TResult> Invoke( Func<TCallbackArgs, TResult> callback, Action? steamCallback = null, CancellationToken ct = default )
+		{
 			if ( _currentRequest != null && !_currentRequest.IsCompleted ) {
 				return await _currentRequest;
 			}
@@ -111,7 +116,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// <param name="steamCallback"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		private async Task<TResult> InvokeInternal( Func<TCallbackArgs, TResult> callback, Action? steamCallback, CancellationToken ct ) {
+		private async Task<TResult> InvokeInternal( Func<TCallbackArgs, TResult> callback, Action? steamCallback, CancellationToken ct )
+		{
 			_currentTcs = new TaskCompletionSource<TCallbackArgs>();
 
 			if ( steamCallback != null ) {
@@ -150,7 +156,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services {
 		/// </summary>
 		/// <param name="pCallback"></param>
 		/// <param name="bIOFailure"></param>
-		private void OnCallback( TCallbackArgs pCallback, bool bIOFailure ) {
+		private void OnCallback( TCallbackArgs pCallback, bool bIOFailure )
+		{
 			TaskCompletionSource<TCallbackArgs>? tcs = null;
 			lock ( _requestLock ) {
 				tcs = _currentTcs;

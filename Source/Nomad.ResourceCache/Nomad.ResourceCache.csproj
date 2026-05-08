@@ -1,16 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>NomadFramework.ResourceCache</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>Unified resource cache and asset access module for NomadFramework.</Description>
-
-    <NomadValidateAsModule>true</NomadValidateAsModule>
-    <NomadUseSourceGenerators>true</NomadUseSourceGenerators>
+    <UseNomadSourceGenerators>true</UseNomadSourceGenerators>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Nomad.Core\Nomad.Core.csproj" />
   </ItemGroup>
-
 </Project>

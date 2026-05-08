@@ -13,28 +13,12 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-using System;
-
-namespace Nomad.OnlineServices.Steam.Private.Services.LobbyServices
+namespace Nomad.Core.OnlineServices
 {
-	internal sealed class SteamLobbyCommandService : IDisposable
-	{
-		private bool _isDisposed = false;
-
-		/*
-		===============
-		Dispose
-		===============
-		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		public void Dispose()
-		{
-			if ( !_isDisposed ) {
-			}
-			GC.SuppressFinalize( this );
-			_isDisposed = true;
-		}
-	};
-};
+    public enum LobbyLeaveReason : byte
+    {
+        Leave,
+        Kicked,
+        Disconnected
+    }
+}

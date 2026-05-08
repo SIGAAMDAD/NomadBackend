@@ -17,7 +17,8 @@ using System;
 using System.Runtime.CompilerServices;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
+namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+{
 	/*
 	===================================================================================
 	
@@ -29,7 +30,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 	/// 
 	/// </summary>
 
-	internal readonly struct SteamLobbyKey {
+	internal readonly struct SteamLobbyKey
+	{
 		public CSteamID Id => _id;
 		private readonly CSteamID _id;
 
@@ -48,7 +50,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="guid"></param>
-		public SteamLobbyKey( CSteamID id, Guid guid ) {
+		public SteamLobbyKey( CSteamID id, Guid guid )
+		{
 			_id = id;
 			_guid = guid;
 			_hashCode = HashCode.Combine(

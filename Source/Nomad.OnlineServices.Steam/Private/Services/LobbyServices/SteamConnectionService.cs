@@ -23,8 +23,10 @@ using Nomad.OnlineServices.Steam.Private.Repositories;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Services.LobbyServices {
-	internal sealed class SteamConnectionService : IDisposable {
+namespace Nomad.OnlineServices.Steam.Private.Services.LobbyServices
+{
+	internal sealed class SteamConnectionService : IDisposable
+	{
 		private readonly Callback<SteamNetConnectionStatusChangedCallback_t> _netConnectionStatusChanged;
 
 		private readonly SteamConnectionRepository _connections;
@@ -51,7 +53,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services.LobbyServices {
 		/// </summary>
 		/// <param name="logger"></param>
 		/// <param name="eventFactory"></param>
-		public SteamConnectionService( ILoggerService logger, IGameEventRegistryService eventFactory ) {
+		public SteamConnectionService( ILoggerService logger, IGameEventRegistryService eventFactory )
+		{
 			_eventFactory = eventFactory ?? throw new ArgumentNullException( nameof( eventFactory ) );
 			_connections = new SteamConnectionRepository( logger );
 
@@ -104,7 +107,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services.LobbyServices {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				foreach ( var connection in _connections.Snapshot() ) {
 					SteamNetworkingSockets.CloseConnection( connection.Connection, 0, "Shutdown", false );
@@ -123,13 +127,15 @@ namespace Nomad.OnlineServices.Steam.Private.Services.LobbyServices {
 			_isDisposed = true;
 		}
 
-		public void StartHosting( int virtualPort = 0 ) {
+		public void StartHosting( int virtualPort = 0 )
+		{
 			SteamNetworkingUtils.InitRelayNetworkAccess();
 			_pollGroup = SteamNetworkingSockets.CreatePollGroup();
 			_listenSocket = SteamNetworkingSockets.CreateListenSocketP2P( virtualPort, _socketOptions.Length, _socketOptions );
 		}
 
-		public HSteamNetConnection ConnectP2P( CSteamID remoteSteamId, int virtualPort = 0 ) {
+		public HSteamNetConnection ConnectP2P( CSteamID remoteSteamId, int virtualPort = 0 )
+		{
 			var identity = new SteamNetworkingIdentity();
 			identity.SetSteamID( remoteSteamId );
 
@@ -143,7 +149,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services.LobbyServices {
 			return conn;
 		}
 
-		public bool Accept( HSteamNetConnection handle ) {
+		public bool Accept( HSteamNetConnection handle )
+		{
 			if ( !_connections.TryGet( handle, out var connection ) || connection == null ) {
 				return false;
 			}
@@ -157,7 +164,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services.LobbyServices {
 			return true;
 		}
 
-		private void OnConnectionStatusChanged( SteamNetConnectionStatusChangedCallback_t pCallback ) {
+		private void OnConnectionStatusChanged( SteamNetConnectionStatusChangedCallback_t pCallback )
+		{
 			var handle = pCallback.m_hConn;
 			var info = pCallback.m_info;
 

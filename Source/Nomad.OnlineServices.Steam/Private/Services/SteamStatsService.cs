@@ -19,7 +19,8 @@ using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
 using Nomad.OnlineServices.Steam.Private.Repositories;
 
-namespace Nomad.OnlineServices.Steam {
+namespace Nomad.OnlineServices.Steam
+{
 	/*
 	===================================================================================
 
@@ -31,7 +32,8 @@ namespace Nomad.OnlineServices.Steam {
 	///
 	/// </summary>
 
-	internal sealed class SteamStatsService : IStatsService {
+	internal sealed class SteamStatsService : IStatsService
+	{
 		public bool SupportsLeaderboards => true;
 
 		private readonly SteamStatsRepository _statsRepository;
@@ -50,7 +52,8 @@ namespace Nomad.OnlineServices.Steam {
 		/// </summary>
 		/// <param name="statsRepository"></param>
 		/// <param name="logger"></param>
-		public SteamStatsService( SteamStatsRepository statsRepository, ILoggerService logger ) {
+		public SteamStatsService( SteamStatsRepository statsRepository, ILoggerService logger )
+		{
 			_category = logger.CreateCategory( nameof( SteamStatsService ), LogLevel.Info, true );
 
 			_statsRepository = statsRepository;
@@ -64,7 +67,8 @@ namespace Nomad.OnlineServices.Steam {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_category?.Dispose();
 			}

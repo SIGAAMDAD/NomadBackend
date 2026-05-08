@@ -18,6 +18,9 @@ using System.Collections.Generic;
 
 namespace Nomad.Core.OnlineServices
 {
+    /// <summary>
+    ///
+    /// </summary>
     public sealed record NetworkSessionInfo
     {
         public Guid SessionId { get; init; }

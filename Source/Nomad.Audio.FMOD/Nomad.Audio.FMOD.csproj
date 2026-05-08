@@ -1,11 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>NomadFramework.Audio.FMOD</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>FMOD audio backend integration for NomadFramework.</Description>
-
-    <NomadValidateAsModule>true</NomadValidateAsModule>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,51 +9,20 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Condition="'$(NomadIsWindows)' == 'true'" Include="fmod.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <NomadNativeAsset Include="fmod.dll" HostOS="Windows" RuntimeIdentifier="win-x64" />
+    <NomadNativeAsset Include="fmodL.dll" HostOS="Windows" RuntimeIdentifier="win-x64" />
+    <NomadNativeAsset Include="fmodstudio.dll" HostOS="Windows" RuntimeIdentifier="win-x64" />
+    <NomadNativeAsset Include="fmodstudioL.dll" HostOS="Windows" RuntimeIdentifier="win-x64" />
 
-    <Content Condition="'$(NomadIsWindows)' == 'true'" Include="fmodL.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-
-    <Content Condition="'$(NomadIsWindows)' == 'true'" Include="fmodstudio.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-
-    <Content Condition="'$(NomadIsWindows)' == 'true'" Include="fmodstudioL.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-
-    <Content Condition="'$(NomadIsLinux)' == 'true'" Include="fmod.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
-
-    <Content Condition="'$(NomadIsLinux)' == 'true'" Include="fmodL.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
-
-    <Content Condition="'$(NomadIsLinux)' == 'true'" Include="libfmod.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
-
-    <Content Condition="'$(NomadIsLinux)' == 'true'" Include="libfmodL.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
-
-    <Content Condition="'$(NomadIsLinux)' == 'true'" Include="libfmodstudio.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
-
-    <Content Condition="'$(NomadIsLinux)' == 'true'" Include="libfmodstudioL.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackageCopyToOutput>true</PackageCopyToOutput>
-    </Content>
+    <NomadNativeAsset Include="fmod.so" HostOS="Linux" RuntimeIdentifier="linux-x64" />
+    <NomadNativeAsset Include="fmodL.so" HostOS="Linux" RuntimeIdentifier="linux-x64" />
+    <NomadNativeAsset Include="libfmod.so" HostOS="Linux" RuntimeIdentifier="linux-x64" />
+    <NomadNativeAsset Include="libfmodL.so" HostOS="Linux" RuntimeIdentifier="linux-x64" />
+    <NomadNativeAsset Include="libfmodstudio.so" HostOS="Linux" RuntimeIdentifier="linux-x64" />
+    <NomadNativeAsset Include="libfmodstudioL.so" HostOS="Linux" RuntimeIdentifier="linux-x64" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
 </Project>

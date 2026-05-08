@@ -1,0 +1,55 @@
+<Project>
+  <!--
+    Projects add items like:
+
+      <NomadNativeAsset Include="steam_api64.dll" HostOS="Windows" PackageRid="win-x64" />
+      <NomadNativeAsset Include="libsteam_api.so" HostOS="Linux" PackageRid="linux-x64" />
+
+    HostOS controls local output copying.
+    PackageRid controls NuGet package path.
+
+    This target intentionally filters items inside a Target. Top-level ItemGroup
+    conditions cannot safely reference arbitrary custom item metadata such as
+    %(NomadNativeAsset.PackageRid).
+
+    PackagePath is stamped onto temporary items first, then copied to None.
+    Do not use PackagePath="runtimes/%(PackageRid)/..." directly on None,
+    because the SDK may already have default None items for the same files.
+  -->
+
+  <Target Name="NomadPrepareNativeAssets"
+    BeforeTargets="AssignTargetPaths;ResolveReferences;Pack"
+    Condition="'@(NomadNativeAsset)' != ''">
+    <ItemGroup>
+      <!-- Remove SDK-default None/Content entries for these files so only the explicit native-asset
+      entries remain. -->
+      <None Remove="@(NomadNativeAsset)" />
+      <Content Remove="@(NomadNativeAsset)" />
+
+      <_NomadNativeAssetForCurrentHost Include="@(NomadNativeAsset)"
+        Condition="'%(NomadNativeAsset.HostOS)' == '' or '%(NomadNativeAsset.HostOS)' == '$(NomadHostOS)'">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Pack>false</Pack>
+      </_NomadNativeAssetForCurrentHost>
+
+      <_NomadNativeAssetWithPackageRid Include="@(NomadNativeAsset)"
+        Condition="'%(NomadNativeAsset.PackageRid)' != ''">
+        <Pack>true</Pack>
+        <PackagePath>
+          runtimes/%(NomadNativeAsset.PackageRid)/native/%(NomadNativeAsset.Filename)%(NomadNativeAsset.Extension)</PackagePath>
+        <Visible>false</Visible>
+      </_NomadNativeAssetWithPackageRid>
+
+      <_NomadNativeAssetWithoutPackageRid Include="@(NomadNativeAsset)"
+        Condition="'%(NomadNativeAsset.PackageRid)' == ''">
+        <Pack>true</Pack>
+        <PackagePath>native/%(NomadNativeAsset.Filename)%(NomadNativeAsset.Extension)</PackagePath>
+        <Visible>false</Visible>
+      </_NomadNativeAssetWithoutPackageRid>
+
+      <Content Include="@(_NomadNativeAssetForCurrentHost)" />
+      <None Include="@(_NomadNativeAssetWithPackageRid)" />
+      <None Include="@(_NomadNativeAssetWithoutPackageRid)" />
+    </ItemGroup>
+  </Target>
+</Project>

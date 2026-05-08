@@ -1,0 +1,66 @@
+<Project>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1</TargetFrameworks>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+
+    <UnityVersion Condition="'$(UnityVersion)' == ''">6000.3.6f1</UnityVersion>
+
+    <!-- Explicit override wins. -->
+    <UnityInstallPath Condition="'$(UnityInstallPath)' == '' and '$(UNITY_HOME)' != ''">
+      $(UNITY_HOME)</UnityInstallPath>
+
+    <!-- Unity Hub fallbacks. -->
+    <UnityInstallPath
+      Condition="'$(UnityInstallPath)' == '' and '$(IsWindows)' == 'true' and Exists('C:\Program Files\Unity\Hub\Editor\$(UnityVersion)')">C:\Program
+      Files\Unity\Hub\Editor\$(UnityVersion)</UnityInstallPath>
+    <UnityInstallPath
+      Condition="'$(UnityInstallPath)' == '' and '$(IsMacOS)' == 'true' and Exists('/Applications/Unity/Hub/Editor/$(UnityVersion)')">
+      /Applications/Unity/Hub/Editor/$(UnityVersion)</UnityInstallPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsWindows)' == 'true'">
+    <UnityManagedPath>$(UnityInstallPath)\Editor\Data\Managed</UnityManagedPath>
+    <UnityEnginePath>$(UnityManagedPath)\UnityEngine</UnityEnginePath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsMacOS)' == 'true'">
+    <UnityManagedPath>$(UnityInstallPath)/Unity.app/Contents/Managed</UnityManagedPath>
+    <UnityEnginePath>$(UnityManagedPath)/UnityEngine</UnityEnginePath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsLinux)' == 'true'">
+    <UnityManagedPath>$(UnityInstallPath)/Editor/Data/Managed</UnityManagedPath>
+    <UnityEnginePath>$(UnityManagedPath)/UnityEngine</UnityEnginePath>
+  </PropertyGroup>
+
+  <Target Name="ValidateUnityPaths" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(UnityInstallPath)' == ''"
+      Text="Unity install path not found. Set UnityInstallPath or UNITY_HOME." />
+    <Error
+      Condition="!Exists('$(UnityEnginePath)/UnityEngine.CoreModule.dll') and !Exists('$(UnityEnginePath)\UnityEngine.CoreModule.dll')"
+      Text="UnityEngine.CoreModule.dll not found under $(UnityEnginePath)." />
+  </Target>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(UnityEnginePath)/UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine.InputModule">
+      <HintPath>$(UnityEnginePath)/UnityEngine.InputModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>$(UnityEnginePath)/UnityEngine.AnimationModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="Unity.InputSystem">
+      <HintPath>Unity.InputSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

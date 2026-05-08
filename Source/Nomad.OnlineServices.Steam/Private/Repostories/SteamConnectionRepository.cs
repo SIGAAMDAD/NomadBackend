@@ -19,7 +19,8 @@ using Nomad.Core.Logger;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Repositories {
+namespace Nomad.OnlineServices.Steam.Private.Repositories
+{
 	/*
 	===================================================================================
 	
@@ -31,16 +32,19 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 	/// 
 	/// </summary>
 
-	internal sealed class SteamConnectionRepository {
+	internal sealed class SteamConnectionRepository
+	{
 		private readonly ConcurrentDictionary<CSteamID, SteamNetConnection> _connections = new();
 
-		public SteamConnectionRepository( ILoggerService logger ) {
+		public SteamConnectionRepository( ILoggerService logger )
+		{
 		}
 
 		private readonly ConcurrentDictionary<HSteamNetConnection, SteamNetConnection> _byHandle = new();
 		private readonly ConcurrentDictionary<ulong, HSteamNetConnection> _bySteamId64 = new();
 
-		public bool Add( SteamNetConnection connection ) {
+		public bool Add( SteamNetConnection connection )
+		{
 			if ( !_byHandle.TryAdd( connection.Connection, connection ) ) {
 				return false;
 			}
@@ -50,11 +54,13 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 			return true;
 		}
 
-		public bool TryGet( HSteamNetConnection handle, out SteamNetConnection? connection ) {
+		public bool TryGet( HSteamNetConnection handle, out SteamNetConnection? connection )
+		{
 			return _byHandle.TryGetValue( handle, out connection );
 		}
 
-		public bool TryGet( CSteamID steamId, out SteamNetConnection? connection ) {
+		public bool TryGet( CSteamID steamId, out SteamNetConnection? connection )
+		{
 			connection = null;
 			if ( !_bySteamId64.TryGetValue( steamId.m_SteamID, out var handle ) ) {
 				return false;
@@ -62,7 +68,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 			return _byHandle.TryGetValue( handle, out connection );
 		}
 
-		public bool Remove( HSteamNetConnection handle ) {
+		public bool Remove( HSteamNetConnection handle )
+		{
 			if ( !_byHandle.TryGetValue( handle, out var connection ) ) {
 				return false;
 			}
@@ -72,7 +79,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 			return true;
 		}
 
-		public ICollection<SteamNetConnection> Snapshot() {
+		public ICollection<SteamNetConnection> Snapshot()
+		{
 			return _byHandle.Values;
 		}
 	};

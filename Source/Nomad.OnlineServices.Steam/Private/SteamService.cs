@@ -27,7 +27,8 @@ using Nomad.OnlineServices.Steam.Private.Services;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private {
+namespace Nomad.OnlineServices.Steam.Private
+{
 	/*
 	===================================================================================
 
@@ -39,7 +40,8 @@ namespace Nomad.OnlineServices.Steam.Private {
 	///
 	/// </summary>
 
-	internal sealed class SteamService : IOnlinePlatformService {
+	internal sealed class SteamService : IOnlinePlatformService
+	{
 		public OnlinePlatform Platform => OnlinePlatform.Steam;
 		public string PlatformName => nameof( OnlinePlatform.Steam );
 		public bool IsAvailable => true;
@@ -103,7 +105,8 @@ namespace Nomad.OnlineServices.Steam.Private {
 		/// <param name="engineService"></param>
 		/// <param name="eventFactory"></param>
 		/// <param name="cvarSystem"></param>
-		public SteamService( ILoggerService logger, IFileSystem fileSystem, IEngineService engineService, IGameEventRegistryService eventFactory, ICVarSystemService cvarSystem ) {
+		public SteamService( ILoggerService logger, IFileSystem fileSystem, IEngineService engineService, IGameEventRegistryService eventFactory, ICVarSystemService cvarSystem )
+		{
 			ArgumentGuard.ThrowIfNull( logger );
 			ArgumentGuard.ThrowIfNull( fileSystem );
 			ArgumentGuard.ThrowIfNull( engineService );
@@ -145,7 +148,8 @@ namespace Nomad.OnlineServices.Steam.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_lobbyService?.Dispose();
 				_statsService?.Dispose();
@@ -167,7 +171,8 @@ namespace Nomad.OnlineServices.Steam.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public void RunCallbacks() {
+		public void RunCallbacks()
+		{
 			SteamAPI.RunCallbacks();
 		}
 	};

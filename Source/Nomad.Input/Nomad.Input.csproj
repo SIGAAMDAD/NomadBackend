@@ -1,12 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>NomadFramework.Input</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>Engine-agnostic input binding and input action module for NomadFramework.</Description>
-
-    <NomadValidateAsModule>true</NomadValidateAsModule>
-    <NomadUseSourceGenerators>true</NomadUseSourceGenerators>
+    <UseNomadSourceGenerators>true</UseNomadSourceGenerators>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,8 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="10.0.5" />
-    <PackageReference Include="System.Text.Json" Version="10.0.3" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Text.Json" />
   </ItemGroup>
-
 </Project>

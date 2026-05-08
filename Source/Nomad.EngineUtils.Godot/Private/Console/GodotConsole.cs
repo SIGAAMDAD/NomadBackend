@@ -25,13 +25,13 @@ using Nomad.Core.Logger;
 namespace Nomad.EngineUtils.Godot.Private.Console {
 	/*
 	===================================================================================
-	
+
 	GodotConsole
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal sealed class GodotConsole : IConsoleObject, IDisposable {
@@ -73,7 +73,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="owner"></param>
 		/// <param name="logger"></param>
@@ -177,7 +177,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Dispose() {
 			if ( _isDisposed ) {
@@ -212,7 +212,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Show() {
 			if ( _isOpen ) {
@@ -234,7 +234,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Hide() {
 			if ( !_isOpen ) {
@@ -255,7 +255,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Toggle() {
 			if ( _isOpen ) {
@@ -271,7 +271,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Clear() {
 			_outputView.Clear();
@@ -283,7 +283,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="message"></param>
 		public void Print( string message ) {
@@ -296,7 +296,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="text"></param>
 		public void ExecuteText( string text ) {
@@ -309,7 +309,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnToggleRequested( in ConsoleToggleRequestedEventArgs args ) {
@@ -322,7 +322,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnPageUp( in PageUpEventArgs args ) {
@@ -337,7 +337,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnPageDown( in PageDownEventArgs args ) {
@@ -352,7 +352,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnHistoryPrevious( in HistoryPrevEventArgs args ) {
@@ -367,7 +367,7 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnHistoryNext( in HistoryNextEventArgs args ) {

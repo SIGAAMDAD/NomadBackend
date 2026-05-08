@@ -1,14 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>NomadFramework.EngineUtils.Settings</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>Engine-facing settings integration module for NomadFramework.</Description>
-
-    <NomadValidateAsModule>true</NomadValidateAsModule>
-
-    <DebugType>embedded</DebugType>
-    <DebugSymbols>true</DebugSymbols>
+    <Version>0.0.1-alpha1</Version>
+    <UseEmbeddedDebugSymbols>true</UseEmbeddedDebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,5 +11,4 @@
     <ProjectReference Include="..\Nomad.Events\Nomad.Events.csproj" />
     <ProjectReference Include="..\Nomad.Audio\Nomad.Audio.csproj" />
   </ItemGroup>
-
 </Project>

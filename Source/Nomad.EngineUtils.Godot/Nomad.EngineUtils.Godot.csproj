@@ -1,17 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFrameworks>net10.0</TargetFrameworks>
-
-    <NomadEngineAdapter>true</NomadEngineAdapter>
-    <NomadEngine>Godot</NomadEngine>
-    <NomadUseDefaultGodotPackages>true</NomadUseDefaultGodotPackages>
-    <NomadUseSourceGenerators>true</NomadUseSourceGenerators>
-    <NomadValidateAsModule>true</NomadValidateAsModule>
-
     <PackageId>NomadFramework.EngineUtils.Godot</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>Godot engine adapter module for NomadFramework.</Description>
+    <UseNomadSourceGenerators>true</UseNomadSourceGenerators>
+    <LinkNomadEngineTemplates>true</LinkNomadEngineTemplates>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,11 +13,4 @@
     <ProjectReference Include="..\Nomad.Events\Nomad.Events.csproj" />
     <ProjectReference Include="..\Nomad.EngineTemplates\Nomad.EngineTemplates.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="..\Nomad.EngineTemplates\**\*.cs"
-             Exclude="..\Nomad.EngineTemplates\bin\**\*.cs;..\Nomad.EngineTemplates\obj\**\*.cs"
-             LinkBase="Nomad.EngineTemplates" />
-  </ItemGroup>
-
 </Project>

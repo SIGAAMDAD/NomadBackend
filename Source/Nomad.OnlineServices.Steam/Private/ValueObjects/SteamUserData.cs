@@ -15,11 +15,13 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
+namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+{
 	/// <summary>
-	/// 
+	///
 	/// </summary>
-	internal record SteamUserData {
+	internal sealed record SteamUserData
+	{
 		public CSteamID UserID { get; init; }
 		public string? UserName { get; init; }
 	};

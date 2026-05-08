@@ -24,7 +24,8 @@ using Nomad.Core.Util;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Repositories {
+namespace Nomad.OnlineServices.Steam.Private.Repositories
+{
 	/*
 	===================================================================================
 
@@ -36,7 +37,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 	///
 	/// </summary>
 
-	internal sealed class SteamStatsRepository : IDisposable {
+	internal sealed class SteamStatsRepository : IDisposable
+	{
 		public int NumAchievements => _achievements.Count;
 		public int NumStats => _stats.Count;
 
@@ -72,7 +74,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		/// <param name="userData"></param>
 		/// <param name="logger"></param>
 		/// <param name="engineService"></param>
-		public SteamStatsRepository( SteamUserData userData, ILoggerService logger, IEngineService engineService ) {
+		public SteamStatsRepository( SteamUserData userData, ILoggerService logger, IEngineService engineService )
+		{
 			_userStatsReceived = Callback<UserStatsReceived_t>.Create( OnUserStatsReceived );
 			_userStatsStored = Callback<UserStatsStored_t>.Create( OnUserStatsStored );
 			_userStatsUnloaded = Callback<UserStatsUnloaded_t>.Create( OnUserStatsUnloaded );
@@ -99,7 +102,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_userStatsReceived?.Dispose();
 				_userStatsStored?.Dispose();
@@ -123,7 +127,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		/// </summary>
 		/// <param name="achievementId"></param>
 		/// <returns></returns>
-		public IAchievementInfo? GetAchievementInfo( string achievementId ) {
+		public IAchievementInfo? GetAchievementInfo( string achievementId )
+		{
 			if ( !_achievements.TryGetValue( achievementId, out var achievementInfo ) ) {
 				return null;
 			}
@@ -140,7 +145,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		/// </summary>
 		/// <param name="achievementId"></param>
 		/// <param name="progress"></param>
-		public void SetAchievementProgress( string achievementId, float progress ) {
+		public void SetAchievementProgress( string achievementId, float progress )
+		{
 			if ( !_achievements.TryGetValue( achievementId, out var info ) ) {
 				return;
 			}
@@ -172,7 +178,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		///
 		/// </summary>
 		/// <param name="achievementId"></param>
-		public void UnlockAchievement( string achievementId ) {
+		public void UnlockAchievement( string achievementId )
+		{
 			if ( !_achievements.ContainsKey( achievementId ) ) {
 				_category.PrintError( $"Achievement '{achievementId}' does not exist!" );
 				return;
@@ -191,7 +198,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		///
 		/// </summary>
 		/// <param name="achievementId"></param>
-		public void LockAchievement( string achievementId ) {
+		public void LockAchievement( string achievementId )
+		{
 			if ( !_achievements.TryGetValue( achievementId, out var info ) ) {
 				_category.PrintError( $"Achievement '{achievementId}' does not exist!" );
 				return;
@@ -212,7 +220,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		/// </summary>
 		/// <param name="statId"></param>
 		/// <returns></returns>
-		public float GetStatFloat( string statId ) {
+		public float GetStatFloat( string statId )
+		{
 			if ( _stats.TryGetValue( statId, out var stat ) && stat.IsFloat ) {
 				return stat.Value.FloatValue;
 			}
@@ -236,7 +245,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		/// </summary>
 		/// <param name="statId"></param>
 		/// <returns></returns>
-		public int GetStatInt( string statId ) {
+		public int GetStatInt( string statId )
+		{
 			if ( _stats.TryGetValue( statId, out var stat ) && !stat.IsFloat ) {
 				return stat.Value.IntValue;
 			}
@@ -260,7 +270,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		/// </summary>
 		/// <param name="statId"></param>
 		/// <param name="value"></param>
-		public void SetStatFloat( string statId, float value ) {
+		public void SetStatFloat( string statId, float value )
+		{
 			_stats[statId] = new SteamStatData {
 				Name = new InternString( statId ),
 				Value = new SteamStatData.Data { FloatValue = value },
@@ -282,7 +293,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		/// </summary>
 		/// <param name="statId"></param>
 		/// <param name="value"></param>
-		public void SetStatInt( string statId, int value ) {
+		public void SetStatInt( string statId, int value )
+		{
 			_stats[statId] = new SteamStatData {
 				Name = new InternString( statId ),
 				Value = new SteamStatData.Data { IntValue = value },
@@ -303,7 +315,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		///
 		/// </summary>
 		/// <returns></returns>
-		public bool StoreStats() {
+		public bool StoreStats()
+		{
 			bool anyFailed = false;
 
 			// Write dirty stats
@@ -344,7 +357,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		///
 		/// </summary>
 		/// <param name="pCallback"></param>
-		private void OnUserStatsUnloaded( UserStatsUnloaded_t pCallback ) {
+		private void OnUserStatsUnloaded( UserStatsUnloaded_t pCallback )
+		{
 		}
 
 		/*
@@ -356,7 +370,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		///
 		/// </summary>
 		/// <param name="pCallback"></param>
-		private void OnUserStatsStored( UserStatsStored_t pCallback ) {
+		private void OnUserStatsStored( UserStatsStored_t pCallback )
+		{
 			if ( pCallback.m_eResult != EResult.k_EResultOK ) {
 				return;
 			}
@@ -371,7 +386,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		///
 		/// </summary>
 		/// <param name="pCallback"></param>
-		private void OnUserStatsReceived( UserStatsReceived_t pCallback ) {
+		private void OnUserStatsReceived( UserStatsReceived_t pCallback )
+		{
 			if ( pCallback.m_eResult != EResult.k_EResultOK ) {
 				return;
 			}
@@ -394,7 +410,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		///
 		/// </summary>
 		/// <param name="pCallback"></param>
-		private void OnUserAchievementStored( UserAchievementStored_t pCallback ) {
+		private void OnUserAchievementStored( UserAchievementStored_t pCallback )
+		{
 			if ( !_achievements.TryGetValue( pCallback.m_rgchAchievementName, out var info ) ) {
 				return;
 			}
@@ -420,7 +437,8 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories {
 		///
 		/// </summary>
 		/// <param name="pCallback"></param>
-		private void OnUserAchievementIconFetched( UserAchievementIconFetched_t pCallback ) {
+		private void OnUserAchievementIconFetched( UserAchievementIconFetched_t pCallback )
+		{
 			if ( !_achievements.TryGetValue( pCallback.m_rgchAchievementName, out var info ) ) {
 				return;
 			}

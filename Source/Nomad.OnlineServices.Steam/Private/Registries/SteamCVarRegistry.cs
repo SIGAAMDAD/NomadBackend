@@ -15,7 +15,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using Nomad.Core.CVars;
 
-namespace Nomad.OnlineServices.Steam.Private.Registries {
+namespace Nomad.OnlineServices.Steam.Private.Registries
+{
 	/*
 	===================================================================================
 
@@ -27,7 +28,8 @@ namespace Nomad.OnlineServices.Steam.Private.Registries {
 	///
 	/// </summary>
 
-	internal static class SteamCVarRegistry {
+	internal static class SteamCVarRegistry
+	{
 		/*
 		===============
 		RegisterCVars
@@ -37,7 +39,8 @@ namespace Nomad.OnlineServices.Steam.Private.Registries {
 		///
 		/// </summary>
 		/// <param name="cvarSystem"></param>
-		public static void RegisterCVars( ICVarSystemService cvarSystem ) {
+		public static void RegisterCVars( ICVarSystemService cvarSystem )
+		{
 			cvarSystem.Register(
 				new CVarCreateInfo<int> {
 					Name = Constants.CVars.LOBBY_MAX_CLIENTS,

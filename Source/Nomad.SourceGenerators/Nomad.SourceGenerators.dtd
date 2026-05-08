@@ -1,0 +1,20 @@
+<!ELEMENT Project (PropertyGroup+,ItemGroup)>
+<!ATTLIST Project Sdk NMTOKEN #REQUIRED>
+<!ELEMENT PropertyGroup (TargetFrameworks?,LangVersion?,IsTool?,IsPackable?,AssemblyName?,RootNamespace?,NoWarn,Nullable?,ImplicitUsings?,IsRoslynComponent?,EnforceExtendedAnalyzerRules?,GenerateDocumentationFile?)>
+<!ELEMENT TargetFrameworks (#PCDATA)>
+<!ELEMENT LangVersion (#PCDATA)>
+<!ELEMENT IsTool (#PCDATA)>
+<!ELEMENT IsPackable (#PCDATA)>
+<!ELEMENT AssemblyName (#PCDATA)>
+<!ELEMENT RootNamespace (#PCDATA)>
+<!ELEMENT NoWarn (#PCDATA)>
+<!ELEMENT Nullable (#PCDATA)>
+<!ELEMENT ImplicitUsings (#PCDATA)>
+<!ELEMENT IsRoslynComponent (#PCDATA)>
+<!ELEMENT EnforceExtendedAnalyzerRules (#PCDATA)>
+<!ELEMENT GenerateDocumentationFile (#PCDATA)>
+<!ELEMENT ItemGroup (PackageReference)>
+<!ELEMENT PackageReference EMPTY>
+<!ATTLIST PackageReference Include NMTOKEN #REQUIRED>
+<!ATTLIST PackageReference Version NMTOKEN #REQUIRED>
+<!ATTLIST PackageReference PrivateAssets NMTOKEN #REQUIRED>

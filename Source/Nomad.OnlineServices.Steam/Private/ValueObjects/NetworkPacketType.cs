@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-The Nomad MPLv2 Source Code
+The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
 
 This Source Code Form is subject to the terms of the Mozilla Public
@@ -13,11 +13,19 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-using Steamworks;
+namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+{
+	internal enum NetworkPacketType : ushort
+	{
+		Invalid = 0,
 
-namespace Nomad.OnlineServices.Steam.Services.NetworkServices {
-	internal sealed class SteamPacketHandler {
-		public SteamPacketHandler() {
-		}
+		Handshake = 1,
+		Ping = 2,
+		Pong = 3,
+
+		InputCommand = 100,
+		Snapshot = 101,
+		Rpc = 102,
+		Chat = 103
 	};
 };

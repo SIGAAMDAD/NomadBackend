@@ -1,11 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>NomadFramework.Save</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>Deterministic save serialization, versioning, metadata, and state restoration for NomadFramework.</Description>
-
-    <NomadUseSourceGenerators>true</NomadUseSourceGenerators>
+    <UseNomadSourceGenerators>true</UseNomadSourceGenerators>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,5 +9,4 @@
     <ProjectReference Include="..\Nomad.Events\Nomad.Events.csproj" />
     <ProjectReference Include="..\Nomad.CVars\Nomad.CVars.csproj" />
   </ItemGroup>
-
 </Project>

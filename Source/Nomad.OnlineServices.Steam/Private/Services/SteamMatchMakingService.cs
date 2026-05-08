@@ -28,7 +28,8 @@ using Nomad.OnlineServices.Steam.Private.Services;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private {
+namespace Nomad.OnlineServices.Steam.Private
+{
 	/*
 	===================================================================================
 
@@ -40,7 +41,8 @@ namespace Nomad.OnlineServices.Steam.Private {
 	///
 	/// </summary>
 
-	internal sealed class SteamMatchMakingService : IMatchMakingService {
+	internal sealed class SteamMatchMakingService : IMatchMakingService
+	{
 		private readonly List<LobbyInfo> _lobbies = new();
 
 		private readonly SteamAsyncCallbackDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>> _lobbyMatchList;
@@ -58,23 +60,14 @@ namespace Nomad.OnlineServices.Steam.Private {
 		public MatchMakingInfo? CurrentRequest => _activeRequest;
 		private MatchMakingInfo? _activeRequest = null;
 
-		public IGameEvent<SearchResultsUpdatedEventArgs> SearchResultsUpdated {
-			get {
-				throw new NotImplementedException();
-			}
-		}
+		public IGameEvent<SearchResultsUpdatedEventArgs> SearchResultsUpdated => _searchResultsUpdated;
+		private readonly IGameEvent<SearchResultsUpdatedEventArgs> _searchResultsUpdated = default;
 
-		public IGameEvent<MatchFoundEventArgs> MatchFound {
-			get {
-				throw new NotImplementedException();
-			}
-		}
+		public IGameEvent<MatchFoundEventArgs> MatchFound => _matchFound;
+		private readonly IGameEvent<MatchFoundEventArgs> _matchFound = default;
 
-		public IGameEvent<MatchMakingFailedEventArgs> MatchMakingFailed {
-			get {
-				throw new NotImplementedException();
-			}
-		}
+		public IGameEvent<MatchMakingFailedEventArgs> MatchMakingFailed => _matchMakingFailed;
+		private readonly IGameEvent<MatchMakingFailedEventArgs> _matchMakingFailed = default;
 
 		private bool _isDisposed = false;
 
@@ -89,7 +82,8 @@ namespace Nomad.OnlineServices.Steam.Private {
 		/// <param name="repository"></param>
 		/// <param name="cvarSystem"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public SteamMatchMakingService( SteamLobbyRepository repository, ICVarSystemService cvarSystem ) {
+		public SteamMatchMakingService( SteamLobbyRepository repository, ICVarSystemService cvarSystem )
+		{
 			ArgumentGuard.ThrowIfNull( cvarSystem );
 
 			_lobbyMatchList = new SteamAsyncCallbackDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>>();
@@ -109,7 +103,8 @@ namespace Nomad.OnlineServices.Steam.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_lobbyMatchList?.Dispose();
 			}
@@ -128,7 +123,8 @@ namespace Nomad.OnlineServices.Steam.Private {
 		/// <param name="info"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public async Task<IReadOnlyList<LobbyInfo>> SearchLobbies( MatchMakingInfo info, CancellationToken ct = default ) {
+		public async Task<IReadOnlyList<LobbyInfo>> SearchLobbies( MatchMakingInfo info, CancellationToken ct = default )
+		{
 			_cancellationToken = CancellationTokenSource.CreateLinkedTokenSource( ct );
 			ct.ThrowIfCancellationRequested();
 
@@ -142,7 +138,7 @@ namespace Nomad.OnlineServices.Steam.Private {
 				await RequestLobbyListAsync( info.Range, ct );
 			}
 
-			var steamLobbies = _repository.Lobbies;
+			ICollection<SteamLobbyData> steamLobbies = _repository.Lobbies;
 			List<LobbyInfo> lobbies = new List<LobbyInfo>( steamLobbies.Count );
 			foreach ( var lobby in steamLobbies ) {
 				lobbies.Add( lobby.Info );
@@ -163,10 +159,12 @@ namespace Nomad.OnlineServices.Steam.Private {
 		/// <param name="info"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public async Task<LobbyInfo?> FindBestLobby( MatchMakingInfo info, CancellationToken ct = default ) {
+		public async Task<LobbyInfo?> FindBestLobby( MatchMakingInfo info, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 
 			var lobbies = await SearchLobbies( info, ct );
+			ct.ThrowIfCancellationRequested();
 
 #if NET10_0_OR_GREATER
 			Span<int> scores = stackalloc int[lobbies.Count];
@@ -177,6 +175,8 @@ namespace Nomad.OnlineServices.Steam.Private {
 #endif
 
 			for ( int i = 0; i < lobbies.Count; i++ ) {
+				ct.ThrowIfCancellationRequested();
+
 				var lobby = lobbies[i];
 
 				foreach ( var gameMode in info.GameModes ) {
@@ -200,12 +200,18 @@ namespace Nomad.OnlineServices.Steam.Private {
 			return null;
 		}
 
-		public async Task<bool> StartQuickPlay( MatchMakingInfo info, CancellationToken ct = default ) {
-
-			return false;
+		public async Task<bool> StartQuickPlay( MatchMakingInfo info, CancellationToken ct = default )
+		{
+			LobbyInfo? lobby = await FindBestLobby( info, ct );
+			if ( lobby == null ) {
+				_matchMakingFailed.Publish( new MatchMakingFailedEventArgs() );
+				return false;
+			}
+			return true;
 		}
 
-		public async Task Cancel( CancellationToken ct = default ) {
+		public async Task Cancel( CancellationToken ct = default )
+		{
 			_cancellationToken.Cancel();
 			_activeRequest = null;
 		}
@@ -221,7 +227,8 @@ namespace Nomad.OnlineServices.Steam.Private {
 		/// <param name="range"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		private async Task<ICollection<SteamLobbyData>> RequestLobbyListAsync( ServerRange range, CancellationToken ct = default ) {
+		private async Task<ICollection<SteamLobbyData>> RequestLobbyListAsync( ServerRange range, CancellationToken ct = default )
+		{
 			return await _lobbyMatchList.Invoke(
 				callback: result => {
 					for ( int i = 0; i < result.m_nLobbiesMatching; i++ ) {

@@ -1,19 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>NomadFramework.Events</PackageId>
-    <Version>0.1.0-alpha1</Version>
-    <Description>High-performance synchronous and asynchronous event dispatching for NomadFramework.</Description>
-
-    <NomadValidateAsModule>true</NomadValidateAsModule>
+    <IsNomadTrimmable>true</IsNomadTrimmable>
+    <EnableEventDebug>true</EnableEventDebug>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <DefineConstants>$(DefineConstants);EVENT_DEBUG</DefineConstants>
-  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Nomad.Core\Nomad.Core.csproj" />
   </ItemGroup>
-
 </Project>

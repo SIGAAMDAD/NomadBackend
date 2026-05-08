@@ -18,13 +18,12 @@ using System.Collections.Generic;
 using System.Threading;
 using Nomad.Core.CVars;
 using Nomad.Core.Events;
-using Nomad.Core.OnlineServices;
 using Nomad.CVars;
-using Nomad.OnlineServices.Steam.Private.Services.LobbyServices;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Entities {
+namespace Nomad.OnlineServices.Steam.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -36,13 +35,14 @@ namespace Nomad.OnlineServices.Steam.Private.Entities {
 	///
 	/// </summary>
 
-	internal sealed class SteamLobbyInstance : IDisposable {
-		public HashSet<ulong> Members => _memberService.Members;
+	internal sealed class SteamLobbyInstance : IDisposable
+	{
+		public List<SteamUserData> Members => _members;
+		private readonly List<SteamUserData> _members = new();
 
-		public LobbyInfo Info => _info.Info;
+		public SteamLobbyData Info => _info;
 		private readonly SteamLobbyData _info;
 
-		private readonly SteamLobbyMemberService _memberService;
 		private readonly Timer _updateTimer;
 
 		private bool _isDisposed = false;
@@ -58,9 +58,9 @@ namespace Nomad.OnlineServices.Steam.Private.Entities {
 		/// <param name="info"></param>
 		/// <param name="cvarSystem"></param>
 		/// <param name="eventFactory"></param>
-		public SteamLobbyInstance( SteamLobbyData info, ICVarSystemService cvarSystem, IGameEventRegistryService eventFactory ) {
+		public SteamLobbyInstance( SteamLobbyData info, ICVarSystemService cvarSystem, IGameEventRegistryService eventFactory )
+		{
 			_info = info;
-			_memberService = new SteamLobbyMemberService( eventFactory );
 
 			var updateInterval = cvarSystem.GetCVarOrThrow<int>( Constants.CVars.LOBBY_METADATA_FETCH_INTERVAL );
 			_updateTimer = new Timer( OnUpdateTimerTimeout, null, TimeSpan.FromSeconds( updateInterval.Value ), TimeSpan.FromSeconds( updateInterval.Value ) );
@@ -74,25 +74,13 @@ namespace Nomad.OnlineServices.Steam.Private.Entities {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
-				_memberService?.Dispose();
 				_updateTimer?.Dispose();
 			}
 			GC.SuppressFinalize( this );
 			_isDisposed = true;
-		}
-
-		/*
-		===============
-		Leave
-		===============
-		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		public void Leave() {
-			SteamMatchmaking.LeaveLobby( _info.Id );
 		}
 
 		/*
@@ -104,7 +92,8 @@ namespace Nomad.OnlineServices.Steam.Private.Entities {
 		///
 		/// </summary>
 		/// <param name="state"></param>
-		private void OnUpdateTimerTimeout( object? state ) {
+		private void OnUpdateTimerTimeout( object? state )
+		{
 			lock ( _info ) {
 				_info.Update();
 			}

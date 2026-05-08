@@ -17,7 +17,8 @@ using System;
 using Nomad.Core.OnlineServices;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
+namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+{
 	/*
 	===================================================================================
 	
@@ -29,7 +30,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 	/// 
 	/// </summary>
 
-	internal sealed class SteamNetConnection {
+	internal sealed class SteamNetConnection
+	{
 		public NetworkConnectionState Status => _status;
 		private NetworkConnectionState _status;
 
@@ -53,7 +55,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 		/// </summary>
 		/// <param name="connection"></param>
 		/// <param name="remoteIdentity"></param>
-		public SteamNetConnection( HSteamNetConnection connection, SteamNetworkingIdentity remoteIdentity ) {
+		public SteamNetConnection( HSteamNetConnection connection, SteamNetworkingIdentity remoteIdentity )
+		{
 			_connection = connection;
 			_identity = remoteIdentity;
 
@@ -62,7 +65,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects {
 			}
 		}
 
-		public void SetStatus( NetworkConnectionState state ) {
+		public void SetStatus( NetworkConnectionState state )
+		{
 			_status = state;
 		}
 	};

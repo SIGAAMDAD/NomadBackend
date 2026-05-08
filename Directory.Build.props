@@ -1,5 +1,83 @@
 <Project>
-  <Import Project="Build/Targets/Nomad.Common.props" />
-  <Import Project="Build/Targets/Nomad.Analyzers.props"
-          Condition="'$(NomadDisableAnalyzers)' != 'true'" />
+  <!--
+    This file is imported early by SDK-style projects.
+    Avoid relying on properties set inside individual .csproj files here.
+    Project name/path based conditions are safe here.
+  -->
+
+  <PropertyGroup>
+    <IsNomadSourceGeneratorProject Condition="'$(MSBuildProjectName)' == 'Nomad.SourceGenerators'">true</IsNomadSourceGeneratorProject>
+    <IsNomadGodotProject Condition="'$(MSBuildProjectName)' == 'Nomad.EngineUtils.Godot'">true</IsNomadGodotProject>
+    <IsNomadUnityProject Condition="'$(MSBuildProjectName)' == 'Nomad.EngineUtils.Unity'">true</IsNomadUnityProject>
+
+    <IsNomadSpecialProject Condition="'$(IsNomadSourceGeneratorProject)' == 'true' or '$(IsNomadGodotProject)' == 'true' or '$(IsNomadUnityProject)' == 'true' or '$(IsTool)' == 'true' or '$(IsTestProject)' == 'true'">true</IsNomadSpecialProject>
+    <IsNomadStandardLibraryProject Condition="'$(IsNomadSpecialProject)' != 'true'">true</IsNomadStandardLibraryProject>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Nullable>annotations</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <BuildInParallel>true</BuildInParallel>
+
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <NoWarn>$(NoWarn);CA1501;CA2213</NoWarn>
+    <WarningsAsErrors>$(WarningsAsErrors);CA1816;CA2200;CA2215;CA2218;CA2219;CA2224;CA2227;CA2241;CA1506;CA1308;CA1310;CA2119;CA2013;CA2012;CA2011;CA1836;CA1834;CA1830;CA1835;CA1829;CA1827;CA1825;CA1822</WarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- Default target matrix for normal libraries. -->
+  <PropertyGroup Condition="'$(IsNomadStandardLibraryProject)' == 'true'">
+    <TargetFrameworks>net10.0;net8.0;netstandard2.1</TargetFrameworks>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <!-- Per-TFM language level and constants. -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <LangVersion>14.0</LangVersion>
+    <DefineConstants>$(DefineConstants);NET10_0;USE_LATEST_FEATURES</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <LangVersion>12.0</LangVersion>
+    <DefineConstants>$(DefineConstants);NET8_0</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <LangVersion>9.0</LangVersion>
+    <DefineConstants>$(DefineConstants);NETSTANDARD2_1;USE_COMPATIBILITY_EXTENSIONS;UNITY_COMPATIBLE</DefineConstants>
+    <NoWarn>$(NoWarn);CS8632;CS8600;CS8601;CS8602;CS8603;CS8604;CS8618;CS8625</NoWarn>
+  </PropertyGroup>
+
+  <!-- Host platform detection. -->
+  <PropertyGroup>
+    <IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
+    <IsLinux Condition="'$(OS)' != 'Windows_NT' and '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+    <IsMacOS Condition="'$(OS)' != 'Windows_NT' and '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsMacOS>
+
+    <NomadHostOS Condition="'$(IsWindows)' == 'true'">Windows</NomadHostOS>
+    <NomadHostOS Condition="'$(IsLinux)' == 'true'">Linux</NomadHostOS>
+    <NomadHostOS Condition="'$(IsMacOS)' == 'true'">MacOS</NomadHostOS>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsWindows)' == 'true'">
+    <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsLinux)' == 'true'">
+    <DefineConstants>$(DefineConstants);LINUX</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsMacOS)' == 'true'">
+    <DefineConstants>$(DefineConstants);MACOS</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Specialized project families. -->
+  <Import Project="build/Nomad.Engine.Godot.props" Condition="'$(IsNomadGodotProject)' == 'true'" />
+  <Import Project="build/Nomad.Engine.Unity.props" Condition="'$(IsNomadUnityProject)' == 'true'" />
 </Project>
