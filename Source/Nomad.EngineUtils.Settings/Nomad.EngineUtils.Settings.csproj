@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>NomadFramework.EngineUtils.Settings</PackageId>
-    <Version>0.0.1-alpha1</Version>
-    <UseEmbeddedDebugSymbols>true</UseEmbeddedDebugSymbols>
+    <Version>0.1.0-alpha1</Version>
   </PropertyGroup>
 
   <ItemGroup>

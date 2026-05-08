@@ -8,8 +8,7 @@
       <DefineConstants>$(DefineConstants);EVENT_DEBUG</DefineConstants>
    </PropertyGroup>
 
-   <PropertyGroup
-      Condition="'$(IsNomadTrimmable)' == 'true' and ('$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net8.0')">
+   <PropertyGroup Condition="('$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net8.0')">
       <IsTrimmable>true</IsTrimmable>
    </PropertyGroup>
 
@@ -18,8 +17,7 @@
       <DebugSymbols>true</DebugSymbols>
    </PropertyGroup>
 
-   <ItemGroup
-      Condition="'$(UseNomadSourceGenerators)' == 'true' and '$(MSBuildProjectName)' != 'Nomad.SourceGenerators'">
+   <ItemGroup Condition="'$(UseNomadSourceGenerators)' == 'true' and '$(MSBuildProjectName)' != 'Nomad.SourceGenerators'">
       <ProjectReference
          Include="$(MSBuildThisFileDirectory)Source/Nomad.SourceGenerators/Nomad.SourceGenerators.csproj"
          OutputItemType="Analyzer"
