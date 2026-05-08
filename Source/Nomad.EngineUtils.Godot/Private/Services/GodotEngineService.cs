@@ -35,15 +35,15 @@ using Nomad.Core.Engine.Windowing;
 namespace Nomad.EngineUtils.Godot.Private.Services {
     /*
     ===================================================================================
-    
+
     GodotEngineService
-    
+
     ===================================================================================
     */
     /// <summary>
-    /// 
+    ///
     /// </summary>
-    
+
     internal sealed class GodotEngineService : IEngineService {
         private readonly SceneTree _sceneTree;
         private readonly Node _root;
@@ -56,10 +56,6 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
         private readonly ISceneManager _sceneManager;
 
         private readonly GodotInputPump _inputPump;
-
-        private readonly ILoggerService _logger;
-        private readonly IGameEventRegistryService _eventFactory;
-        private readonly IFileSystem _fileSystem;
 
         private readonly IServiceLocator _locator;
 
@@ -84,19 +80,18 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
             _sceneTree = sceneTree ?? throw new ArgumentNullException( nameof( sceneTree ) );
             _root = sceneTree.Root;
 
-            _logger = locator.GetService<ILoggerService>();
-            _eventFactory = locator.GetService<IGameEventRegistryService>();
-            _fileSystem = locator.GetService<IFileSystem>();
+            var logger = locator.GetService<ILoggerService>();
+            var eventFactory = locator.GetService<IGameEventRegistryService>();
             var cvarSystem = locator.GetService<ICVarSystemService>();
 
             _loader = new GodotLoader();
 
-            _inputPump = new GodotInputPump( _eventFactory );
+            _inputPump = new GodotInputPump( eventFactory );
             _root.CallDeferred( Node.MethodName.AddChild, _inputPump );
 
             DisplayCVars.Register( cvarSystem );
 
-            _windowService = new GodotWindowService( _sceneTree, cvarSystem, _eventFactory );
+            _windowService = new GodotWindowService( _sceneTree, cvarSystem, eventFactory );
             serviceFactory.AddSingleton( _windowService );
             _windowService.CloseRequested.Subscribe( OnWindowCloseRequested );
 
@@ -106,16 +101,16 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
             _displayService = new GodotDisplayService( sceneTree, _windowService, cvarSystem );
             serviceFactory.AddSingleton( _displayService );
 
-            _sceneManager = new GodotSceneManager( _sceneTree, new BaseCache<PackedScene, string>( _logger, _eventFactory, _loader ) );
+            _sceneManager = new GodotSceneManager( _sceneTree, new BaseCache<PackedScene, string>( logger, eventFactory, _loader ) );
             serviceFactory.AddSingleton( _sceneManager );
             serviceFactory.AddSingleton<ISplitScreenService>( new GodotSplitScreenService() );
 
             serviceFactory.AddSingleton<IRaycastService>( new GodotRaycastService( _sceneTree.Root.World2D ) );
 
-            _logger.AddSink( new ConsoleSink() );
+            logger.AddSink( new ConsoleSink() );
 
             serviceFactory.AddSingleton<ITimeService>( new GodotTimeService() );
-            serviceFactory.AddSingleton<IGamePauseService>( new GodotPauseService( _sceneTree, _eventFactory ) );
+            serviceFactory.AddSingleton<IGamePauseService>( new GodotPauseService( _sceneTree, eventFactory ) );
 
             EngineService.Initialize( this );
         }
@@ -155,7 +150,12 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
         /// </summary>
         /// <returns></returns>
         public IConsoleObject CreateConsoleObject() {
-            var console = new GodotConsole( _root, _logger, _eventFactory, _fileSystem );
+            var console = new GodotConsole(
+				_root,
+				_locator.GetService<ILoggerService>(),
+				_locator.GetService<IGameEventRegistryService>(),
+				_locator.GetService<IFileSystem>()
+			);
             return console;
         }
 
