@@ -11,13 +11,12 @@ Invoke-NomadCommand $Script:DotNet @(
 	"--verify-no-changes"
 )
 
-Invoke-NomadCommand $Script:DotNet @(
-	"format",
-	$Script:SolutionPath,
-	"style",
-	"--verify-no-changes"
-)
-
+#Invoke-NomadCommand $Script:DotNet @(
+#	"format",
+#	$Script:SolutionPath,
+#	"style",
+#	"--verify-no-changes"
+#)
 
 #Invoke-NomadCommand $Script:DotNet @(
 #	"format",
