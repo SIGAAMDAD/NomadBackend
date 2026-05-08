@@ -3,6 +3,7 @@
     <PackageId>NomadFramework.Core</PackageId>
     <UseNomadSourceGenerators>true</UseNomadSourceGenerators>
     <EnableEventDebug>true</EnableEventDebug>
+    <IsNomadStandardLibraryProject>true</IsNomadStandardLibraryProject>
   </PropertyGroup>
 
   <ItemGroup>

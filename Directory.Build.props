@@ -78,6 +78,6 @@
   </PropertyGroup>
 
   <!-- Specialized project families. -->
-  <Import Project="build/Nomad.Engine.Godot.props" Condition="'$(IsNomadGodotProject)' == 'true'" />
-  <Import Project="build/Nomad.Engine.Unity.props" Condition="'$(IsNomadUnityProject)' == 'true'" />
+  <Import Project="Build/Nomad.Engine.Godot.props" Condition="'$(IsNomadGodotProject)' == 'true'" />
+  <Import Project="Build/Nomad.Engine.Unity.props" Condition="'$(IsNomadUnityProject)' == 'true'" />
 </Project>
