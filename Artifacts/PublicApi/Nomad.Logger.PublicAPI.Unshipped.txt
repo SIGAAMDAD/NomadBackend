@@ -1,0 +1,12 @@
+Globals/Logging.cs: public static ILoggerCategory CreateCategory(string name, LogLevel level, bool enabled)
+Globals/Logging.cs: public static ILoggerService Instance => _instance ?? throw new SubsystemNotInitializedException()
+Globals/Logging.cs: public static class Logging
+Globals/Logging.cs: public static void AddSink(ILoggerSink sink)
+Globals/Logging.cs: public static void Clear()
+Globals/Logging.cs: public static void PrintDebug(string message)
+Globals/Logging.cs: public static void PrintError(string message)
+Globals/Logging.cs: public static void PrintLine(string message)
+Globals/Logging.cs: public static void PrintWarning(string message)
+LoggerBootstrapper.cs: public sealed class LoggerBootstrapper : IBootstrapper
+LoggerBootstrapper.cs: public void Initialize(IServiceRegistry serviceRegistry, IServiceLocator locator)
+LoggerBootstrapper.cs: public void Shutdown()

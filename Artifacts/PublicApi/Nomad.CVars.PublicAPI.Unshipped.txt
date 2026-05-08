@@ -1,0 +1,26 @@
+CVarBootstrapper.cs: public sealed class CVarBootstrapper : IBootstrapper
+CVarBootstrapper.cs: public void Initialize(IServiceRegistry registry, IServiceLocator locator)
+CVarBootstrapper.cs: public void Shutdown()
+CVarSystemExtensions.cs: public static ICVar<T> GetCVarOrThrow<T>(this ICVarSystemService cvarSystem, string name)
+CVarSystemExtensions.cs: public static class CVarSystemExtensions
+Exceptions/CVarTypeMismatchException.cs: public CVarTypeMismatchException(Type expectedType, Type castType)
+Exceptions/CVarTypeMismatchException.cs: public sealed class CVarTypeMismatchException : NomadException
+Global/CVarSystem.cs: public static ICVar<T> Register<T>(CVarCreateInfo<T> createInfo)
+Global/CVarSystem.cs: public static ICVar<T>? GetCVar<T>(string name)
+Global/CVarSystem.cs: public static ICVar<T>[]? GetCVarsWithValueType<T>()
+Global/CVarSystem.cs: public static ICVar? GetCVar(string name)
+Global/CVarSystem.cs: public static ICVarSystemService Instance => _instance ?? throw new SubsystemNotInitializedException()
+Global/CVarSystem.cs: public static ICVar[]? GetCVars()
+Global/CVarSystem.cs: public static ICVar[]? GetCVarsInGroup(string groupName)
+Global/CVarSystem.cs: public static bool CVarExists(string name)
+Global/CVarSystem.cs: public static bool CVarExists<T>(string name)
+Global/CVarSystem.cs: public static bool GroupExists(string groupName)
+Global/CVarSystem.cs: public static bool TryFind(string name, out ICVar? cvar)
+Global/CVarSystem.cs: public static bool TryFind<T>(string name, out ICVar<T>? cvar)
+Global/CVarSystem.cs: public static class CVarSystem
+Global/CVarSystem.cs: public static void Load(IFileSystem fileSystem, string configFile)
+Global/CVarSystem.cs: public static void Restart()
+Global/CVarSystem.cs: public static void Save(IFileSystem fileSystem, string configFile)
+Global/CVarSystem.cs: public static void Unregister(ICVar cvar)
+Interfaces/ICVarFactory.cs: public interface ICVarFactory
+Interfaces/ICVarLocator.cs: public interface ICVarLocator : IDisposable

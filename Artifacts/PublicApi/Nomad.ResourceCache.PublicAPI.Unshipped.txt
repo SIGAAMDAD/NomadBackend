@@ -1,0 +1,56 @@
+Entities/CachePolicy.cs: public EvictionPolicy EvictionPolicy
+Entities/CachePolicy.cs: public TimeSpan UnloadUnusedAfter
+Entities/CachePolicy.cs: public bool PreloadDependencies
+Entities/CachePolicy.cs: public int MaxResourceCount
+Entities/CachePolicy.cs: public long MaxMemorySize
+Entities/CachePolicy.cs: public sealed class CachePolicy
+Entities/CachePolicy.cs: public static readonly CachePolicy Default = new CachePolicy()
+Events/ResourceLoadProgressEventArgs.cs: public ResourceLoadProgressEventArgs(TId id, float progress, ResourceLoadState state)
+Events/ResourceLoadProgressEventArgs.cs: public readonly ResourceLoadState State
+Events/ResourceLoadProgressEventArgs.cs: public readonly TId Id
+Events/ResourceLoadProgressEventArgs.cs: public readonly float Progress
+Events/ResourceLoadProgressEventArgs.cs: public readonly partial struct ResourceLoadProgressEventArgs<TId>
+Services/BaseCache.cs: public BaseCache(ILoggerService logger, IGameEventRegistryService eventFactory, IResourceLoader loader)
+Services/BaseCache.cs: public CachePolicy Policy
+Services/BaseCache.cs: public CacheStatistics Statistics => new CacheStatistics(
+Services/BaseCache.cs: public IGameEvent<ResourceLoadFailedEventArgs<TId>> ResourceLoadFailed => _resourceLoadFailed
+Services/BaseCache.cs: public IGameEvent<ResourceLoadedEventArgs<TId>> ResourceLoaded => _resourceLoaded
+Services/BaseCache.cs: public IGameEvent<ResourceUnloadedEventArgs<TId>> ResourceUnloaded => _resourceUnloaded
+Services/BaseCache.cs: public class BaseCache<TResource, TId> : IResourceCacheService<TResource, TId>
+Services/BaseCache.cs: public int Count => _cache.Count
+Services/BaseCache.cs: public int GetReferenceCount(TId id)
+Services/BaseCache.cs: public long CurrentCacheSize => _currentMemorySize
+Services/BaseCache.cs: public long MaxCacheSize
+Services/BaseCache.cs: public virtual ICacheEntry<TResource, TId> GetCached(TId id)
+Services/BaseCache.cs: public virtual ICacheEntry<TResource, TId>? GetById(TId id)
+Services/BaseCache.cs: public virtual IEnumerable<ICacheEntry<TResource, TId>> GetByIds(ReadOnlySpan<TId> ids)
+Services/BaseCache.cs: public virtual async Task PreloadAsync(IEnumerable<TId> ids, CancellationToken ct = default)
+Services/BaseCache.cs: public virtual async ValueTask PreloadAsync(TId id, CancellationToken ct = default)
+Services/BaseCache.cs: public virtual async ValueTask<ICacheEntry<TResource, TId>> GetCachedAsync(TId id, IProgress<ResourceLoadProgressEventArgs<TId>>? progress = null, CancellationToken ct = default)
+Services/BaseCache.cs: public virtual async ValueTask<ICacheEntry<TResource, TId>?> GetByIdAsync(TId id, CancellationToken ct = default)
+Services/BaseCache.cs: public virtual bool TryGetById(TId id, out ICacheEntry<TResource, TId>? entity)
+Services/BaseCache.cs: public virtual bool TryGetCached(TId id, out ICacheEntry<TResource, TId>? resource)
+Services/BaseCache.cs: public virtual void ClearUnused()
+Services/BaseCache.cs: public virtual void Dispose()
+Services/BaseCache.cs: public virtual void EvictIfNeeded()
+Services/BaseCache.cs: public virtual void Preload(IEnumerable<TId> ids)
+Services/BaseCache.cs: public virtual void Preload(TId id)
+Services/BaseCache.cs: public virtual void ReleaseReference(TId id)
+Services/BaseCache.cs: public virtual void Unload(TId id)
+Services/BaseCache.cs: public virtual void UnloadAll()
+Services/BaseCache.cs: public void AddReference(TId id)
+Services/ICacheEntry.cs: public interface ICacheEntry<TResource, TId> : IEntity<TId>, IDisposable
+Services/IResourceCacheService.cs: public interface IResourceCacheService<TResource, TId> :
+ValueObjects/CacheStatistics.cs: public CacheStatistics(int cacheHits, int cacheMisses, int totalLoaded, int totalEvictions, int memoryUsage, int activeReferences, TimeSpan averageLoadTime)
+ValueObjects/CacheStatistics.cs: public readonly TimeSpan AverageLoadTime
+ValueObjects/CacheStatistics.cs: public readonly int ActiveReferences
+ValueObjects/CacheStatistics.cs: public readonly int CacheHits
+ValueObjects/CacheStatistics.cs: public readonly int CacheMisses
+ValueObjects/CacheStatistics.cs: public readonly int MemoryUsage
+ValueObjects/CacheStatistics.cs: public readonly int TotalEvictions
+ValueObjects/CacheStatistics.cs: public readonly int TotalLoaded
+ValueObjects/CacheStatistics.cs: public readonly struct CacheStatistics
+ValueObjects/EntryAccessStatistics.cs: public record EntryAccessStatistics(
+ValueObjects/EvictionPolicy.cs: public enum EvictionPolicy : sbyte
+ValueObjects/ResourceLoadState.cs: public enum ResourceLoadState : byte
+ValueObjects/UnloadReason.cs: public enum UnloadReason : byte

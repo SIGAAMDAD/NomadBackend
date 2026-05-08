@@ -1,0 +1,46 @@
+AsyncSubscriptionHandle.cs: public bool IsDisposed => _isDisposed
+AsyncSubscriptionHandle.cs: public sealed class AsyncSubscriptionHandle<TArgs> : ISubscriptionHandle
+AsyncSubscriptionHandle.cs: public void Dispose()
+EventHandlerException.cs: public EventHandlerException(
+EventHandlerException.cs: public Type ArgsType
+EventHandlerException.cs: public int HandlerIndex
+EventHandlerException.cs: public sealed class EventHandlerException : NomadException
+EventHandlerException.cs: public string EventName
+EventHandlerException.cs: public string HandlerName
+EventPriority.cs: public enum EventPriority : sbyte
+EventPublicException.cs: public EventPublishException(string eventName, Type argsType, IReadOnlyList<EventHandlerException> handlerExceptions)
+EventPublicException.cs: public IReadOnlyList<EventHandlerException> HandlerExceptions
+EventPublicException.cs: public Type ArgsType
+EventPublicException.cs: public sealed class EventPublishException : NomadException
+EventPublicException.cs: public string EventName
+EventQueue.cs: public EventQueue()
+EventQueue.cs: public bool ProcessNext()
+EventQueue.cs: public int Count
+EventQueue.cs: public sealed class EventQueue
+EventQueue.cs: public void Clear()
+EventQueue.cs: public void Enqueue<TArgs>(IGameEvent<TArgs> gameEvent, TArgs args, EventPriority priority = EventPriority.Normal)
+EventQueue.cs: public void ProcessAll()
+EventSystemBootstrapper.cs: public sealed class EventBootstrapper : IBootstrapper
+EventSystemBootstrapper.cs: public void Initialize(IServiceRegistry registry, IServiceLocator locator)
+EventSystemBootstrapper.cs: public void Shutdown()
+Extensions/GameEventExtensions.cs: public static IGameEvent<TArgs> PublishAfter<TArgs>(this IGameEvent<TArgs> source, int waitMS)
+Extensions/GameEventExtensions.cs: public static IGameEvent<TArgs> PublishEvery<TArgs>(this IGameEvent<TArgs> source, Func<TArgs> payloadCallback, int publishIntervalMS)
+Extensions/GameEventExtensions.cs: public static IGameEvent<TArgs> PublishEvery<TArgs>(this IGameEvent<TArgs> source, TArgs payload, int publishIntervalMS)
+Extensions/GameEventExtensions.cs: public static IGameEvent<TArgs> Where<TArgs>(this IGameEvent<TArgs> source, Func<TArgs, bool> predicate)
+Extensions/GameEventExtensions.cs: public static ISubscriptionHandle SubscribeOnce<TArgs>(this IGameEvent<TArgs> gameEvent, EventCallback<TArgs> callback)
+Extensions/GameEventExtensions.cs: public static ISubscriptionHandle SubscribeUntil<TArgs>(this IGameEvent<TArgs> gameEvent, Func<TArgs, bool> predicate, EventCallback<TArgs> callback)
+Extensions/GameEventExtensions.cs: public static ISubscriptionHandle SubscribeWhere<TArgs>(this IGameEvent<TArgs> gameEvent, Func<TArgs, bool> predicate, EventCallback<TArgs> callback)
+Extensions/GameEventExtensions.cs: public static class GameEventExtensions
+Globals/GameEventRegistry.cs: public static IGameEvent<TArgs> GetEvent<TArgs>(string name, string nameSpace, EventFlags flags = EventFlags.Default)
+Globals/GameEventRegistry.cs: public static IGameEventRegistryService Instance => _instance ?? throw new SubsystemNotInitializedException()
+Globals/GameEventRegistry.cs: public static IReadOnlyCollection<IGameEvent> GetAllEvents()
+Globals/GameEventRegistry.cs: public static ISubscriptionGroup GetGroup(string name)
+Globals/GameEventRegistry.cs: public static bool TryGetEvent<TArgs>(string name, string nameSpace, out IGameEvent<TArgs>? gameEvent)
+Globals/GameEventRegistry.cs: public static bool TryRemoveEvent<TArgs>(string nameSpace, string name)
+Globals/GameEventRegistry.cs: public static class GameEventRegistry
+Globals/GameEventRegistry.cs: public static void ClearAllEvents()
+Globals/GameEventRegistry.cs: public static void ClearAllGroups()
+Globals/GameEventRegistry.cs: public static void ClearEventsInNamespace(string nameSpace)
+SubscriptionHandle.cs: public bool IsDisposed => _isDisposed
+SubscriptionHandle.cs: public sealed class SubscriptionHandle<TArgs> : ISubscriptionHandle
+SubscriptionHandle.cs: public void Dispose()

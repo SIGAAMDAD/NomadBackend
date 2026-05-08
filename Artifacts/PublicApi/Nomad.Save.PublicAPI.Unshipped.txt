@@ -1,0 +1,40 @@
+Exceptions/CreateSaveFileFailedException.cs: public CreateSaveFileFailed(string filePath)
+Exceptions/CreateSaveFileFailedException.cs: public sealed class CreateSaveFileFailed : NomadException
+Exceptions/DuplicateFieldException.cs: public sealed class DuplicateFieldException : NomadException
+Exceptions/DuplicateFieldException.cs: public string FieldName => _fieldName
+Exceptions/DuplicateSectionException.cs: public DuplicateSectionException(string sectionName)
+Exceptions/DuplicateSectionException.cs: public sealed class DuplicateSectionException : NomadException
+Exceptions/DuplicateSectionException.cs: public string SectionName => _sectionName
+Exceptions/FieldCorruptException.cs: public FieldCorruptException(string sectionName, long fieldIndex, long fileOffset, string message = "")
+Exceptions/FieldCorruptException.cs: public long FieldIndex
+Exceptions/FieldCorruptException.cs: public sealed class FieldCorruptException : SaveFileCorruptException
+Exceptions/FieldCorruptException.cs: public string SectionName
+Exceptions/InvalidFieldTypeException.cs: public InvalidFieldTypeException(Type attemptedType)
+Exceptions/InvalidFieldTypeException.cs: public sealed class InvalidFieldTypeException : NomadException
+Exceptions/SaveFileCorruptException.cs: public SaveFileCorruptException(long fileOffset, string message)
+Exceptions/SaveFileCorruptException.cs: public class SaveFileCorruptException : NomadException
+Exceptions/SaveFileCorruptException.cs: public long FileOffset
+Exceptions/SectionCorruptException.cs: public SectionCorruptException(string? sectionName, long sectionIndex, long fileOffset, string message = "")
+Exceptions/SectionCorruptException.cs: public long SectionIndex => _sectionIndex
+Exceptions/SectionCorruptException.cs: public sealed class SectionCorruptException : SaveFileCorruptException
+Exceptions/SectionCorruptException.cs: public string SectionName => _sectionName
+Interfaces/ISaveReaderService.cs: public interface ISaveReaderService : IDisposable
+Interfaces/ISaveSectionReader.cs: public interface ISaveSectionReader : IDisposable
+Interfaces/ISaveSectionWriter.cs: public interface ISaveSectionWriter : IDisposable
+Interfaces/ISaveWriterService.cs: public interface ISaveWriterService : IDisposable
+SaveBootstrapper.cs: public sealed class SaveBootstrapper : IBootstrapper
+SaveBootstrapper.cs: public void Initialize(IServiceRegistry registry, IServiceLocator locator)
+SaveBootstrapper.cs: public void Shutdown()
+Services/ISaveDataProvider.cs: public interface ISaveDataProvider : IDisposable
+ValueObjects/GameVersion.cs: public GameVersion(uint major, uint minor, uint patch)
+ValueObjects/GameVersion.cs: public readonly struct GameVersion
+ValueObjects/GameVersion.cs: public readonly uint Major
+ValueObjects/GameVersion.cs: public readonly uint Minor
+ValueObjects/GameVersion.cs: public readonly uint Patch
+ValueObjects/GameVersion.cs: public ulong ToInt()
+ValueObjects/SaveFileMetadata.cs: public record SaveFileMetadata(
+ValueObjects/SaveFileVersion.cs: public SaveFileVersion(uint major, uint minor, ulong patch)
+ValueObjects/SaveFileVersion.cs: public readonly struct SaveFileVersion
+ValueObjects/SaveFileVersion.cs: public readonly uint Major
+ValueObjects/SaveFileVersion.cs: public readonly uint Minor
+ValueObjects/SaveFileVersion.cs: public readonly ulong Patch

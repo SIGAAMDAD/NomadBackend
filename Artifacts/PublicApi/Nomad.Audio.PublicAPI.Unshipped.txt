@@ -1,0 +1,38 @@
+Interfaces/IAudioDevice.cs: public interface IAudioDevice : IDisposable
+Interfaces/IAudioEmitter.cs: public interface IAudioEmitter
+Interfaces/IAudioGroup.cs: public interface IAudioGroup
+Interfaces/IAudioResource.cs: public interface IAudioResource : IDisposable
+Interfaces/IChannelRepository.cs: public interface IChannelRepository : IDisposable
+Interfaces/IEmitterFactory.cs: public interface IEmitterFactory
+Interfaces/IEventCollection.cs: public interface IEventCollection
+Interfaces/IGuidRepository.cs: public interface IGuidRepository<TEventId, TBankId> : IDisposable
+Interfaces/IListener.cs: public interface IListener
+Interfaces/IListenerService.cs: public interface IListenerService : IDisposable
+Interfaces/IMusicService.cs: public interface IMusicService
+Interfaces/IParameterCollection.cs: public interface IParameterCollection
+ValueObjects/AudioResult.cs: public enum AudioResult : byte
+ValueObjects/AudioType.cs: public enum AudioType : byte
+ValueObjects/BankHandle.cs: public BankHandle(uint value)
+ValueObjects/BankHandle.cs: public bool Equals(BankHandle other) => other._value == _value
+ValueObjects/BankHandle.cs: public bool IsValid => (_value & 0x00FFFFFF) != 0
+ValueObjects/BankHandle.cs: public readonly struct BankHandle
+ValueObjects/BankHandle.cs: public static implicit operator uint(BankHandle handle) => handle._value
+ValueObjects/BankHandle.cs: public static readonly BankHandle Invalid = default
+ValueObjects/ChannelGroupHandle.cs: public ChannelGroupHandle(uint value)
+ValueObjects/ChannelGroupHandle.cs: public bool IsValid => (_value & 0x00FFFFFF) != 0
+ValueObjects/ChannelGroupHandle.cs: public readonly struct ChannelGroupHandle
+ValueObjects/ChannelGroupHandle.cs: public static implicit operator uint(ChannelGroupHandle handle) => handle._value
+ValueObjects/ChannelGroupHandle.cs: public static readonly ChannelGroupHandle Invalid = default
+ValueObjects/ChannelHandle.cs: public ChannelHandle(int value)
+ValueObjects/ChannelHandle.cs: public bool Equals(ChannelHandle other)
+ValueObjects/ChannelHandle.cs: public bool IsValid => _value != 0
+ValueObjects/ChannelHandle.cs: public readonly struct ChannelHandle
+ValueObjects/ChannelStatus.cs: public enum ChannelStatus : byte
+ValueObjects/EventHandle.cs: public EventHandle(uint value)
+ValueObjects/EventHandle.cs: public bool Equals(EventHandle other) => other._value == _value
+ValueObjects/EventHandle.cs: public bool IsValid => (_value & 0x00FFFFFF) != 0
+ValueObjects/EventHandle.cs: public readonly struct EventHandle
+ValueObjects/EventHandle.cs: public static implicit operator uint(EventHandle handle) => handle._value
+ValueObjects/EventHandle.cs: public static readonly EventHandle Invalid = default
+ValueObjects/SoundCategoryCreateInfo.cs: public record SoundCategoryCreateInfo(
+ValueObjects/SpeakerMode.cs: public enum SpeakerMode : byte

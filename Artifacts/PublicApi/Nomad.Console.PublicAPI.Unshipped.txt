@@ -1,0 +1,41 @@
+ConsoleBootstrapper.cs: public class ConsoleBootstrapper : IBootstrapper
+ConsoleBootstrapper.cs: public void Initialize(IServiceRegistry registry, IServiceLocator locator)
+ConsoleBootstrapper.cs: public void Shutdown()
+ConsoleCommandHandler.cs: public ConsoleCommandHandler(
+ConsoleCommandHandler.cs: public IGameEvent<ConsoleCommandEventArgs> CommandDispatched => _commandDispatchedEvent
+ConsoleCommandHandler.cs: public IGameEvent<ConsoleCommandParseErrorEventArgs> CommandParseError => _commandParseErrorEvent
+ConsoleCommandHandler.cs: public sealed class ConsoleCommandHandler : IDisposable
+ConsoleCommandHandler.cs: public void Dispose()
+ConsoleCommandHandler.cs: public void ExecuteText(string text)
+ConsoleCommandInvocation.cs: public ConsoleCommandInvocation(string name, string rawText, string[] arguments, int commandIndex)
+ConsoleCommandInvocation.cs: public int ArgumentCount => Arguments.Length
+ConsoleCommandInvocation.cs: public int CommandIndex
+ConsoleCommandInvocation.cs: public readonly struct ConsoleCommandInvocation
+ConsoleCommandInvocation.cs: public string GetArgumentAt(int index)
+ConsoleCommandInvocation.cs: public string Name
+ConsoleCommandInvocation.cs: public string RawText
+ConsoleCommandInvocation.cs: public string[] Arguments
+ConsoleCommandParser.cs: public ConsoleCommandParser(int maxCommandsPerLine = DEFAULT_MAX_COMMANDS_PER_LINE)
+ConsoleCommandParser.cs: public bool TryParse(string text, List<ConsoleCommandInvocation> commands, out string error)
+ConsoleCommandParser.cs: public sealed class ConsoleCommandParser : IConsoleCommandParser
+ConsoleHistoryBuffer.cs: public ConsoleHistoryBuffer(
+ConsoleHistoryBuffer.cs: public IGameEvent<HistoryNextEventArgs> HistoryNext => _historyNextEvent
+ConsoleHistoryBuffer.cs: public IGameEvent<HistoryPrevEventArgs> HistoryPrev => _historyPreviousEvent
+ConsoleHistoryBuffer.cs: public int Capacity
+ConsoleHistoryBuffer.cs: public int Count => _history.Count
+ConsoleHistoryBuffer.cs: public sealed class ConsoleHistoryBuffer : IDisposable
+ConsoleHistoryBuffer.cs: public void Add(string text)
+ConsoleHistoryBuffer.cs: public void Clear()
+ConsoleHistoryBuffer.cs: public void Dispose()
+ConsoleHistoryBuffer.cs: public void Save()
+Events/ConsoleCommandEventArgs.cs: public int ArgumentCount => Arguments.Length
+Events/ConsoleCommandEventArgs.cs: public readonly partial struct ConsoleCommandEventArgs
+Events/ConsoleCommandEventArgs.cs: public string GetArgumentAt(int index)
+HistoryStore.cs: public ConsoleHistoryStore(IFileSystem fileSystem)
+HistoryStore.cs: public IReadOnlyList<string> Load()
+HistoryStore.cs: public sealed class ConsoleHistoryStore : IConsoleHistoryStore
+HistoryStore.cs: public void Save(IReadOnlyList<string> history)
+IConsoleCommandParser.cs: public interface IConsoleCommandParser
+IConsoleHistoryStore.cs: public interface IConsoleHistoryStore
+IConsoleInput.cs: public interface IConsoleInput
+IConsoleInputRouter.cs: public interface IConsoleInputRouter
