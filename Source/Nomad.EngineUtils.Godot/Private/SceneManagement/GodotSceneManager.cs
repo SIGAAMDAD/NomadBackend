@@ -21,7 +21,8 @@ using Nomad.Core.Engine.Globals;
 using Nomad.Core.Engine.SceneManagement;
 using Nomad.ResourceCache;
 
-namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
+namespace Nomad.EngineUtils.Godot.Private.SceneManagement
+{
 	/*
 	===================================================================================
 
@@ -33,7 +34,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 	/// 
 	/// </summary>
 
-	internal sealed class GodotSceneManager : ISceneManager {
+	internal sealed class GodotSceneManager : ISceneManager
+	{
 		private const string MANAGED_SCENE_HOST_NAME = "PostProcessingContainer/PostProcessing/__NomadManagedSceneHost";
 
 		/// <summary>
@@ -77,7 +79,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// <param name="sceneCache"></param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="InvalidOperationException"></exception>
-		public GodotSceneManager( SceneTree sceneTree, IResourceCacheService<PackedScene, string> sceneCache ) {
+		public GodotSceneManager( SceneTree sceneTree, IResourceCacheService<PackedScene, string> sceneCache )
+		{
 			_sceneTree = sceneTree ?? throw new ArgumentNullException( nameof( sceneTree ) );
 			_sceneCache = sceneCache ?? throw new ArgumentNullException( nameof( sceneCache ) );
 
@@ -111,7 +114,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _isDisposed ) {
 				return;
 			}
@@ -133,7 +137,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns></returns>
-		public IScene LoadPrefab( string path ) {
+		public IScene LoadPrefab( string path )
+		{
 			_sceneCache.GetCached( path ).Get( out var resource );
 			return WalkSceneTree( resource );
 		}
@@ -151,7 +156,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// <param name="baseScene"></param>
 		/// <exception cref="InvalidOperationException"></exception>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		public void SetScene( IScene scene, LoadSceneMode mode = LoadSceneMode.Single, IScene? baseScene = null ) {
+		public void SetScene( IScene scene, LoadSceneMode mode = LoadSceneMode.Single, IScene? baseScene = null )
+		{
 			ArgumentGuard.ThrowIfNull( scene );
 
 			switch ( mode ) {
@@ -182,7 +188,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// <param name="baseScene"></param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		public IScene LoadScene( string path, LoadSceneMode mode = LoadSceneMode.Single, IScene? baseScene = null ) {
+		public IScene LoadScene( string path, LoadSceneMode mode = LoadSceneMode.Single, IScene? baseScene = null )
+		{
 			_sceneCache.GetCached( path ).Get( out var resource );
 			var scene = WalkSceneTree( resource );
 
@@ -212,7 +219,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// </summary>
 		/// <param name="scene"></param>
 		/// <exception cref="InvalidCastException"></exception>
-		public void SetActiveScene( IScene scene ) {
+		public void SetActiveScene( IScene scene )
+		{
 			ArgumentGuard.ThrowIfNull( scene );
 
 			if ( scene is not GodotScene godotScene ) {
@@ -240,7 +248,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// </summary>
 		/// <param name="scene"></param>
 		/// <exception cref="InvalidCastException"></exception>
-		public void UnloadScene( IScene scene ) {
+		public void UnloadScene( IScene scene )
+		{
 			if ( scene is not GodotScene godotScene ) {
 				throw new InvalidCastException();
 			}
@@ -266,7 +275,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void UnloadAllScenes() {
+		public void UnloadAllScenes()
+		{
 			UnloadCurrentScene();
 
 			for ( int i = _additiveScenes.Count - 1; i >= 0; i-- ) {
@@ -283,7 +293,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void UnloadCurrentScene() {
+		public void UnloadCurrentScene()
+		{
 			if ( _activeScene == null || ReferenceEquals( _activeScene, _baseScene ) ) {
 				return;
 			}
@@ -301,7 +312,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// </summary>
 		/// <param name="resource"></param>
 		/// <returns></returns>
-		private GodotScene WalkSceneTree( PackedScene resource ) {
+		private GodotScene WalkSceneTree( PackedScene resource )
+		{
 			var root = new GodotGameObject( resource.Instantiate() );
 			_gameObjects[root.Node] = root;
 			WalkNode( root.Node );
@@ -318,7 +330,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// 
 		/// </summary>
 		/// <param name="parentObject"></param>
-		private void WalkNode( Node parentObject ) {
+		private void WalkNode( Node parentObject )
+		{
 			var children = parentObject.GetChildren();
 			for ( int i = 0; i < children.Count; i++ ) {
 				if ( children[i] is not Node childNode ) {
@@ -343,7 +356,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// </summary>
 		/// <param name="baseRoot"></param>
 		/// <returns></returns>
-		private static Node EnsureManagedSceneHost( Node baseRoot ) {
+		private static Node EnsureManagedSceneHost( Node baseRoot )
+		{
 			var existing = baseRoot.GetNodeOrNull<Node>( MANAGED_SCENE_HOST_NAME );
 			if ( existing != null ) {
 				return existing;
@@ -367,7 +381,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// </summary>
 		/// <param name="baseScene"></param>
 		/// <returns></returns>
-		private Node ResolveParentNode( IScene? baseScene ) {
+		private Node ResolveParentNode( IScene? baseScene )
+		{
 			if ( baseScene is GodotScene godotScene && godotScene.Root is GodotGameObject godotObject ) {
 				return godotObject.Node;
 			}
@@ -384,7 +399,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// </summary>
 		/// <param name="scene"></param>
 		/// <param name="parent"></param>
-		private static void AttachScene( IScene scene, Node parent ) {
+		private static void AttachScene( IScene scene, Node parent )
+		{
 			var node = ((GodotGameObject)scene.Root).Node;
 			var currentParent = node.GetParent();
 
@@ -405,7 +421,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// 
 		/// </summary>
 		/// <param name="scene"></param>
-		private void ReleaseSceneInstance( IScene scene ) {
+		private void ReleaseSceneInstance( IScene scene )
+		{
 			var node = ((GodotGameObject)scene.Root).Node;
 
 			UnregisterNodeTree( node );
@@ -426,7 +443,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// 
 		/// </summary>
 		/// <param name="node"></param>
-		private void UnregisterNodeTree( Node node ) {
+		private void UnregisterNodeTree( Node node )
+		{
 			var children = node.GetChildren();
 			for ( int i = 0; i < children.Count; i++ ) {
 				if ( children[i] is Node childNode ) {

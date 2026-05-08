@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Save.ValueObjects;
 
-namespace Nomad.Save.Private.ValueObjects {
+namespace Nomad.Save.Private.ValueObjects
+{
 	/*
 	===================================================================================
 	
@@ -28,7 +29,8 @@ namespace Nomad.Save.Private.ValueObjects {
 	/// 
 	/// </summary>
 
-	internal record SaveHeader {
+	internal record SaveHeader
+	{
 		/// <summary>
 		/// 
 		/// </summary>
@@ -61,7 +63,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// <param name="version"></param>
 		/// <param name="sectionCount"></param>
 		/// <param name="checksum"></param>
-		public SaveHeader( string name, GameVersion version, int sectionCount, Checksum checksum ) {
+		public SaveHeader( string name, GameVersion version, int sectionCount, Checksum checksum )
+		{
 			Name = name;
 			Version = version;
 			SectionCount = sectionCount;
@@ -77,7 +80,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		///
 		/// </summary>
 		/// <param name="writer"></param>
-		internal void Serialize( IWriteStream writer ) {
+		internal void Serialize( IWriteStream writer )
+		{
 			writer.WriteUInt64( Constants.HEADER_MAGIC );
 			Version.Serialize( writer );
 			writer.WriteString( Name );
@@ -96,7 +100,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// <param name="reader"></param>
 		/// <param name="magicMatches"></param>
 		/// <returns></returns>
-		internal static SaveHeader Deserialize( IReadStream reader, out bool magicMatches ) {
+		internal static SaveHeader Deserialize( IReadStream reader, out bool magicMatches )
+		{
 			ulong headerMagic = reader.ReadUInt64();
 			magicMatches = headerMagic == Constants.HEADER_MAGIC;
 

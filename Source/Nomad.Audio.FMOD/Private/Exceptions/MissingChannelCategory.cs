@@ -15,10 +15,13 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using Nomad.Core.Exceptions;
 
-namespace Nomad.Audio.Fmod.Private.Exceptions {
-	internal sealed class MissingChannelCategory : NomadException {
+namespace Nomad.Audio.Fmod.Private.Exceptions
+{
+	internal sealed class MissingChannelCategory : NomadException
+	{
 		public MissingChannelCategory( string channelName )
-			: base( $"Missing channel group {channelName}!" ) {
+			: base( $"Missing channel group {channelName}!" )
+		{
 		}
 	};
 };

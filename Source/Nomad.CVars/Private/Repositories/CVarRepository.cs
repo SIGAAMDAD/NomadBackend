@@ -24,7 +24,8 @@ using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.CVars.Exceptions;
 
-namespace Nomad.CVars.Private.Repositories {
+namespace Nomad.CVars.Private.Repositories
+{
 	/*
 	===================================================================================
 	
@@ -36,7 +37,8 @@ namespace Nomad.CVars.Private.Repositories {
 	/// 
 	/// </summary>
 
-	internal sealed class CVarRepository {
+	internal sealed class CVarRepository
+	{
 		public ICollection<ICVar> CVars => _cvars.Values;
 		private readonly ConcurrentDictionary<InternString, ICVar> _cvars = new();
 
@@ -53,7 +55,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// </summary>
 		/// <param name="logger"></param>
 		/// <param name="eventFactory"></param>
-		public CVarRepository( ILoggerService logger, IGameEventRegistryService eventFactory ) {
+		public CVarRepository( ILoggerService logger, IGameEventRegistryService eventFactory )
+		{
 			_logger = logger ?? throw new ArgumentNullException( nameof( logger ) );
 			_eventFactory = eventFactory ?? throw new ArgumentNullException( nameof( eventFactory ) );
 		}
@@ -71,7 +74,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// <param name="eventFactory"></param>
 		/// <returns></returns>
 		/// <exception cref="InvalidCastException"></exception>
-		public ICVar<T> AddCVar<T>( CVarCreateInfo<T> createInfo, IGameEventRegistryService eventFactory ) {
+		public ICVar<T> AddCVar<T>( CVarCreateInfo<T> createInfo, IGameEventRegistryService eventFactory )
+		{
 			ArgumentGuard.ThrowIfNullOrEmpty( createInfo.Name );
 			ArgumentGuard.ThrowIfNullOrEmpty( createInfo.Description );
 
@@ -98,7 +102,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public ICVar? Find( string name ) {
+		public ICVar? Find( string name )
+		{
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 			return _cvars.TryGetValue( new InternString( name ), out ICVar? cvar ) ? cvar : null;
 		}
@@ -114,7 +119,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// <param name="name"></param>
 		/// <param name="cvar"></param>
 		/// <returns></returns>
-		public bool TryFind( string name, out ICVar? cvar ) {
+		public bool TryFind( string name, out ICVar? cvar )
+		{
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 			return _cvars.TryGetValue( new InternString( name ), out cvar );
 		}
@@ -131,7 +137,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// <param name="name"></param>
 		/// <param name="cvar"></param>
 		/// <returns></returns>
-		public bool TryFind<T>( string name, out ICVar<T>? cvar ) {
+		public bool TryFind<T>( string name, out ICVar<T>? cvar )
+		{
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 
 			if ( _cvars.TryGetValue( new InternString( name ), out ICVar? var ) && var is ICVar<T> typedVar ) {
@@ -151,7 +158,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// Removes the given CVar from the cache.
 		/// </summary>
 		/// <param name="cvar">The cvar to remove</param>
-		public void Unregister( ICVar cvar ) {
+		public void Unregister( ICVar cvar )
+		{
 			ArgumentGuard.ThrowIfNull( cvar );
 			_cvars.TryRemove( new InternString( cvar.Name ), out _ );
 		}
@@ -166,7 +174,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public bool CVarExists( string name ) {
+		public bool CVarExists( string name )
+		{
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 			return _cvars.ContainsKey( new InternString( name ) );
 		}
@@ -181,7 +190,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public bool CVarExists<T>( string name ) {
+		public bool CVarExists<T>( string name )
+		{
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 			if ( _cvars.TryGetValue( new InternString( name ), out var cvar ) ) {
 				return cvar is ICVar<T>;
@@ -201,7 +211,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// <param name="name"></param>
 		/// <returns></returns>
 		/// <exception cref="InvalidCastException"></exception>
-		public ICVar<T>? GetCVar<T>( string name ) {
+		public ICVar<T>? GetCVar<T>( string name )
+		{
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 
 			if ( !_cvars.TryGetValue( new InternString( name ), out var cvar ) ) {
@@ -221,7 +232,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public ICVar? GetCVar( string name ) {
+		public ICVar? GetCVar( string name )
+		{
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 
 			if ( !_cvars.TryGetValue( new InternString( name ), out var cvar ) ) {
@@ -241,7 +253,8 @@ namespace Nomad.CVars.Private.Repositories {
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <returns></returns>
-		public ICVar<T>[] GetCVarsWithValueType<T>() {
+		public ICVar<T>[] GetCVarsWithValueType<T>()
+		{
 			List<ICVar<T>> cvars = new List<ICVar<T>>();
 
 			foreach ( var cvar in _cvars ) {

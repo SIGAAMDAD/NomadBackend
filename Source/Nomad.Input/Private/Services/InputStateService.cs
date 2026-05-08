@@ -20,7 +20,8 @@ using System.Runtime.InteropServices;
 using Nomad.Input.Interfaces;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.Services {
+namespace Nomad.Input.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -32,7 +33,8 @@ namespace Nomad.Input.Private.Services {
 	/// 
 	/// </summary>
 
-	internal unsafe sealed class InputStateService : IInputSnapshotService, IDisposable {
+	internal unsafe sealed class InputStateService : IInputSnapshotService, IDisposable
+	{
 		private const int DEVICE_SLOT_COUNT = (int)InputDeviceSlot.Count;
 		private const int CONTROL_COUNT = (int)InputControlId.Count;
 		private const int WORDS_PER_DEVICE = 4;
@@ -64,7 +66,8 @@ namespace Nomad.Input.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public InputStateService() {
+		public InputStateService()
+		{
 			long totalBytes = 0;
 			long pressedBytes = PadBytes( sizeof( ulong ) * DEVICE_SLOT_COUNT * WORDS_PER_DEVICE, Core.Constants.WORDSIZE );
 			long axis1DBytes = PadBytes( sizeof( float ) * DEVICE_SLOT_COUNT * CONTROL_COUNT, Core.Constants.WORDSIZE );
@@ -83,7 +86,8 @@ namespace Nomad.Input.Private.Services {
 			new Span<byte>( _memory, (int)totalBytes ).Clear();
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _isDisposed ) {
 				return;
 			}
@@ -111,7 +115,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="slot"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public ulong* GetPressedWords( InputDeviceSlot slot ) {
+		public ulong* GetPressedWords( InputDeviceSlot slot )
+		{
 			return _pressedBits + ((int)slot * WORDS_PER_DEVICE);
 		}
 
@@ -127,7 +132,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="control"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public bool IsPressed( InputDeviceSlot slot, InputControlId control ) {
+		public bool IsPressed( InputDeviceSlot slot, InputControlId control )
+		{
 			int controlIndex = (int)control;
 			ulong* words = GetPressedWords( slot );
 			return (words[controlIndex >> 6] & (1UL << (controlIndex & 63))) != 0UL;
@@ -145,7 +151,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="control"></param>
 		/// <param name="pressed"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetPressed( InputDeviceSlot slot, InputControlId control, bool pressed ) {
+		public void SetPressed( InputDeviceSlot slot, InputControlId control, bool pressed )
+		{
 			int controlIndex = (int)control;
 			ulong* words = GetPressedWords( slot );
 			ulong mask = 1UL << (controlIndex & 63);
@@ -169,7 +176,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="control"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public float GetAxis1D( InputDeviceSlot slot, InputControlId control ) {
+		public float GetAxis1D( InputDeviceSlot slot, InputControlId control )
+		{
 			return _axis1D[GetFlatIndex( slot, control )];
 		}
 
@@ -185,7 +193,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="control"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public Vector2 GetAxis2D( InputDeviceSlot slot, InputControlId control ) {
+		public Vector2 GetAxis2D( InputDeviceSlot slot, InputControlId control )
+		{
 			return _axis2D[GetFlatIndex( slot, control )];
 		}
 
@@ -201,7 +210,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="control"></param>
 		/// <param name="value"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetAxis1D( InputDeviceSlot slot, InputControlId control, float value ) {
+		public void SetAxis1D( InputDeviceSlot slot, InputControlId control, float value )
+		{
 			_axis1D[GetFlatIndex( slot, control )] = value;
 		}
 
@@ -217,7 +227,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="control"></param>
 		/// <param name="value"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetAxis2D( InputDeviceSlot slot, InputControlId control, Vector2 value ) {
+		public void SetAxis2D( InputDeviceSlot slot, InputControlId control, Vector2 value )
+		{
 			_axis2D[GetFlatIndex( slot, control )] = value;
 		}
 
@@ -231,7 +242,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="value"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetMousePosition( Vector2 value ) {
+		public void SetMousePosition( Vector2 value )
+		{
 			_mousePosition = value;
 			_axis2D[GetFlatIndex( InputDeviceSlot.Mouse, InputControlId.Position )] = value;
 		}
@@ -246,7 +258,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="value"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void AddMouseDelta( Vector2 value ) {
+		public void AddMouseDelta( Vector2 value )
+		{
 			_mouseDelta = value;
 			_axis2D[GetFlatIndex( InputDeviceSlot.Mouse, InputControlId.Delta )] = value;
 		}
@@ -263,7 +276,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="control"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static int GetFlatIndex( InputDeviceSlot slot, InputControlId control ) {
+		private static int GetFlatIndex( InputDeviceSlot slot, InputControlId control )
+		{
 			return ((int)slot * CONTROL_COUNT) + (int)control;
 		}
 
@@ -279,7 +293,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="alignment"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static long PadBytes( long size, long alignment ) {
+		private static long PadBytes( long size, long alignment )
+		{
 			return (size + alignment - 1) & ~(alignment - 1);
 		}
 	};

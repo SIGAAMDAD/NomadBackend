@@ -22,7 +22,8 @@ using Nomad.Core.FileSystem;
 using Nomad.Core.Logger;
 using Nomad.Core.Memory.Buffers;
 
-namespace Nomad.CVars.Private.Serialization {
+namespace Nomad.CVars.Private.Serialization
+{
 	/*
 	===================================================================================
 
@@ -34,7 +35,8 @@ namespace Nomad.CVars.Private.Serialization {
 	/// Loads key-value pairs from .ini files, specifically configuration files
 	/// </summary>
 
-	internal readonly struct IniLoader {
+	internal readonly struct IniLoader
+	{
 		private readonly IDictionary<string, string?>? _iniData;
 
 		/*
@@ -48,7 +50,8 @@ namespace Nomad.CVars.Private.Serialization {
 		/// <param name="configFile"></param>
 		/// <param name="logger"></param>
 		/// <param name="fileSystem"></param>
-		public IniLoader( string configFile, ILoggerCategory logger, IFileSystem fileSystem ) {
+		public IniLoader( string configFile, ILoggerCategory logger, IFileSystem fileSystem )
+		{
 			ArgumentGuard.ThrowIfNullOrEmpty( configFile );
 			ArgumentGuard.ThrowIfNull( logger );
 
@@ -74,7 +77,8 @@ namespace Nomad.CVars.Private.Serialization {
 			}
 		}
 
-		private static string ResolveConfigPath( string configFile, IFileSystem fileSystem ) {
+		private static string ResolveConfigPath( string configFile, IFileSystem fileSystem )
+		{
 			ArgumentGuard.ThrowIfNull( fileSystem );
 
 			if ( Path.IsPathRooted( configFile ) || !string.IsNullOrEmpty( Path.GetDirectoryName( configFile ) ) ) {
@@ -95,7 +99,8 @@ namespace Nomad.CVars.Private.Serialization {
 		/// </summary>
 		/// <param name="name">The name of the key of the configuration value</param>
 		/// <param name="value">The output value</param>
-		public bool LoadConfigValue( string name, out int value ) {
+		public bool LoadConfigValue( string name, out int value )
+		{
 			ArgumentGuard.ThrowIfNull( _iniData );
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 
@@ -118,7 +123,8 @@ namespace Nomad.CVars.Private.Serialization {
 		/// </summary>
 		/// <param name="name">The name of the key of the configuration value</param>
 		/// <param name="value">The output value</param>
-		public bool LoadConfigValue( string name, out uint value ) {
+		public bool LoadConfigValue( string name, out uint value )
+		{
 			ArgumentGuard.ThrowIfNull( _iniData );
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 
@@ -141,7 +147,8 @@ namespace Nomad.CVars.Private.Serialization {
 		/// </summary>
 		/// <param name="name">The name of the key of the configuration value</param>
 		/// <param name="value">The output value</param>
-		public bool LoadConfigValue( string name, out float value ) {
+		public bool LoadConfigValue( string name, out float value )
+		{
 			ArgumentGuard.ThrowIfNull( _iniData );
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 
@@ -164,7 +171,8 @@ namespace Nomad.CVars.Private.Serialization {
 		/// </summary>
 		/// <param name="name">The name of the key of the configuration value</param>
 		/// <param name="value">The output value</param>
-		public bool LoadConfigValue( string name, out bool value ) {
+		public bool LoadConfigValue( string name, out bool value )
+		{
 			ArgumentGuard.ThrowIfNull( _iniData );
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 
@@ -195,7 +203,8 @@ namespace Nomad.CVars.Private.Serialization {
 		/// </summary>
 		/// <param name="name">The name of the key of the configuration value</param>
 		/// <param name="value">The output value</param>
-		public bool LoadConfigValue( string name, out string value ) {
+		public bool LoadConfigValue( string name, out string value )
+		{
 			ArgumentGuard.ThrowIfNull( _iniData );
 			ArgumentGuard.ThrowIfNullOrEmpty( name );
 

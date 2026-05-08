@@ -15,9 +15,12 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System.Numerics;
 
-namespace Nomad.Audio.Fmod.Private {
-	internal static class Vector2Extensions {
-		public static FMOD.ATTRIBUTES_3D Make3D( this Vector2 vector ) {
+namespace Nomad.Audio.Fmod.Private
+{
+	internal static class Vector2Extensions
+	{
+		public static FMOD.ATTRIBUTES_3D Make3D( this Vector2 vector )
+		{
 			return new FMOD.ATTRIBUTES_3D {
 				position = new FMOD.VECTOR { x = vector.X, y = 0.0f, z = vector.Y },
 				velocity = new FMOD.VECTOR { x = 0.0f, y = 0.0f, z = 0.0f },

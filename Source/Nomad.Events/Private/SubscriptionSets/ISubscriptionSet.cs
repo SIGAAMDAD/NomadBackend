@@ -18,7 +18,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.Events;
 
-namespace Nomad.Events.Private.SubscriptionSets {
+namespace Nomad.Events.Private.SubscriptionSets
+{
 	/*
 	===================================================================================
 
@@ -31,7 +32,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 	/// </summary>
 
 	internal interface ISubscriptionSet<TArgs> : IDisposable
-		where TArgs : struct {
+		where TArgs : struct
+	{
 		/// <summary>
 		/// 
 		/// </summary>

@@ -18,7 +18,8 @@ using Nomad.Audio.Fmod.Private.Repositories;
 using Nomad.Audio.Interfaces;
 using Nomad.Core.Logger;
 
-namespace Nomad.Audio.Fmod.Private.Entities {
+namespace Nomad.Audio.Fmod.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -30,7 +31,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 	/// Contains a collection of <see cref="FMODEvent"/> objects, most usually for a bank.
 	/// </summary>
 
-	internal record FMODEventCollection : IEventCollection {
+	internal record FMODEventCollection : IEventCollection
+	{
 		public int EventCount => _events.Length;
 
 		private readonly FMOD.Studio.EventDescription[] _events;
@@ -47,7 +49,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// <param name="events"></param>
 		/// <param name="guidRepository"></param>
 		/// <param name="logger"></param>
-		public FMODEventCollection( FMOD.Studio.EventDescription[] events, FMODGuidRepository guidRepository, ILoggerService logger ) {
+		public FMODEventCollection( FMOD.Studio.EventDescription[] events, FMODGuidRepository guidRepository, ILoggerService logger )
+		{
 			_events = events;
 			_eventIds = new List<string>( _events.Length );
 			for ( int i = 0; i < _events.Length; i++ ) {
@@ -67,7 +70,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// </summary>
 		/// <param name="eventId"></param>
 		/// <returns></returns>
-		public bool ContainsEvent( string eventId ) {
+		public bool ContainsEvent( string eventId )
+		{
 			return _eventIds.Contains( eventId );
 		}
 
@@ -80,7 +84,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public IReadOnlyList<string> GetEventIds() {
+		public IReadOnlyList<string> GetEventIds()
+		{
 			return _eventIds;
 		}
 	};

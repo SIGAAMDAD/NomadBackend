@@ -17,7 +17,8 @@ using System.Runtime.InteropServices;
 using Nomad.Core.Util;
 using Nomad.Core.CVars;
 
-namespace Nomad.CVars.Private.ValueObjects {
+namespace Nomad.CVars.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -30,7 +31,8 @@ namespace Nomad.CVars.Private.ValueObjects {
 	/// </summary>
 
 	[StructLayout( LayoutKind.Explicit, Pack = 16, Size = 24 )]
-	internal readonly struct CVarMetadata {
+	internal readonly struct CVarMetadata
+	{
 		[FieldOffset( 0 )] public readonly InternString Name;
 		[FieldOffset( 8 )] public readonly InternString Description;
 		[FieldOffset( 16 )] public readonly CVarFlags Flags;
@@ -55,7 +57,8 @@ namespace Nomad.CVars.Private.ValueObjects {
 		/// <param name="description">The CVar's description.</param>
 		/// <param name="flags">The CVar's flags.</param>
 		/// <param name="type">The CVar's type.</param>
-		public CVarMetadata( string name, string description, CVarFlags flags, CVarType type ) {
+		public CVarMetadata( string name, string description, CVarFlags flags, CVarType type )
+		{
 			Name = new InternString( name );
 			Description = new InternString( description );
 			Flags = flags;

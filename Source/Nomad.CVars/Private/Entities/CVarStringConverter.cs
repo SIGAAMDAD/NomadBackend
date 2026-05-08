@@ -18,7 +18,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Nomad.CVars.Private.Entities {
+namespace Nomad.CVars.Private.Entities
+{
 	/*
 	===================================================================================
 	
@@ -30,7 +31,8 @@ namespace Nomad.CVars.Private.Entities {
 	/// 
 	/// </summary>
 
-	internal static class CVarStringConverter {
+	internal static class CVarStringConverter
+	{
 		private delegate bool TryParseDelegate( string s, out object? result );
 		private delegate bool TryParseUnmanaged<T>( string s, NumberStyles styles, IFormatProvider provider, out T value ) where T : unmanaged;
 
@@ -60,7 +62,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="s"></param>
 		/// <param name="result"></param>
 		/// <returns></returns>
-		private static bool TryParseBool( string s, out object? result ) {
+		private static bool TryParseBool( string s, out object? result )
+		{
 			if ( bool.TryParse( s, out bool value ) ) {
 				result = value;
 				return true;
@@ -84,7 +87,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="parser"></param>
 		/// <returns></returns>
 		private static bool TryParsePrimitive<T>( string s, out object? result, NumberStyles style, TryParseUnmanaged<T> parser )
-			where T : unmanaged {
+			where T : unmanaged
+		{
 			if ( parser.Invoke( s, style, CultureInfo.InvariantCulture, out var value ) ) {
 				result = value;
 				return true;
@@ -106,7 +110,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="result"></param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
-		public static bool TryParse( string str, Type targetType, out object? result ) {
+		public static bool TryParse( string str, Type targetType, out object? result )
+		{
 			if ( _parsers.TryGetValue( targetType, out var parser ) ) {
 				return parser.Invoke( str, out result );
 			}
@@ -128,7 +133,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="targetType"></param>
 		/// <param name="result"></param>
 		/// <returns></returns>
-		private static bool EnumTryParse( string str, Type targetType, out object? result ) {
+		private static bool EnumTryParse( string str, Type targetType, out object? result )
+		{
 			// we only use Enum.IsDefined here because if we don't there's a bug where even if the integral value itself exceeds the enum, it'll still get parsed as valid. So we need a manual
 			// bounds check here to ensure that never happens.
 			if ( Enum.TryParse( targetType, str, ignoreCase: true, out result ) && Enum.IsDefined( targetType, result ) ) {

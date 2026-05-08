@@ -18,17 +18,21 @@ using Nomad.Audio.Fmod.Private.Repositories;
 using Nomad.Audio.Fmod.Private.Services;
 using Nomad.Audio.Interfaces;
 
-namespace Nomad.Audio.Fmod.Private.Services {
-	internal sealed class FMODEmitterFactory : IEmitterFactory {
+namespace Nomad.Audio.Fmod.Private.Services
+{
+	internal sealed class FMODEmitterFactory : IEmitterFactory
+	{
 		private readonly FMODChannelService _channelRepository;
 		private readonly FMODBusRepository _busRepository;
 
-		public FMODEmitterFactory( FMODChannelService channelRepository, FMODBusRepository busRepository ) {
+		public FMODEmitterFactory( FMODChannelService channelRepository, FMODBusRepository busRepository )
+		{
 			_channelRepository = channelRepository;
 			_busRepository = busRepository;
 		}
 
-		public IAudioEmitter CreateEmitter( string category ) {
+		public IAudioEmitter CreateEmitter( string category )
+		{
 			return new FMODEmitter( _channelRepository, _busRepository.GetSoundCategory( category ) );
 		}
 	};

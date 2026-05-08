@@ -18,7 +18,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.FileSystem.Streams;
 
-namespace Nomad.FileSystem.Private {
+namespace Nomad.FileSystem.Private
+{
 	/*
 	===================================================================================
 
@@ -30,7 +31,8 @@ namespace Nomad.FileSystem.Private {
 	/// Base implementation of a data stream.
 	/// </summary>
 
-	internal abstract class BaseStream : IDataStream {
+	internal abstract class BaseStream : IDataStream
+	{
 		/// <summary>
 		/// Gets the length of the stream in bytes.
 		/// </summary>

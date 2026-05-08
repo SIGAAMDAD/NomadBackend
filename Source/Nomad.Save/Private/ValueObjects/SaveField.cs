@@ -18,7 +18,8 @@ using Nomad.Core.Util;
 using Nomad.Save.Exceptions;
 using Nomad.Save.Private.Serialization.FieldSerializers;
 
-namespace Nomad.Save.Private.ValueObjects {
+namespace Nomad.Save.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -30,7 +31,8 @@ namespace Nomad.Save.Private.ValueObjects {
 	///
 	/// </summary>
 
-	internal readonly struct SaveField {
+	internal readonly struct SaveField
+	{
 		public static readonly SaveField Empty = default;
 
 		public readonly string Name;
@@ -48,7 +50,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// <param name="name"></param>
 		/// <param name="type"></param>
 		/// <param name="value"></param>
-		public SaveField( string name, AnyType type, Any value ) {
+		public SaveField( string name, AnyType type, Any value )
+		{
 			Name = name;
 			Type = type;
 			Value = value;
@@ -65,7 +68,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// <param name="section"></param>
 		/// <param name="field"></param>
 		/// <param name="stream"></param>
-		public static void Write( string section, SaveField field, IWriteStream stream ) {
+		public static void Write( string section, SaveField field, IWriteStream stream )
+		{
 			stream.WriteString( field.Name );
 			stream.WriteUInt8( (byte)field.Type );
 			FieldSerializerRegistry.GetSerializer( Any.GetAnyType( field.Type ) ).Serialize( stream, field.Value );
@@ -84,7 +88,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// <param name="stream">The file stream to read from.</param>
 		/// <returns>A new SaveField object.</returns>
 		/// <exception cref="FieldCorruptException">Thrown if the field's data is invalid.</exception>
-		public static SaveField Read( string section, int index, IMemoryReadStream stream ) {
+		public static SaveField Read( string section, int index, IMemoryReadStream stream )
+		{
 			string name = stream.ReadString();
 			if ( string.IsNullOrEmpty( name ) || name.Length > Constants.MAX_FIELD_NAME_LENGTH ) {
 				throw new FieldCorruptException( section, index, stream.Position, $"Field name length corrupted (0 or string overflow, {name.Length} bytes)" );

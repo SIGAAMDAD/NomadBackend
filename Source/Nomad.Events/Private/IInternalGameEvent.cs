@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using Nomad.Core.Events;
 using Nomad.Events.Private.SubscriptionSets;
 
-namespace Nomad.Events.Private {
+namespace Nomad.Events.Private
+{
 	/*
 	===================================================================================
 	
@@ -30,7 +31,8 @@ namespace Nomad.Events.Private {
 	/// </summary>
 
 	internal interface IInternalGameEvent<TArgs> : IGameEvent<TArgs>
-		where TArgs : struct {
+		where TArgs : struct
+	{
 		/// <summary>
 		/// 
 		/// </summary>

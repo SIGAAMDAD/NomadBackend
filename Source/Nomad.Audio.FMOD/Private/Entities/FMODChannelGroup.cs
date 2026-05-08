@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using Nomad.Audio.ValueObjects;
 
-namespace Nomad.Audio.Fmod.Private.Entities {
+namespace Nomad.Audio.Fmod.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -28,7 +29,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 	///
 	/// </summary>
 
-	internal sealed class FMODChannelGroup : IDisposable {
+	internal sealed class FMODChannelGroup : IDisposable
+	{
 		public float Volume {
 			get => _volume;
 			set {
@@ -90,7 +92,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// </summary>
 		/// <param name="category"></param>
 		/// <param name="system">The core FMOD system.</param>
-		public FMODChannelGroup( SoundCategoryCreateInfo category, FMOD.Studio.System system ) {
+		public FMODChannelGroup( SoundCategoryCreateInfo category, FMOD.Studio.System system )
+		{
 			//			FMODValidator.ValidateCall( system.getBus( "Master", out _bus ) );
 			//			FMODValidator.ValidateCall( _bus.getChannelGroup( out _group ) );
 		}
@@ -100,7 +103,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		~FMODChannelGroup
 		===============
 		*/
-		~FMODChannelGroup() {
+		~FMODChannelGroup()
+		{
 			Dispose();
 		}
 
@@ -109,7 +113,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		Dispose
 		===============
 		*/
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _isDisposed ) {
 				return;
 			}
@@ -134,7 +139,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// <summary>
 		/// Stops all events that are controlled by this sound category.
 		/// </summary>
-		public void StopAllEvents() {
+		public void StopAllEvents()
+		{
 			FMODValidator.ValidateCall( _bus.stopAllEvents( FMOD.Studio.STOP_MODE.ALLOWFADEOUT ) );
 		}
 	};

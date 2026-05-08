@@ -20,7 +20,8 @@ using System.Threading.Tasks;
 using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 
-namespace Nomad.Events.Private.EventTypes {
+namespace Nomad.Events.Private.EventTypes
+{
 	/*
 	===================================================================================
 	
@@ -33,7 +34,8 @@ namespace Nomad.Events.Private.EventTypes {
 	/// </summary>
 
 	internal sealed class FilteredGameEvent<TArgs> : IGameEvent<TArgs>
-		where TArgs : struct {
+		where TArgs : struct
+	{
 #if EVENT_DEBUG
 		public TArgs LastPayload => _source.LastPayload;
 		public int SubscriberCount => _source.SubscriberCount;
@@ -70,7 +72,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// </summary>
 		/// <param name="source"></param>
 		/// <param name="predicate"></param>
-		public FilteredGameEvent( IGameEvent<TArgs> source, Func<TArgs, bool> predicate ) {
+		public FilteredGameEvent( IGameEvent<TArgs> source, Func<TArgs, bool> predicate )
+		{
 			ArgumentGuard.ThrowIfNull( source );
 			ArgumentGuard.ThrowIfNull( predicate );
 
@@ -86,7 +89,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_source.Dispose();
 			}
@@ -103,7 +107,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// 
 		/// </summary>
 		/// <param name="eventArgs"></param>
-		public void Publish( in TArgs eventArgs ) {
+		public void Publish( in TArgs eventArgs )
+		{
 			_source.Publish( in eventArgs );
 		}
 
@@ -119,7 +124,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// <param name="ct"></param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
-		public Task PublishAsync( TArgs eventArgs, CancellationToken ct = default ) {
+		public Task PublishAsync( TArgs eventArgs, CancellationToken ct = default )
+		{
 			throw new NotSupportedException();
 		}
 
@@ -133,7 +139,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <returns></returns>
-		public ISubscriptionHandle Subscribe( EventCallback<TArgs> callback ) {
+		public ISubscriptionHandle Subscribe( EventCallback<TArgs> callback )
+		{
 			EventCallback<TArgs> wrapped = ( in TArgs args ) => {
 				if ( _predicate.Invoke( args ) ) {
 					callback.Invoke( in args );
@@ -154,7 +161,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// <param name="asyncCallback"></param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
-		public ISubscriptionHandle SubscribeAsync( AsyncEventCallback<TArgs> asyncCallback ) {
+		public ISubscriptionHandle SubscribeAsync( AsyncEventCallback<TArgs> asyncCallback )
+		{
 			throw new NotSupportedException();
 		}
 
@@ -167,7 +175,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// 
 		/// </summary>
 		/// <param name="callback"></param>
-		public void Unsubscribe( EventCallback<TArgs> callback ) {
+		public void Unsubscribe( EventCallback<TArgs> callback )
+		{
 			if ( _handlerMap.TryGetValue( callback, out var wrapped ) ) {
 				_source.Unsubscribe( (EventCallback<TArgs>)wrapped );
 				_handlerMap.Remove( callback );
@@ -184,7 +193,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// </summary>
 		/// <param name="asyncCallback"></param>
 		/// <exception cref="NotSupportedException"></exception>
-		public void UnsubscribeAsync( AsyncEventCallback<TArgs> asyncCallback ) {
+		public void UnsubscribeAsync( AsyncEventCallback<TArgs> asyncCallback )
+		{
 			throw new NotSupportedException();
 		}
 	};

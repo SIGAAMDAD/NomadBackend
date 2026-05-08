@@ -21,7 +21,8 @@ using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
 
-namespace Nomad.Events.Private.SubscriptionSets {
+namespace Nomad.Events.Private.SubscriptionSets
+{
 	/*
 	===================================================================================
 
@@ -34,7 +35,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 	/// </summary>
 
 	internal sealed class AtomicSubscriptionSet<TArgs> : SubscriptionSetBase<TArgs>
-		where TArgs : struct {
+		where TArgs : struct
+	{
 		private static readonly EventCallback<TArgs>[] _emptySubscriptions = Array.Empty<EventCallback<TArgs>>();
 		private static readonly AsyncEventCallback<TArgs>[] _emptyAsyncSubscriptions = Array.Empty<AsyncEventCallback<TArgs>>();
 
@@ -53,7 +55,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="logger"></param>
 		/// <param name="exceptionPolicy"></param>
 		public AtomicSubscriptionSet( IGameEvent<TArgs> eventData, ILoggerService logger, EventExceptionPolicy exceptionPolicy )
-			: base( eventData, logger, exceptionPolicy ) {
+			: base( eventData, logger, exceptionPolicy )
+		{
 			_genericSubscriptions = _emptySubscriptions;
 			_asyncSubscriptions = _emptyAsyncSubscriptions;
 		}
@@ -66,7 +69,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected override void OnDispose() {
+		protected override void OnDispose()
+		{
 			Interlocked.Exchange( ref _genericSubscriptions, _emptySubscriptions );
 			Interlocked.Exchange( ref _asyncSubscriptions, _emptyAsyncSubscriptions );
 		}
@@ -81,7 +85,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <returns></returns>
-		public override bool AddSubscription( EventCallback<TArgs> callback ) {
+		public override bool AddSubscription( EventCallback<TArgs> callback )
+		{
 			ThrowIfDisposed();
 			ArgumentGuard.ThrowIfNull( callback );
 
@@ -114,7 +119,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <returns></returns>
-		public override bool AddSubscriptionAsync( AsyncEventCallback<TArgs> callback ) {
+		public override bool AddSubscriptionAsync( AsyncEventCallback<TArgs> callback )
+		{
 			ThrowIfDisposed();
 			ArgumentGuard.ThrowIfNull( callback );
 
@@ -147,7 +153,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <returns></returns>
-		public override bool RemoveSubscription( EventCallback<TArgs> callback ) {
+		public override bool RemoveSubscription( EventCallback<TArgs> callback )
+		{
 			ThrowIfDisposed();
 			ArgumentGuard.ThrowIfNull( callback );
 
@@ -177,7 +184,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <returns></returns>
-		public override bool RemoveSubscriptionAsync( AsyncEventCallback<TArgs> callback ) {
+		public override bool RemoveSubscriptionAsync( AsyncEventCallback<TArgs> callback )
+		{
 			ThrowIfDisposed();
 			ArgumentGuard.ThrowIfNull( callback );
 
@@ -206,7 +214,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		public override void Pump( in TArgs args ) {
+		public override void Pump( in TArgs args )
+		{
 			ThrowIfDisposed();
 
 			EventCallback<TArgs>[] subscriptions = Volatile.Read( ref _genericSubscriptions );
@@ -236,7 +245,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="args"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public override async Task PumpAsync( TArgs args, CancellationToken ct ) {
+		public override async Task PumpAsync( TArgs args, CancellationToken ct )
+		{
 			ThrowIfDisposed();
 
 			AsyncEventCallback<TArgs>[] subscriptions = Volatile.Read( ref _asyncSubscriptions );
@@ -254,7 +264,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="callback"></param>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public override bool ContainsCallback( EventCallback<TArgs> callback, out int index ) {
+		public override bool ContainsCallback( EventCallback<TArgs> callback, out int index )
+		{
 			ThrowIfDisposed();
 			index = IndexOf( Volatile.Read( ref _genericSubscriptions ), callback );
 			return index >= 0;
@@ -271,7 +282,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="callback"></param>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public override bool ContainsCallbackAsync( AsyncEventCallback<TArgs> callback, out int index ) {
+		public override bool ContainsCallbackAsync( AsyncEventCallback<TArgs> callback, out int index )
+		{
 			ThrowIfDisposed();
 			index = IndexOf( Volatile.Read( ref _asyncSubscriptions ), callback );
 			return index >= 0;
@@ -289,7 +301,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="subscriptions"></param>
 		/// <param name="callback"></param>
 		/// <returns></returns>
-		private static int IndexOf<TCallback>( TCallback[] subscriptions, TCallback callback ) {
+		private static int IndexOf<TCallback>( TCallback[] subscriptions, TCallback callback )
+		{
 			for ( int i = 0; i < subscriptions.Length; i++ ) {
 				if ( Equals( subscriptions[i], callback ) ) {
 					return i;
@@ -310,7 +323,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="subscriptions"></param>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		private static TCallback[] RemoveAt<TCallback>( TCallback[] subscriptions, int index ) {
+		private static TCallback[] RemoveAt<TCallback>( TCallback[] subscriptions, int index )
+		{
 			if ( subscriptions.Length == 1 ) {
 				return Array.Empty<TCallback>();
 			}

@@ -23,7 +23,8 @@ using Nomad.Save.Exceptions;
 using Nomad.Save.Interfaces;
 using Nomad.Save.Private.ValueObjects;
 
-namespace Nomad.Save.Private.Entities {
+namespace Nomad.Save.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -35,7 +36,8 @@ namespace Nomad.Save.Private.Entities {
 	///
 	/// </summary>
 
-	internal sealed class SaveSectionReader : ISaveSectionReader {
+	internal sealed class SaveSectionReader : ISaveSectionReader
+	{
 		/// <summary>
 		/// The name of the section.
 		/// </summary>
@@ -66,7 +68,8 @@ namespace Nomad.Save.Private.Entities {
 		/// <param name="category"></param>
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="DuplicateFieldException"></exception>
-		public SaveSectionReader( SaveConfig config, int index, IMemoryReadStream reader, ILoggerCategory category ) {
+		public SaveSectionReader( SaveConfig config, int index, IMemoryReadStream reader, ILoggerCategory category )
+		{
 			// TODO: implement a field pool or something of that nature.
 			_fields = new Dictionary<string, SaveField>();
 			_category = category ?? throw new ArgumentNullException( nameof( category ) );
@@ -103,7 +106,8 @@ namespace Nomad.Save.Private.Entities {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_fields.Clear();
 			}
@@ -124,7 +128,8 @@ namespace Nomad.Save.Private.Entities {
 		/// <returns></returns>
 		/// <exception cref="InvalidCastException"></exception>
 		public T GetField<T>( string fieldName )
-			where T : unmanaged {
+			where T : unmanaged
+		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
 			ArgumentGuard.ThrowIfNullOrEmpty( fieldName );
 
@@ -149,7 +154,8 @@ namespace Nomad.Save.Private.Entities {
 		/// <param name="fieldName"></param>
 		/// <returns></returns>
 		/// <exception cref="InvalidCastException"></exception>
-		public string GetString( string fieldName ) {
+		public string GetString( string fieldName )
+		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
 			ArgumentGuard.ThrowIfNullOrEmpty( fieldName );
 

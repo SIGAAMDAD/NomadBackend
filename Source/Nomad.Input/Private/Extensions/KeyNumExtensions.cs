@@ -18,7 +18,8 @@ using System.Runtime.CompilerServices;
 using Nomad.Core.Input.ValueObjects;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.Extensions {
+namespace Nomad.Input.Private.Extensions
+{
 	/*
 	===================================================================================
 	
@@ -30,7 +31,8 @@ namespace Nomad.Input.Private.Extensions {
 	/// 
 	/// </summary>
 
-	internal static class KeyNumExtensions {
+	internal static class KeyNumExtensions
+	{
 		/*
 		===============
 		ToControlId
@@ -43,7 +45,8 @@ namespace Nomad.Input.Private.Extensions {
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static InputControlId ToControlId( this KeyNum keyNum ) {
+		public static InputControlId ToControlId( this KeyNum keyNum )
+		{
 			return (byte)keyNum < (byte)KeyNum.Count ? (InputControlId)((byte)keyNum + 1) : throw new ArgumentOutOfRangeException( nameof( keyNum ) );
 		}
 	};

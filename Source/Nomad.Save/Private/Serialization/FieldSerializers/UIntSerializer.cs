@@ -17,7 +17,8 @@ using System.Runtime.CompilerServices;
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.Util;
 
-namespace Nomad.Save.Private.Serialization.FieldSerializers {
+namespace Nomad.Save.Private.Serialization.FieldSerializers
+{
 	/*
 	===================================================================================
 
@@ -29,7 +30,8 @@ namespace Nomad.Save.Private.Serialization.FieldSerializers {
 	///
 	/// </summary>
 
-	internal sealed class UIntSerializer : IFieldSerializer<uint> {
+	internal sealed class UIntSerializer : IFieldSerializer<uint>
+	{
 		public AnyType FieldType => AnyType.UInt32;
 
 		/*

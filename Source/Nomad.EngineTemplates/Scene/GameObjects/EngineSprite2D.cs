@@ -21,7 +21,7 @@ using Nomad.EngineTemplates.BaseClasses;
 
 namespace Nomad.EngineTemplates.Scene.GameObjects
 {
-	/// <summary>
+    /// <summary>
     /// Declares shared template metadata for 2D sprite wrappers.
     /// </summary>
     [TemplateClass(
@@ -53,7 +53,7 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
         GodotSetterExpression = "base.FlipV = value",
         UnityGetterExpression = "GetComponent<global::UnityEngine.SpriteRenderer>().flipY",
         UnitySetterExpression = "GetComponent<global::UnityEngine.SpriteRenderer>().flipY = value")]
-	[TemplateObject2D]
+    [TemplateObject2D]
     internal class TemplateSprite2D
     {
     }

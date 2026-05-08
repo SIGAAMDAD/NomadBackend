@@ -15,7 +15,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 
-namespace Nomad.Save.Private.ValueObjects {
+namespace Nomad.Save.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -27,7 +28,8 @@ namespace Nomad.Save.Private.ValueObjects {
 	/// Describes a save backup file known to the save system.
 	/// </summary>
 
-	internal readonly struct BackupData : IEquatable<BackupData> {
+	internal readonly struct BackupData : IEquatable<BackupData>
+	{
 		public static readonly BackupData Empty = new BackupData(
 			sourcePath: string.Empty,
 			backupPath: string.Empty,
@@ -53,7 +55,8 @@ namespace Nomad.Save.Private.ValueObjects {
 			DateTime createdUtc,
 			long sizeBytes,
 			int order
-		) {
+		)
+		{
 			SourcePath = sourcePath ?? string.Empty;
 			BackupPath = backupPath ?? string.Empty;
 			SaveName = saveName ?? string.Empty;
@@ -62,18 +65,21 @@ namespace Nomad.Save.Private.ValueObjects {
 			Order = order;
 		}
 
-		public bool Equals( BackupData other ) {
+		public bool Equals( BackupData other )
+		{
 			return BackupPath.Equals( other.BackupPath, StringComparison.OrdinalIgnoreCase )
 				&& SaveName.Equals( other.SaveName, StringComparison.Ordinal )
 				&& CreatedUtc.Equals( other.CreatedUtc )
 				&& Order == other.Order;
 		}
 
-		public override bool Equals( object? obj ) {
+		public override bool Equals( object? obj )
+		{
 			return obj is BackupData other && Equals( other );
 		}
 
-		public override int GetHashCode() {
+		public override int GetHashCode()
+		{
 			return HashCode.Combine(
 				BackupPath.ToUpperInvariant(),
 				SaveName,

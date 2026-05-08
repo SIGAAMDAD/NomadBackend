@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using Nomad.Audio.Interfaces;
 
-namespace Nomad.Audio.Fmod.Private.Entities {
+namespace Nomad.Audio.Fmod.Private.Entities
+{
 	/*
 	===================================================================================
 	
@@ -28,7 +29,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 	/// 
 	/// </summary>
 
-	internal sealed class FMODAudioGroup : IAudioGroup {
+	internal sealed class FMODAudioGroup : IAudioGroup
+	{
 		public string Name => _name;
 		private readonly string _name;
 
@@ -62,7 +64,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// </summary>
 		/// <param name="bus"></param>
 		/// <param name="name"></param>
-		public FMODAudioGroup( FMOD.Studio.Bus bus, string name ) {
+		public FMODAudioGroup( FMOD.Studio.Bus bus, string name )
+		{
 			_bus = bus;
 			_name = name;
 

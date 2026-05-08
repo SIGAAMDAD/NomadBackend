@@ -21,7 +21,8 @@ using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
 
-namespace Nomad.Events.Private.SubscriptionSets {
+namespace Nomad.Events.Private.SubscriptionSets
+{
 	/*
 	===================================================================================
 
@@ -36,7 +37,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 	/// DO NOT MULTITHREAD THIS, YOU WILL GET RACE CONDITIONS!!!
 	/// </remarks>
 	internal sealed class LockFreeSubscriptionSet<TArgs> : SubscriptionSetBase<TArgs>
-		where TArgs : struct {
+		where TArgs : struct
+	{
 		private readonly SubscriptionCache<TArgs, EventCallback<TArgs>> _genericSubscriptions;
 
 		/*
@@ -51,7 +53,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="logger"></param>
 		/// <param name="exceptionPolicy"></param>
 		public LockFreeSubscriptionSet( IGameEvent<TArgs> eventData, ILoggerService logger, EventExceptionPolicy exceptionPolicy )
-			: base( eventData, logger, exceptionPolicy ) {
+			: base( eventData, logger, exceptionPolicy )
+		{
 			_genericSubscriptions = new SubscriptionCache<TArgs, EventCallback<TArgs>>();
 		}
 
@@ -63,7 +66,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <summary>
 		///
 		/// </summary>
-		protected override void OnDispose() {
+		protected override void OnDispose()
+		{
 			_genericSubscriptions?.Dispose();
 		}
 
@@ -77,7 +81,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback">The method that is called whenever the event triggers.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
-		public override bool AddSubscription( EventCallback<TArgs> callback ) {
+		public override bool AddSubscription( EventCallback<TArgs> callback )
+		{
 			ThrowIfDisposed();
 			ArgumentGuard.ThrowIfNull( callback );
 
@@ -101,7 +106,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <exception cref="NotSupportedException"></exception>
-		public override bool AddSubscriptionAsync( AsyncEventCallback<TArgs> callback ) {
+		public override bool AddSubscriptionAsync( AsyncEventCallback<TArgs> callback )
+		{
 			throw new NotSupportedException( $"{nameof( LockFreeSubscriptionSet<TArgs> )} does not support async subscriptions." );
 		}
 
@@ -115,7 +121,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback">The callback to remove from the subscription list.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
-		public override bool RemoveSubscription( EventCallback<TArgs> callback ) {
+		public override bool RemoveSubscription( EventCallback<TArgs> callback )
+		{
 			ThrowIfDisposed();
 			ArgumentGuard.ThrowIfNull( callback );
 
@@ -139,7 +146,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <exception cref="NotSupportedException"></exception>
-		public override bool RemoveSubscriptionAsync( AsyncEventCallback<TArgs> callback ) {
+		public override bool RemoveSubscriptionAsync( AsyncEventCallback<TArgs> callback )
+		{
 			throw new NotSupportedException( $"{nameof( LockFreeSubscriptionSet<TArgs> )} does not support async subscriptions." );
 		}
 
@@ -152,7 +160,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// "Publishes" an event to all subscribers.
 		/// </summary>
 		/// <param name="args"></param>
-		public override void Pump( in TArgs args ) {
+		public override void Pump( in TArgs args )
+		{
 			ThrowIfDisposed();
 
 			List<EventHandlerException>? failures = null;
@@ -182,7 +191,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="ct"></param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
-		public override Task PumpAsync( TArgs args, CancellationToken ct ) {
+		public override Task PumpAsync( TArgs args, CancellationToken ct )
+		{
 			throw new NotSupportedException( $"{nameof( LockFreeSubscriptionSet<TArgs> )} does not support async pumping." );
 		}
 
@@ -197,7 +207,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="callback"></param>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public override bool ContainsCallback( EventCallback<TArgs> callback, out int index ) {
+		public override bool ContainsCallback( EventCallback<TArgs> callback, out int index )
+		{
 			ThrowIfDisposed();
 			return TryFindCallback( _genericSubscriptions, callback, out index );
 		}
@@ -214,7 +225,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="index"></param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
-		public override bool ContainsCallbackAsync( AsyncEventCallback<TArgs> callback, out int index ) {
+		public override bool ContainsCallbackAsync( AsyncEventCallback<TArgs> callback, out int index )
+		{
 			throw new NotSupportedException( $"{nameof( LockFreeSubscriptionSet<TArgs> )} does not support async subscriptions." );
 		}
 	};

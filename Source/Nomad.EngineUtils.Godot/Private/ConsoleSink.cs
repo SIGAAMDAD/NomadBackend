@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using Godot;
 using Nomad.Core.Logger;
 
-namespace Nomad.EngineUtils.Godot.Private {
+namespace Nomad.EngineUtils.Godot.Private
+{
 	/*
 	===================================================================================
 
@@ -28,7 +29,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 	///
 	/// </summary>
 
-	internal sealed class ConsoleSink : SinkBase {
+	internal sealed class ConsoleSink : SinkBase
+	{
 		/*
 		===============
 		Print
@@ -38,7 +40,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		///
 		/// </summary>
 		/// <param name="message"></param>
-		public override void Print( string message ) {
+		public override void Print( string message )
+		{
 			GD.PrintRich( message );
 		}
 
@@ -50,7 +53,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public override void Clear() {
+		public override void Clear()
+		{
 			System.Console.Clear();
 		}
 
@@ -62,7 +66,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public override void Flush() {
+		public override void Flush()
+		{
 		}
 	};
 };

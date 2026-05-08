@@ -26,7 +26,7 @@ namespace Nomad.EngineTemplates.BaseClasses
     /// </summary>
     [TemplateClass(Contract = typeof(IUIElement))]
     [TemplateBaseClass]
-	[TemplateEvent(Name = "DisplayStateChanged", PayloadType = typeof(bool))]
+    [TemplateEvent(Name = "DisplayStateChanged", PayloadType = typeof(bool))]
     [TemplateEvent(Name = "Focused", PayloadType = typeof(EmptyEventArgs))]
     [TemplateEvent(Name = "Unfocused", PayloadType = typeof(EmptyEventArgs))]
     [TemplateProperty(

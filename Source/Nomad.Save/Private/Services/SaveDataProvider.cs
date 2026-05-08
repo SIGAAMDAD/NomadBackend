@@ -32,7 +32,8 @@ using Nomad.Save.Private.Repositories;
 using Nomad.Core.CVars;
 using Nomad.CVars;
 
-namespace Nomad.Save.Private.Services {
+namespace Nomad.Save.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -45,7 +46,8 @@ namespace Nomad.Save.Private.Services {
 	/// </summary>
 	/// TODO: refactor this is doing WAY too much.
 
-	internal sealed class SaveDataProvider : ISaveDataProvider {
+	internal sealed class SaveDataProvider : ISaveDataProvider
+	{
 		private readonly ISaveWriterService _writerService;
 		private readonly ISaveReaderService _readerService;
 
@@ -83,7 +85,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="cvarSystem"></param>
 		/// <param name="fileSystem"></param>
 		/// <param name="logger"></param>
-		public SaveDataProvider( IEngineService engineService, IGameEventRegistryService eventFactory, ICVarSystemService cvarSystem, IFileSystem fileSystem, ILoggerService logger ) {
+		public SaveDataProvider( IEngineService engineService, IGameEventRegistryService eventFactory, ICVarSystemService cvarSystem, IFileSystem fileSystem, ILoggerService logger )
+		{
 			ArgumentGuard.ThrowIfNull( engineService, nameof( engineService ) );
 			ArgumentGuard.ThrowIfNull( eventFactory, nameof( eventFactory ) );
 			ArgumentGuard.ThrowIfNull( cvarSystem, nameof( cvarSystem ) );
@@ -119,7 +122,8 @@ namespace Nomad.Save.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_readerService?.Dispose();
 				_writerService?.Dispose();
@@ -146,7 +150,8 @@ namespace Nomad.Save.Private.Services {
 		///
 		/// </summary>
 		/// <returns></returns>
-		public IReadOnlyList<SaveFileMetadata> ListSaveFiles() {
+		public IReadOnlyList<SaveFileMetadata> ListSaveFiles()
+		{
 			return _slotRepository.GetMetadataList();
 		}
 
@@ -160,7 +165,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public async Task Load( string name ) {
+		public async Task Load( string name )
+		{
 			try {
 				_readerService.Load( name );
 				_loadBegin.Publish( new LoadBeginEventArgs( _readerService ) );
@@ -182,7 +188,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="name"></param>
 		/// <param name="gameVersion"></param>
 		/// <returns></returns>
-		public async Task Save( string name, GameVersion gameVersion ) {
+		public async Task Save( string name, GameVersion gameVersion )
+		{
 			try {
 				_writerService.BeginSave( name, gameVersion );
 				_saveBegin.Publish( new SaveBeginEventArgs( _writerService ) );
@@ -203,7 +210,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="engineService"></param>
 		/// <param name="cvarSystem"></param>
 		/// <exception cref="CVarMissing"></exception>
-		private static SaveConfig InitConfiguration( IEngineService engineService, ICVarSystemService cvarSystem ) {
+		private static SaveConfig InitConfiguration( IEngineService engineService, ICVarSystemService cvarSystem )
+		{
 			SaveCVarRegistry.RegisterCVars( engineService, cvarSystem );
 
 			ICVar<string> dataPath = cvarSystem.GetCVarOrThrow<string>( Constants.CVars.DATA_PATH );
@@ -246,7 +254,8 @@ namespace Nomad.Save.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnAutoSaveIntervalChanged( in CVarValueChangedEventArgs<int> args ) {
+		private void OnAutoSaveIntervalChanged( in CVarValueChangedEventArgs<int> args )
+		{
 			_config = _config with { AutoSaveInterval = args.NewValue };
 		}
 
@@ -259,7 +268,8 @@ namespace Nomad.Save.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnAutoSaveEnabledChanged( in CVarValueChangedEventArgs<bool> args ) {
+		private void OnAutoSaveEnabledChanged( in CVarValueChangedEventArgs<bool> args )
+		{
 			_config = _config with { AutoSave = args.NewValue };
 		}
 	};

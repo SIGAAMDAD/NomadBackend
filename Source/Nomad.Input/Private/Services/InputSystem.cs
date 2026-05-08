@@ -30,7 +30,8 @@ using Nomad.Input.Private.Repositories;
 using Nomad.Input.Private.ValueObjects;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.Services {
+namespace Nomad.Input.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -42,7 +43,8 @@ namespace Nomad.Input.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class InputSystem : IInputSystem {
+	internal sealed class InputSystem : IInputSystem
+	{
 		public InputScheme Mode => _mode;
 		private readonly InputScheme _mode;
 
@@ -83,7 +85,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="logger"></param>
 		/// <param name="eventFactory"></param>
 		/// <param name="registry"></param>
-		public InputSystem( IFileSystem fileSystem, ICVarSystemService cvarSystem, ILoggerService logger, IGameEventRegistryService eventFactory, IServiceRegistry registry ) {
+		public InputSystem( IFileSystem fileSystem, ICVarSystemService cvarSystem, ILoggerService logger, IGameEventRegistryService eventFactory, IServiceRegistry registry )
+		{
 			ArgumentGuard.ThrowIfNull( eventFactory, nameof( eventFactory ) );
 			ArgumentGuard.ThrowIfNull( cvarSystem, nameof( cvarSystem ) );
 			ArgumentGuard.ThrowIfNull( registry, nameof( registry ) );
@@ -137,7 +140,8 @@ namespace Nomad.Input.Private.Services {
 				.Subscribe( OnGamepadButtonEventTriggered );
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _isDisposed ) {
 				return;
 			}
@@ -167,7 +171,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="keyEvent"></param>
-		public void PushKeyboardEvent( in KeyboardEventArgs keyEvent ) {
+		public void PushKeyboardEvent( in KeyboardEventArgs keyEvent )
+		{
 			_stateService.SetPressed( InputDeviceSlot.Keyboard, keyEvent.KeyNum.ToControlId(), keyEvent.Pressed );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
@@ -186,7 +191,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="mouseButtonEvent"></param>
-		public void PushMouseButtonEvent( in MouseButtonEventArgs mouseButtonEvent ) {
+		public void PushMouseButtonEvent( in MouseButtonEventArgs mouseButtonEvent )
+		{
 			_stateService.SetPressed( InputDeviceSlot.Mouse, mouseButtonEvent.Button.ToControlId(), mouseButtonEvent.Pressed );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
@@ -204,7 +210,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="mouseMotionEvent"></param>
-		public void PushMouseMotionEvent( in MouseMotionEventArgs mouseMotionEvent ) {
+		public void PushMouseMotionEvent( in MouseMotionEventArgs mouseMotionEvent )
+		{
 			_stateService.AddMouseDelta( new Vector2( mouseMotionEvent.RelativeX, mouseMotionEvent.RelativeY ) );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
@@ -222,7 +229,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="mousePositionChangedEvent"></param>
-		public void PushMousePositionChangedEvent( in MousePositionChangedEventArgs mousePositionChangedEvent ) {
+		public void PushMousePositionChangedEvent( in MousePositionChangedEventArgs mousePositionChangedEvent )
+		{
 			_stateService.SetMousePosition( new Vector2( mousePositionChangedEvent.PositionX, mousePositionChangedEvent.PositionY ) );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
@@ -240,7 +248,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="gamepadButtonEvent"></param>
-		public void PushGamepadButtonEvent( in GamepadButtonEventArgs gamepadButtonEvent ) {
+		public void PushGamepadButtonEvent( in GamepadButtonEventArgs gamepadButtonEvent )
+		{
 			InputDeviceSlot deviceSlot = GetGamepadDeviceSlot( gamepadButtonEvent.DeviceId );
 			_stateService.SetPressed( deviceSlot, gamepadButtonEvent.Button.ToControlId(), gamepadButtonEvent.Pressed );
 
@@ -259,7 +268,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="gamepadAxisEvent"></param>
-		public void PushGamepadAxisEvent( in GamepadAxisEventArgs gamepadAxisEvent ) {
+		public void PushGamepadAxisEvent( in GamepadAxisEventArgs gamepadAxisEvent )
+		{
 			InputDeviceSlot deviceSlot = GetGamepadDeviceSlot( gamepadAxisEvent.DeviceId );
 			InputControlId controlId = gamepadAxisEvent.Stick.ToControlId();
 
@@ -281,7 +291,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="graph"></param>
 		/// <param name="actions"></param>
-		private void DispatchResolved( CompiledBindingGraph graph, ReadOnlySpan<ResolvedAction> actions ) {
+		private void DispatchResolved( CompiledBindingGraph graph, ReadOnlySpan<ResolvedAction> actions )
+		{
 			for ( int i = 0; i < actions.Length; i++ ) {
 				_dispatchService.Dispatch( graph, in actions[i] );
 			}
@@ -295,7 +306,8 @@ namespace Nomad.Input.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		private void RecompileBindings() {
+		private void RecompileBindings()
+		{
 			_compilerService.CompileIntoRepository( _bindRepository.GetAllBindings() );
 		}
 
@@ -310,7 +322,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="deviceId"></param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		private static InputDeviceSlot GetGamepadDeviceSlot( int deviceId ) {
+		private static InputDeviceSlot GetGamepadDeviceSlot( int deviceId )
+		{
 			return deviceId switch {
 				0 => InputDeviceSlot.Gamepad0,
 				1 => InputDeviceSlot.Gamepad1,
@@ -329,7 +342,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnKeyboardEventTriggered( in KeyboardEventArgs args ) {
+		private void OnKeyboardEventTriggered( in KeyboardEventArgs args )
+		{
 			if ( _processEvents ) {
 				PushKeyboardEvent( in args );
 			}
@@ -344,7 +358,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnMouseButtonEventTriggered( in MouseButtonEventArgs args ) {
+		private void OnMouseButtonEventTriggered( in MouseButtonEventArgs args )
+		{
 			if ( _processEvents ) {
 				PushMouseButtonEvent( in args );
 			}
@@ -359,7 +374,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnMouseMotionEventTriggered( in MouseMotionEventArgs args ) {
+		private void OnMouseMotionEventTriggered( in MouseMotionEventArgs args )
+		{
 			if ( _processEvents ) {
 				PushMouseMotionEvent( in args );
 			}
@@ -374,7 +390,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnMousePositionChangedEventTriggered( in MousePositionChangedEventArgs args ) {
+		private void OnMousePositionChangedEventTriggered( in MousePositionChangedEventArgs args )
+		{
 			if ( _processEvents ) {
 				PushMousePositionChangedEvent( in args );
 			}
@@ -389,7 +406,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnGamepadAxisEventTriggered( in GamepadAxisEventArgs args ) {
+		private void OnGamepadAxisEventTriggered( in GamepadAxisEventArgs args )
+		{
 			if ( _processEvents ) {
 				PushGamepadAxisEvent( in args );
 			}
@@ -404,7 +422,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnGamepadButtonEventTriggered( in GamepadButtonEventArgs args ) {
+		private void OnGamepadButtonEventTriggered( in GamepadButtonEventArgs args )
+		{
 			if ( _processEvents ) {
 				PushGamepadButtonEvent( in args );
 			}
@@ -419,7 +438,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnPauseStateChanged( in PauseStateChangedEventArgs args ) {
+		private void OnPauseStateChanged( in PauseStateChangedEventArgs args )
+		{
 			_processEvents = !args.IsPaused;
 		}
 	}

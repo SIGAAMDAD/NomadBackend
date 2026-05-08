@@ -22,7 +22,7 @@ namespace Nomad.EngineTemplates.Assets
     /// Declares the engine template for material assets.
     /// </summary>
 	[TemplateClass(Contract = typeof(IMaterial), IsAsset = true, GodotBase = "Godot.Material", UnityBase = "UnityEngine.Material")]
-	[TemplateNamespace(Name = "Assets")]
+    [TemplateNamespace(Name = "Assets")]
     internal class EngineMaterial
     {
     }

@@ -29,7 +29,8 @@ using Nomad.Core.Logger;
 using Nomad.CVars;
 using Nomad.ResourceCache;
 
-namespace Nomad.Audio.Fmod.Private.Services {
+namespace Nomad.Audio.Fmod.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -41,7 +42,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	/// 
 	/// </summary>
 
-	internal unsafe sealed class FMODChannelService : IChannelRepository {
+	internal unsafe sealed class FMODChannelService : IChannelRepository
+	{
 		private const int INVALID_INDEX = -1;
 		private const byte FLAG_ESSENTIAL = 1 << 0;
 
@@ -126,7 +128,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			ILoggerService logger,
 			ICVarSystemService cvarSystem,
 			IListenerService listenerService,
-			FMODDevice fmodSystem ) {
+			FMODDevice fmodSystem )
+		{
 
 			_listenerService = listenerService;
 			_eventRepository = fmodSystem.EventRepository;
@@ -204,7 +207,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			_maxActiveChannels.ValueChanged.Subscribe( OnMaxActiveChannelsValueChanged );
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _disposed ) {
 				return;
 			}
@@ -224,7 +228,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			Vector2 position,
 			SoundCategory category,
 			float basePriority = 0.5f,
-			bool isEssential = false ) {
+			bool isEssential = false )
+		{
 
 			ProcessFinishedInstances();
 
@@ -287,7 +292,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return new FMODChannelHandle( slot, generation );
 		}
 
-		public void Update( float deltaTime ) {
+		public void Update( float deltaTime )
+		{
 			_elapsedSeconds += deltaTime;
 
 			ProcessFinishedInstances();
@@ -297,7 +303,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			EnforceCategoryLimits();
 		}
 
-		public bool IsAlive( FMODChannelHandle handle ) {
+		public bool IsAlive( FMODChannelHandle handle )
+		{
 			if ( !handle.IsValid ) {
 				return false;
 			}
@@ -308,7 +315,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return _slotGeneration[slot] == handle.Generation && _slotToDense[slot] != INVALID_INDEX;
 		}
 
-		public bool TryStopChannel( FMODChannelHandle handle, bool wasStolen = false ) {
+		public bool TryStopChannel( FMODChannelHandle handle, bool wasStolen = false )
+		{
 			if ( !IsAlive( handle ) ) {
 				return false;
 			}
@@ -316,7 +324,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return true;
 		}
 
-		public bool TryGetChannelView( FMODChannelHandle handle, out FMODChannelView view ) {
+		public bool TryGetChannelView( FMODChannelHandle handle, out FMODChannelView view )
+		{
 			view = default;
 			if ( !IsAlive( handle ) ) {
 				return false;
@@ -344,7 +353,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public bool TryResolveDense( FMODChannelHandle handle, out int dense ) {
+		public bool TryResolveDense( FMODChannelHandle handle, out int dense )
+		{
 			dense = INVALID_INDEX;
 
 			int slot = handle.Slot;
@@ -358,7 +368,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return dense != INVALID_INDEX;
 		}
 
-		public bool TrySetPosition( FMODChannelHandle handle, Vector2 position ) {
+		public bool TrySetPosition( FMODChannelHandle handle, Vector2 position )
+		{
 			if ( !TryResolveDense( handle, out int dense ) ) {
 				return false;
 			}
@@ -374,7 +385,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return true;
 		}
 
-		public bool TrySetVolume( FMODChannelHandle handle, float volume ) {
+		public bool TrySetVolume( FMODChannelHandle handle, float volume )
+		{
 			if ( !TryResolveDense( handle, out int dense ) ) {
 				return false;
 			}
@@ -388,7 +400,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return true;
 		}
 
-		public bool TrySetPitch( FMODChannelHandle handle, float pitch ) {
+		public bool TrySetPitch( FMODChannelHandle handle, float pitch )
+		{
 			if ( !TryResolveDense( handle, out int dense ) ) {
 				return false;
 			}
@@ -403,12 +416,14 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return true;
 		}
 
-		public bool IsPlaying( FMODChannelHandle handle ) {
+		public bool IsPlaying( FMODChannelHandle handle )
+		{
 			return TryResolveDense( handle, out int dense ) && IsInstancePlaying( _arena.InstancePtr[dense] );
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private int AcquireSlotOrSteal( float now, float incomingPriority, ushort incomingCategoryId, bool isEssential ) {
+		private int AcquireSlotOrSteal( float now, float incomingPriority, ushort incomingCategoryId, bool isEssential )
+		{
 			if ( !isEssential && _denseCount >= _maxActiveChannels.Value ) {
 				return StealBestCandidate( now, incomingPriority, incomingCategoryId );
 			}
@@ -420,7 +435,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return StealBestCandidate( now, incomingPriority, incomingCategoryId );
 		}
 
-		private int StealBestCandidate( float now, float incomingPriority, ushort incomingCategoryId ) {
+		private int StealBestCandidate( float now, float incomingPriority, ushort incomingCategoryId )
+		{
 			float bestScore = float.MinValue;
 			int bestDense = INVALID_INDEX;
 
@@ -459,7 +475,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return reusedSlot;
 		}
 
-		private void ProcessFinishedInstances() {
+		private void ProcessFinishedInstances()
+		{
 			while ( _finishedInstances.TryDequeue( out nint instanceHandle ) ) {
 				if ( _instanceToSlot.TryGet( instanceHandle, out int slot ) ) {
 					if ( _slotToDense[slot] != INVALID_INDEX ) {
@@ -469,7 +486,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			}
 		}
 
-		private void DecayStealCountsIfNeeded() {
+		private void DecayStealCountsIfNeeded()
+		{
 			if ( !_shouldDecay ) {
 				return;
 			}
@@ -492,7 +510,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			_dirtyStealEventCount = write;
 		}
 
-		private void UpdatePrioritiesAndVolumes() {
+		private void UpdatePrioritiesAndVolumes()
+		{
 			Vector2 listener = _listenerService.ActiveListener;
 			float lx = listener.X;
 			float ly = listener.Y;
@@ -521,7 +540,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			}
 		}
 
-		private void CleanupStoppedInstances() {
+		private void CleanupStoppedInstances()
+		{
 			for ( int dense = _denseCount - 1; dense >= 0; dense-- ) {
 				if ( !IsInstancePlaying( _arena.InstancePtr[dense] ) ) {
 					ForceStopDense( dense, false );
@@ -529,7 +549,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			}
 		}
 
-		private void EnforceCategoryLimits() {
+		private void EnforceCategoryLimits()
+		{
 			for ( ushort categoryNumericId = 0; categoryNumericId < _categoryCount; categoryNumericId++ ) {
 				while ( _activeCountByCategoryId[categoryNumericId] > _maxSimultaneousByCategoryId[categoryNumericId] ) {
 					int victimSlot = FindLowestPrioritySlotInCategory( categoryNumericId );
@@ -541,7 +562,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			}
 		}
 
-		private int FindLowestPrioritySlotInCategory( ushort categoryNumericId ) {
+		private int FindLowestPrioritySlotInCategory( ushort categoryNumericId )
+		{
 			int slot = _categoryHeadById[categoryNumericId];
 			int bestSlot = INVALID_INDEX;
 			float lowestPriority = float.MaxValue;
@@ -564,14 +586,16 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return bestSlot;
 		}
 
-		private void ForceStopSlot( int slot, bool wasStolen ) {
+		private void ForceStopSlot( int slot, bool wasStolen )
+		{
 			int dense = _slotToDense[slot];
 			if ( dense != INVALID_INDEX ) {
 				ForceStopDense( dense, wasStolen );
 			}
 		}
 
-		private void ForceStopDense( int dense, bool wasStolen ) {
+		private void ForceStopDense( int dense, bool wasStolen )
+		{
 			int slot = _denseToSlot[dense];
 			ushort cat = _arena.CategoryId[dense];
 
@@ -614,7 +638,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void MoveDense( int srcDense, int dstDense ) {
+		private void MoveDense( int srcDense, int dstDense )
+		{
 			int movedSlot = _denseToSlot[srcDense];
 			_denseToSlot[dstDense] = movedSlot;
 			_slotToDense[movedSlot] = dstDense;
@@ -636,7 +661,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void LinkSlotIntoCategory( int slot, ushort categoryNumericId ) {
+		private void LinkSlotIntoCategory( int slot, ushort categoryNumericId )
+		{
 			int head = _categoryHeadById[categoryNumericId];
 			_arena.SlotPrevInCategory[slot] = INVALID_INDEX;
 			_arena.SlotNextInCategory[slot] = head;
@@ -647,7 +673,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void UnlinkSlotFromCategory( int slot, ushort categoryNumericId ) {
+		private void UnlinkSlotFromCategory( int slot, ushort categoryNumericId )
+		{
 			int prev = _arena.SlotPrevInCategory[slot];
 			int next = _arena.SlotNextInCategory[slot];
 
@@ -670,7 +697,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			ushort categoryNumericId,
 			float x,
 			float y,
-			float basePriority ) {
+			float basePriority )
+		{
 
 			Vector2 listener = _listenerService.ActiveListener;
 			float dx = x - listener.X;
@@ -695,7 +723,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return priority;
 		}
 
-		private float CalculateStealScore( int dense, float now, float incomingPriority, ushort incomingCategoryId ) {
+		private float CalculateStealScore( int dense, float now, float incomingPriority, ushort incomingCategoryId )
+		{
 			// You can substitute your exact existing steal formula here.
 			// This shape is intentionally simple and branch-light.
 			float age = now - _arena.StartTime[dense];
@@ -718,7 +747,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void RecordSteal( ushort eventNumericId ) {
+		private void RecordSteal( ushort eventNumericId )
+		{
 			if ( _consecutiveStealCountByEventId[eventNumericId] < ushort.MaxValue ) {
 				_consecutiveStealCountByEventId[eventNumericId]++;
 			}
@@ -729,7 +759,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			_shouldDecay = true;
 		}
 
-		private FMODEventResource CreateSoundInstance( string eventName ) {
+		private FMODEventResource CreateSoundInstance( string eventName )
+		{
 			var cached = _eventRepository.GetCached( eventName )
 				?? throw new Exception( $"Couldn't find event description for '{eventName}'." );
 			cached.Get( out var description );
@@ -742,13 +773,15 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static bool IsInstancePlaying( nint instanceHandle ) {
+		private static bool IsInstancePlaying( nint instanceHandle )
+		{
 			var instance = new FMOD.Studio.EventInstance( instanceHandle );
 			instance.getPlaybackState( out var state );
 			return instance.isValid() && state == FMOD.Studio.PLAYBACK_STATE.PLAYING;
 		}
 
-		private ushort GetOrCreateEventId( string eventName ) {
+		private ushort GetOrCreateEventId( string eventName )
+		{
 			if ( _eventIds.TryGetValue( eventName, out ushort existing ) ) {
 				return existing;
 			}
@@ -760,7 +793,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return id;
 		}
 
-		private ushort GetOrCreateCategoryId( SoundCategory category ) {
+		private ushort GetOrCreateCategoryId( SoundCategory category )
+		{
 			string categoryName = category.Config.Name;
 			if ( _categoryIds.TryGetValue( categoryName, out ushort existing ) ) {
 				return existing;
@@ -778,7 +812,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return id;
 		}
 
-		private void EnsureEventCapacity( int count ) {
+		private void EnsureEventCapacity( int count )
+		{
 			if ( count <= _eventNames.Length ) {
 				return;
 			}
@@ -790,7 +825,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			Array.Resize( ref _dirtyStealEventIds, newSize );
 		}
 
-		private void EnsureCategoryCapacity( int count ) {
+		private void EnsureCategoryCapacity( int count )
+		{
 			if ( count <= _categoryNames.Length ) {
 				return;
 			}
@@ -808,7 +844,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			}
 		}
 
-		private void InitConfig( ICVarSystemService cvarSystem ) {
+		private void InitConfig( ICVarSystemService cvarSystem )
+		{
 			var effectsVolume = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.EFFECTS_VOLUME );
 			_effectsVolume = effectsVolume.Value;
 			effectsVolume.ValueChanged.Subscribe( OnEffectsVolumeChanged );
@@ -818,7 +855,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			minTimeBetweenChannelSteals.ValueChanged.Subscribe( OnMinTimeBetweenChannelStealsValueChanged );
 		}
 
-		private void OnMaxActiveChannelsValueChanged( in CVarValueChangedEventArgs<int> args ) {
+		private void OnMaxActiveChannelsValueChanged( in CVarValueChangedEventArgs<int> args )
+		{
 			if ( args.NewValue <= 0 ) {
 				_maxActiveChannels.Value = Math.Max( 1, args.OldValue );
 				return;
@@ -828,21 +866,25 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			}
 		}
 
-		private void OnEffectsVolumeChanged( in CVarValueChangedEventArgs<float> args ) {
+		private void OnEffectsVolumeChanged( in CVarValueChangedEventArgs<float> args )
+		{
 			_effectsVolume = args.NewValue;
 		}
 
-		private void OnMinTimeBetweenChannelStealsValueChanged( in CVarValueChangedEventArgs<float> args ) {
+		private void OnMinTimeBetweenChannelStealsValueChanged( in CVarValueChangedEventArgs<float> args )
+		{
 			_minTimeBetweenChannelSteals = args.NewValue;
 		}
 
-		private FMOD.RESULT SoundFinishedCallback( FMOD.Studio.EVENT_CALLBACK_TYPE type, nint instance, IntPtr parameters ) {
+		private FMOD.RESULT SoundFinishedCallback( FMOD.Studio.EVENT_CALLBACK_TYPE type, nint instance, IntPtr parameters )
+		{
 			_finishedInstances.Enqueue( instance );
 			return FMOD.RESULT.OK;
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static int NextPow2( int value ) {
+		private static int NextPow2( int value )
+		{
 			value--;
 			value |= value >> 1;
 			value |= value >> 2;
@@ -853,14 +895,16 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			return value < 8 ? 8 : value;
 		}
 
-		private sealed class InstanceToSlotMap {
+		private sealed class InstanceToSlotMap
+		{
 			private nint[] _keys;
 			private int[] _values;
 			private byte[] _state; // 0 empty, 1 used, 2 tombstone
 			private int _count;
 			private int _mask;
 
-			public InstanceToSlotMap( int capacity ) {
+			public InstanceToSlotMap( int capacity )
+			{
 				int size = NextPow2( Math.Max( 8, capacity ) );
 				_keys = new nint[size];
 				_values = new int[size];
@@ -869,7 +913,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			}
 
 			[MethodImpl( MethodImplOptions.AggressiveInlining )]
-			public void Set( nint key, int value ) {
+			public void Set( nint key, int value )
+			{
 				if ( (_count + 1) * 2 >= _keys.Length ) {
 					Resize( _keys.Length << 1 );
 				}
@@ -877,7 +922,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			}
 
 			[MethodImpl( MethodImplOptions.AggressiveInlining )]
-			public bool TryGet( nint key, out int value ) {
+			public bool TryGet( nint key, out int value )
+			{
 				int idx = FindIndex( key );
 				if ( idx < 0 ) {
 					value = -1;
@@ -888,7 +934,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			}
 
 			[MethodImpl( MethodImplOptions.AggressiveInlining )]
-			public void Remove( nint key ) {
+			public void Remove( nint key )
+			{
 				int idx = FindIndex( key );
 				if ( idx < 0 ) {
 					return;
@@ -899,7 +946,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 				_count--;
 			}
 
-			private void InsertOrUpdate( nint key, int value ) {
+			private void InsertOrUpdate( nint key, int value )
+			{
 				int idx = Hash( key ) & _mask;
 				int firstTombstone = -1;
 				while ( true ) {
@@ -924,7 +972,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 				}
 			}
 
-			private int FindIndex( nint key ) {
+			private int FindIndex( nint key )
+			{
 				int idx = Hash( key ) & _mask;
 				while ( true ) {
 					byte state = _state[idx];
@@ -940,7 +989,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 				}
 			}
 
-			private void Resize( int newSize ) {
+			private void Resize( int newSize )
+			{
 				nint[] oldKeys = _keys;
 				int[] oldValues = _values;
 				byte[] oldState = _state;

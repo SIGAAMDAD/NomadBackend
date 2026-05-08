@@ -18,7 +18,8 @@ using System.Collections.Generic;
 using System.Threading;
 using Nomad.Audio.Interfaces;
 
-namespace Nomad.Audio.Fmod.Private.Repositories {
+namespace Nomad.Audio.Fmod.Private.Repositories
+{
 	/*
 	===================================================================================
 
@@ -30,9 +31,11 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 	///
 	/// </summary>
 
-	internal sealed class FMODGuidRepository : IGuidRepository<FMOD.GUID, FMOD.GUID> {
+	internal sealed class FMODGuidRepository : IGuidRepository<FMOD.GUID, FMOD.GUID>
+	{
 		private sealed class GUIDCache<TGuid, TId>
-			where TId : notnull {
+			where TId : notnull
+		{
 			private readonly Dictionary<TGuid, TId> _guids = new Dictionary<TGuid, TId>();
 			private readonly Dictionary<TId, TGuid> _reverseLookup = new Dictionary<TId, TGuid>();
 
@@ -44,7 +47,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 			Add
 			===============
 			*/
-			public void Add( TId path, TGuid guid ) {
+			public void Add( TId path, TGuid guid )
+			{
 				_guids[guid] = path;
 				_reverseLookup[path] = guid;
 			}
@@ -54,7 +58,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 			Clear
 			===============
 			*/
-			public void Clear() {
+			public void Clear()
+			{
 				_guids.Clear();
 				_reverseLookup.Clear();
 			}
@@ -75,7 +80,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_lock?.Dispose();
 			}
@@ -93,7 +99,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="path"></param>
 		/// <param name="guid"></param>
-		public void AddEventId( string path, FMOD.GUID guid ) {
+		public void AddEventId( string path, FMOD.GUID guid )
+		{
 			_lock.EnterWriteLock();
 			try {
 				_eventGuids.Add( path, guid );
@@ -112,7 +119,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="path"></param>
 		/// <param name="guid"></param>
-		public void AddBankId( string path, FMOD.GUID guid ) {
+		public void AddBankId( string path, FMOD.GUID guid )
+		{
 			_lock.EnterWriteLock();
 			try {
 				_bankGuids.Add( path, guid );
@@ -131,7 +139,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="guid"></param>
 		/// <returns></returns>
-		public string GetEventId( FMOD.GUID guid ) {
+		public string GetEventId( FMOD.GUID guid )
+		{
 			_lock.EnterUpgradeableReadLock();
 			try {
 				return _eventGuids[guid];
@@ -150,7 +159,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public FMOD.GUID GetEventGuid( string id ) {
+		public FMOD.GUID GetEventGuid( string id )
+		{
 			_lock.EnterUpgradeableReadLock();
 			try {
 				return _eventGuids[id];
@@ -169,7 +179,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="guid"></param>
 		/// <returns></returns>
-		public string GetBankId( FMOD.GUID guid ) {
+		public string GetBankId( FMOD.GUID guid )
+		{
 			_lock.EnterUpgradeableReadLock();
 			try {
 				return _bankGuids[guid];
@@ -188,7 +199,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public FMOD.GUID GetBankGuid( string id ) {
+		public FMOD.GUID GetBankGuid( string id )
+		{
 			_lock.EnterUpgradeableReadLock();
 			try {
 				return _bankGuids[id];

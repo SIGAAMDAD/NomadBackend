@@ -23,7 +23,8 @@ using System.Text;
 using Nomad.Core.CVars;
 using Nomad.CVars;
 
-namespace Nomad.Audio.Fmod.Private.ValueObjects {
+namespace Nomad.Audio.Fmod.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -35,7 +36,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 	///
 	/// </summary>
 
-	internal sealed class FMODSystemHandle : IDisposable {
+	internal sealed class FMODSystemHandle : IDisposable
+	{
 		public FMOD.Studio.System StudioSystem {
 			get {
 				lock ( _systemLock ) {
@@ -69,7 +71,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		/// <param name="cvarSystem"></param>
 		/// <param name="logger"></param>
 		/// <exception cref="CVarMissing"></exception>
-		public FMODSystemHandle( ICVarSystemService cvarSystem, ILoggerService logger ) {
+		public FMODSystemHandle( ICVarSystemService cvarSystem, ILoggerService logger )
+		{
 			_logger = logger;
 
 			var fmodLogging = cvarSystem.GetCVarOrThrow<bool>( Constants.CVars.EngineUtils.Audio.FMOD.LOGGING );
@@ -95,7 +98,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		/// <summary>
 		/// Releases the unmanaged FMOD system handles.
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _studioSystem.isValid() ) {
 				FMODValidator.ValidateCall( _system.close() );
 				FMODValidator.ValidateCall( _system.release() );
@@ -113,7 +117,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		===============
 		*/
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void Update() {
+		public void Update()
+		{
 #if DEBUG
 			FMODValidator.ValidateCall( StudioSystem.update() );
 			FMODValidator.ValidateCall( System.update() );
@@ -137,7 +142,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		/// <param name="func"></param>
 		/// <param name="message"></param>
 		/// <returns></returns>
-		private static FMOD.RESULT DebugCallback( FMOD.DEBUG_FLAGS flags, nint file, int line, nint func, nint message ) {
+		private static FMOD.RESULT DebugCallback( FMOD.DEBUG_FLAGS flags, nint file, int line, nint func, nint message )
+		{
 			string formattedMessage = Marshal.PtrToStringAnsi( message );
 			string formattedFile = Marshal.PtrToStringAnsi( file );
 			string formattedFunc = Marshal.PtrToStringAnsi( func );

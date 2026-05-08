@@ -22,7 +22,8 @@ using Nomad.Core.FileSystem;
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Save.Private.ValueObjects;
 
-namespace Nomad.Save.Private.Services {
+namespace Nomad.Save.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -39,7 +40,8 @@ namespace Nomad.Save.Private.Services {
 	/// replacement.
 	/// </remarks>
 
-	internal sealed class AtomicWriterService {
+	internal sealed class AtomicWriterService
+	{
 		private readonly IFileSystem _fileSystem;
 		private readonly BackupService _backupService;
 
@@ -55,7 +57,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="fileSystem">File-system service.</param>
 		/// <param name="backupService">Backup service.</param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public AtomicWriterService( IEngineService engineService, IFileSystem fileSystem, BackupService backupService ) {
+		public AtomicWriterService( IEngineService engineService, IFileSystem fileSystem, BackupService backupService )
+		{
 			_fileSystem = fileSystem ?? throw new ArgumentNullException( nameof( fileSystem ) );
 			_backupService = backupService ?? throw new ArgumentNullException( nameof( backupService ) );
 		}
@@ -70,7 +73,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <returns>Temporary path.</returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static string GetAtomicPathName() {
+		public static string GetAtomicPathName()
+		{
 			return Path.Combine( Path.GetTempPath(), Guid.NewGuid().ToString( "N" ) + ".tmp" );
 		}
 
@@ -85,7 +89,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="destinationFileName">Destination save path.</param>
 		/// <returns>Temporary path.</returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static string GetAtomicPathName( string destinationFileName ) {
+		public static string GetAtomicPathName( string destinationFileName )
+		{
 			if ( string.IsNullOrWhiteSpace( destinationFileName ) ) {
 				return GetAtomicPathName();
 			}
@@ -113,7 +118,8 @@ namespace Nomad.Save.Private.Services {
 		/// <exception cref="ArgumentNullException"></exception>
 		/// <exception cref="FileNotFoundException"></exception>
 		/// <exception cref="IOException"></exception>
-		public void FinalizeSaveData( string fileName, IMemoryFileWriteStream memoryWriter ) {
+		public void FinalizeSaveData( string fileName, IMemoryFileWriteStream memoryWriter )
+		{
 			if ( string.IsNullOrWhiteSpace( fileName ) ) {
 				throw new ArgumentException( "Save file name cannot be null or empty.", nameof( fileName ) );
 			}
@@ -159,7 +165,8 @@ namespace Nomad.Save.Private.Services {
 		/// Ensures the destination save directory exists.
 		/// </summary>
 		/// <param name="fileName">Final save path.</param>
-		private void EnsureDestinationDirectory( string fileName ) {
+		private void EnsureDestinationDirectory( string fileName )
+		{
 			string? directory = Path.GetDirectoryName( fileName );
 
 			if ( !string.IsNullOrWhiteSpace( directory ) && !_fileSystem.DirectoryExists( directory ) ) {
@@ -176,7 +183,8 @@ namespace Nomad.Save.Private.Services {
 		/// Attempts to delete a temporary save file.
 		/// </summary>
 		/// <param name="tempFileName">Temporary file path.</param>
-		private void TryDeleteTempFile( string tempFileName ) {
+		private void TryDeleteTempFile( string tempFileName )
+		{
 			if ( string.IsNullOrWhiteSpace( tempFileName ) ) {
 				return;
 			}

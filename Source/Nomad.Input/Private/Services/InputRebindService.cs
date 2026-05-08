@@ -24,7 +24,8 @@ using Nomad.Input.Private.Extensions;
 using Nomad.Input.Private.Repositories;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.Services {
+namespace Nomad.Input.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -36,7 +37,8 @@ namespace Nomad.Input.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class InputRebindService : IInputRebindService, IDisposable {
+	internal sealed class InputRebindService : IInputRebindService, IDisposable
+	{
 		private const float AXIS_CAPTURE_THRESHOLD = 0.5f;
 		private const float AXIS_CAPTURE_THRESHOLD_SQUARED = AXIS_CAPTURE_THRESHOLD * AXIS_CAPTURE_THRESHOLD;
 
@@ -63,7 +65,8 @@ namespace Nomad.Input.Private.Services {
 			BindRepository repository,
 			BindingCompilerService compilerService,
 			IGameEventRegistryService eventRegistry
-		) {
+		)
+		{
 			ArgumentGuard.ThrowIfNull( eventRegistry, nameof( eventRegistry ) );
 			_repository = repository ?? throw new ArgumentNullException( nameof( repository ) );
 			_compilerService = compilerService ?? throw new ArgumentNullException( nameof( compilerService ) );
@@ -96,7 +99,8 @@ namespace Nomad.Input.Private.Services {
 			_gamepadAxisEvent.Subscribe( OnGamepadAxisEventTriggered );
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _isDisposed ) {
 				return;
 			}
@@ -111,7 +115,8 @@ namespace Nomad.Input.Private.Services {
 			GC.SuppressFinalize( this );
 		}
 
-		public bool BeginRebind( in InputRebindRequest request ) {
+		public bool BeginRebind( in InputRebindRequest request )
+		{
 			if ( _currentRequest.HasValue ) {
 				return false;
 			}
@@ -127,7 +132,8 @@ namespace Nomad.Input.Private.Services {
 			return true;
 		}
 
-		public bool CancelRebind() {
+		public bool CancelRebind()
+		{
 			if ( !_currentRequest.HasValue ) {
 				return false;
 			}
@@ -138,7 +144,8 @@ namespace Nomad.Input.Private.Services {
 			return true;
 		}
 
-		public bool ApplyBinding( in InputRebindRequest request, in InputBindingDefinition binding ) {
+		public bool ApplyBinding( in InputRebindRequest request, in InputBindingDefinition binding )
+		{
 			if ( !TryGetRequestBinding( request, out var actions, out _ ) ) {
 				return false;
 			}
@@ -169,21 +176,24 @@ namespace Nomad.Input.Private.Services {
 			return true;
 		}
 
-		private void OnKeyboardEventTriggered( in KeyboardEventArgs args ) {
+		private void OnKeyboardEventTriggered( in KeyboardEventArgs args )
+		{
 			if ( !_currentRequest.HasValue || !args.Pressed ) {
 				return;
 			}
 			ApplyCapturedButton( InputDeviceSlot.Keyboard, args.KeyNum.ToControlId() );
 		}
 
-		private void OnMouseButtonEventTriggered( in MouseButtonEventArgs args ) {
+		private void OnMouseButtonEventTriggered( in MouseButtonEventArgs args )
+		{
 			if ( !_currentRequest.HasValue || !args.Pressed ) {
 				return;
 			}
 			ApplyCapturedButton( InputDeviceSlot.Mouse, args.Button.ToControlId() );
 		}
 
-		private void OnMouseMotionEventTriggered( in MouseMotionEventArgs args ) {
+		private void OnMouseMotionEventTriggered( in MouseMotionEventArgs args )
+		{
 			if ( !_currentRequest.HasValue ) {
 				return;
 			}
@@ -206,7 +216,8 @@ namespace Nomad.Input.Private.Services {
 			ApplyBinding( request, updated );
 		}
 
-		private void OnGamepadButtonEventTriggered( in GamepadButtonEventArgs args ) {
+		private void OnGamepadButtonEventTriggered( in GamepadButtonEventArgs args )
+		{
 			if ( !_currentRequest.HasValue || !args.Pressed ) {
 				return;
 			}
@@ -214,7 +225,8 @@ namespace Nomad.Input.Private.Services {
 			ApplyCapturedButton( GetGamepadDeviceSlot( args.DeviceId ), args.Button.ToControlId() );
 		}
 
-		private void OnGamepadAxisEventTriggered( in GamepadAxisEventArgs args ) {
+		private void OnGamepadAxisEventTriggered( in GamepadAxisEventArgs args )
+		{
 			if ( !_currentRequest.HasValue || args.Value.LengthSquared() < AXIS_CAPTURE_THRESHOLD_SQUARED ) {
 				return;
 			}
@@ -234,7 +246,8 @@ namespace Nomad.Input.Private.Services {
 			ApplyBinding( request, updated );
 		}
 
-		private void ApplyCapturedButton( InputDeviceSlot deviceId, InputControlId controlId ) {
+		private void ApplyCapturedButton( InputDeviceSlot deviceId, InputControlId controlId )
+		{
 			if ( !_currentRequest.HasValue ) {
 				return;
 			}
@@ -302,7 +315,8 @@ namespace Nomad.Input.Private.Services {
 			in InputRebindRequest request,
 			out ImmutableArray<InputActionDefinition> actions,
 			out InputBindingDefinition binding
-		) {
+		)
+		{
 			binding = null;
 
 			if ( !_repository.TryGetBindMapping( request.MappingName, out actions ) ) {
@@ -332,7 +346,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="actions"></param>
 		/// <param name="actionId"></param>
 		/// <returns></returns>
-		private static int FindActionIndex( ImmutableArray<InputActionDefinition> actions, string actionId ) {
+		private static int FindActionIndex( ImmutableArray<InputActionDefinition> actions, string actionId )
+		{
 			for ( int i = 0; i < actions.Length; i++ ) {
 				if ( actions[i].Id.Equals( actionId, StringComparison.Ordinal ) ) {
 					return i;
@@ -352,7 +367,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="kind"></param>
 		/// <param name="part"></param>
 		/// <returns></returns>
-		private static bool IsSupported( InputBindingKind kind, InputRebindPart part ) {
+		private static bool IsSupported( InputBindingKind kind, InputRebindPart part )
+		{
 			return kind switch {
 				InputBindingKind.Button => part == InputRebindPart.Whole,
 				InputBindingKind.Delta2D => part == InputRebindPart.Whole,
@@ -377,7 +393,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="deviceId"></param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		private static InputDeviceSlot GetGamepadDeviceSlot( int deviceId ) {
+		private static InputDeviceSlot GetGamepadDeviceSlot( int deviceId )
+		{
 			return deviceId switch {
 				0 => InputDeviceSlot.Gamepad0,
 				1 => InputDeviceSlot.Gamepad1,

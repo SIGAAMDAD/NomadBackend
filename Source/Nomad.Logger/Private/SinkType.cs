@@ -1,4 +1,4 @@
-﻿/*
+/*
 ===========================================================================
 The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
@@ -13,11 +13,13 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Logger.Private {
+namespace Nomad.Logger.Private
+{
 	/// <summary>
 	/// 
 	/// </summary>
-	internal enum SinkType : byte {
+	internal enum SinkType : byte
+	{
 		InGame,     // the in-game console
 		Engine,     // the engine console
 		File,       // a logfile

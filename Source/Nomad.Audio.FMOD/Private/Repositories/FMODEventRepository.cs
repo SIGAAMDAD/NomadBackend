@@ -20,7 +20,8 @@ using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.ResourceCache;
 
-namespace Nomad.Audio.Fmod.Private.Repositories {
+namespace Nomad.Audio.Fmod.Private.Repositories
+{
 	/*
 	===================================================================================
 
@@ -32,9 +33,11 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 	/// A resource cache containing FMOD event descriptions.
 	/// </summary>
 
-	internal sealed class FMODEventRepository : BaseCache<IAudioResource, string> {
+	internal sealed class FMODEventRepository : BaseCache<IAudioResource, string>
+	{
 		public FMODEventRepository( ILoggerService logger, IGameEventRegistryService eventFactory, FMODDevice fmodSystem )
-			: base( logger, eventFactory, new FMODEventLoader( fmodSystem, fmodSystem.GuidRepository, logger.CreateCategory( nameof( FMODEventLoader ), LogLevel.Info, true ) ) ) {
+			: base( logger, eventFactory, new FMODEventLoader( fmodSystem, fmodSystem.GuidRepository, logger.CreateCategory( nameof( FMODEventLoader ), LogLevel.Info, true ) ) )
+		{
 		}
 	};
 };

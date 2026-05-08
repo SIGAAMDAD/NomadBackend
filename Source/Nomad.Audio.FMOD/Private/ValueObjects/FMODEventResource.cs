@@ -18,7 +18,8 @@ using System.Runtime.CompilerServices;
 using Nomad.Audio.Fmod.Private.Entities;
 using Nomad.Audio.Interfaces;
 
-namespace Nomad.Audio.Fmod.Private.ValueObjects {
+namespace Nomad.Audio.Fmod.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -30,7 +31,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 	///
 	/// </summary>
 
-	internal readonly struct FMODEventResource : IAudioResource {
+	internal readonly struct FMODEventResource : IAudioResource
+	{
 		private readonly FMOD.Studio.EventDescription _instance;
 		public readonly bool IsValid => _instance.isValid();
 
@@ -43,7 +45,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		/// 
 		/// </summary>
 		/// <param name="instance"></param>
-		public FMODEventResource( FMOD.Studio.EventDescription instance ) {
+		public FMODEventResource( FMOD.Studio.EventDescription instance )
+		{
 			_instance = instance;
 		}
 
@@ -55,7 +58,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			Unload();
 		}
 
@@ -69,7 +73,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		/// </summary>
 		/// <param name="instance"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void CreateInstance( out FMODChannelResource instance ) {
+		public void CreateInstance( out FMODChannelResource instance )
+		{
 			FMODValidator.ValidateCall( _instance.createInstance( out var resource ) );
 			instance = new FMODChannelResource( resource );
 		}
@@ -82,7 +87,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		/// <summary>
 		/// Unloads and deallocates all event instances bound to this event description.
 		/// </summary>
-		public void Unload() {
+		public void Unload()
+		{
 			if ( _instance.isValid() ) {
 				FMODValidator.ValidateCall( _instance.unloadSampleData() );
 				FMODValidator.ValidateCall( _instance.releaseAllInstances() );

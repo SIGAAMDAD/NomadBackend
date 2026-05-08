@@ -17,18 +17,18 @@ using System;
 
 namespace Nomad.EngineTemplates.Attributes.Properties
 {
-	/// <summary>
-	/// Declares the shared template metadata for render-order properties.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, Inherited = true)]
-	[TemplateProperty(
+    /// <summary>
+    /// Declares the shared template metadata for render-order properties.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
+    [TemplateProperty(
         Name = "RenderOrder",
         Type = typeof(int),
         GodotSetterExpression = "base.ZIndex = value",
         GodotGetterExpression = "base.ZIndex",
         UnityGetterExpression = "GetComponent<global::UnityEngine.Renderer>() != null ? GetComponent<global::UnityEngine.Renderer>().sortingOrder : 0",
         UnitySetterExpression = "(GetComponent<global::UnityEngine.Renderer>() ?? throw new global::System.InvalidOperationException(\"A UnityEngine.Renderer component is required.\")).sortingOrder = value")]
-	internal class TemplateRenderOrderProperty : Attribute
-	{
-	}
+    internal class TemplateRenderOrderProperty : Attribute
+    {
+    }
 }

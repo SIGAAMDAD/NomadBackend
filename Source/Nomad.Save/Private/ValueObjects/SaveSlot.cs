@@ -17,7 +17,8 @@ using System.Text;
 using Nomad.Core.Util;
 using Nomad.Save.ValueObjects;
 
-namespace Nomad.Save.Private.ValueObjects {
+namespace Nomad.Save.Private.ValueObjects
+{
 	/// <summary>
 	///
 	/// </summary>
@@ -26,8 +27,10 @@ namespace Nomad.Save.Private.ValueObjects {
 	internal record SaveSlot(
 		string FileName,
 		SaveFileMetadata Metadata
-	) {
-		public static string CalculateFileName( bool autoSave, SaveFileMetadata metadata ) {
+	)
+	{
+		public static string CalculateFileName( bool autoSave, SaveFileMetadata metadata )
+		{
 			StringBuilder sb = new StringBuilder( 256 );
 
 			sb.AppendFormat( "{0}_{1}_{2}{3}{4}{5}{6}{7}.ngd",

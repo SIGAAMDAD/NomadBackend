@@ -1,4 +1,4 @@
-﻿/*
+/*
 ===========================================================================
 The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
@@ -20,7 +20,8 @@ using System.Text;
 using Nomad.Core.Logger;
 using Nomad.Core.Memory;
 
-namespace Nomad.Logger.Private {
+namespace Nomad.Logger.Private
+{
 	/*
 	===================================================================================
 
@@ -32,7 +33,8 @@ namespace Nomad.Logger.Private {
 	///
 	/// </summary>
 
-	internal sealed class MessageBuilder {
+	internal sealed class MessageBuilder
+	{
 		private readonly BasicObjectPool<StringBuilder> _sb = new BasicObjectPool<StringBuilder>( CreateMessageBuffer );
 
 		/*
@@ -48,7 +50,8 @@ namespace Nomad.Logger.Private {
 		/// <param name="message"></param>
 		/// <param name="addLine"></param>
 		/// <returns></returns>
-		public string FormatMessage( ILoggerCategory category, LogLevel level, string message, bool addLine ) {
+		public string FormatMessage( ILoggerCategory category, LogLevel level, string message, bool addLine )
+		{
 			var sb = _sb.Rent();
 			try {
 				sb.Clear();
@@ -68,7 +71,8 @@ namespace Nomad.Logger.Private {
 		===============
 		*/
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static StringBuilder CreateMessageBuffer() {
+		private static StringBuilder CreateMessageBuffer()
+		{
 			return new StringBuilder( 1024 );
 		}
 

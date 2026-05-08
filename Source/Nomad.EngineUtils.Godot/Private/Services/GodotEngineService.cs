@@ -32,221 +32,237 @@ using Nomad.EngineUtils.Godot.Private.Console;
 using Nomad.Core.FileSystem;
 using Nomad.Core.Engine.Windowing;
 
-namespace Nomad.EngineUtils.Godot.Private.Services {
-    /*
+namespace Nomad.EngineUtils.Godot.Private.Services
+{
+	/*
     ===================================================================================
 
     GodotEngineService
 
     ===================================================================================
     */
-    /// <summary>
-    ///
-    /// </summary>
+	/// <summary>
+	///
+	/// </summary>
 
-    internal sealed class GodotEngineService : IEngineService {
-        private readonly SceneTree _sceneTree;
-        private readonly Node _root;
+	internal sealed class GodotEngineService : IEngineService
+	{
+		private readonly SceneTree _sceneTree;
+		private readonly Node _root;
 
-        private readonly GodotLoader _loader;
+		private readonly GodotLoader _loader;
 
-        private readonly IWindowService _windowService;
-        private readonly ILocalizationService _localizationService;
-        private readonly IDisplayService _displayService;
-        private readonly ISceneManager _sceneManager;
+		private readonly IWindowService _windowService;
+		private readonly ILocalizationService _localizationService;
+		private readonly IDisplayService _displayService;
+		private readonly ISceneManager _sceneManager;
 
-        private readonly GodotInputPump _inputPump;
+		private readonly GodotInputPump _inputPump;
 
-        private readonly IServiceLocator _locator;
+		private readonly IServiceLocator _locator;
 
-        private bool _isDisposed = false;
+		private bool _isDisposed = false;
 
-        /*
+		/*
         ===============
         GodotEngineService
         ===============
         */
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="sceneTree"></param>
-        /// <param name="serviceFactory"></param>
-        /// <param name="locator"></param>
-        public GodotEngineService( SceneTree sceneTree, IServiceRegistry serviceFactory, IServiceLocator locator ) {
-            ArgumentGuard.ThrowIfNull( serviceFactory );
-            ArgumentGuard.ThrowIfNull( locator );
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="sceneTree"></param>
+		/// <param name="serviceFactory"></param>
+		/// <param name="locator"></param>
+		public GodotEngineService( SceneTree sceneTree, IServiceRegistry serviceFactory, IServiceLocator locator )
+		{
+			ArgumentGuard.ThrowIfNull( serviceFactory );
+			ArgumentGuard.ThrowIfNull( locator );
 
-            _locator = locator ?? throw new ArgumentNullException( nameof( locator ) );
-            _sceneTree = sceneTree ?? throw new ArgumentNullException( nameof( sceneTree ) );
-            _root = sceneTree.Root;
+			_locator = locator ?? throw new ArgumentNullException( nameof( locator ) );
+			_sceneTree = sceneTree ?? throw new ArgumentNullException( nameof( sceneTree ) );
+			_root = sceneTree.Root;
 
-            var logger = locator.GetService<ILoggerService>();
-            var eventFactory = locator.GetService<IGameEventRegistryService>();
-            var cvarSystem = locator.GetService<ICVarSystemService>();
+			var logger = locator.GetService<ILoggerService>();
+			var eventFactory = locator.GetService<IGameEventRegistryService>();
+			var cvarSystem = locator.GetService<ICVarSystemService>();
 
-            _loader = new GodotLoader();
+			_loader = new GodotLoader();
 
-            _inputPump = new GodotInputPump( eventFactory );
-            _root.CallDeferred( Node.MethodName.AddChild, _inputPump );
+			_inputPump = new GodotInputPump( eventFactory );
+			_root.CallDeferred( Node.MethodName.AddChild, _inputPump );
 
-            DisplayCVars.Register( cvarSystem );
+			DisplayCVars.Register( cvarSystem );
 
-            _windowService = new GodotWindowService( _sceneTree, cvarSystem, eventFactory );
-            serviceFactory.AddSingleton( _windowService );
-            _windowService.CloseRequested.Subscribe( OnWindowCloseRequested );
+			_windowService = new GodotWindowService( _sceneTree, cvarSystem, eventFactory );
+			serviceFactory.AddSingleton( _windowService );
+			_windowService.CloseRequested.Subscribe( OnWindowCloseRequested );
 
-            _localizationService = new GodotLocalizationService();
-            serviceFactory.AddSingleton( _localizationService );
+			_localizationService = new GodotLocalizationService();
+			serviceFactory.AddSingleton( _localizationService );
 
-            _displayService = new GodotDisplayService( sceneTree, _windowService, cvarSystem );
-            serviceFactory.AddSingleton( _displayService );
+			_displayService = new GodotDisplayService( sceneTree, _windowService, cvarSystem );
+			serviceFactory.AddSingleton( _displayService );
 
-            _sceneManager = new GodotSceneManager( _sceneTree, new BaseCache<PackedScene, string>( logger, eventFactory, _loader ) );
-            serviceFactory.AddSingleton( _sceneManager );
-            serviceFactory.AddSingleton<ISplitScreenService>( new GodotSplitScreenService() );
+			_sceneManager = new GodotSceneManager( _sceneTree, new BaseCache<PackedScene, string>( logger, eventFactory, _loader ) );
+			serviceFactory.AddSingleton( _sceneManager );
+			serviceFactory.AddSingleton<ISplitScreenService>( new GodotSplitScreenService() );
 
-            serviceFactory.AddSingleton<IRaycastService>( new GodotRaycastService( _sceneTree.Root.World2D ) );
+			serviceFactory.AddSingleton<IRaycastService>( new GodotRaycastService( _sceneTree.Root.World2D ) );
 
-            logger.AddSink( new ConsoleSink() );
+			logger.AddSink( new ConsoleSink() );
 
-            serviceFactory.AddSingleton<ITimeService>( new GodotTimeService() );
-            serviceFactory.AddSingleton<IGamePauseService>( new GodotPauseService( _sceneTree, eventFactory ) );
+			serviceFactory.AddSingleton<ITimeService>( new GodotTimeService() );
+			serviceFactory.AddSingleton<IGamePauseService>( new GodotPauseService( _sceneTree, eventFactory ) );
 
-            EngineService.Initialize( this );
-        }
+			EngineService.Initialize( this );
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        public void Dispose() {
-            if ( !_isDisposed ) {
-                _windowService?.Dispose();
-                _sceneManager?.Dispose();
-            }
-            GC.SuppressFinalize( this );
-            _isDisposed = true;
-        }
+		/// <summary>
+		///
+		/// </summary>
+		public void Dispose()
+		{
+			if ( !_isDisposed ) {
+				_windowService?.Dispose();
+				_sceneManager?.Dispose();
+			}
+			GC.SuppressFinalize( this );
+			_isDisposed = true;
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="ospath"></param>
-        /// <returns></returns>
-        public string GetLocalPath( string ospath ) {
-            return ProjectSettings.LocalizePath( ospath );
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="ospath"></param>
+		/// <returns></returns>
+		public string GetLocalPath( string ospath )
+		{
+			return ProjectSettings.LocalizePath( ospath );
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="localpath"></param>
-        /// <returns></returns>
-        public string GetOSPath( string localpath ) {
-            return ProjectSettings.GlobalizePath( localpath );
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="localpath"></param>
+		/// <returns></returns>
+		public string GetOSPath( string localpath )
+		{
+			return ProjectSettings.GlobalizePath( localpath );
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public IConsoleObject CreateConsoleObject() {
-            var console = new GodotConsole(
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
+		public IConsoleObject CreateConsoleObject()
+		{
+			var console = new GodotConsole(
 				_root,
 				_locator.GetService<ILoggerService>(),
 				_locator.GetService<IGameEventRegistryService>(),
 				_locator.GetService<IFileSystem>()
 			);
-            return console;
-        }
+			return console;
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public IResourceLoader GetResourceLoader() {
-            return _loader;
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
+		public IResourceLoader GetResourceLoader()
+		{
+			return _loader;
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public bool IsApplicationFocused() {
-            return _windowService.IsFocused;
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
+		public bool IsApplicationFocused()
+		{
+			return _windowService.IsFocused;
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public string GetApplicationVersion() {
-            return ProjectSettings.GetSetting( "application/config/version" ).AsString();
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
+		public string GetApplicationVersion()
+		{
+			return ProjectSettings.GetSetting( "application/config/version" ).AsString();
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public string GetEngineVersion() {
-            var version = global::Godot.Engine.GetVersionInfo();
-            return version["string"].AsString();
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
+		public string GetEngineVersion()
+		{
+			var version = global::Godot.Engine.GetVersionInfo();
+			return version["string"].AsString();
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="exitCode"></param>
-        public void Quit( int exitCode = 0 ) {
-            System.Environment.Exit( exitCode );
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="exitCode"></param>
+		public void Quit( int exitCode = 0 )
+		{
+			System.Environment.Exit( exitCode );
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="scope"></param>
-        /// <returns></returns>
-        public string GetStoragePath( StorageScope scope ) => scope switch {
-            StorageScope.Install => ProjectSettings.GlobalizePath( "res://" ),
-            StorageScope.StreamingAssets => ProjectSettings.GlobalizePath( "res://Assets/" ),
-            StorageScope.UserData => ProjectSettings.GlobalizePath( "user://" ),
-            _ => ProjectSettings.GlobalizePath( "user://" )
-        };
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="scope"></param>
+		/// <returns></returns>
+		public string GetStoragePath( StorageScope scope ) => scope switch {
+			StorageScope.Install => ProjectSettings.GlobalizePath( "res://" ),
+			StorageScope.StreamingAssets => ProjectSettings.GlobalizePath( "res://Assets/" ),
+			StorageScope.UserData => ProjectSettings.GlobalizePath( "user://" ),
+			_ => ProjectSettings.GlobalizePath( "user://" )
+		};
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="relativePath"></param>
-        /// <param name="scope"></param>
-        /// <returns></returns>
-        public string GetStoragePath( string relativePath, StorageScope scope ) {
-            return $"{GetStoragePath( scope )}{relativePath}";
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="relativePath"></param>
+		/// <param name="scope"></param>
+		/// <returns></returns>
+		public string GetStoragePath( string relativePath, StorageScope scope )
+		{
+			return $"{GetStoragePath( scope )}{relativePath}";
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public string GetSystemRegion() {
-            return System.Globalization.CultureInfo.CurrentCulture.Name;
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
+		public string GetSystemRegion()
+		{
+			return System.Globalization.CultureInfo.CurrentCulture.Name;
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="image"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
-        public IDisposable CreateImageRGBA( byte[] image, int width, int height ) {
-            return Image.CreateFromData( width, height, false, Image.Format.Rgba8, image );
-        }
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="image"></param>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		/// <returns></returns>
+		public IDisposable CreateImageRGBA( byte[] image, int width, int height )
+		{
+			return Image.CreateFromData( width, height, false, Image.Format.Rgba8, image );
+		}
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="args"></param>
-        private void OnWindowCloseRequested( in WindowCloseRequestedEventArgs args ) {
-            Quit();
-        }
-    }
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="args"></param>
+		private void OnWindowCloseRequested( in WindowCloseRequestedEventArgs args )
+		{
+			Quit();
+		}
+	}
 }

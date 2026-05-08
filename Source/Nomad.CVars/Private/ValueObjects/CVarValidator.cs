@@ -17,7 +17,8 @@ using System;
 using System.Runtime.CompilerServices;
 using Nomad.Core.CVars;
 
-namespace Nomad.CVars.Private.ValueObjects {
+namespace Nomad.CVars.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -29,7 +30,8 @@ namespace Nomad.CVars.Private.ValueObjects {
 	///
 	/// </summary>
 
-	internal readonly struct CVarValidator<T> {
+	internal readonly struct CVarValidator<T>
+	{
 		private readonly Func<T, bool>? _validator;
 
 		/*
@@ -41,7 +43,8 @@ namespace Nomad.CVars.Private.ValueObjects {
 		/// 
 		/// </summary>
 		/// <param name="validator"></param>
-		public CVarValidator( Func<T, bool>? validator ) {
+		public CVarValidator( Func<T, bool>? validator )
+		{
 			_validator = validator;
 		}
 
@@ -69,7 +72,8 @@ namespace Nomad.CVars.Private.ValueObjects {
 		/// </summary>
 		/// <param name="name">The name to check.</param>
 		/// <returns>Returns true if the name is valid.</returns>
-		public static bool IsValidName( string name ) {
+		public static bool IsValidName( string name )
+		{
 			if ( string.IsNullOrEmpty( name ) ) {
 				return false;
 			} else if ( name[0] == '.' || name[name.Length - 1] == '.' ) {
@@ -93,7 +97,8 @@ namespace Nomad.CVars.Private.ValueObjects {
 		/// </summary>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static bool ValidateCVarType() {
+		public static bool ValidateCVarType()
+		{
 			return typeof( T ).GetCVarType() != CVarType.Count;
 		}
 
@@ -108,7 +113,8 @@ namespace Nomad.CVars.Private.ValueObjects {
 		/// <param name="c"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static bool IsValidNameCharacter( char c ) {
+		private static bool IsValidNameCharacter( char c )
+		{
 			return char.IsLetterOrDigit( c ) || c == '.' || c == '_';
 		}
 	};

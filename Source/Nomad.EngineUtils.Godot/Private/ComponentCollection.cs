@@ -6,14 +6,17 @@ using System.Runtime.InteropServices;
 using Nomad.Core.ECS;
 using Nomad.Core.Scene.GameObjects;
 
-namespace Nomad.EngineUtils.Private.Godot {
+namespace Nomad.EngineUtils.Private.Godot
+{
 	/// <summary>
 	/// Heterogeneous component store for a single IGameObject.
 	/// One component per exact runtime type.
 	/// Fast iteration, O(1) lookup, O(1) swap-back removal.
 	/// </summary>
-	internal sealed class ComponentCollection : IDisposable {
-		private struct Entry {
+	internal sealed class ComponentCollection : IDisposable
+	{
+		private struct Entry
+		{
 			public NomadBehaviour? Component;
 			public byte Initialized;
 		};
@@ -26,7 +29,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 
 		public int Count => _count;
 
-		public ComponentCollection( IGameObject owner, int initialCapacity = 8 ) {
+		public ComponentCollection( IGameObject owner, int initialCapacity = 8 )
+		{
 			if ( initialCapacity < 1 ) {
 				initialCapacity = 1;
 			}
@@ -36,7 +40,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 			_entries = ArrayPool<Entry>.Shared.Rent( initialCapacity );
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _disposed ) {
 				return;
 			}
@@ -117,7 +122,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		/// Adds an already-created component instance.
 		/// Uses the component's exact runtime type as the lookup key.
 		/// </summary>
-		public NomadBehaviour AddExisting( NomadBehaviour component, bool initialize = true ) {
+		public NomadBehaviour AddExisting( NomadBehaviour component, bool initialize = true )
+		{
 			if ( component is null ) {
 				throw new ArgumentNullException( nameof( component ) );
 			}
@@ -156,7 +162,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 			return Remove( typeof( T ) );
 		}
 
-		public bool Remove( Type componentType ) {
+		public bool Remove( Type componentType )
+		{
 			if ( componentType is null ) {
 				throw new ArgumentNullException( nameof( componentType ) );
 			}
@@ -177,7 +184,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		/// Safe to call during owner OnInit.
 		/// </summary>
 		[MethodImpl( MethodImplOptions.AggressiveOptimization )]
-		public void InitializePending() {
+		public void InitializePending()
+		{
 			ThrowIfDisposed();
 
 			ref Entry start = ref MemoryMarshal.GetArrayDataReference( _entries );
@@ -192,7 +200,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveOptimization )]
-		public void ShutdownAll() {
+		public void ShutdownAll()
+		{
 			ThrowIfDisposed();
 
 			ref Entry start = ref MemoryMarshal.GetArrayDataReference( _entries );
@@ -207,7 +216,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveOptimization )]
-		public void UpdateAll( float delta ) {
+		public void UpdateAll( float delta )
+		{
 			ThrowIfDisposed();
 
 			ref Entry start = ref MemoryMarshal.GetArrayDataReference( _entries );
@@ -221,7 +231,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveOptimization )]
-		public void PhysicsUpdateAll( float delta ) {
+		public void PhysicsUpdateAll( float delta )
+		{
 			ThrowIfDisposed();
 
 			ref Entry start = ref MemoryMarshal.GetArrayDataReference( _entries );
@@ -234,7 +245,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 			}
 		}
 
-		public void Clear() {
+		public void Clear()
+		{
 			ThrowIfDisposed();
 
 			for ( int i = _count - 1; i >= 0; --i ) {
@@ -247,7 +259,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void InitializeAt( int index ) {
+		private void InitializeAt( int index )
+		{
 			ref Entry entry = ref _entries[index];
 			if ( entry.Component is not null && entry.Initialized == 0 ) {
 				entry.Component.OnInit();
@@ -256,7 +269,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void ShutdownAt( int index ) {
+		private void ShutdownAt( int index )
+		{
 			ref Entry entry = ref _entries[index];
 			if ( entry.Component is not null && entry.Initialized != 0 ) {
 				entry.Component.OnShutdown();
@@ -265,7 +279,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void RemoveAt( int index ) {
+		private void RemoveAt( int index )
+		{
 			Type removedType = _entries[index].Component!.GetType();
 
 			int last = _count - 1;
@@ -282,7 +297,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 			_count = last;
 		}
 
-		private void EnsureCapacity( int needed ) {
+		private void EnsureCapacity( int needed )
+		{
 			if ( needed <= _entries.Length ) {
 				return;
 			}
@@ -300,7 +316,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void ThrowIfDisposed() {
+		private void ThrowIfDisposed()
+		{
 			if ( _disposed ) {
 				throw new ObjectDisposedException( nameof( ComponentCollection ) );
 			}

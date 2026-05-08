@@ -20,14 +20,14 @@ using Nomad.EngineTemplates.BaseClasses;
 
 namespace Nomad.EngineTemplates.UI
 {
-	/// <summary>
-	/// 
-	/// </summary>
-	[TemplateClass(Contract = typeof(IImageView), GodotBase = "Godot.TextureRect", UnityBase = "UnityEngine.MonoBehaviour")]
-	[TemplateNamespace(Name = "UI")]
-	[TemplateUIElement]
-	[TemplateProperty(Name = "Texture", Type = typeof(ITexture), Documentation = "The image to be displayed within this UI element.")]
-	internal class ImageView
-	{
-	}
+    /// <summary>
+    /// 
+    /// </summary>
+    [TemplateClass(Contract = typeof(IImageView), GodotBase = "Godot.TextureRect", UnityBase = "UnityEngine.MonoBehaviour")]
+    [TemplateNamespace(Name = "UI")]
+    [TemplateUIElement]
+    [TemplateProperty(Name = "Texture", Type = typeof(ITexture), Documentation = "The image to be displayed within this UI element.")]
+    internal class ImageView
+    {
+    }
 }

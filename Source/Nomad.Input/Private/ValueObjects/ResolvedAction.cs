@@ -18,8 +18,10 @@ using System.Runtime.CompilerServices;
 using Nomad.Core.Util;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.ValueObjects {
-	internal readonly struct ResolvedAction {
+namespace Nomad.Input.Private.ValueObjects
+{
+	internal readonly struct ResolvedAction
+	{
 		public readonly InternString ActionId;
 		public readonly int ActionIndex;
 		public readonly long TimeStamp;
@@ -41,7 +43,8 @@ namespace Nomad.Input.Private.ValueObjects {
 			bool buttonValue = default,
 			float floatValue = default,
 			Vector2 vector2Value = default
-		) {
+		)
+		{
 			ActionId = actionId;
 			ActionIndex = actionIndex;
 			TimeStamp = timeStamp;

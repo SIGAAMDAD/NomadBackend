@@ -20,7 +20,8 @@ using Nomad.Core.ResourceCache;
 using Nomad.Core.Util;
 using Godot;
 
-namespace Nomad.EngineUtils.Godot.Private {
+namespace Nomad.EngineUtils.Godot.Private
+{
 	/*
     ===================================================================================
 
@@ -32,13 +33,15 @@ namespace Nomad.EngineUtils.Godot.Private {
 	/// A godot-focused resource loader.
 	/// </summary>
 
-	internal sealed class GodotLoader : IResourceLoader {
+	internal sealed class GodotLoader : IResourceLoader
+	{
 		/// <summary>
 		///
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public Result<TResource> Load<TResource, TId>( TId id ) {
+		public Result<TResource> Load<TResource, TId>( TId id )
+		{
 			if ( id is not string path ) {
 				throw new InvalidCastException();
 			}
@@ -63,7 +66,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <param name="id"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public async Task<Result<TResource>> LoadAsync<TResource, TId>( TId id, CancellationToken ct = default ) {
+		public async Task<Result<TResource>> LoadAsync<TResource, TId>( TId id, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 
 			if ( id is not string path ) {

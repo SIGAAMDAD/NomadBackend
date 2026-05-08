@@ -17,11 +17,11 @@ using System;
 
 namespace Nomad.EngineTemplates.Attributes.Events
 {
-	/// <summary>
-	/// Represents an event that fires whenever a GameObject's visibility status is changed.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, Inherited = true)]
-	[TemplateEvent(Name = "DisplayStateChanged", PayloadType = typeof(bool))]
+    /// <summary>
+    /// Represents an event that fires whenever a GameObject's visibility status is changed.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
+    [TemplateEvent(Name = "DisplayStateChanged", PayloadType = typeof(bool))]
     internal class TemplateDisplayStateChangedEvent : Attribute
     {
     }

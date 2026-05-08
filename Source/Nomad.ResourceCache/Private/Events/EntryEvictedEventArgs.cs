@@ -13,12 +13,14 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.ResourceCache.Private.Events {
+namespace Nomad.ResourceCache.Private.Events
+{
 	/// <summary>
 	/// 
 	/// </summary>
 	/// <typeparam name="TId"></typeparam>
-	internal readonly struct EntryEvictedEventArgs<TId> {
+	internal readonly struct EntryEvictedEventArgs<TId>
+	{
 		/// <summary>
 		/// 
 		/// </summary>
@@ -28,7 +30,8 @@ namespace Nomad.ResourceCache.Private.Events {
 		/// 
 		/// </summary>
 		/// <param name="id"></param>
-		public EntryEvictedEventArgs( TId id ) {
+		public EntryEvictedEventArgs( TId id )
+		{
 			Id = id;
 		}
 	};

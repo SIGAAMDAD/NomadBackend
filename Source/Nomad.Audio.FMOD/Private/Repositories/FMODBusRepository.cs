@@ -19,7 +19,8 @@ using Nomad.Audio.Fmod.Private.Services;
 using Nomad.Audio.Fmod.ValueObjects;
 using Nomad.Audio.ValueObjects;
 
-namespace Nomad.Audio.Fmod.Private.Repositories {
+namespace Nomad.Audio.Fmod.Private.Repositories
+{
 	/*
 	===================================================================================
 
@@ -31,7 +32,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 	///
 	/// </summary>
 
-	internal sealed class FMODBusRepository {
+	internal sealed class FMODBusRepository
+	{
 		public Dictionary<string, SoundCategory> Categories => _categories;
 		private readonly Dictionary<string, SoundCategory> _categories = new();
 
@@ -46,7 +48,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// Creates and FMODBusRepository
 		/// </summary>
 		/// <param name="fmodSystem"></param>
-		public FMODBusRepository( FMODDevice fmodSystem ) {
+		public FMODBusRepository( FMODDevice fmodSystem )
+		{
 			_fmodSystem = fmodSystem;
 
 			_categories["SoundCategory:UI"] = new SoundCategory(
@@ -92,7 +95,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// <param name="categoryName"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public SoundCategory GetSoundCategory( string categoryName ) {
+		public SoundCategory GetSoundCategory( string categoryName )
+		{
 			return _categories[categoryName];
 		}
 
@@ -106,7 +110,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="createInfo"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void CreateCategory( SoundCategoryCreateInfo createInfo ) {
+		public void CreateCategory( SoundCategoryCreateInfo createInfo )
+		{
 			_categories[createInfo.Name] = new SoundCategory(
 				Config: createInfo,
 				_fmodSystem.StudioSystem

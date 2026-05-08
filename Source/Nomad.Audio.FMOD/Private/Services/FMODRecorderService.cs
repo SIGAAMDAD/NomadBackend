@@ -17,12 +17,15 @@ using System;
 using System.Runtime.InteropServices;
 using Nomad.Core.Logger;
 
-namespace Nomad.Audio.Fmod.Private.Services {
-	internal sealed class FMODRecorderService {
+namespace Nomad.Audio.Fmod.Private.Services
+{
+	internal sealed class FMODRecorderService
+	{
 		private readonly FMOD.DSP _recorder;
 		private readonly FMOD.Sound _recordSound;
 
-		public FMODRecorderService( FMODCallbackDispatcher callbackDispatcher, ILoggerCategory category, FMOD.System system ) {
+		public FMODRecorderService( FMODCallbackDispatcher callbackDispatcher, ILoggerCategory category, FMOD.System system )
+		{
 			FMODValidator.ValidateCall( category, system.getRecordNumDrivers( out int numDrivers, out int numConnected ) );
 
 			system.getRecordDriverInfo(

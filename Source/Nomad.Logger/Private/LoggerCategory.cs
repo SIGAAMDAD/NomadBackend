@@ -1,4 +1,4 @@
-﻿/*
+/*
 ===========================================================================
 The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
@@ -21,7 +21,8 @@ using System.Threading.Tasks;
 using Nomad.Core.Collections;
 using Nomad.Core.Logger;
 
-namespace Nomad.Logger.Private {
+namespace Nomad.Logger.Private
+{
 	/*
 	===================================================================================
 
@@ -33,7 +34,8 @@ namespace Nomad.Logger.Private {
 	///
 	/// </summary>
 
-	internal sealed class LoggerCategory : ILoggerCategory {
+	internal sealed class LoggerCategory : ILoggerCategory
+	{
 		public string Name => _name;
 		private readonly string _name;
 
@@ -62,7 +64,8 @@ namespace Nomad.Logger.Private {
 		/// <param name="level"></param>
 		/// <param name="enabled"></param>
 		/// <param name="builder"></param>
-		public LoggerCategory( string name, LogLevel level, bool enabled, MessageBuilder builder ) {
+		public LoggerCategory( string name, LogLevel level, bool enabled, MessageBuilder builder )
+		{
 			_name = name;
 			_level = level;
 			_enabled = enabled;
@@ -82,7 +85,8 @@ namespace Nomad.Logger.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			_sinks.Clear();
 		}
 
@@ -95,7 +99,8 @@ namespace Nomad.Logger.Private {
 		///
 		/// </summary>
 		/// <param name="sink"></param>
-		public void AddSink( ILoggerSink sink ) {
+		public void AddSink( ILoggerSink sink )
+		{
 			_sinks.Add( sink );
 		}
 
@@ -108,7 +113,8 @@ namespace Nomad.Logger.Private {
 		///
 		/// </summary>
 		/// <param name="sink"></param>
-		public void RemoveSink( ILoggerSink sink ) {
+		public void RemoveSink( ILoggerSink sink )
+		{
 			_sinks.Remove( sink );
 		}
 
@@ -121,7 +127,8 @@ namespace Nomad.Logger.Private {
 		///
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintLine( string message ) {
+		public void PrintLine( string message )
+		{
 			_messageQueue.Enqueue( _builder.FormatMessage( this, LogLevel.Info, message, true ) );
 		}
 
@@ -134,7 +141,8 @@ namespace Nomad.Logger.Private {
 		///
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintWarning( string message ) {
+		public void PrintWarning( string message )
+		{
 			_messageQueue.Enqueue( message );
 		}
 
@@ -147,7 +155,8 @@ namespace Nomad.Logger.Private {
 		///
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintError( string message ) {
+		public void PrintError( string message )
+		{
 			_messageQueue.Enqueue( message );
 		}
 
@@ -160,7 +169,8 @@ namespace Nomad.Logger.Private {
 		///
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintDebug( string message ) {
+		public void PrintDebug( string message )
+		{
 			_messageQueue.Enqueue( message );
 		}
 
@@ -173,12 +183,13 @@ namespace Nomad.Logger.Private {
 		///
 		/// </summary>
 		/// <returns></returns>
-		private async void LoggerThreadAsync() {
+		private async void LoggerThreadAsync()
+		{
 			try {
 				while ( true ) {
 					while ( _messageQueue.TryDequeue( out var message ) ) {
 						for ( int i = 0; i < _sinks.Count; i++ ) {
-							_sinks[ i ].Print( message );
+							_sinks[i].Print( message );
 						}
 					}
 					await Task.Delay( 250 );

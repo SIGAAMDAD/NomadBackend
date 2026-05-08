@@ -17,7 +17,8 @@ using Nomad.Core.Engine.Services;
 using Godot;
 using Nomad.Core.Events;
 
-namespace Nomad.EngineUtils.Private.Godot {
+namespace Nomad.EngineUtils.Private.Godot
+{
 	/*
 	===================================================================================
 	
@@ -28,8 +29,9 @@ namespace Nomad.EngineUtils.Private.Godot {
 	/// <summary>
 	/// 
 	/// </summary>
-	
-	internal sealed class GodotPauseService : IGamePauseService {
+
+	internal sealed class GodotPauseService : IGamePauseService
+	{
 		public bool IsPaused => _sceneTree.Paused;
 
 		private readonly SceneTree _sceneTree;
@@ -37,7 +39,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		public IGameEvent<PauseStateChangedEventArgs> PauseStateChanged => _pauseStateChanged;
 		private readonly IGameEvent<PauseStateChangedEventArgs> _pauseStateChanged;
 
-		public GodotPauseService( SceneTree sceneTree, IGameEventRegistryService eventFactory ) {
+		public GodotPauseService( SceneTree sceneTree, IGameEventRegistryService eventFactory )
+		{
 			_sceneTree = sceneTree;
 			_pauseStateChanged = eventFactory.GetEvent<PauseStateChangedEventArgs>( PauseStateChangedEventArgs.Name, PauseStateChangedEventArgs.NameSpace );
 		}
@@ -50,7 +53,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Pause() {
+		public void Pause()
+		{
 			SetPaused( true );
 		}
 
@@ -62,7 +66,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Resume() {
+		public void Resume()
+		{
 			SetPaused( false );
 		}
 
@@ -75,7 +80,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		/// 
 		/// </summary>
 		/// <param name="paused"></param>
-		public void SetPaused( bool paused ) {
+		public void SetPaused( bool paused )
+		{
 			if ( _sceneTree.Paused == paused ) {
 				return;
 			}

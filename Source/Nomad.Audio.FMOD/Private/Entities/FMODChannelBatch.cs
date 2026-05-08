@@ -15,7 +15,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 
-namespace Nomad.Audio.Fmod.Private.Entities {
+namespace Nomad.Audio.Fmod.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -27,7 +28,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 	///
 	/// </summary>
 
-	internal struct FMODChannelBatch {
+	internal struct FMODChannelBatch
+	{
 		public float[] Volumes;
 		public float[] Pitches;
 
@@ -42,7 +44,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		///
 		/// </summary>
 		/// <param name="maxChannels"></param>
-		public FMODChannelBatch( int maxChannels ) {
+		public FMODChannelBatch( int maxChannels )
+		{
 			Volumes = new float[maxChannels];
 			Pitches = new float[maxChannels];
 			ConsecutiveStealCounts = new int[maxChannels];
@@ -56,7 +59,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// <summary>
 		///
 		/// </summary>
-		public void DecayStealCounts() {
+		public void DecayStealCounts()
+		{
 			int maxChannels = ConsecutiveStealCounts.Length;
 			for ( int i = 0; i < maxChannels; i++ ) {
 				int stealCount = ConsecutiveStealCounts[i];

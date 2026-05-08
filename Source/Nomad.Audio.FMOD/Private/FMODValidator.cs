@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using Nomad.Core.Logger;
 
-namespace Nomad.Audio.Fmod {
+namespace Nomad.Audio.Fmod
+{
 	/*
 	===================================================================================
 	
@@ -28,7 +29,8 @@ namespace Nomad.Audio.Fmod {
 	/// 
 	/// </summary>
 
-	internal static class FMODValidator {
+	internal static class FMODValidator
+	{
 		private static ILoggerService? _logger;
 
 		/*
@@ -40,7 +42,8 @@ namespace Nomad.Audio.Fmod {
 		/// 
 		/// </summary>
 		/// <param name="logger"></param>
-		public static void Initialize( ILoggerService logger ) {
+		public static void Initialize( ILoggerService logger )
+		{
 			_logger = logger;
 		}
 
@@ -54,7 +57,8 @@ namespace Nomad.Audio.Fmod {
 		/// </summary>
 		/// <param name="result"></param>
 		/// <exception cref="FMODException"></exception>
-		public static void ValidateCall( FMOD.RESULT result ) {
+		public static void ValidateCall( FMOD.RESULT result )
+		{
 			if ( result != FMOD.RESULT.OK ) {
 				_logger?.PrintError( $"FMODValidator.ValidateCall: FMOD Error - '{FMOD.Error.String( result )}'" );
 				throw new FMODException( FMOD.Error.String( result ) );
@@ -72,7 +76,8 @@ namespace Nomad.Audio.Fmod {
 		/// <param name="category"></param>
 		/// <param name="result"></param>
 		/// <exception cref="FMODException"></exception>
-		public static void ValidateCall( ILoggerCategory category, FMOD.RESULT result ) {
+		public static void ValidateCall( ILoggerCategory category, FMOD.RESULT result )
+		{
 			if ( result != FMOD.RESULT.OK ) {
 				category.PrintLine( $"FMODValidator.ValidateCall: FMOD Error - '{FMOD.Error.String( result )}'" );
 				throw new FMODException( FMOD.Error.String( result ) );

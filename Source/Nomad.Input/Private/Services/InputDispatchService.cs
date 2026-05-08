@@ -19,7 +19,8 @@ using Nomad.Core.Util;
 using Nomad.Input.Private.ValueObjects;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.Services {
+namespace Nomad.Input.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -31,17 +32,20 @@ namespace Nomad.Input.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class InputDispatchService {
+	internal sealed class InputDispatchService
+	{
 		private IGameEvent<ButtonActionEventArgs>?[] _buttonEvents = Array.Empty<IGameEvent<ButtonActionEventArgs>?>();
 		private IGameEvent<FloatActionEventArgs>?[] _floatEvents = Array.Empty<IGameEvent<FloatActionEventArgs>?>();
 		private IGameEvent<AxisActionEventArgs>?[] _axisEvents = Array.Empty<IGameEvent<AxisActionEventArgs>?>();
 		private readonly IGameEventRegistryService _eventFactory;
 
-		public InputDispatchService( IGameEventRegistryService eventFactory ) {
+		public InputDispatchService( IGameEventRegistryService eventFactory )
+		{
 			_eventFactory = eventFactory ?? throw new ArgumentNullException( nameof( eventFactory ) );
 		}
 
-		public void Dispatch( CompiledBindingGraph graph, in ResolvedAction action ) {
+		public void Dispatch( CompiledBindingGraph graph, in ResolvedAction action )
+		{
 			EnsureCapacity( graph.Actions.Length );
 
 			int slot = action.ActionIndex;
@@ -79,7 +83,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="slot"></param>
 		/// <param name="actionId"></param>
 		/// <returns></returns>
-		private IGameEvent<ButtonActionEventArgs> GetButtonEvent( int slot, InternString actionId ) {
+		private IGameEvent<ButtonActionEventArgs> GetButtonEvent( int slot, InternString actionId )
+		{
 			var gameEvent = _buttonEvents[slot];
 			if ( gameEvent != null ) {
 				return gameEvent;
@@ -94,7 +99,8 @@ namespace Nomad.Input.Private.Services {
 			return gameEvent;
 		}
 
-		private IGameEvent<FloatActionEventArgs> GetFloatEvent( int slot, InternString actionId ) {
+		private IGameEvent<FloatActionEventArgs> GetFloatEvent( int slot, InternString actionId )
+		{
 			var gameEvent = _floatEvents[slot];
 			if ( gameEvent != null ) {
 				return gameEvent;
@@ -109,7 +115,8 @@ namespace Nomad.Input.Private.Services {
 			return gameEvent;
 		}
 
-		private IGameEvent<AxisActionEventArgs> GetAxisEvent( int slot, InternString actionId ) {
+		private IGameEvent<AxisActionEventArgs> GetAxisEvent( int slot, InternString actionId )
+		{
 			var gameEvent = _axisEvents[slot];
 			if ( gameEvent != null ) {
 				return gameEvent;
@@ -124,7 +131,8 @@ namespace Nomad.Input.Private.Services {
 			return gameEvent;
 		}
 
-		private void EnsureCapacity( int actionCount ) {
+		private void EnsureCapacity( int actionCount )
+		{
 			if ( _buttonEvents.Length >= actionCount ) {
 				return;
 			}

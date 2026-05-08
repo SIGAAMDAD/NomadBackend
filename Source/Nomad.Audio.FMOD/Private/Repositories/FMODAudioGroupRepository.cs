@@ -23,7 +23,8 @@ using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.CVars;
 
-namespace Nomad.Audio.Fmod.Private.Repositories {
+namespace Nomad.Audio.Fmod.Private.Repositories
+{
 	/*
 	===================================================================================
 	
@@ -35,7 +36,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 	/// 
 	/// </summary>
 
-	internal sealed class FMODAudioGroupRepository : IDisposable {
+	internal sealed class FMODAudioGroupRepository : IDisposable
+	{
 		private readonly ConcurrentDictionary<string, IAudioGroup> _groups = new();
 		private readonly FMOD.Studio.System _system;
 
@@ -59,7 +61,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="system"></param>
 		/// <param name="cvarSystem"></param>
-		public FMODAudioGroupRepository( FMOD.Studio.System system, ILoggerCategory category, ICVarSystemService cvarSystem ) {
+		public FMODAudioGroupRepository( FMOD.Studio.System system, ILoggerCategory category, ICVarSystemService cvarSystem )
+		{
 			_system = system;
 			_category = category;
 
@@ -92,7 +95,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_onMusicVolumeChanged?.Dispose();
 				_onSoundEffectsVolumeChanged?.Dispose();
@@ -111,7 +115,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		private IAudioGroup FindGroup( string name ) {
+		private IAudioGroup FindGroup( string name )
+		{
 			if ( !_groups.TryGetValue( name, out var group ) ) {
 				_category.PrintLine( $"Fetching bus group '{name}'..." );
 				FMODValidator.ValidateCall( _system.getBus( name, out var bus ) );
@@ -129,7 +134,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnMusicOnChanged( in CVarValueChangedEventArgs<bool> args ) {
+		private void OnMusicOnChanged( in CVarValueChangedEventArgs<bool> args )
+		{
 			_musicGroup.Muted = !args.NewValue;
 		}
 
@@ -142,7 +148,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnSoundEffectsOnChanged( in CVarValueChangedEventArgs<bool> args ) {
+		private void OnSoundEffectsOnChanged( in CVarValueChangedEventArgs<bool> args )
+		{
 			_soundEffectsGroup.Muted = !args.NewValue;
 		}
 
@@ -155,7 +162,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnSoundEffectsVolumeChanged( in CVarValueChangedEventArgs<float> args ) {
+		private void OnSoundEffectsVolumeChanged( in CVarValueChangedEventArgs<float> args )
+		{
 			_soundEffectsGroup.Volume = args.NewValue;
 		}
 
@@ -168,7 +176,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnMusicVolumeChanged( in CVarValueChangedEventArgs<float> args ) {
+		private void OnMusicVolumeChanged( in CVarValueChangedEventArgs<float> args )
+		{
 			_musicGroup.Volume = args.NewValue;
 		}
 	};

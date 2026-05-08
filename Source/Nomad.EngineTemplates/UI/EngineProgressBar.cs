@@ -19,16 +19,16 @@ using Nomad.EngineTemplates.BaseClasses;
 
 namespace Nomad.EngineTemplates.UI
 {
-	/// <summary>
+    /// <summary>
     /// Declares the engine template for progress bar UI elements.
     /// </summary>
     [TemplateClass(Contract = typeof(IProgressBar), GodotBase = "Godot.ProgressBar", UnityBase = "UnityEngine.MonoBehaviour")]
     [TemplateNamespace(Name = "UI")]
-	[TemplateEvent(Name = "ValueSet", PayloadType = typeof(float))]
+    [TemplateEvent(Name = "ValueSet", PayloadType = typeof(float))]
     [TemplateProperty(Name = "Minimum", Type = typeof(float), GodotGetterExpression = "(float)base.MinValue", GodotSetterExpression = "base.MinValue = value")]
     [TemplateProperty(Name = "Maximum", Type = typeof(float), GodotGetterExpression = "(float)base.MaxValue", GodotSetterExpression = "base.MaxValue = value")]
     [TemplateUIElement]
-	internal class EngineProgressBar
-	{
-	}
+    internal class EngineProgressBar
+    {
+    }
 }

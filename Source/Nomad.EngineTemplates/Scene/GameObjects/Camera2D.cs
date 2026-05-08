@@ -20,10 +20,10 @@ using Nomad.EngineTemplates.Attributes.Properties;
 
 namespace Nomad.EngineTemplates.Scene.GameObjects
 {
-	/// <summary>
-	/// Declares the engine template for 2D camera objects.
-	/// </summary>
-	[TemplateClass(Contract = typeof(ICamera2D), GodotBase = "Godot.Camera2D", UnityBase = "UnityEngine.MonoBehaviour")]
+    /// <summary>
+    /// Declares the engine template for 2D camera objects.
+    /// </summary>
+    [TemplateClass(Contract = typeof(ICamera2D), GodotBase = "Godot.Camera2D", UnityBase = "UnityEngine.MonoBehaviour")]
     [TemplateNamespace(Name = "Scene.GameObjects")]
     [TemplateProperty(
         Name = "IsVisible",
@@ -33,24 +33,24 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
         UnityGetterExpression = "GetComponent<global::UnityEngine.Camera>() != null && GetComponent<global::UnityEngine.Camera>().enabled",
         UnitySetterExpression = "(GetComponent<global::UnityEngine.Camera>() ?? throw new global::System.InvalidOperationException(\"A UnityEngine.Camera component is required.\")).enabled = value"
     )]
-	[TemplatePositionProperty]
-	[TemplateScaleProperty]
-	[TemplateRotationProperty]
+    [TemplatePositionProperty]
+    [TemplateScaleProperty]
+    [TemplateRotationProperty]
     [TemplateRenderOrderProperty]
-	[TemplateTypeConversion(
+    [TemplateTypeConversion(
         AgnosticType = typeof(Vector2),
         AgnosticToGodotExpression = "new global::Godot.Vector2({{value}}.X, {{value}}.Y)",
         GodotToAgnosticExpression = "new global::System.Numerics.Vector2({{value}}.X, {{value}}.Y)",
-		AgnosticToUnityExpression = "new global::UnityEngine.Vector2({{value}}.X, {{value}}.Y)",
-		UnityToAgnosticExpression = "new global::System.Numerics.Vector2({{value}}.x, {{value}}.y)"
-	)]
-	[TemplateProperty(
+        AgnosticToUnityExpression = "new global::UnityEngine.Vector2({{value}}.X, {{value}}.Y)",
+        UnityToAgnosticExpression = "new global::System.Numerics.Vector2({{value}}.x, {{value}}.y)"
+    )]
+    [TemplateProperty(
         Name = "Zoom",
         Type = typeof(Vector2),
         UnityGetterExpression = "GetComponent<global::UnityEngine.Camera>() != null ? new global::System.Numerics.Vector2(GetComponent<global::UnityEngine.Camera>().orthographicSize, GetComponent<global::UnityEngine.Camera>().orthographicSize) : global::System.Numerics.Vector2.One",
         UnitySetterExpression = "(GetComponent<global::UnityEngine.Camera>() ?? throw new global::System.InvalidOperationException(\"A UnityEngine.Camera component is required.\")).orthographicSize = value.X"
     )]
-	internal class Camera2D
-	{
-	}
+    internal class Camera2D
+    {
+    }
 }

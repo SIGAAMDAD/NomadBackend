@@ -22,7 +22,8 @@ using Nomad.Core.Events;
 using Nomad.Core.FileSystem;
 using Nomad.Core.Logger;
 
-namespace Nomad.EngineUtils.Godot.Private.Console {
+namespace Nomad.EngineUtils.Godot.Private.Console
+{
 	/*
 	===================================================================================
 
@@ -34,7 +35,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 	///
 	/// </summary>
 
-	internal sealed class GodotConsole : IConsoleObject, IDisposable {
+	internal sealed class GodotConsole : IConsoleObject, IDisposable
+	{
 		public bool IsOpen => _isOpen;
 		private bool _isOpen = false;
 
@@ -85,7 +87,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 			ILoggerService logger,
 			IGameEventRegistryService eventRegistry,
 			IFileSystem fileSystem
-		) {
+		)
+		{
 			ArgumentNullException.ThrowIfNull( owner );
 			ArgumentNullException.ThrowIfNull( fileSystem );
 
@@ -179,7 +182,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _isDisposed ) {
 				return;
 			}
@@ -214,7 +218,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		/// <summary>
 		///
 		/// </summary>
-		public void Show() {
+		public void Show()
+		{
 			if ( _isOpen ) {
 				return;
 			}
@@ -236,7 +241,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		/// <summary>
 		///
 		/// </summary>
-		public void Hide() {
+		public void Hide()
+		{
 			if ( !_isOpen ) {
 				return;
 			}
@@ -257,7 +263,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		/// <summary>
 		///
 		/// </summary>
-		public void Toggle() {
+		public void Toggle()
+		{
 			if ( _isOpen ) {
 				Hide();
 			} else {
@@ -273,7 +280,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		/// <summary>
 		///
 		/// </summary>
-		public void Clear() {
+		public void Clear()
+		{
 			_outputView.Clear();
 		}
 
@@ -286,7 +294,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		///
 		/// </summary>
 		/// <param name="message"></param>
-		public void Print( string message ) {
+		public void Print( string message )
+		{
 			_outputView.Print( message );
 		}
 
@@ -299,7 +308,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		///
 		/// </summary>
 		/// <param name="text"></param>
-		public void ExecuteText( string text ) {
+		public void ExecuteText( string text )
+		{
 			_commandHandler.ExecuteText( text );
 		}
 
@@ -312,7 +322,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnToggleRequested( in ConsoleToggleRequestedEventArgs args ) {
+		private void OnToggleRequested( in ConsoleToggleRequestedEventArgs args )
+		{
 			Toggle();
 		}
 
@@ -325,7 +336,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnPageUp( in PageUpEventArgs args ) {
+		private void OnPageUp( in PageUpEventArgs args )
+		{
 			if ( _isOpen ) {
 				_outputView.PageUp();
 			}
@@ -340,7 +352,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnPageDown( in PageDownEventArgs args ) {
+		private void OnPageDown( in PageDownEventArgs args )
+		{
 			if ( _isOpen ) {
 				_outputView.PageDown();
 			}
@@ -355,7 +368,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnHistoryPrevious( in HistoryPrevEventArgs args ) {
+		private void OnHistoryPrevious( in HistoryPrevEventArgs args )
+		{
 			if ( _isOpen ) {
 				_inputLine.ApplyHistoryText( args.Text );
 			}
@@ -370,7 +384,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnHistoryNext( in HistoryNextEventArgs args ) {
+		private void OnHistoryNext( in HistoryNextEventArgs args )
+		{
 			if ( !_isOpen ) {
 				return;
 			}

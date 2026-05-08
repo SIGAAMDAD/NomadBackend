@@ -17,7 +17,8 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace Nomad.Audio.Fmod.Private.Entities {
+namespace Nomad.Audio.Fmod.Private.Entities
+{
 	/*
 	===================================================================================
 	
@@ -30,7 +31,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 	/// </summary>
 
 	[StructLayout( LayoutKind.Sequential, Pack = 1, Size = 8 )]
-	internal struct FMODChannelResource {
+	internal struct FMODChannelResource
+	{
 		public readonly FMOD.Studio.PLAYBACK_STATE PlaybackState {
 			get {
 				FMODValidator.ValidateCall( _instance.getPlaybackState( out FMOD.Studio.PLAYBACK_STATE state ) );
@@ -109,7 +111,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// 
 		/// </summary>
 		/// <param name="instance"></param>
-		public FMODChannelResource( FMOD.Studio.EventInstance instance ) {
+		public FMODChannelResource( FMOD.Studio.EventInstance instance )
+		{
 			_instance = instance;
 		}
 
@@ -121,7 +124,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// <summary>
 		///
 		/// </summary>
-		public readonly void Dispose() {
+		public readonly void Dispose()
+		{
 			Unload();
 		}
 
@@ -135,7 +139,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// </summary>
 		/// <param name="stopMode"></param>
 		/// <returns></returns>
-		public readonly FMOD.RESULT Stop( FMOD.Studio.STOP_MODE stopMode ) {
+		public readonly FMOD.RESULT Stop( FMOD.Studio.STOP_MODE stopMode )
+		{
 			return _instance.stop( stopMode );
 		}
 
@@ -148,7 +153,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public readonly FMOD.RESULT Start() {
+		public readonly FMOD.RESULT Start()
+		{
 			return _instance.start();
 		}
 
@@ -162,7 +168,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <returns></returns>
-		public readonly FMOD.RESULT SetFinishedCallback( FMOD.Studio.EVENT_CALLBACK? callback ) {
+		public readonly FMOD.RESULT SetFinishedCallback( FMOD.Studio.EVENT_CALLBACK? callback )
+		{
 			return _instance.setCallback( callback, FMOD.Studio.EVENT_CALLBACK_TYPE.STOPPED | FMOD.Studio.EVENT_CALLBACK_TYPE.START_FAILED );
 		}
 
@@ -174,7 +181,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// <summary>
 		/// Clears the unmanaged FMOD EventInstance.
 		/// </summary>
-		public readonly void Unload() {
+		public readonly void Unload()
+		{
 			if ( _instance.isValid() ) {
 				// ensure we unhook the callback (causes a seggy if its not done)
 				FMODValidator.ValidateCall( SetFinishedCallback( null ) );

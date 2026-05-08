@@ -21,7 +21,8 @@ using Nomad.Input.Interfaces;
 using Nomad.Input.Private.Repositories;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.Services {
+namespace Nomad.Input.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -33,7 +34,8 @@ namespace Nomad.Input.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class BindResolver : IBindResolver {
+	internal sealed class BindResolver : IBindResolver
+	{
 		private readonly BindRepository _repository;
 		private readonly Action _bindingsChanged;
 
@@ -48,7 +50,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="repository"></param>
 		/// <param name="bindingsChanged"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public BindResolver( BindRepository repository, Action bindingsChanged ) {
+		public BindResolver( BindRepository repository, Action bindingsChanged )
+		{
 			_repository = repository ?? throw new ArgumentNullException( nameof( repository ) );
 			_bindingsChanged = bindingsChanged ?? throw new ArgumentNullException( nameof( bindingsChanged ) );
 		}
@@ -63,7 +66,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="mappingName"></param>
 		/// <returns></returns>
-		public IReadOnlyList<InputActionDefinition>? GetBindMapping( string mappingName ) {
+		public IReadOnlyList<InputActionDefinition>? GetBindMapping( string mappingName )
+		{
 			return _repository.TryGetBindMapping( mappingName, out var bindings ) ? bindings : null;
 		}
 
@@ -77,7 +81,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="scheme"></param>
 		/// <returns></returns>
-		public IReadOnlyList<string> GetMappingsForScheme( InputScheme scheme ) {
+		public IReadOnlyList<string> GetMappingsForScheme( InputScheme scheme )
+		{
 			return _repository.GetMappingsForScheme( scheme );
 		}
 
@@ -91,7 +96,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="scheme"></param>
 		/// <returns></returns>
-		public string? GetActiveMapping( InputScheme scheme ) {
+		public string? GetActiveMapping( InputScheme scheme )
+		{
 			return _repository.GetActiveMapping( scheme );
 		}
 
@@ -106,7 +112,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="scheme"></param>
 		/// <param name="mappingName"></param>
 		/// <returns></returns>
-		public bool LoadMapping( InputScheme scheme, string mappingName ) {
+		public bool LoadMapping( InputScheme scheme, string mappingName )
+		{
 			if ( !_repository.SetActiveMapping( scheme, mappingName ) ) {
 				return false;
 			}
@@ -126,7 +133,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="mappingName"></param>
 		/// <param name="actionId"></param>
 		/// <param name="bindings"></param>
-		public void SetActionBindings( string mappingName, string actionId, ImmutableArray<InputBindingDefinition> bindings ) {
+		public void SetActionBindings( string mappingName, string actionId, ImmutableArray<InputBindingDefinition> bindings )
+		{
 			if ( _repository.SetActionBindings( mappingName, actionId, bindings ) ) {
 				_bindingsChanged();
 			}

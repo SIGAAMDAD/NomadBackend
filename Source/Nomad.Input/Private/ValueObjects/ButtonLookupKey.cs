@@ -16,8 +16,10 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using Nomad.Input.ValueObjects;
 using System;
 
-namespace Nomad.Input.Private.ValueObjects {
-	internal readonly struct ButtonLookupKey : IEquatable<ButtonLookupKey> {
+namespace Nomad.Input.Private.ValueObjects
+{
+	internal readonly struct ButtonLookupKey : IEquatable<ButtonLookupKey>
+	{
 		/// <summary>
 		/// 
 		/// </summary>
@@ -42,23 +44,27 @@ namespace Nomad.Input.Private.ValueObjects {
 		/// <param name="device"></param>
 		/// <param name="control"></param>
 		/// <param name="pressed"></param>
-		public ButtonLookupKey( InputDeviceSlot device, InputControlId control, bool pressed ) {
+		public ButtonLookupKey( InputDeviceSlot device, InputControlId control, bool pressed )
+		{
 			_device = device;
 			_control = control;
 			_pressed = pressed;
 		}
 
-		public bool Equals( ButtonLookupKey other ) {
+		public bool Equals( ButtonLookupKey other )
+		{
 			return _device == other._device
 				&& _control == other._control
 				&& _pressed == other._pressed;
 		}
 
-		public override bool Equals( object? obj ) {
+		public override bool Equals( object? obj )
+		{
 			return obj is ButtonLookupKey other && Equals( other );
 		}
 
-		public override int GetHashCode() {
+		public override int GetHashCode()
+		{
 			return HashCode.Combine( (int)_device, (int)_control, _pressed );
 		}
 	};

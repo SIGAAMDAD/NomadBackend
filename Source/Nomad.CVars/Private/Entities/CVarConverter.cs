@@ -17,7 +17,8 @@ using System.Runtime.CompilerServices;
 using Nomad.Core.CVars;
 using Nomad.CVars.Exceptions;
 
-namespace Nomad.CVars.Private.Entities {
+namespace Nomad.CVars.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -30,7 +31,8 @@ namespace Nomad.CVars.Private.Entities {
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 
-	internal struct CVarConverter<T> {
+	internal struct CVarConverter<T>
+	{
 		public T Value;
 		private readonly CVarType _type;
 
@@ -44,7 +46,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <param name="type"></param>
 		/// <param name="defaultValue"></param>
-		public CVarConverter( CVarType type, T defaultValue ) {
+		public CVarConverter( CVarType type, T defaultValue )
+		{
 			_type = type;
 			Value = defaultValue;
 		}
@@ -59,7 +62,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <returns>The <see cref="Value"/> in string format.</returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public readonly string? GetStringValue() {
+		public readonly string? GetStringValue()
+		{
 			return _type == CVarType.String ? Value?.ToString() : throw new CVarTypeMismatchException( typeof( string ), _type.GetSystemType() );
 		}
 
@@ -73,7 +77,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <returns>The <see cref="Value"/> in 32-bit integer format, 0 by default if int.TryParse failed</returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public readonly uint GetUIntegerValue() {
+		public readonly uint GetUIntegerValue()
+		{
 			return _type == CVarType.UInt ? Unsafe.As<T, uint>( ref Unsafe.AsRef( in Value ) ) : throw new CVarTypeMismatchException( typeof( uint ), _type.GetSystemType() );
 		}
 
@@ -87,7 +92,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <returns>The <see cref="Value"/> in 32-bit integer format, 0 by default if int.TryParse failed</returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public readonly int GetIntegerValue() {
+		public readonly int GetIntegerValue()
+		{
 			return _type == CVarType.Int ? Unsafe.As<T, int>( ref Unsafe.AsRef( in Value ) ) : throw new CVarTypeMismatchException( typeof( int ), _type.GetSystemType() );
 		}
 
@@ -101,7 +107,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <returns>The <see cref="Value"/> in 32-bit floating-point format, 0 by default if float.TryParse failed</returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public float GetDecimalValue() {
+		public float GetDecimalValue()
+		{
 			return _type == CVarType.Decimal ? Unsafe.As<T, float>( ref Unsafe.AsRef( in Value ) ) : throw new CVarTypeMismatchException( typeof( float ), _type.GetSystemType() );
 		}
 
@@ -115,7 +122,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <returns>The <see cref="Value"/> in 8-bit boolean format, false by default if bool.TryParse failed</returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public readonly bool GetBooleanValue() {
+		public readonly bool GetBooleanValue()
+		{
 			return _type == CVarType.Boolean ? Unsafe.As<T, bool>( ref Unsafe.AsRef( in Value ) ) : throw new CVarTypeMismatchException( typeof( bool ), _type.GetSystemType() );
 		}
 
@@ -130,7 +138,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetIntegerValue( int value ) {
+		public void SetIntegerValue( int value )
+		{
 			Value = _type == CVarType.Int ? Unsafe.As<int, T>( ref value ) : throw new CVarTypeMismatchException( typeof( int ), _type.GetSystemType() );
 		}
 
@@ -145,7 +154,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetUIntegerValue( uint value ) {
+		public void SetUIntegerValue( uint value )
+		{
 			Value = _type == CVarType.UInt ? Unsafe.As<uint, T>( ref value ) : throw new CVarTypeMismatchException( typeof( uint ), _type.GetSystemType() );
 		}
 
@@ -160,7 +170,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetBooleanValue( bool value ) {
+		public void SetBooleanValue( bool value )
+		{
 			Value = _type == CVarType.Boolean ? Unsafe.As<bool, T>( ref value ) : throw new CVarTypeMismatchException( typeof( bool ), _type.GetSystemType() );
 		}
 
@@ -175,7 +186,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetDecimalValue( float value ) {
+		public void SetDecimalValue( float value )
+		{
 			Value = _type == CVarType.Decimal ? Unsafe.As<float, T>( ref value ) : throw new CVarTypeMismatchException( typeof( float ), _type.GetSystemType() );
 		}
 
@@ -190,7 +202,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetStringValue( string value ) {
+		public void SetStringValue( string value )
+		{
 			Value = _type == CVarType.String ? Unsafe.As<string, T>( ref value ) : throw new CVarTypeMismatchException( typeof( string ), _type.GetSystemType() );
 		}
 
@@ -206,7 +219,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetValue<T1>( T1 value ) {
+		public void SetValue<T1>( T1 value )
+		{
 			if ( typeof( T ) == typeof( T1 ) ) {
 				Value = Unsafe.As<T1, T>( ref value );
 			} else {

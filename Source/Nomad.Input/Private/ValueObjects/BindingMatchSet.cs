@@ -15,14 +15,17 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 
-namespace Nomad.Input.Private.ValueObjects {
-	internal readonly ref struct BindingMatchSet {
+namespace Nomad.Input.Private.ValueObjects
+{
+	internal readonly ref struct BindingMatchSet
+	{
 		public readonly ReadOnlySpan<int> BindingIndices;
 		public readonly ReadOnlySpan<int> Scores;
 
 		public int Length => BindingIndices.Length;
 
-		public BindingMatchSet( ReadOnlySpan<int> bindingIndices, ReadOnlySpan<int> scores ) {
+		public BindingMatchSet( ReadOnlySpan<int> bindingIndices, ReadOnlySpan<int> scores )
+		{
 			BindingIndices = bindingIndices;
 			Scores = scores;
 		}

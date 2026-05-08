@@ -16,23 +16,29 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using Nomad.Core.Logger;
 
-namespace Nomad.EngineUtils.Godot.Private.Console {
-	internal sealed class GodotConsoleSink : SinkBase {
+namespace Nomad.EngineUtils.Godot.Private.Console
+{
+	internal sealed class GodotConsoleSink : SinkBase
+	{
 		private readonly GodotConsoleOutputView _outputView;
 
-		public GodotConsoleSink( GodotConsoleOutputView outputView ) {
+		public GodotConsoleSink( GodotConsoleOutputView outputView )
+		{
 			_outputView = outputView ?? throw new ArgumentNullException( nameof( outputView ) );
 		}
 
-		public override void Clear() {
+		public override void Clear()
+		{
 			_outputView.Clear();
 		}
 
-		public override void Print( string message ) {
+		public override void Print( string message )
+		{
 			_outputView.Print( message );
 		}
 
-		public override void Flush() {
+		public override void Flush()
+		{
 		}
 	};
 };

@@ -102,7 +102,7 @@ namespace Nomad.EngineUtils
         public T? CastAs<T>()
             where T : class, IGameObject
         {
-            if ( _node is T castedType )
+            if (_node is T castedType)
             {
                 return castedType;
             }

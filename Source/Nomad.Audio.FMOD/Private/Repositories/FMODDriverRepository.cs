@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Nomad.Audio.Fmod.Private.Repositories {
+namespace Nomad.Audio.Fmod.Private.Repositories
+{
 	/*
 	===================================================================================
 
@@ -28,7 +29,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 	/// Holds the supported FMOD output backends and tracks the currently selected one.
 	/// </summary>
 
-	internal sealed class FMODDriverRepository {
+	internal sealed class FMODDriverRepository
+	{
 		/// <summary>
 		/// A list of all audio driver APIs available for usage with FMOD.
 		/// </summary>
@@ -56,7 +58,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// <summary>
 		/// 
 		/// </summary>
-		public FMODDriverRepository() {
+		public FMODDriverRepository()
+		{
 			_supportedAudioDrivers = new Dictionary<FMOD.OUTPUTTYPE, string>() {
 				[FMOD.OUTPUTTYPE.AUTODETECT] = "Auto Detect",
 #if WINDOWS
@@ -82,7 +85,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// 
 		/// </summary>
 		/// <param name="audioDriver"></param>
-		public void SetCurrentDriver( FMOD.OUTPUTTYPE audioDriver ) {
+		public void SetCurrentDriver( FMOD.OUTPUTTYPE audioDriver )
+		{
 			_audioDriver = audioDriver;
 		}
 
@@ -96,7 +100,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="audioDriver"></param>
 		/// <returns></returns>
-		public string GetDriverName( FMOD.OUTPUTTYPE audioDriver ) {
+		public string GetDriverName( FMOD.OUTPUTTYPE audioDriver )
+		{
 			return _supportedAudioDrivers.TryGetValue( audioDriver, out string name ) ? name : audioDriver.ToString();
 		}
 	};

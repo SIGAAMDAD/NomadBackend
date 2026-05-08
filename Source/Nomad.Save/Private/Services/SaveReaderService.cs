@@ -25,7 +25,8 @@ using Nomad.Save.Private.Repositories;
 using Nomad.Save.Private.ValueObjects;
 using Nomad.Save.Exceptions;
 
-namespace Nomad.Save.Private.Services {
+namespace Nomad.Save.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -37,7 +38,8 @@ namespace Nomad.Save.Private.Services {
 	///
 	/// </summary>
 
-	internal sealed class SaveReaderService : ISaveReaderService {
+	internal sealed class SaveReaderService : ISaveReaderService
+	{
 		public int SectionCount => _sections.Count;
 
 		private readonly ConcurrentDictionary<string, SaveSectionReader> _sections;
@@ -63,7 +65,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="slotRepository"></param>
 		/// <param name="fileSystem"></param>
 		/// <param name="logger"></param>
-		public SaveReaderService( SaveConfig config, SlotRepository slotRepository, IFileSystem fileSystem, ILoggerService logger ) {
+		public SaveReaderService( SaveConfig config, SlotRepository slotRepository, IFileSystem fileSystem, ILoggerService logger )
+		{
 			_slotRepository = slotRepository ?? throw new ArgumentNullException( nameof( slotRepository ) );
 			_fileSystem = fileSystem ?? throw new ArgumentNullException( nameof( fileSystem ) );
 			_sections = new ConcurrentDictionary<string, SaveSectionReader>();
@@ -80,7 +83,8 @@ namespace Nomad.Save.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_category?.Dispose();
 			}
@@ -97,7 +101,8 @@ namespace Nomad.Save.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="name"></param>
-		void ISaveReaderService.Load( string name ) {
+		void ISaveReaderService.Load( string name )
+		{
 			var filepath = _slotRepository.AddSaveFile( name, false );
 
 			_sections.Clear();
@@ -140,7 +145,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="sectionName"></param>
 		/// <returns></returns>
-		public ISaveSectionReader? FindSection( string sectionName ) {
+		public ISaveSectionReader? FindSection( string sectionName )
+		{
 			if ( !_sections.TryGetValue( sectionName, out var section ) ) {
 				_category.PrintError( $"SaveReaderService.FindSection: section '{sectionName}' not found!" );
 				return null;

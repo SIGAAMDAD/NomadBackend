@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using Nomad.Audio.Fmod.ValueObjects;
 
-namespace Nomad.Audio.Fmod.Private.Entities {
+namespace Nomad.Audio.Fmod.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -28,7 +29,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 	///
 	/// </summary>
 
-	internal sealed class FMODChannel : IDisposable {
+	internal sealed class FMODChannel : IDisposable
+	{
 		public FMODChannelResource Instance = new FMODChannelResource();
 
 		public float BasePriority = 0.0f;
@@ -82,7 +84,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			Instance.Dispose();
 		}
 
@@ -96,7 +99,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// </summary>
 		/// <param name="now"></param>
 		/// <returns></returns>
-		public float AgeSeconds( float now ) {
+		public float AgeSeconds( float now )
+		{
 			return now - StartTimeSeconds;
 		}
 
@@ -108,7 +112,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Reset() {
+		public void Reset()
+		{
 			Instance = new FMODChannelResource();
 
 			BasePriority = 0.0f;

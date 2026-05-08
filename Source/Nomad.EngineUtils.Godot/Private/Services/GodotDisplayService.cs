@@ -22,7 +22,8 @@ using Nomad.Core.Engine.Rendering;
 using Nomad.Core.Engine.Windowing;
 using Nomad.Core.Engine.Services;
 
-namespace Nomad.EngineUtils.Godot.Private.Services {
+namespace Nomad.EngineUtils.Godot.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -33,8 +34,9 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 	/// <summary>
 	/// 
 	/// </summary>
-	
-	internal sealed class GodotDisplayService : IDisplayService {
+
+	internal sealed class GodotDisplayService : IDisplayService
+	{
 		public bool SupportsBloom => true;
 		public bool SupportsSMAA => true;
 		public bool SupportsFXAA => true;
@@ -60,7 +62,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// <param name="sceneTree"></param>
 		/// <param name="windowService"></param>
 		/// <param name="cvarSystem"></param>
-		public GodotDisplayService( SceneTree sceneTree, IWindowService windowService, ICVarSystemService cvarSystem ) {
+		public GodotDisplayService( SceneTree sceneTree, IWindowService windowService, ICVarSystemService cvarSystem )
+		{
 			_viewportRid = sceneTree.Root.GetViewportRid();
 			_environment = new Environment() {
 				GlowBlendMode = Environment.GlowBlendModeEnum.Additive,
@@ -109,7 +112,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnBrightnessChanged( in CVarValueChangedEventArgs<float> args ) {
+		private void OnBrightnessChanged( in CVarValueChangedEventArgs<float> args )
+		{
 			_environment.AdjustmentBrightness = args.NewValue;
 		}
 
@@ -122,7 +126,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnWindowResolutionChanged( in CVarValueChangedEventArgs<WindowResolution> args ) {
+		private void OnWindowResolutionChanged( in CVarValueChangedEventArgs<WindowResolution> args )
+		{
 			var size = (WindowSize)args.NewValue;
 			_windowService.Width = size.Width;
 			_windowService.Height = size.Height;
@@ -137,7 +142,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnMonitorIndexChanged( in CVarValueChangedEventArgs<int> args ) {
+		private void OnMonitorIndexChanged( in CVarValueChangedEventArgs<int> args )
+		{
 			_windowService.ScreenIndex = args.NewValue;
 		}
 
@@ -150,7 +156,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnAspectRatioChanged( in CVarValueChangedEventArgs<AspectRatio> args ) {
+		private void OnAspectRatioChanged( in CVarValueChangedEventArgs<AspectRatio> args )
+		{
 			ProjectSettings.SetSetting( "display/window/stretch/scale", args.NewValue.GetRatio() );
 		}
 
@@ -163,7 +170,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnWindowModeChanged( in CVarValueChangedEventArgs<WindowMode> args ) {
+		private void OnWindowModeChanged( in CVarValueChangedEventArgs<WindowMode> args )
+		{
 			_windowService.Mode = args.NewValue;
 		}
 
@@ -176,7 +184,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnMaxFpsChanged( in CVarValueChangedEventArgs<int> args ) {
+		private void OnMaxFpsChanged( in CVarValueChangedEventArgs<int> args )
+		{
 			global::Godot.Engine.MaxFps = args.NewValue;
 		}
 
@@ -189,7 +198,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnVSyncModeChanged( in CVarValueChangedEventArgs<VSyncMode> args ) {
+		private void OnVSyncModeChanged( in CVarValueChangedEventArgs<VSyncMode> args )
+		{
 			var vsyncMode = DisplayServer.VSyncMode.Disabled;
 			int swapChainImageCount = 2;
 			switch ( args.NewValue ) {
@@ -220,7 +230,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnAntiAliasingChanged( in CVarValueChangedEventArgs<AntiAliasingMode> args ) {
+		private void OnAntiAliasingChanged( in CVarValueChangedEventArgs<AntiAliasingMode> args )
+		{
 			switch ( args.NewValue ) {
 				case AntiAliasingMode.None:
 					RenderingServer.ViewportSetMsaa2D( _viewportRid, RenderingServer.ViewportMsaa.Disabled );

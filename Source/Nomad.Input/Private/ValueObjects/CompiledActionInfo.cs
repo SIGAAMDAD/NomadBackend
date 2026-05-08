@@ -15,11 +15,14 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using Nomad.Core.Util;
 
-namespace Nomad.Input.Private.ValueObjects {
-	internal readonly struct CompiledActionInfo {
+namespace Nomad.Input.Private.ValueObjects
+{
+	internal readonly struct CompiledActionInfo
+	{
 		public readonly InternString ActionId;
 
-		public CompiledActionInfo( InternString actionId ) {
+		public CompiledActionInfo( InternString actionId )
+		{
 			ActionId = actionId;
 		}
 	};

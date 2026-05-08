@@ -23,7 +23,8 @@ using Nomad.Core.FileSystem.Configs;
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.Memory.Buffers;
 
-namespace Nomad.FileSystem.Private.MemoryStream {
+namespace Nomad.FileSystem.Private.MemoryStream
+{
 	/*
 	===================================================================================
 
@@ -35,7 +36,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 	///
 	/// </summary>
 
-	internal class MemoryWriteStream : MemoryStreamBase, IMemoryWriteStream {
+	internal class MemoryWriteStream : MemoryStreamBase, IMemoryWriteStream
+	{
 		/// <summary>
 		/// The maximum possible length of the buffer. Set to 1 GiB because of integer limitations.
 		/// </summary>
@@ -73,7 +75,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="config"></param>
 		public MemoryWriteStream( MemoryWriteConfig config )
-			: base( config.Strategy ) {
+			: base( config.Strategy )
+		{
 			if ( config.InitialCapacity < 0 || config.InitialCapacity > config.MaxCapacity || config.InitialCapacity > MAX_CAPACITY || config.MaxCapacity > MAX_CAPACITY ) {
 				throw new ArgumentOutOfRangeException( nameof( config ) );
 			}
@@ -93,7 +96,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <summary>
 		/// Flushes the stream. This operation is a no-op for memory streams.
 		/// </summary>
-		public override void Flush() {
+		public override void Flush()
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 		}
 
@@ -107,7 +111,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous flush operation.</returns>
-		public override async ValueTask FlushAsync( CancellationToken ct = default ) {
+		public override async ValueTask FlushAsync( CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ct.ThrowIfCancellationRequested();
 		}
@@ -121,7 +126,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// 
 		/// </summary>
 		/// <param name="length"></param>
-		public override void SetLength( long length ) {
+		public override void SetLength( long length )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			if ( this.length < length ) {
 				ResizeBuffer( length );
@@ -143,7 +149,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="buffer">An array of bytes. This method copies count bytes from buffer to the current stream.</param>
 		/// <param name="offset">The zero-based byte offset in buffer at which to begin copying bytes to the current stream.</param>
 		/// <param name="count">The number of bytes to be written to the current stream.</param>
-		public void Write( byte[] buffer, int offset, int count ) {
+		public void Write( byte[] buffer, int offset, int count )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( buffer );
 			if ( offset < 0 || offset + count > buffer.Length ) {
@@ -184,7 +191,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="buffer">A read-only span of bytes. This method copies the contents of the span to the current stream.</param>
 		/// <param name="offset">The zero-based byte offset in buffer at which to begin copying bytes to the current stream.</param>
 		/// <param name="count">The number of bytes to be written to the current stream.</param>
-		public void Write( ReadOnlySpan<byte> buffer, int offset, int count ) {
+		public void Write( ReadOnlySpan<byte> buffer, int offset, int count )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			if ( offset < 0 || offset + count > buffer.Length ) {
 				throw new ArgumentOutOfRangeException( nameof( offset ) );
@@ -224,7 +232,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="count">The number of bytes to be written to the current stream.</param>
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous write operation.</returns>
-		public async ValueTask WriteAsync( byte[] buffer, int offset, int count, CancellationToken ct = default ) {
+		public async ValueTask WriteAsync( byte[] buffer, int offset, int count, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( buffer );
 			if ( offset < 0 || offset + count > buffer.Length ) {
@@ -252,7 +261,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="buffer">A read-only memory buffer. This method copies the contents of the buffer to the current stream.</param>
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous write operation.</returns>
-		public async ValueTask WriteAsync( ReadOnlyMemory<byte> buffer, CancellationToken ct = default ) {
+		public async ValueTask WriteAsync( ReadOnlyMemory<byte> buffer, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			ct.ThrowIfCancellationRequested();
@@ -272,7 +282,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="count">The number of bytes to be written to the current stream.</param>
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous write operation.</returns>
-		public async ValueTask WriteAsync( ReadOnlyMemory<byte> buffer, int offset, int count, CancellationToken ct = default ) {
+		public async ValueTask WriteAsync( ReadOnlyMemory<byte> buffer, int offset, int count, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			ct.ThrowIfCancellationRequested();
@@ -288,7 +299,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// Reads all bytes from the specified read stream and writes them to the current stream.
 		/// </summary>
 		/// <param name="stream">The read stream to copy from.</param>
-		public void WriteFromStream( IReadStream stream ) {
+		public void WriteFromStream( IReadStream stream )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( stream );
 
@@ -306,7 +318,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="stream">The read stream to copy from.</param>
 		/// <param name="ct">A token to cancel the operation.</param>
-		public async ValueTask WriteFromStreamAsync( IReadStream stream, CancellationToken ct = default ) {
+		public async ValueTask WriteFromStreamAsync( IReadStream stream, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( stream );
 
@@ -324,7 +337,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// Writes a UTF-8 encoded string to the stream, prefixed with its length as a 7-bit encoded integer.
 		/// </summary>
 		/// <param name="value">The string to write.</param>
-		public void WriteString( string value ) {
+		public void WriteString( string value )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( value );
 
@@ -365,7 +379,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// Writes an integer to the stream using 7-bit encoded format.
 		/// </summary>
 		/// <param name="value">The integer value to write.</param>
-		public void Write7BitEncodedInt( int value ) {
+		public void Write7BitEncodedInt( int value )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			uint uValue = (uint)value;
@@ -652,7 +667,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// We're already checking the buffer is null from all the calling functions, so a null check isn't necessary here.
 		/// </remarks>
 		/// <param name="required">The bytes needed to write the data.</param>
-		private void EnsureCapacity( long required ) {
+		private void EnsureCapacity( long required )
+		{
 			if ( position + required > buffer!.Length ) {
 				ResizeBuffer( Math.Max( buffer.Length * 2, position + required ) );
 			}
@@ -668,7 +684,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="newLength"></param>
 		/// <exception cref="InvalidOperationException"></exception>
-		private void ResizeBuffer( long newLength ) {
+		private void ResizeBuffer( long newLength )
+		{
 			if ( _fixedSize ) {
 				throw new InvalidOperationException( "MemoryWriteStream was created with _fixedTrue = true, cannot attempt resize" );
 			}
@@ -712,7 +729,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <typeparam name="T">The type of the value to write.</typeparam>
 		/// <param name="value">The value to write.</param>
 		/// <param name="size">The size in bytes of the primitive we're writing.</param>
-		private void Write<T>( T value, int size ) {
+		private void Write<T>( T value, int size )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			EnsureCapacity( size );
@@ -733,7 +751,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// Adds <paramref name="byteCount"/> to the position, increasing the stream's length if required.
 		/// </summary>
 		/// <param name="byteCount">The number of bytes we're adding to the stream.</param>
-		private void BumpPosition( int byteCount ) {
+		private void BumpPosition( int byteCount )
+		{
 			long newPosition = position + byteCount;
 			if ( newPosition > length ) {
 				length = newPosition;

@@ -30,21 +30,21 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
         GodotBase = "global::Godot.AnimatedSprite2D",
         UnityBase = "global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter",
         Documentation = "Represents a frame-based animated 2D sprite."
-	)]
+    )]
     [TemplateEvent(
         Name = "AnimationFinished",
         PayloadType = typeof(EmptyEventArgs),
         Documentation = "Fired when the current animation finishes.",
         GodotHookExpression = "base.AnimationFinished += () => {{field}}.Publish(default);",
         UnityHookExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().AnimationFinished += animationName => {{field}}.Invoke();"
-	)]
-	[TemplateEvent(
+    )]
+    [TemplateEvent(
         Name = "AnimationLooped",
         PayloadType = typeof(EmptyEventArgs),
         Documentation = "Fired when the current animation finishes.",
         GodotHookExpression = "base.AnimationLooped += () => {{field}}.Publish(default);",
         UnityHookExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().AnimationFinished += animationName => {{field}}.Invoke();"
-	)]
+    )]
     [TemplateProperty(
         Name = "Color",
         Type = typeof(Vector4),
@@ -53,7 +53,7 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
         GodotSetterExpression = "base.Modulate = new global::Godot.Color(value.X, value.Y, value.Z, value.W)",
         UnityGetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().Color",
         UnitySetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().Color = value"
-	)]
+    )]
     [TemplateProperty(
         Name = "FlipHorizontal",
         Type = typeof(bool),
@@ -62,7 +62,7 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
         GodotSetterExpression = "base.FlipH = value",
         UnityGetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().FlipHorizontal",
         UnitySetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().FlipHorizontal = value"
-	)]
+    )]
     [TemplateProperty(
         Name = "FlipVertical",
         Type = typeof(bool),
@@ -71,7 +71,7 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
         GodotSetterExpression = "base.FlipV = value",
         UnityGetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().FlipVertical",
         UnitySetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().FlipVertical = value"
-	)]
+    )]
     [TemplateProperty(
         Name = "Animation",
         Type = typeof(string),
@@ -80,7 +80,7 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
         GodotSetterExpression = "base.Animation = value",
         UnityGetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().Animation",
         UnitySetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().Animation = value"
-	)]
+    )]
     [TemplateProperty(
         Name = "Frame",
         Type = typeof(int),
@@ -89,7 +89,7 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
         GodotSetterExpression = "base.Frame = value",
         UnityGetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().Frame",
         UnitySetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().Frame = value"
-	)]
+    )]
     [TemplateProperty(
         Name = "SpeedScale",
         Type = typeof(float),
@@ -98,7 +98,7 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
         GodotSetterExpression = "base.SpeedScale = value",
         UnityGetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().SpeedScale",
         UnitySetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().SpeedScale = value"
-	)]
+    )]
     [TemplateProperty(
         Name = "IsPlaying",
         Type = typeof(bool),
@@ -106,7 +106,7 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
         Documentation = "Whether the current animation is playing.",
         GodotGetterExpression = "base.IsPlaying()",
         UnityGetterExpression = "GetComponent<global::Nomad.Unity.Scene.GameObjects.AnimatedSprite2DAdapter>().IsPlaying"
-	)]
+    )]
     [TemplateMethod(
         Name = "Play",
         Documentation = "Starts playback of the current animation.")]
@@ -116,7 +116,7 @@ namespace Nomad.EngineTemplates.Scene.GameObjects
     [TemplateMethod(
         Name = "Stop",
         Documentation = "Stops playback.")]
-	[TemplateObject2D]
+    [TemplateObject2D]
     internal class TemplateAnimatedSprite2D
     {
     }

@@ -25,7 +25,8 @@ using Nomad.Core.Engine.Rendering;
 using Nomad.Core.CVars;
 using Nomad.CVars;
 
-namespace Nomad.EngineUtils.Godot.Private.Services {
+namespace Nomad.EngineUtils.Godot.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -37,7 +38,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class GodotWindowService : IWindowService {
+	internal sealed class GodotWindowService : IWindowService
+	{
 		private const string SWAPCHAIN_IMAGE_COUNT = "rendering/rendering_device/vsync/swapchain_image_count";
 
 		/// <summary>
@@ -196,7 +198,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// <param name="sceneTree"></param>
 		/// <param name="cvarSystem"></param>
 		/// <param name="eventFactory"></param>
-		internal GodotWindowService( SceneTree sceneTree, ICVarSystemService cvarSystem, IGameEventRegistryService eventFactory ) {
+		internal GodotWindowService( SceneTree sceneTree, ICVarSystemService cvarSystem, IGameEventRegistryService eventFactory )
+		{
 			_window = sceneTree.Root;
 			_window.FocusEntered += OnFocusEntered;
 			_window.FocusExited += OnFocusExited;
@@ -254,7 +257,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_sizeChanged?.Dispose();
 				_closeRequested?.Dispose();
@@ -275,7 +279,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// </summary>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
-		public void GetScreenResolution( out int width, out int height ) {
+		public void GetScreenResolution( out int width, out int height )
+		{
 			width = _screenWidth;
 			height = _screenHeight;
 		}
@@ -290,7 +295,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// </summary>
 		/// <param name="monitorIndex"></param>
 		/// <returns></returns>
-		public IReadOnlyList<WindowResolution> GetSupportedResolutions( int monitorIndex ) {
+		public IReadOnlyList<WindowResolution> GetSupportedResolutions( int monitorIndex )
+		{
 			var monitor = _monitors[monitorIndex];
 			var resolutions = new List<WindowResolution>();
 
@@ -315,7 +321,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// <param name="monitorIndex"></param>
 		/// <param name="nativeSize"></param>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		public void GetNativeResolutionForMonitor( int monitorIndex, out WindowSize nativeSize ) {
+		public void GetNativeResolutionForMonitor( int monitorIndex, out WindowSize nativeSize )
+		{
 			RangeGuard.ThrowIfOutOfRange( monitorIndex, 0, _monitors.Length - 1, nameof( monitorIndex ) );
 			nativeSize = _monitors[monitorIndex].ScreenSize;
 		}
@@ -329,7 +336,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// Gets a list of all the currently available monitors and fetches their sizes and other various data.
 		/// </summary>u
 		/// <returns></returns>
-		private static Monitor[] GetScreenList() {
+		private static Monitor[] GetScreenList()
+		{
 			int screenCount = DisplayServer.GetScreenCount();
 			var screens = new Monitor[screenCount];
 
@@ -351,7 +359,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		///
 		/// </summary>
 		/// <param name="mode"></param>
-		private void SetWindowMode( WindowMode mode ) {
+		private void SetWindowMode( WindowMode mode )
+		{
 			bool borderless = false;
 			var modeEnum = Window.ModeEnum.Windowed;
 			switch ( mode ) {
@@ -389,7 +398,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		private void OnFocusEntered() {
+		private void OnFocusEntered()
+		{
 			_isFocused = true;
 			_focusChanged.Publish( new WindowFocusChangedEventArgs( _isFocused ) );
 		}
@@ -402,7 +412,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		private void OnFocusExited() {
+		private void OnFocusExited()
+		{
 			_isFocused = false;
 			_focusChanged.Publish( new WindowFocusChangedEventArgs( _isFocused ) );
 		}
@@ -415,7 +426,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		private void OnSizeChanged() {
+		private void OnSizeChanged()
+		{
 			var size = _window.Size;
 			_sizeChanged.Publish( new WindowSizeChangedEventArgs( size.X, size.Y ) );
 		}
@@ -428,7 +440,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		private void OnCloseRequested() {
+		private void OnCloseRequested()
+		{
 			_closeRequested.Publish( default );
 		}
 
@@ -440,7 +453,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		private void OnTitleChanged() {
+		private void OnTitleChanged()
+		{
 		}
 
 		/*
@@ -452,7 +466,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnWindowModeValueChanged( in CVarValueChangedEventArgs<WindowMode> args ) {
+		private void OnWindowModeValueChanged( in CVarValueChangedEventArgs<WindowMode> args )
+		{
 			Mode = args.NewValue;
 		}
 
@@ -465,7 +480,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnMaximumFramerateValueChanged( in CVarValueChangedEventArgs<int> args ) {
+		private void OnMaximumFramerateValueChanged( in CVarValueChangedEventArgs<int> args )
+		{
 			MaximumFramerate = args.NewValue;
 		}
 
@@ -478,7 +494,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnWindowResolutionValueChanged( in CVarValueChangedEventArgs<WindowResolution> args ) {
+		private void OnWindowResolutionValueChanged( in CVarValueChangedEventArgs<WindowResolution> args )
+		{
 			var windowSize = (WindowSize)args.NewValue;
 			SetWindowSize( windowSize );
 		}
@@ -492,11 +509,13 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnMonitorValueChanged( in CVarValueChangedEventArgs<int> args ) {
+		private void OnMonitorValueChanged( in CVarValueChangedEventArgs<int> args )
+		{
 			ScreenIndex = args.NewValue;
 		}
 
-		private void SetWindowSize( WindowSize size ) {
+		private void SetWindowSize( WindowSize size )
+		{
 			if ( _mode == WindowMode.BorderlessFullscreen || _mode == WindowMode.Fullscreen || _mode == WindowMode.ExclusiveFullscreen ) {
 				var baseSize = _window.ContentScaleSize;
 				float scaleX = (float)baseSize.X / size.Width;

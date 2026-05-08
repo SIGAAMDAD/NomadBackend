@@ -21,7 +21,8 @@ using Nomad.Core.Logger;
 using Nomad.Core.Util;
 using Nomad.Events.Private;
 
-namespace Nomad.Events {
+namespace Nomad.Events
+{
 	/*
 	===================================================================================
 
@@ -33,7 +34,8 @@ namespace Nomad.Events {
 	/// Handles event registration and lookup.
 	/// </summary>
 
-	internal sealed class GameEventRegistry : IGameEventRegistryService {
+	internal sealed class GameEventRegistry : IGameEventRegistryService
+	{
 		private readonly ConcurrentDictionary<EventKey, IGameEvent> _eventCache = new ConcurrentDictionary<EventKey, IGameEvent>();
 		private readonly ConcurrentDictionary<InternString, ISubscriptionGroup> _groupCache = new ConcurrentDictionary<InternString, ISubscriptionGroup>();
 
@@ -45,7 +47,8 @@ namespace Nomad.Events {
 		///
 		/// </summary>
 		/// <param name="logger"></param>
-		public GameEventRegistry( ILoggerService logger ) {
+		public GameEventRegistry( ILoggerService logger )
+		{
 			_logger = logger;
 		}
 
@@ -57,7 +60,8 @@ namespace Nomad.Events {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				ClearAllGroups();
 				foreach ( var @event in _eventCache ) {
@@ -79,7 +83,8 @@ namespace Nomad.Events {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public ISubscriptionGroup GetGroup( string name ) {
+		public ISubscriptionGroup GetGroup( string name )
+		{
 			var group = _groupCache.GetOrAdd( new InternString( name ), g => new SubscriptionGroup( name, this ) );
 			return group;
 		}
@@ -92,7 +97,8 @@ namespace Nomad.Events {
 		/// <summary>
 		///
 		/// </summary>
-		public void ClearAllGroups() {
+		public void ClearAllGroups()
+		{
 			foreach ( var group in _groupCache ) {
 				group.Value.Dispose();
 			}
@@ -108,7 +114,8 @@ namespace Nomad.Events {
 		///
 		/// </summary>
 		/// <param name="group"></param>
-		public void RemoveGroup( ISubscriptionGroup group ) {
+		public void RemoveGroup( ISubscriptionGroup group )
+		{
 			_groupCache.TryRemove( new InternString( group.Name ), out _ );
 		}
 
@@ -121,7 +128,8 @@ namespace Nomad.Events {
 		/// Releases all events in the naming space of <paramref name="nameSpace"/>.
 		/// </summary>
 		/// <param name="nameSpace"></param>
-		public void ClearEventsInNamespace( string nameSpace ) {
+		public void ClearEventsInNamespace( string nameSpace )
+		{
 			foreach ( var @event in _eventCache ) {
 				if ( @event.Value.NameSpace.Equals( nameSpace, StringComparison.InvariantCulture ) ) {
 					@event.Value.Dispose();
@@ -144,7 +152,8 @@ namespace Nomad.Events {
 		/// <param name="flags"></param>
 		/// <returns></returns>
 		public IGameEvent<TArgs> GetEvent<TArgs>( string name, string nameSpace, EventFlags flags = EventFlags.Default )
-			where TArgs : struct {
+			where TArgs : struct
+		{
 			var internedName = new InternString( name );
 			var internedNameSpace = new InternString( nameSpace );
 			var key = new EventKey(
@@ -176,7 +185,8 @@ namespace Nomad.Events {
 		/// <param name="gameEvent">When this method returns, contains the event if found; otherwise <c>null</c>.</param>
 		/// <returns><c>true</c> if the event exists; otherwise <c>false</c>.</returns>
 		public bool TryGetEvent<TArgs>( string name, string nameSpace, out IGameEvent<TArgs>? gameEvent )
-			where TArgs : struct {
+			where TArgs : struct
+		{
 			var key = new EventKey(
 				name: new InternString( name ),
 				nameSpace: new InternString( nameSpace ),
@@ -205,7 +215,8 @@ namespace Nomad.Events {
 		/// <param name="nameSpace"></param>
 		/// <returns></returns>
 		public bool TryRemoveEvent<TArgs>( string name, string nameSpace )
-			where TArgs : struct {
+			where TArgs : struct
+		{
 			var key = new EventKey(
 				name: new InternString( name ),
 				nameSpace: new InternString( nameSpace ),
@@ -226,7 +237,8 @@ namespace Nomad.Events {
 		/// <summary>
 		///
 		/// </summary>
-		public void ClearAllEvents() {
+		public void ClearAllEvents()
+		{
 			foreach ( var @event in _eventCache ) {
 				@event.Value.Dispose();
 			}

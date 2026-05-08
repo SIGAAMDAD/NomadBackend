@@ -17,7 +17,8 @@ using Nomad.Core.CVars;
 using Nomad.Core;
 using Nomad.Audio.ValueObjects;
 
-namespace Nomad.Audio.Fmod.Private.Registries {
+namespace Nomad.Audio.Fmod.Private.Registries
+{
 	/*
 	===================================================================================
 	
@@ -29,7 +30,8 @@ namespace Nomad.Audio.Fmod.Private.Registries {
 	/// 
 	/// </summary>
 
-	internal static class AudioCVars {
+	internal static class AudioCVars
+	{
 		/*
 		===============
 		Register
@@ -39,7 +41,8 @@ namespace Nomad.Audio.Fmod.Private.Registries {
 		/// 
 		/// </summary>
 		/// <param name="cvarSystem"></param>
-		public static void Register( ICVarSystemService cvarSystem ) {
+		public static void Register( ICVarSystemService cvarSystem )
+		{
 			cvarSystem.Register(
 				new CVarCreateInfo<float> {
 					Name = Constants.CVars.EngineUtils.Audio.MASTER_VOLUME,

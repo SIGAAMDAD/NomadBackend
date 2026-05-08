@@ -17,7 +17,8 @@ using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Save.Exceptions;
 
-namespace Nomad.Save.Private.ValueObjects {
+namespace Nomad.Save.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -29,7 +30,8 @@ namespace Nomad.Save.Private.ValueObjects {
 	/// Represents a save section's header containing the metadata.
 	/// </summary>
 
-	internal readonly ref struct SectionHeader {
+	internal readonly ref struct SectionHeader
+	{
 		public const int HEADER_CHECKSUM_OFFSET = sizeof( int ) + sizeof( ulong );
 
 		/// <summary>
@@ -64,7 +66,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// <param name="byteLength"></param>
 		/// <param name="fieldCount"></param>
 		/// <param name="checksum"></param>
-		public SectionHeader( string name, int byteLength, int fieldCount, Checksum checksum ) {
+		public SectionHeader( string name, int byteLength, int fieldCount, Checksum checksum )
+		{
 			Name = name;
 			ByteLength = byteLength;
 			FieldCount = fieldCount;
@@ -80,7 +83,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		///
 		/// </summary>
 		/// <param name="stream"></param>
-		public void Save( IWriteStream stream ) {
+		public void Save( IWriteStream stream )
+		{
 			stream.WriteInt32( ByteLength );
 			stream.WriteUInt64( Checksum.Value );
 			stream.WriteString( Name );
@@ -98,7 +102,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// <param name="index"></param>
 		/// <param name="stream"></param>
 		/// <returns></returns>
-		public static SectionHeader Load( int index, IMemoryReadStream stream ) {
+		public static SectionHeader Load( int index, IMemoryReadStream stream )
+		{
 			RangeGuard.ThrowIfNegative( index, nameof( index ) );
 
 			int byteLength = stream.ReadInt32();

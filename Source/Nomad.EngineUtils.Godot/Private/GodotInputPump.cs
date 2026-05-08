@@ -22,7 +22,8 @@ using Nomad.Core.Events;
 using Nomad.Core.Input;
 using Nomad.Core.Input.ValueObjects;
 
-namespace Nomad.EngineUtils.Godot.Private {
+namespace Nomad.EngineUtils.Godot.Private
+{
 	/*
 	===================================================================================
 
@@ -34,7 +35,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 	///
 	/// </summary>
 
-	internal sealed partial class GodotInputPump : Node, IInputAdapter {
+	internal sealed partial class GodotInputPump : Node, IInputAdapter
+	{
 		/// <summary>
 		/// 
 		/// </summary>
@@ -75,29 +77,30 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// 
 		/// </summary>
 		/// <param name="eventFactory"></param>
-		public GodotInputPump( IGameEventRegistryService eventFactory ) {
+		public GodotInputPump( IGameEventRegistryService eventFactory )
+		{
 			Name = nameof( GodotInputPump );
 			ProcessMode = ProcessModeEnum.Always;
 			ProcessThreadGroup = ProcessThreadGroupEnum.SubThread;
 
 			Array.Clear( _leftStickState );
 			Array.Clear( _rightStickState );
-			
+
 			_keyboardEvent = eventFactory
 				.GetEvent<KeyboardEventArgs>( KeyboardEventArgs.Name, KeyboardEventArgs.NameSpace, EventFlags.NoLock );
-			
+
 			_mouseButtonEvent = eventFactory
 				.GetEvent<MouseButtonEventArgs>( MouseButtonEventArgs.Name, MouseButtonEventArgs.NameSpace, EventFlags.NoLock );
-			
+
 			_mouseMotionEvent = eventFactory
 				.GetEvent<MouseMotionEventArgs>( MouseMotionEventArgs.Name, MouseMotionEventArgs.NameSpace, EventFlags.NoLock );
-			
+
 			_mousePositionChangedEvent = eventFactory
 				.GetEvent<MousePositionChangedEventArgs>( MousePositionChangedEventArgs.Name, MousePositionChangedEventArgs.NameSpace, EventFlags.NoLock );
-			
+
 			_gamepadAxisEvent = eventFactory
 				.GetEvent<GamepadAxisEventArgs>( GamepadAxisEventArgs.Name, GamepadAxisEventArgs.NameSpace, EventFlags.NoLock );
-			
+
 			_gamepadButtonEvent = eventFactory
 				.GetEvent<GamepadButtonEventArgs>( GamepadButtonEventArgs.Name, GamepadButtonEventArgs.NameSpace, EventFlags.NoLock );
 		}
@@ -111,7 +114,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// Intercepts all incoming input events.
 		/// </summary>
 		/// <param name="event"></param>
-		public override void _Input( InputEvent @event ) {
+		public override void _Input( InputEvent @event )
+		{
 			var now = DateTime.Now.ToFileTimeUtc();
 			switch ( @event ) {
 				case InputEventKey keyEvent:
@@ -187,16 +191,17 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private System.Numerics.Vector2 UpdateStickValue( InputEventJoypadMotion motion ) {
+		private System.Numerics.Vector2 UpdateStickValue( InputEventJoypadMotion motion )
+		{
 			RangeGuard.ThrowIfOutOfRange( motion.Device, 0, 3, nameof( motion ) );
-			
+
 			System.Numerics.Vector2[] cache = motion.Axis switch {
 				JoyAxis.LeftX or JoyAxis.LeftY => _leftStickState,
 				JoyAxis.RightX or JoyAxis.RightY => _rightStickState,
 				_ => throw new ArgumentOutOfRangeException( nameof( motion ) ),
 			};
 
-			ref System.Numerics.Vector2 value = ref cache[ motion.Device ];
+			ref System.Numerics.Vector2 value = ref cache[motion.Device];
 			switch ( motion.Axis ) {
 				case JoyAxis.LeftX:
 				case JoyAxis.RightX:
@@ -224,7 +229,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static GamepadStick GodotStickToNomadGamepadStick( JoyAxis axis ) {
+		private static GamepadStick GodotStickToNomadGamepadStick( JoyAxis axis )
+		{
 			return axis switch {
 				JoyAxis.LeftX or JoyAxis.LeftY => GamepadStick.Left,
 				JoyAxis.RightX or JoyAxis.RightY => GamepadStick.Right,

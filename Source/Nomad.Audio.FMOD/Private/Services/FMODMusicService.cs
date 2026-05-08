@@ -21,7 +21,8 @@ using Nomad.Audio.Interfaces;
 using Nomad.Core.CVars;
 using Nomad.ResourceCache;
 
-namespace Nomad.Audio.Fmod.Private.Services {
+namespace Nomad.Audio.Fmod.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -33,7 +34,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	///
 	/// </summary>
 
-	internal sealed class FMODMusicService : IMusicService {
+	internal sealed class FMODMusicService : IMusicService
+	{
 		public bool IsPlaying => _musicInstance.PlaybackState == FMOD.Studio.PLAYBACK_STATE.PLAYING || _musicInstance.PlaybackState == FMOD.Studio.PLAYBACK_STATE.SUSTAINING;
 
 		private FMODEventResource _musicHandle;
@@ -55,7 +57,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <param name="eventRepository"></param>
 		/// <param name="cvarSystem"></param>
 		/// <exception cref="Exception"></exception>
-		public FMODMusicService( IResourceCacheService<IAudioResource, string> eventRepository, ICVarSystemService cvarSystem ) {
+		public FMODMusicService( IResourceCacheService<IAudioResource, string> eventRepository, ICVarSystemService cvarSystem )
+		{
 			_eventRepository = eventRepository;
 		}
 
@@ -69,7 +72,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <exception cref="InvalidCastException"></exception>
-		public void PlayTheme( string name ) {
+		public void PlayTheme( string name )
+		{
 			_eventRepository.GetCached( name ).Get( out var handle );
 			if ( handle is not FMODEventResource resource ) {
 				return;
@@ -88,7 +92,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		///
 		/// </summary>
 		/// <param name="fade"></param>
-		public void StopTheme( bool fade = false ) {
+		public void StopTheme( bool fade = false )
+		{
 			if ( !IsPlaying ) {
 				return;
 			}

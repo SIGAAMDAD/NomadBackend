@@ -19,7 +19,8 @@ using System.Threading.Tasks;
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.FileSystem.Configs;
 
-namespace Nomad.FileSystem.Private.MemoryStream {
+namespace Nomad.FileSystem.Private.MemoryStream
+{
 	/*
 	===================================================================================
 
@@ -31,7 +32,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 	/// 
 	/// </summary>
 
-	internal sealed class MemoryFileWriteStream : MemoryWriteStream, IMemoryFileWriteStream {
+	internal sealed class MemoryFileWriteStream : MemoryWriteStream, IMemoryFileWriteStream
+	{
 		/// <summary>
 		/// 
 		/// </summary>
@@ -53,7 +55,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="config"></param>
 		public MemoryFileWriteStream( MemoryFileWriteConfig config )
-			: base( config ) {
+			: base( config )
+		{
 			_filepath = config.FilePath!;
 			Open( config );
 		}
@@ -66,7 +69,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected override void Dispose( bool disposing ) {
+		protected override void Dispose( bool disposing )
+		{
 			if ( isDisposed ) {
 				return;
 			}
@@ -85,7 +89,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected override async ValueTask DisposeAsyncCore() {
+		protected override async ValueTask DisposeAsyncCore()
+		{
 			await FlushAsync();
 			await base.DisposeAsyncCore();
 		}
@@ -98,7 +103,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <summary>
 		///
 		/// </summary>
-		public void Close() {
+		public void Close()
+		{
 			Dispose();
 		}
 
@@ -110,7 +116,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <summary>
 		/// Flushes the memory file write stream to the underlying file.
 		/// </summary>
-		public override void Flush() {
+		public override void Flush()
+		{
 			if ( buffer != null ) {
 				using var stream = new System.IO.FileStream( _filepath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None );
 				stream.Write( buffer.GetSlice( 0, (int)position ) );
@@ -127,7 +134,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// Asynchronously flushes the memory file write stream to the underlying file.
 		/// </summary>
 		/// <param name="ct">The cancellation token to use for the operation.</param>
-		public override async ValueTask FlushAsync( CancellationToken ct = default ) {
+		public override async ValueTask FlushAsync( CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			if ( buffer != null ) {
 				using var stream = new System.IO.FileStream( _filepath, System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.None );
@@ -146,7 +154,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="config"></param>
 		/// <returns><c>true</c> if the file was opened successfully; otherwise, <c>false.</c></returns>
-		private bool Open( MemoryFileWriteConfig config ) {
+		private bool Open( MemoryFileWriteConfig config )
+		{
 			if ( config.Append ) {
 				throw new NotImplementedException();
 			} else {

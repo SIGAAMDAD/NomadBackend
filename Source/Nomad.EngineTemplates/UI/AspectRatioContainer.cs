@@ -20,13 +20,13 @@ using Nomad.EngineTemplates.BaseClasses;
 
 namespace Nomad.EngineTemplates.UI
 {
-	/// <summary>
-	/// 
-	/// </summary>
-	[TemplateClass(Contract = typeof(IAspectRatioContainer), GodotBase = "Godot.AspectRatioContainer", UnityBase = "UnityEngine.UI.AspectRatioFitter")]
-	[TemplateUIElement]
-	[TemplateProperty(Name = "Ratio", Type = typeof(AspectRatioValue), GodotGetterExpression = "new global::Nomad.Core.Engine.Windowing.AspectRatioValue(base.Ratio)", GodotSetterExpression = "base.Ratio = (float)value")]
-	internal sealed class AspectRatioContainer
-	{
-	}
+    /// <summary>
+    /// 
+    /// </summary>
+    [TemplateClass(Contract = typeof(IAspectRatioContainer), GodotBase = "Godot.AspectRatioContainer", UnityBase = "UnityEngine.UI.AspectRatioFitter")]
+    [TemplateUIElement]
+    [TemplateProperty(Name = "Ratio", Type = typeof(AspectRatioValue), GodotGetterExpression = "new global::Nomad.Core.Engine.Windowing.AspectRatioValue(base.Ratio)", GodotSetterExpression = "base.Ratio = (float)value")]
+    internal sealed class AspectRatioContainer
+    {
+    }
 }

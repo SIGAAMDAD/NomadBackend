@@ -13,7 +13,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Events.Private {
+namespace Nomad.Events.Private
+{
 	/*
 	===================================================================================
 	
@@ -25,7 +26,8 @@ namespace Nomad.Events.Private {
 	/// 
 	/// </summary>
 
-	internal abstract class QueuedEvent {
+	internal abstract class QueuedEvent
+	{
 		public abstract void Process();
 	};
 };

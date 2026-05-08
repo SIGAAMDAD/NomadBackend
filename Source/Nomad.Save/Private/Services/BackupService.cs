@@ -22,7 +22,8 @@ using Nomad.Core.FileSystem;
 using Nomad.Save.Private.Entities;
 using Nomad.Save.Private.ValueObjects;
 
-namespace Nomad.Save.Private.Services {
+namespace Nomad.Save.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -39,7 +40,8 @@ namespace Nomad.Save.Private.Services {
 	/// <see cref="SaveConfig.MaxBackups"/>.
 	/// </remarks>
 
-	internal sealed class BackupService : IDisposable {
+	internal sealed class BackupService : IDisposable
+	{
 		private const string SAVE_EXTENSION = ".ngd";
 		private const string BACKUP_EXTENSION = ".ngd.backup";
 		private const string BACKUP_TIME_FORMAT = "yyyyMMddHHmmssfffffff";
@@ -71,7 +73,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="config">Save-system config.</param>
 		/// <param name="fileSystem">File-system service.</param>
-		public BackupService( SaveConfig config, IFileSystem fileSystem ) {
+		public BackupService( SaveConfig config, IFileSystem fileSystem )
+		{
 			_config = config ?? throw new ArgumentNullException( nameof( config ) );
 			_fileSystem = fileSystem ?? throw new ArgumentNullException( nameof( fileSystem ) );
 
@@ -94,7 +97,8 @@ namespace Nomad.Save.Private.Services {
 		/// <summary>
 		/// Releases backup-service state.
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _isDisposed ) {
 				return;
 			}
@@ -115,7 +119,8 @@ namespace Nomad.Save.Private.Services {
 		/// <summary>
 		/// Rebuilds the in-memory backup chain from disk.
 		/// </summary>
-		public void RefreshBackups() {
+		public void RefreshBackups()
+		{
 			ThrowIfDisposed();
 
 			lock ( _lock ) {
@@ -150,7 +155,8 @@ namespace Nomad.Save.Private.Services {
 		/// Returns a snapshot of all known backups.
 		/// </summary>
 		/// <returns>Backup metadata snapshot.</returns>
-		public IReadOnlyList<BackupData> ListBackups() {
+		public IReadOnlyList<BackupData> ListBackups()
+		{
 			ThrowIfDisposed();
 
 			lock ( _lock ) {
@@ -168,7 +174,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="fileName">Save name or save path.</param>
 		/// <returns>Backup metadata snapshot.</returns>
-		public IReadOnlyList<BackupData> ListBackups( string fileName ) {
+		public IReadOnlyList<BackupData> ListBackups( string fileName )
+		{
 			ThrowIfDisposed();
 			ThrowIfNullOrEmpty( fileName, nameof( fileName ) );
 
@@ -199,7 +206,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="fileName">Primary save file path.</param>
 		/// <returns><c>true</c> if a backup was created; otherwise, <c>false</c>.</returns>
-		public bool CreateBackup( string fileName ) {
+		public bool CreateBackup( string fileName )
+		{
 			return TryCreateBackup( fileName, out _ );
 		}
 
@@ -214,7 +222,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="fileName">Primary save file path.</param>
 		/// <param name="backup">Created backup metadata.</param>
 		/// <returns><c>true</c> if a backup was created; otherwise, <c>false</c>.</returns>
-		public bool TryCreateBackup( string fileName, out BackupData backup ) {
+		public bool TryCreateBackup( string fileName, out BackupData backup )
+		{
 			ThrowIfDisposed();
 			ThrowIfNullOrEmpty( fileName, nameof( fileName ) );
 
@@ -271,7 +280,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="fileName">Save name or save path.</param>
 		/// <param name="backup">Newest backup.</param>
 		/// <returns><c>true</c> if a backup exists; otherwise, <c>false</c>.</returns>
-		public bool TryGetLatestBackup( string fileName, out BackupData backup ) {
+		public bool TryGetLatestBackup( string fileName, out BackupData backup )
+		{
 			ThrowIfDisposed();
 			ThrowIfNullOrEmpty( fileName, nameof( fileName ) );
 
@@ -308,7 +318,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="destinationFileName">Destination primary save path.</param>
 		/// <returns><c>true</c> if restored; otherwise, <c>false</c>.</returns>
-		public bool RestoreLatestBackup( string destinationFileName ) {
+		public bool RestoreLatestBackup( string destinationFileName )
+		{
 			ThrowIfDisposed();
 			ThrowIfNullOrEmpty( destinationFileName, nameof( destinationFileName ) );
 
@@ -330,7 +341,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="backup">Backup metadata.</param>
 		/// <param name="destinationFileName">Destination primary save path.</param>
 		/// <returns><c>true</c> if restored; otherwise, <c>false</c>.</returns>
-		public bool RestoreBackup( BackupData backup, string destinationFileName ) {
+		public bool RestoreBackup( BackupData backup, string destinationFileName )
+		{
 			ThrowIfDisposed();
 			ThrowIfNullOrEmpty( destinationFileName, nameof( destinationFileName ) );
 
@@ -364,7 +376,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="backup">Backup metadata.</param>
 		/// <returns><c>true</c> if deleted; otherwise, <c>false</c>.</returns>
-		public bool DeleteBackup( BackupData backup ) {
+		public bool DeleteBackup( BackupData backup )
+		{
 			ThrowIfDisposed();
 
 			if ( !backup.IsValid ) {
@@ -386,7 +399,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="fileName">Save name or save path.</param>
 		/// <returns>Number of backups deleted.</returns>
-		public int DeleteBackups( string fileName ) {
+		public int DeleteBackups( string fileName )
+		{
 			ThrowIfDisposed();
 			ThrowIfNullOrEmpty( fileName, nameof( fileName ) );
 
@@ -415,7 +429,8 @@ namespace Nomad.Save.Private.Services {
 		/// Enforces the configured backup-chain length for a logical save.
 		/// </summary>
 		/// <param name="fileName">Save name or save path.</param>
-		public void PruneBackups( string fileName ) {
+		public void PruneBackups( string fileName )
+		{
 			ThrowIfDisposed();
 			ThrowIfNullOrEmpty( fileName, nameof( fileName ) );
 
@@ -436,7 +451,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="backup"></param>
 		/// <returns></returns>
-		private bool DeleteBackupNoLock( BackupData backup ) {
+		private bool DeleteBackupNoLock( BackupData backup )
+		{
 			try {
 				if ( _fileSystem.FileExists( backup.BackupPath ) ) {
 					_fileSystem.DeleteFile( backup.BackupPath );
@@ -463,7 +479,8 @@ namespace Nomad.Save.Private.Services {
 		///
 		/// </summary>
 		/// <param name="saveName"></param>
-		private void PruneBackupsNoLock( string saveName ) {
+		private void PruneBackupsNoLock( string saveName )
+		{
 			var matches = new List<BackupData>();
 
 			for ( int i = 0; i < _backups.Count; i++ ) {
@@ -489,7 +506,8 @@ namespace Nomad.Save.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		private void EnsureBackupDirectory() {
+		private void EnsureBackupDirectory()
+		{
 			if ( !_fileSystem.DirectoryExists( _config.BackupPath ) ) {
 				_fileSystem.CreateDirectory( _config.BackupPath );
 			}
@@ -507,7 +525,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="createdUtc"></param>
 		/// <param name="order"></param>
 		/// <returns></returns>
-		private string CreateBackupPath( string saveName, DateTime createdUtc, int order ) {
+		private string CreateBackupPath( string saveName, DateTime createdUtc, int order )
+		{
 			string safeSaveName = SanitizeFileName( saveName );
 			string timestamp = createdUtc.ToString( BACKUP_TIME_FORMAT, CultureInfo.InvariantCulture );
 			string backupFileName = $"{safeSaveName}.bak{order:D4}.{timestamp}{BACKUP_EXTENSION}";
@@ -526,7 +545,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="backupPath"></param>
 		/// <param name="backup"></param>
 		/// <returns></returns>
-		private bool TryParseBackupPath( string backupPath, out BackupData backup ) {
+		private bool TryParseBackupPath( string backupPath, out BackupData backup )
+		{
 			backup = BackupData.Empty;
 
 			if ( string.IsNullOrWhiteSpace( backupPath ) ) {
@@ -590,7 +610,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="saveName"></param>
 		/// <returns></returns>
-		private int GetNextBackupOrder( string saveName ) {
+		private int GetNextBackupOrder( string saveName )
+		{
 			int maxOrder = 0;
 
 			for ( int i = 0; i < _backups.Count; i++ ) {
@@ -613,7 +634,8 @@ namespace Nomad.Save.Private.Services {
 		///
 		/// </summary>
 		/// <param name="backupPath"></param>
-		private void DeletePartialBackupNoThrow( string backupPath ) {
+		private void DeletePartialBackupNoThrow( string backupPath )
+		{
 			if ( string.IsNullOrWhiteSpace( backupPath ) ) {
 				return;
 			}
@@ -637,7 +659,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="fileName"></param>
 		/// <returns></returns>
-		private static string GetSaveName( string fileName ) {
+		private static string GetSaveName( string fileName )
+		{
 			string name = Path.GetFileName( fileName );
 
 			if ( name.EndsWith( SAVE_EXTENSION, StringComparison.OrdinalIgnoreCase ) ) {
@@ -660,7 +683,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		private static string SanitizeFileName( string name ) {
+		private static string SanitizeFileName( string name )
+		{
 			char[] invalidChars = Path.GetInvalidFileNameChars();
 			char[] chars = name.ToCharArray();
 
@@ -684,7 +708,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="text"></param>
 		/// <param name="createdUtc"></param>
 		/// <returns></returns>
-		private static bool TryParseTimestamp( string text, out DateTime createdUtc ) {
+		private static bool TryParseTimestamp( string text, out DateTime createdUtc )
+		{
 			return DateTime.TryParseExact(
 				text,
 				BACKUP_TIME_FORMAT,
@@ -703,7 +728,8 @@ namespace Nomad.Save.Private.Services {
 		///
 		/// </summary>
 		/// <param name="backups"></param>
-		private static void SortBackups( List<BackupData> backups ) {
+		private static void SortBackups( List<BackupData> backups )
+		{
 			backups.Sort(
 				( a, b ) => {
 					int dateComparison = b.CreatedUtc.CompareTo( a.CreatedUtc );
@@ -727,7 +753,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="candidate"></param>
 		/// <param name="current"></param>
 		/// <returns></returns>
-		private static bool IsNewer( BackupData candidate, BackupData current ) {
+		private static bool IsNewer( BackupData candidate, BackupData current )
+		{
 			int dateComparison = candidate.CreatedUtc.CompareTo( current.CreatedUtc );
 			if ( dateComparison > 0 ) {
 				return true;
@@ -748,7 +775,8 @@ namespace Nomad.Save.Private.Services {
 		///
 		/// </summary>
 		/// <exception cref="ObjectDisposedException"></exception>
-		private void ThrowIfDisposed() {
+		private void ThrowIfDisposed()
+		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
 		}
 
@@ -763,7 +791,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="value"></param>
 		/// <param name="paramName"></param>
 		/// <exception cref="ArgumentException"></exception>
-		private static void ThrowIfNullOrEmpty( string value, string paramName ) {
+		private static void ThrowIfNullOrEmpty( string value, string paramName )
+		{
 			if ( string.IsNullOrWhiteSpace( value ) ) {
 				throw new ArgumentException( "Value cannot be null or empty.", paramName );
 			}

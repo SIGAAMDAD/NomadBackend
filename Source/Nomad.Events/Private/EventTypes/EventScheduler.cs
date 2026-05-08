@@ -20,7 +20,8 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Nomad.Core.Compatibility.Guards;
 
-namespace Nomad.Events.Private.EventTypes {
+namespace Nomad.Events.Private.EventTypes
+{
 	/*
 	===================================================================================
 	
@@ -32,9 +33,12 @@ namespace Nomad.Events.Private.EventTypes {
 	/// 
 	/// </summary>
 
-	internal static class EventScheduler {
-		private sealed class ScheduledItem : IDisposable {
-			public ScheduledItem( Action callback, SynchronizationContext? context, int publisherThreadId, long dueTimestamp, long intervalTicks, long order ) {
+	internal static class EventScheduler
+	{
+		private sealed class ScheduledItem : IDisposable
+		{
+			public ScheduledItem( Action callback, SynchronizationContext? context, int publisherThreadId, long dueTimestamp, long intervalTicks, long order )
+			{
 				Callback = callback;
 				Context = context;
 				PublisherThreadId = publisherThreadId;
@@ -53,7 +57,8 @@ namespace Nomad.Events.Private.EventTypes {
 			public bool IsCanceled => Volatile.Read( ref _isCanceled ) != 0;
 			private int _isCanceled;
 
-			public void Dispose() {
+			public void Dispose()
+			{
 				Interlocked.Exchange( ref _isCanceled, 1 );
 			}
 		};
@@ -67,16 +72,19 @@ namespace Nomad.Events.Private.EventTypes {
 		private static long _nextOrder;
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static IDisposable Schedule( Action callback, int delayMS ) {
+		public static IDisposable Schedule( Action callback, int delayMS )
+		{
 			return ScheduleCore( callback, delayMS, 0 );
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static IDisposable ScheduleRecurring( Action callback, int intervalMS ) {
+		public static IDisposable ScheduleRecurring( Action callback, int intervalMS )
+		{
 			return ScheduleCore( callback, intervalMS, intervalMS );
 		}
 
-		private static IDisposable ScheduleCore( Action callback, int dueMS, int intervalMS ) {
+		private static IDisposable ScheduleCore( Action callback, int dueMS, int intervalMS )
+		{
 			RangeGuard.ThrowIfNegative( dueMS, nameof( dueMS ) );
 			RangeGuard.ThrowIfNegative( intervalMS, nameof( intervalMS ) );
 
@@ -105,7 +113,8 @@ namespace Nomad.Events.Private.EventTypes {
 			return item;
 		}
 
-		private static void OnTimerElapsed( object state ) {
+		private static void OnTimerElapsed( object state )
+		{
 			List<ScheduledItem> dueItems = null;
 
 			lock ( _gate ) {
@@ -145,7 +154,8 @@ namespace Nomad.Events.Private.EventTypes {
 			}
 		}
 
-		private static void Dispatch( ScheduledItem item ) {
+		private static void Dispatch( ScheduledItem item )
+		{
 			if ( item.IsCanceled ) {
 				return;
 			}
@@ -163,11 +173,13 @@ namespace Nomad.Events.Private.EventTypes {
 			ThreadPool.QueueUserWorkItem( _executeScheduledItem, item );
 		}
 
-		private static void PostScheduledItem( object? state ) {
+		private static void PostScheduledItem( object? state )
+		{
 			ExecuteScheduledItem( state! );
 		}
 
-		private static void ExecuteScheduledItem( object state ) {
+		private static void ExecuteScheduledItem( object state )
+		{
 			ScheduledItem item = (ScheduledItem)state;
 			if ( item.IsCanceled ) {
 				return;
@@ -201,14 +213,16 @@ namespace Nomad.Events.Private.EventTypes {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static long ToTimestampTicks( int milliseconds ) {
+		private static long ToTimestampTicks( int milliseconds )
+		{
 			return milliseconds <= 0
 				? 0
 				: ((long)milliseconds * Stopwatch.Frequency + 999L) / 1000L;
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static void ArmTimer( long dueTimestamp ) {
+		private static void ArmTimer( long dueTimestamp )
+		{
 			long remainingTicks = dueTimestamp - Stopwatch.GetTimestamp();
 			int dueMS = remainingTicks <= 0
 				? 0
@@ -217,12 +231,14 @@ namespace Nomad.Events.Private.EventTypes {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static int Compare( ScheduledItem left, ScheduledItem right ) {
+		private static int Compare( ScheduledItem left, ScheduledItem right )
+		{
 			int dueCompare = left.DueTimestamp.CompareTo( right.DueTimestamp );
 			return dueCompare != 0 ? dueCompare : left.Order.CompareTo( right.Order );
 		}
 
-		private static void HeapPush( ScheduledItem item ) {
+		private static void HeapPush( ScheduledItem item )
+		{
 			_heap.Add( item );
 			int index = _heap.Count - 1;
 
@@ -239,7 +255,8 @@ namespace Nomad.Events.Private.EventTypes {
 			_heap[index] = item;
 		}
 
-		private static ScheduledItem HeapPop() {
+		private static ScheduledItem HeapPop()
+		{
 			int lastIndex = _heap.Count - 1;
 			ScheduledItem root = _heap[0];
 			ScheduledItem last = _heap[lastIndex];

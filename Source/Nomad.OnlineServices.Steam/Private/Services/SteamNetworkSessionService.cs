@@ -113,7 +113,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 			if ( !result ) {
 				return false;
 			}
-			_currentSession = new NetworkSessionInfo {};
+			_currentSession = new NetworkSessionInfo { };
 			return false;
 		}
 

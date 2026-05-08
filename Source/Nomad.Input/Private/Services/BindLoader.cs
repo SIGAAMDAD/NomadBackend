@@ -27,7 +27,8 @@ using Nomad.Input.ValueObjects;
 using Nomad.Core.Logger;
 using Nomad.Core.Compatibility.Guards;
 
-namespace Nomad.Input.Private.Services {
+namespace Nomad.Input.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -39,7 +40,8 @@ namespace Nomad.Input.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class BindLoader {
+	internal sealed class BindLoader
+	{
 		private readonly IFileSystem _fileSystem;
 		private readonly ILoggerCategory _category;
 
@@ -53,7 +55,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="fileSystem"></param>
 		/// <param name="logger"></param>
-		public BindLoader( IFileSystem fileSystem, ILoggerService logger ) {
+		public BindLoader( IFileSystem fileSystem, ILoggerService logger )
+		{
 			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
 
 			_fileSystem = fileSystem ?? throw new ArgumentNullException( nameof( fileSystem ) );
@@ -73,7 +76,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="filePath"></param>
 		/// <param name="binds"></param>
 		/// <returns></returns>
-		public bool LoadBindDatabase( string filePath, out ImmutableArray<InputActionDefinition> binds ) {
+		public bool LoadBindDatabase( string filePath, out ImmutableArray<InputActionDefinition> binds )
+		{
 			IBufferHandle? fileBuffer = _fileSystem.LoadFile( filePath );
 			if ( fileBuffer == null ) {
 				binds = ImmutableArray<InputActionDefinition>.Empty;
@@ -131,7 +135,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="actions"></param>
 		/// <param name="fallbackName"></param>
 		/// <exception cref="Exception"></exception>
-		private static void ParseActionDefinition( JsonElement actionElement, Dictionary<string, int> actionIndices, List<ActionBuilder> actions, string? fallbackName = null ) {
+		private static void ParseActionDefinition( JsonElement actionElement, Dictionary<string, int> actionIndices, List<ActionBuilder> actions, string? fallbackName = null )
+		{
 			string name = GetRequiredString( actionElement, "Name", fallbackName );
 			string id = GetRequiredString( actionElement, "Id", fallbackName );
 			InputValueType valueType = JsonLoader.GetRequired<InputValueType>( actionElement, "ValueType" );
@@ -175,7 +180,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="scheme"></param>
 		/// <returns></returns>
 		/// <exception cref="Exception"></exception>
-		private static InputBindingDefinition ParseBindingDefinition( JsonElement bindingElement, InputScheme scheme ) {
+		private static InputBindingDefinition ParseBindingDefinition( JsonElement bindingElement, InputScheme scheme )
+		{
 			InputBindingKind kind = JsonLoader.TryGetProperty( bindingElement, "Kind", out JsonElement kindElement )
 				? JsonLoader.Read<InputBindingKind>( kindElement, "Kind" )
 				: InferBindingKind( bindingElement );
@@ -221,7 +227,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="bindingElement"></param>
 		/// <returns></returns>
-		private static InputBindingKind InferBindingKind( JsonElement bindingElement ) {
+		private static InputBindingKind InferBindingKind( JsonElement bindingElement )
+		{
 			string deviceId = GetRequiredString( bindingElement, "DeviceId" );
 
 			if ( deviceId.Equals( Constants.MOUSE_MOTION_DEVICE_ID, StringComparison.OrdinalIgnoreCase ) ) {
@@ -241,7 +248,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="bindingElement"></param>
 		/// <returns></returns>
 		/// <exception cref="Exception"></exception>
-		private static ButtonBinding ParseButtonBinding( JsonElement bindingElement ) {
+		private static ButtonBinding ParseButtonBinding( JsonElement bindingElement )
+		{
 			InputDeviceSlot deviceId = ParseDeviceSlot( GetRequiredString( bindingElement, "DeviceId" ) );
 			string controlName = GetRequiredString( bindingElement, "ControlId", GetOptionalString( bindingElement, "ButtonId" ) );
 
@@ -275,7 +283,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="bindingElement"></param>
 		/// <returns></returns>
-		private static Axis1DBinding ParseAxis1DBinding( JsonElement bindingElement ) {
+		private static Axis1DBinding ParseAxis1DBinding( JsonElement bindingElement )
+		{
 			InputDeviceSlot deviceId = ParseDeviceSlot( GetRequiredString( bindingElement, "DeviceId" ) );
 			return new Axis1DBinding(
 				deviceId: deviceId,
@@ -298,7 +307,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="bindingElement"></param>
 		/// <returns></returns>
-		private static Axis1DCompositeBinding ParseAxis1DCompositeBinding( JsonElement bindingElement ) {
+		private static Axis1DCompositeBinding ParseAxis1DCompositeBinding( JsonElement bindingElement )
+		{
 			return new Axis1DCompositeBinding(
 				negative: ParseKeyboardControl( GetRequiredString( bindingElement, "Negative" ) ),
 				positive: ParseKeyboardControl( GetRequiredString( bindingElement, "Positive" ) ),
@@ -317,7 +327,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="bindingElement"></param>
 		/// <returns></returns>
-		private static Axis2DBinding ParseAxis2DBinding( JsonElement bindingElement ) {
+		private static Axis2DBinding ParseAxis2DBinding( JsonElement bindingElement )
+		{
 			InputDeviceSlot deviceId = ParseDeviceSlot( GetRequiredString( bindingElement, "DeviceId" ) );
 			return new Axis2DBinding(
 				deviceId: deviceId,
@@ -342,7 +353,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="bindingElement"></param>
 		/// <returns></returns>
-		private static Axis2DCompositeBinding ParseAxis2DCompositeBinding( JsonElement bindingElement ) {
+		private static Axis2DCompositeBinding ParseAxis2DCompositeBinding( JsonElement bindingElement )
+		{
 			return new Axis2DCompositeBinding(
 				up: ParseKeyboardControl( GetRequiredString( bindingElement, "Up" ) ),
 				down: ParseKeyboardControl( GetRequiredString( bindingElement, "Down" ) ),
@@ -364,7 +376,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="bindingElement"></param>
 		/// <returns></returns>
-		private static Delta2DBinding ParseDelta2DBinding( JsonElement bindingElement ) {
+		private static Delta2DBinding ParseDelta2DBinding( JsonElement bindingElement )
+		{
 			InputDeviceSlot deviceId = ParseDeviceSlot( GetRequiredString( bindingElement, "DeviceId" ) );
 			return new Delta2DBinding(
 				deviceId: deviceId,
@@ -377,7 +390,8 @@ namespace Nomad.Input.Private.Services {
 			);
 		}
 
-		private static InputDeviceSlot ParseDeviceSlot( string deviceId ) {
+		private static InputDeviceSlot ParseDeviceSlot( string deviceId )
+		{
 			if ( deviceId.Equals( Constants.KEYBOARD_DEVICE_ID, StringComparison.OrdinalIgnoreCase ) ) {
 				return InputDeviceSlot.Keyboard;
 			}
@@ -404,7 +418,8 @@ namespace Nomad.Input.Private.Services {
 			throw new Exception( $"Invalid DeviceId '{deviceId}' in bindings file." );
 		}
 
-		private static InputControlId ParseButtonControl( InputDeviceSlot deviceId, string controlName ) {
+		private static InputControlId ParseButtonControl( InputDeviceSlot deviceId, string controlName )
+		{
 			return deviceId switch {
 				InputDeviceSlot.Keyboard => ParseKeyboardControl( controlName ),
 				InputDeviceSlot.Mouse => ParseMouseButtonControl( controlName ),
@@ -413,7 +428,8 @@ namespace Nomad.Input.Private.Services {
 			};
 		}
 
-		private static InputControlId ParseAnalogControl( InputDeviceSlot deviceId, string controlName ) {
+		private static InputControlId ParseAnalogControl( InputDeviceSlot deviceId, string controlName )
+		{
 			return deviceId switch {
 				InputDeviceSlot.Keyboard => ParseKeyboardControl( controlName ),
 				InputDeviceSlot.Mouse => ParseInputControlId( controlName ),
@@ -422,7 +438,8 @@ namespace Nomad.Input.Private.Services {
 			};
 		}
 
-		private static InputControlId ParseKeyboardControl( string controlName ) {
+		private static InputControlId ParseKeyboardControl( string controlName )
+		{
 			if ( Enum.TryParse( controlName, true, out KeyNum keyNum ) ) {
 				return keyNum.ToControlId();
 			}
@@ -432,7 +449,8 @@ namespace Nomad.Input.Private.Services {
 			throw new Exception( $"Invalid keyboard control '{controlName}' in bindings file." );
 		}
 
-		private static InputControlId ParseMouseButtonControl( string controlName ) {
+		private static InputControlId ParseMouseButtonControl( string controlName )
+		{
 			if ( Enum.TryParse( controlName, true, out MouseButton mouseButton ) ) {
 				return mouseButton.ToControlId();
 			}
@@ -442,7 +460,8 @@ namespace Nomad.Input.Private.Services {
 			throw new Exception( $"Invalid mouse control '{controlName}' in bindings file." );
 		}
 
-		private static InputControlId ParseGamepadButtonControl( string controlName ) {
+		private static InputControlId ParseGamepadButtonControl( string controlName )
+		{
 			if ( Enum.TryParse( controlName, true, out GamepadButton gamepadButton ) ) {
 				return gamepadButton.ToControlId();
 			}
@@ -452,14 +471,16 @@ namespace Nomad.Input.Private.Services {
 			throw new Exception( $"Invalid gamepad control '{controlName}' in bindings file." );
 		}
 
-		private static InputControlId ParseInputControlId( string controlName ) {
+		private static InputControlId ParseInputControlId( string controlName )
+		{
 			if ( Enum.TryParse( controlName, true, out InputControlId controlId ) ) {
 				return controlId;
 			}
 			throw new Exception( $"Invalid control '{controlName}' in bindings file." );
 		}
 
-		private static string GetRequiredString( JsonElement element, string propertyName, string? fallback = null ) {
+		private static string GetRequiredString( JsonElement element, string propertyName, string? fallback = null )
+		{
 			if ( element.ValueKind == JsonValueKind.String ) {
 				return JsonLoader.Read<string>( element, propertyName );
 			}
@@ -472,23 +493,27 @@ namespace Nomad.Input.Private.Services {
 			throw new Exception( $"Bindings file is missing string property '{propertyName}'." );
 		}
 
-		private static string? GetOptionalString( JsonElement element, string propertyName ) {
+		private static string? GetOptionalString( JsonElement element, string propertyName )
+		{
 			return JsonLoader.TryGet( element, propertyName, out string? value ) ? value : null;
 		}
 
-		private sealed class ActionBuilder {
+		private sealed class ActionBuilder
+		{
 			public string Name { get; }
 			public string Id { get; }
 			public InputValueType ValueType { get; }
 			public List<InputBindingDefinition> Bindings { get; } = new();
 
-			public ActionBuilder( string name, string id, InputValueType valueType ) {
+			public ActionBuilder( string name, string id, InputValueType valueType )
+			{
 				Name = name;
 				Id = id;
 				ValueType = valueType;
 			}
 
-			public InputActionDefinition Build() {
+			public InputActionDefinition Build()
+			{
 				return new InputActionDefinition( Name, Id, ValueType, Bindings.ToImmutableArray() );
 			}
 		}

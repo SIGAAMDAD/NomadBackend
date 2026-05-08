@@ -16,11 +16,13 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using System.IO;
 
-namespace Nomad.FileSystem.Private.FileStreams {
+namespace Nomad.FileSystem.Private.FileStreams
+{
 	/// <summary>
 	/// A unified Reader that can Read to either a text (StreamReader) or binary (BinaryReader) stream.
 	/// </summary>
-	internal readonly struct FileReader {
+	internal readonly struct FileReader
+	{
 		public bool IsText => _textReader != null;
 		public long Position {
 			get => _textReader != null ? _textReader.BaseStream.Position : _binaryReader.BaseStream.Position;
@@ -40,7 +42,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// Initializes a new instance for text writing.
 		/// </summary>
 		/// <param name="reader">The underlying StreamReader.</param>
-		public FileReader( StreamReader reader ) {
+		public FileReader( StreamReader reader )
+		{
 			_textReader = reader;
 			_binaryReader = null;
 		}
@@ -49,114 +52,131 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// Initializes a new instance for binary writing.
 		/// </summary>
 		/// <param name="reader">The underlying BinaryReader.</param>
-		public FileReader( BinaryReader reader ) {
+		public FileReader( BinaryReader reader )
+		{
 			_textReader = null;
 			_binaryReader = reader;
 		}
 
-		public IDisposable GetStream() {
+		public IDisposable GetStream()
+		{
 			return _textReader != null ? _textReader : _binaryReader;
 		}
 
-		public byte ReadByte() {
+		public byte ReadByte()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadByte();
 		}
 
-		public sbyte ReadSByte() {
+		public sbyte ReadSByte()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadSByte();
 		}
 
-		public char ReadChar() {
+		public char ReadChar()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadChar();
 		}
 
-		public short ReadShort() {
+		public short ReadShort()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadInt16();
 		}
 
-		public ushort ReadUShort() {
+		public ushort ReadUShort()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadUInt16();
 		}
 
-		public int ReadInt() {
+		public int ReadInt()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadInt32();
 		}
 
-		public uint ReadUInt() {
+		public uint ReadUInt()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadUInt32();
 		}
 
-		public long ReadLong() {
+		public long ReadLong()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadInt64();
 		}
 
-		public ulong ReadULong() {
+		public ulong ReadULong()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadUInt64();
 		}
 
-		public float ReadFloat() {
+		public float ReadFloat()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadSingle();
 		}
 
-		public double ReadDouble() {
+		public double ReadDouble()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadDouble();
 		}
 
-		public decimal ReadDecimal() {
+		public decimal ReadDecimal()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadDecimal();
 		}
 
-		public bool ReadBoolean() {
+		public bool ReadBoolean()
+		{
 			if ( _textReader != null ) {
 				throw new NotSupportedException();
 			}
 			return _binaryReader.ReadBoolean();
 		}
 
-		public string ReadString() {
+		public string ReadString()
+		{
 			if ( _textReader != null ) {
 				return _textReader.ReadLine();
 			}
 			return _binaryReader.ReadString();
 		}
 
-		public byte[] ReadToEnd() {
+		public byte[] ReadToEnd()
+		{
 			long remaining;
 			byte[] buffer;
 

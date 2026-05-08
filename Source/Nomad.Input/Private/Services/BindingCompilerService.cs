@@ -21,7 +21,8 @@ using Nomad.Input.Private.Repositories;
 using Nomad.Input.Private.ValueObjects;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.Services {
+namespace Nomad.Input.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -33,7 +34,8 @@ namespace Nomad.Input.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class BindingCompilerService {
+	internal sealed class BindingCompilerService
+	{
 		private const int DEVICE_COUNT = (int)InputDeviceSlot.Count;
 		private const int CONTROL_COUNT = (int)InputControlId.Count;
 		private const int BUTTON_BUCKET_COUNT = DEVICE_COUNT * CONTROL_COUNT * 2;
@@ -51,7 +53,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="compiledBindings"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public BindingCompilerService( CompiledBindingRepository compiledBindings ) {
+		public BindingCompilerService( CompiledBindingRepository compiledBindings )
+		{
 			_compiledBindings = compiledBindings ?? throw new ArgumentNullException( nameof( compiledBindings ) );
 		}
 
@@ -64,7 +67,8 @@ namespace Nomad.Input.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="actions"></param>
-		public void CompileIntoRepository( ImmutableArray<InputActionDefinition> actions ) {
+		public void CompileIntoRepository( ImmutableArray<InputActionDefinition> actions )
+		{
 			_compiledBindings.Replace( Compile( actions ) );
 		}
 
@@ -79,7 +83,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="actions"></param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		public static CompiledBindingGraph Compile( ImmutableArray<InputActionDefinition> actions ) {
+		public static CompiledBindingGraph Compile( ImmutableArray<InputActionDefinition> actions )
+		{
 			if ( actions.IsDefaultOrEmpty ) {
 				return CompiledBindingGraph.Empty;
 			}
@@ -235,7 +240,8 @@ namespace Nomad.Input.Private.Services {
 		/// </summary>
 		/// <param name="actions"></param>
 		/// <returns></returns>
-		private static int EstimateBindingCapacity( ImmutableArray<InputActionDefinition> actions ) {
+		private static int EstimateBindingCapacity( ImmutableArray<InputActionDefinition> actions )
+		{
 			int total = 0;
 			for ( int i = 0; i < actions.Length; i++ ) {
 				total += actions[i].Bindings.Length;
@@ -255,7 +261,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="writeOffsets"></param>
 		/// <param name="totalEntries"></param>
 		/// <returns></returns>
-		private static Bucket[] BuildBuckets( int[] counts, out int[] writeOffsets, out int totalEntries ) {
+		private static Bucket[] BuildBuckets( int[] counts, out int[] writeOffsets, out int totalEntries )
+		{
 			var buckets = new Bucket[counts.Length];
 			writeOffsets = new int[counts.Length];
 
@@ -293,7 +300,8 @@ namespace Nomad.Input.Private.Services {
 			out ulong mask2,
 			out ulong mask3,
 			out int modifierCount
-		) {
+		)
+		{
 			mask0 = 0UL;
 			mask1 = 0UL;
 			mask2 = 0UL;
@@ -335,7 +343,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="exactScheme"></param>
 		/// <param name="consumesInput"></param>
 		/// <returns></returns>
-		private static int ComputeScoreBase( int priority, int modifierCount, bool exactScheme, bool consumesInput ) {
+		private static int ComputeScoreBase( int priority, int modifierCount, bool exactScheme, bool consumesInput )
+		{
 			int score = 0;
 			score += priority * 100;
 			score += modifierCount * 25;
@@ -356,7 +365,8 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="control"></param>
 		/// <param name="pressed"></param>
 		/// <returns></returns>
-		private static int GetButtonBucketIndex( InputDeviceSlot device, InputControlId control, bool pressed ) {
+		private static int GetButtonBucketIndex( InputDeviceSlot device, InputControlId control, bool pressed )
+		{
 			return ((((int)device * CONTROL_COUNT) + (int)control) << 1) | (pressed ? 1 : 0);
 		}
 
@@ -371,13 +381,16 @@ namespace Nomad.Input.Private.Services {
 		/// <param name="device"></param>
 		/// <param name="control"></param>
 		/// <returns></returns>
-		private static int GetAxisBucketIndex( InputDeviceSlot device, InputControlId control ) {
+		private static int GetAxisBucketIndex( InputDeviceSlot device, InputControlId control )
+		{
 			return ((int)device * CONTROL_COUNT) + (int)control;
 		}
 	}
 
-	internal static class ListRefExtensions {
-		public static ref readonly T ItemRef<T>( this List<T> list, int index ) {
+	internal static class ListRefExtensions
+	{
+		public static ref readonly T ItemRef<T>( this List<T> list, int index )
+		{
 #if NET6_0_OR_GREATER
 			return ref System.Runtime.InteropServices.CollectionsMarshal.AsSpan( list )[index];
 #else

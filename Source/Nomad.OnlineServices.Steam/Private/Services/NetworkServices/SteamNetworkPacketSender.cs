@@ -44,7 +44,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 			Marshal.StructureToPtr( packet.Header, headerPtr, false );
 			Marshal.Copy( buffer, 0, headerPtr, NetworkPacketHeader.SIZE );
 
-			fixed ( byte *ptr = buffer ) {
+			fixed ( byte* ptr = buffer ) {
 				packet.Payload.Slice( NetworkPacketHeader.SIZE ).CopyTo( buffer );
 				EResult result = SteamNetworkingSockets.SendMessageToConnection( connection.Connection, (nint)ptr, (uint)packetLength, 0, out long messageNumber );
 				if ( result != EResult.k_EResultOK ) {

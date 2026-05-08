@@ -18,7 +18,8 @@ using System.Threading;
 using Nomad.Core.Events;
 using System.Threading.Tasks;
 
-namespace Nomad.Events.Private.EventTypes {
+namespace Nomad.Events.Private.EventTypes
+{
 	/*
 	===================================================================================
 	
@@ -31,7 +32,8 @@ namespace Nomad.Events.Private.EventTypes {
 	/// </summary>
 
 	internal sealed class ScheduledEvent<TArgs> : IGameEvent<TArgs>
-		where TArgs : struct {
+		where TArgs : struct
+	{
 #if EVENT_DEBUG
 		public TArgs LastPayload => _source.LastPayload;
 		public int SubscriberCount => _source.SubscriberCount;
@@ -68,7 +70,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// <param name="source"></param>
 		/// <param name="payload"></param>
 		/// <param name="publishIntervalMS"></param>
-		public ScheduledEvent( IGameEvent<TArgs> source, TArgs payload, int publishIntervalMS ) {
+		public ScheduledEvent( IGameEvent<TArgs> source, TArgs payload, int publishIntervalMS )
+		{
 			_source = source as GameEvent<TArgs> ?? throw new InvalidCastException();
 			_scheduleHandle = EventScheduler.ScheduleRecurring( () => {
 				if ( _isDisposed ) {
@@ -89,7 +92,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// <param name="source"></param>
 		/// <param name="payloadCallback"></param>
 		/// <param name="publishIntervalMS"></param>
-		public ScheduledEvent( IGameEvent<TArgs> source, Func<TArgs> payloadCallback, int publishIntervalMS ) {
+		public ScheduledEvent( IGameEvent<TArgs> source, Func<TArgs> payloadCallback, int publishIntervalMS )
+		{
 			_source = source as GameEvent<TArgs> ?? throw new InvalidCastException();
 			_scheduleHandle = EventScheduler.ScheduleRecurring( () => {
 				if ( _isDisposed ) {
@@ -107,7 +111,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_isDisposed = true;
 				_scheduleHandle?.Dispose();
@@ -125,7 +130,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// 
 		/// </summary>
 		/// <param name="eventArgs"></param>
-		public void Publish( in TArgs eventArgs ) {
+		public void Publish( in TArgs eventArgs )
+		{
 			_source.Publish( in eventArgs );
 		}
 
@@ -141,7 +147,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// <param name="ct"></param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
-		public async Task PublishAsync( TArgs eventArgs, CancellationToken ct = default ) {
+		public async Task PublishAsync( TArgs eventArgs, CancellationToken ct = default )
+		{
 			throw new NotSupportedException();
 		}
 
@@ -155,7 +162,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <returns></returns>
-		public ISubscriptionHandle Subscribe( EventCallback<TArgs> callback ) {
+		public ISubscriptionHandle Subscribe( EventCallback<TArgs> callback )
+		{
 			return _source.Subscribe( callback );
 		}
 
@@ -170,7 +178,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// <param name="asyncCallback"></param>
 		/// <returns></returns>
 		/// <exception cref="NotSupportedException"></exception>
-		public ISubscriptionHandle SubscribeAsync( AsyncEventCallback<TArgs> asyncCallback ) {
+		public ISubscriptionHandle SubscribeAsync( AsyncEventCallback<TArgs> asyncCallback )
+		{
 			throw new NotSupportedException();
 		}
 
@@ -183,7 +192,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// 
 		/// </summary>
 		/// <param name="callback"></param>
-		public void Unsubscribe( EventCallback<TArgs> callback ) {
+		public void Unsubscribe( EventCallback<TArgs> callback )
+		{
 			_source.Unsubscribe( callback );
 		}
 
@@ -197,7 +207,8 @@ namespace Nomad.Events.Private.EventTypes {
 		/// </summary>
 		/// <param name="asyncCallback"></param>
 		/// <exception cref="NotSupportedException"></exception>
-		public void UnsubscribeAsync( AsyncEventCallback<TArgs> asyncCallback ) {
+		public void UnsubscribeAsync( AsyncEventCallback<TArgs> asyncCallback )
+		{
 			throw new NotSupportedException();
 		}
 	};

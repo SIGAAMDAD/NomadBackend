@@ -13,8 +13,10 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Input.Private.ValueObjects {
-	internal sealed class Bind {
+namespace Nomad.Input.Private.ValueObjects
+{
+	internal sealed class Bind
+	{
 		public string Name { get; set; }
 		public string ValueType { get; set; }
 		public string Scheme { get; set; }

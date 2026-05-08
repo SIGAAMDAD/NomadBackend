@@ -18,8 +18,10 @@ using System.Runtime.CompilerServices;
 using Nomad.Core.Input;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.Extensions {
-	internal static class MouseButtonExtensions {
+namespace Nomad.Input.Private.Extensions
+{
+	internal static class MouseButtonExtensions
+	{
 		/*
 		===============
 		ToControlId

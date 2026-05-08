@@ -19,7 +19,8 @@ using Nomad.Console.Events;
 using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 
-namespace Nomad.EngineUtils.Godot.Private.Console {
+namespace Nomad.EngineUtils.Godot.Private.Console
+{
 	/*
 	===================================================================================
 	
@@ -30,8 +31,9 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 	/// <summary>
 	/// 
 	/// </summary>
-	
-	internal sealed partial class GodotConsoleInput : LineEdit, IConsoleInput {
+
+	internal sealed partial class GodotConsoleInput : LineEdit, IConsoleInput
+	{
 		public bool IsOpen => _isOpen;
 
 		public IGameEvent<TextEnteredEventArgs> TextEntered => _textEntered;
@@ -39,7 +41,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 
 		private bool _isOpen = false;
 
-		public GodotConsoleInput( IGameEventRegistryService eventFactory ) {
+		public GodotConsoleInput( IGameEventRegistryService eventFactory )
+		{
 			ArgumentGuard.ThrowIfNull( eventFactory, nameof( eventFactory ) );
 
 			_textEntered = eventFactory.GetEvent<TextEnteredEventArgs>(
@@ -48,29 +51,34 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 			);
 		}
 
-		public void Open() {
+		public void Open()
+		{
 			_isOpen = true;
 			Show();
 			GrabFocus();
 		}
 
-		public void Close() {
+		public void Close()
+		{
 			_isOpen = false;
 			Clear();
 			Hide();
 		}
 
-		public void Focus() {
+		public void Focus()
+		{
 			GrabFocus();
 		}
 
-		public void ApplyHistoryText( string text ) {
+		public void ApplyHistoryText( string text )
+		{
 			Text = text ?? string.Empty;
 			CaretColumn = Text.Length;
 			GrabFocus();
 		}
 
-		public void OnTextEntered( string text ) {
+		public void OnTextEntered( string text )
+		{
 			if ( string.IsNullOrWhiteSpace( text ) ) {
 				Clear();
 				return;
@@ -79,7 +87,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 			Clear();
 		}
 
-		public override void _Ready() {
+		public override void _Ready()
+		{
 			base._Ready();
 
 			Name = nameof( GodotConsoleInput );

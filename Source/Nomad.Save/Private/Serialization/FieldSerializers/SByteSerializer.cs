@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.Util;
 
-namespace Nomad.Save.Private.Serialization.FieldSerializers {
+namespace Nomad.Save.Private.Serialization.FieldSerializers
+{
 	/*
 	===================================================================================
 
@@ -28,7 +29,8 @@ namespace Nomad.Save.Private.Serialization.FieldSerializers {
 	///
 	/// </summary>
 
-	internal sealed class SByteSerializer : IFieldSerializer<sbyte> {
+	internal sealed class SByteSerializer : IFieldSerializer<sbyte>
+	{
 		public AnyType FieldType => AnyType.Int8;
 
 		public void Serialize( IWriteStream stream, in Any value ) => stream.WriteInt8( value.GetPrimitiveValue<sbyte>() );

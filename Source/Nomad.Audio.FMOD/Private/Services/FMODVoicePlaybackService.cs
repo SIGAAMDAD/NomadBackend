@@ -18,7 +18,8 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 
-namespace Nomad.Audio.Fmod.Private.Services {
+namespace Nomad.Audio.Fmod.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -30,7 +31,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class FMODVoicePlaybackService {
+	internal sealed class FMODVoicePlaybackService
+	{
 		private readonly FMOD.System _system;
 		private readonly FMOD.Sound _sound;
 
@@ -48,7 +50,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		private readonly int _sampleRate;
 		private readonly int _channels;
 
-		public FMODVoicePlaybackService( FMOD.System system, int sampleRate, int channels ) {
+		public FMODVoicePlaybackService( FMOD.System system, int sampleRate, int channels )
+		{
 			_system = system;
 			_sampleRate = sampleRate;
 			_channels = channels;
@@ -64,13 +67,15 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			};
 		}
 
-		public void Push( byte[] pcmData ) {
+		public void Push( byte[] pcmData )
+		{
 			if ( pcmData != null && pcmData.Length > 0 ) {
 				_queue.Enqueue( pcmData );
 			}
 		}
 
-		private FMOD.RESULT PcmReadCallback( IntPtr soundRaw, IntPtr data, uint datalen ) {
+		private FMOD.RESULT PcmReadCallback( IntPtr soundRaw, IntPtr data, uint datalen )
+		{
 			try {
 				byte[] block = new byte[datalen];
 				int written = 0;

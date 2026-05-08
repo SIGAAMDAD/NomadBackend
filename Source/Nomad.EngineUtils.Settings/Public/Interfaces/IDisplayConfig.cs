@@ -22,7 +22,7 @@ namespace Nomad.EngineUtils.Settings.Interfaces
     ///
     /// </summary>
     public interface IDisplayConfig
-    {        
+    {
         /// <summary>
         ///
         /// </summary>

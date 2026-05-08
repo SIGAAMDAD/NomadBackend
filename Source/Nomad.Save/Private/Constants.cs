@@ -13,9 +13,12 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Save.Private {
-	internal static class Constants {
-		internal static class CVars {
+namespace Nomad.Save.Private
+{
+	internal static class Constants
+	{
+		internal static class CVars
+		{
 			public const string NAMESPACE = "Nomad.Save";
 
 			public const string DATA_PATH = NAMESPACE + ".DataPath";

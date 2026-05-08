@@ -15,8 +15,10 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using Nomad.Core.CVars;
 
-namespace Nomad.Input.Private.Registries {
-	internal static class InputCVarRegistry {
+namespace Nomad.Input.Private.Registries
+{
+	internal static class InputCVarRegistry
+	{
 		/*
 		===============
 		RegisterCVars
@@ -26,7 +28,8 @@ namespace Nomad.Input.Private.Registries {
 		/// 
 		/// </summary>
 		/// <param name="cvarSystem"></param>
-		public static void RegisterCVars( ICVarSystemService cvarSystem ) {
+		public static void RegisterCVars( ICVarSystemService cvarSystem )
+		{
 			cvarSystem.Register(
 				new CVarCreateInfo<string> {
 					Name = Constants.CVars.DEFAULTS_PATH,

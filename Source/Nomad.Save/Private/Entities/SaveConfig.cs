@@ -13,11 +13,13 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Save.Private.Entities {
+namespace Nomad.Save.Private.Entities
+{
 	/// <summary>
 	/// 
 	/// </summary>
-	internal record SaveConfig {
+	internal record SaveConfig
+	{
 		public string DataPath { get; init; }
 
 		public string BackupPath { get; init; }

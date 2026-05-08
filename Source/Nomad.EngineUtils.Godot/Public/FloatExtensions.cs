@@ -17,12 +17,12 @@ using Nomad.Core.Engine.Windowing;
 
 namespace Nomad.EngineUtils
 {
-	/// <summary>
-	/// 
-	/// </summary>
-	public static class FloatExtensions
-	{
-		/// <summary>
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class FloatExtensions
+    {
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="ratio"></param>
@@ -49,5 +49,5 @@ namespace Nomad.EngineUtils
             // just fallback on auto if nothing else is found to be valid
             return AspectRatio.Aspect_Automatic;
         }
-	}
+    }
 }

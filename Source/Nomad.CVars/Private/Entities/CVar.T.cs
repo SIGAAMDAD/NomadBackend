@@ -23,7 +23,8 @@ using Nomad.Core.CVars;
 using Nomad.CVars.Private.ValueObjects;
 using Nomad.CVars.Exceptions;
 
-namespace Nomad.CVars.Private.Entities {
+namespace Nomad.CVars.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -35,7 +36,8 @@ namespace Nomad.CVars.Private.Entities {
 	///
 	/// </summary>
 
-	internal sealed class CVar<T> : ICVar<T> {
+	internal sealed class CVar<T> : ICVar<T>
+	{
 		/// <summary>
 		/// The current value of the CVar.
 		/// </summary>
@@ -120,7 +122,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <param name="eventFactory"></param>
 		/// <param name="createInfo"></param>
-		internal CVar( IGameEventRegistryService eventFactory, CVarCreateInfo<T> createInfo ) {
+		internal CVar( IGameEventRegistryService eventFactory, CVarCreateInfo<T> createInfo )
+		{
 			ArgumentGuard.ThrowIfNullOrEmpty( createInfo.Name );
 			ArgumentGuard.ThrowIfNull( createInfo.Description );
 
@@ -151,7 +154,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// Resets the cvar's <see cref="Value"/> to the <see cref="DefaultValue"/>.
 		/// </summary>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void Reset() {
+		public void Reset()
+		{
 			Value = _defaultValue;
 		}
 
@@ -166,7 +170,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// <param name="value">The value to set the CVar's <see cref="Value"/> to.</param>
 		/// <exception cref="ArgumentException"></exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public void SetFromString( string value ) {
+		public void SetFromString( string value )
+		{
 			ArgumentGuard.ThrowIfNull( value );
 			if ( !CVarStringConverter.TryParse( value, typeof( T ), out object? convertedValue ) ) {
 				throw new ArgumentException( $"Failed to convert cvar value '{value}' to type {typeof( T ).Name}" );
@@ -183,7 +188,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// Sets the CVar's <see cref="Value"/> to the given value.
 		/// </summary>
 		/// <param name="value">The new value of the CVar.</param>
-		public void Set( T value ) {
+		public void Set( T value )
+		{
 			if ( IsReadOnly || !_validator.ValidateValue( value ) || EqualityComparer<T>.Default.Equals( _converter.Value, value ) ) {
 				return;
 			}
@@ -257,7 +263,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
-		public void SetDecimalValue( float value ) {
+		public void SetDecimalValue( float value )
+		{
 			if ( _metadata.Type != CVarType.Decimal ) {
 				throw new CVarTypeMismatchException( typeof( float ), _metadata.Type.GetSystemType() );
 			}
@@ -274,7 +281,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
-		public void SetIntegerValue( int value ) {
+		public void SetIntegerValue( int value )
+		{
 			if ( _metadata.Type != CVarType.Int ) {
 				throw new CVarTypeMismatchException( typeof( int ), _metadata.Type.GetSystemType() );
 			}
@@ -291,7 +299,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
-		public void SetUIntegerValue( uint value ) {
+		public void SetUIntegerValue( uint value )
+		{
 			if ( _metadata.Type != CVarType.UInt ) {
 				throw new CVarTypeMismatchException( typeof( uint ), _metadata.Type.GetSystemType() );
 			}
@@ -308,7 +317,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
-		public void SetBooleanValue( bool value ) {
+		public void SetBooleanValue( bool value )
+		{
 			if ( _metadata.Type != CVarType.Boolean ) {
 				throw new CVarTypeMismatchException( typeof( bool ), _metadata.Type.GetSystemType() );
 			}
@@ -325,7 +335,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <param name="value"></param>
 		/// <exception cref="CVarTypeMismatchException"></exception>
-		public void SetStringValue( string value ) {
+		public void SetStringValue( string value )
+		{
 			if ( _metadata.Type != CVarType.String ) {
 				throw new CVarTypeMismatchException( typeof( string ), _metadata.Type.GetSystemType() );
 			}

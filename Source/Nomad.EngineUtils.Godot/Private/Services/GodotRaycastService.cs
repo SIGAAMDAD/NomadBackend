@@ -19,7 +19,8 @@ using Nomad.Core.Physics;
 using Nomad.Core.Physics.Services;
 using Nomad.Core.Physics.ValueObjects;
 
-namespace Nomad.EngineUtils.Godot.Private.Services {
+namespace Nomad.EngineUtils.Godot.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -31,14 +32,17 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class GodotRaycastService : IRaycastService {
+	internal sealed class GodotRaycastService : IRaycastService
+	{
 		private readonly global::Godot.World2D _world;
 
-		public GodotRaycastService( global::Godot.World2D world ) {
+		public GodotRaycastService( global::Godot.World2D world )
+		{
 			_world = world ?? throw new ArgumentNullException( nameof( world ) );
 		}
 
-		public bool TryRaycast( in RaycastQuery query, out RaycastHit hit ) {
+		public bool TryRaycast( in RaycastQuery query, out RaycastHit hit )
+		{
 			global::Godot.PhysicsRayQueryParameters2D parameters = global::Godot.PhysicsRayQueryParameters2D.Create(
 				query.Origin.ToGodot(),
 				query.GetEndPoint().ToGodot(),
@@ -62,7 +66,7 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 
 			int layer = ExtractFirstLayerBit( collider.CollisionLayer );
 			float distance = Vector2.Distance( query.Origin, point );
-			
+
 			hit = new RaycastHit(
 				point: point,
 				normal: normal,
@@ -75,7 +79,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 			return true;
 		}
 
-		private static int ExtractFirstLayerBit( uint mask ) {
+		private static int ExtractFirstLayerBit( uint mask )
+		{
 			for ( int i = 0; i < 32; ++i ) {
 				if ( ((mask >> i) & 1u) != 0u ) {
 					return i;

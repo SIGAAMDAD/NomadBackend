@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.Util;
 
-namespace Nomad.Save.Private.Serialization.FieldSerializers {
+namespace Nomad.Save.Private.Serialization.FieldSerializers
+{
 	/*
 	===================================================================================
 
@@ -28,7 +29,8 @@ namespace Nomad.Save.Private.Serialization.FieldSerializers {
 	///
 	/// </summary>
 
-	internal sealed class IntSerializer : IFieldSerializer<int> {
+	internal sealed class IntSerializer : IFieldSerializer<int>
+	{
 		public AnyType FieldType => AnyType.Int32;
 
 		public void Serialize( IWriteStream stream, in Any value ) => stream.WriteInt32( value.GetPrimitiveValue<int>() );

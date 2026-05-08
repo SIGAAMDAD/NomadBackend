@@ -22,7 +22,8 @@ using Nomad.Input.Private.Repositories;
 using Nomad.Input.Private.ValueObjects;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.Services {
+namespace Nomad.Input.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -34,20 +35,23 @@ namespace Nomad.Input.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class BindingMatcherService {
+	internal sealed class BindingMatcherService
+	{
 		private readonly CompiledBindingRepository _compiledBindings;
 		private readonly InputStateService _stateService;
 
 		private int[] _matchedBindingIndices = Array.Empty<int>();
 		private int[] _matchedScores = Array.Empty<int>();
 
-		public BindingMatcherService( CompiledBindingRepository compiledBindings, InputStateService stateService ) {
+		public BindingMatcherService( CompiledBindingRepository compiledBindings, InputStateService stateService )
+		{
 			_compiledBindings = compiledBindings ?? throw new ArgumentNullException( nameof( compiledBindings ) );
 			_stateService = stateService ?? throw new ArgumentNullException( nameof( stateService ) );
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public BindingMatchSet MatchKeyboard( CompiledBindingGraph graph, in KeyboardEventArgs evt, uint activeContextMask, InputScheme? activeScheme ) {
+		public BindingMatchSet MatchKeyboard( CompiledBindingGraph graph, in KeyboardEventArgs evt, uint activeContextMask, InputScheme? activeScheme )
+		{
 			return MatchButtons(
 				graph,
 				CompiledBindingRepository.GetButtonCandidateIndices( graph, InputDeviceSlot.Keyboard, evt.KeyNum.ToControlId(), evt.Pressed ),
@@ -57,7 +61,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public BindingMatchSet MatchMouseButton( CompiledBindingGraph graph, in MouseButtonEventArgs evt, uint activeContextMask, InputScheme? activeScheme ) {
+		public BindingMatchSet MatchMouseButton( CompiledBindingGraph graph, in MouseButtonEventArgs evt, uint activeContextMask, InputScheme? activeScheme )
+		{
 			return MatchButtons(
 				graph,
 				CompiledBindingRepository.GetButtonCandidateIndices( graph, InputDeviceSlot.Mouse, evt.Button.ToControlId(), evt.Pressed ),
@@ -67,7 +72,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public BindingMatchSet MatchGamepadButton( CompiledBindingGraph graph, in GamepadButtonEventArgs evt, uint activeContextMask, InputScheme? activeScheme ) {
+		public BindingMatchSet MatchGamepadButton( CompiledBindingGraph graph, in GamepadButtonEventArgs evt, uint activeContextMask, InputScheme? activeScheme )
+		{
 			return MatchButtons(
 				graph,
 				CompiledBindingRepository.GetButtonCandidateIndices( graph, GetGamepadDeviceSlot( evt.DeviceId ), evt.Button.ToControlId(), evt.Pressed ),
@@ -77,7 +83,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public BindingMatchSet MatchGamepadAxis( CompiledBindingGraph graph, InputDeviceSlot device, InputControlId control, uint activeContextMask, InputScheme? activeScheme ) {
+		public BindingMatchSet MatchGamepadAxis( CompiledBindingGraph graph, InputDeviceSlot device, InputControlId control, uint activeContextMask, InputScheme? activeScheme )
+		{
 			return MatchAxes(
 				graph,
 				CompiledBindingRepository.GetAxisCandidateIndices( graph, device, control ),
@@ -87,7 +94,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public BindingMatchSet MatchMouseDelta( CompiledBindingGraph graph, uint activeContextMask, InputScheme? activeScheme ) {
+		public BindingMatchSet MatchMouseDelta( CompiledBindingGraph graph, uint activeContextMask, InputScheme? activeScheme )
+		{
 			if ( _stateService.MouseDelta == Vector2.Zero ) {
 				return new BindingMatchSet( ReadOnlySpan<int>.Empty, ReadOnlySpan<int>.Empty );
 			}
@@ -100,7 +108,8 @@ namespace Nomad.Input.Private.Services {
 			);
 		}
 
-		private BindingMatchSet MatchButtons( CompiledBindingGraph graph, ReadOnlySpan<int> candidateIndices, uint activeContextMask, InputScheme? activeScheme ) {
+		private BindingMatchSet MatchButtons( CompiledBindingGraph graph, ReadOnlySpan<int> candidateIndices, uint activeContextMask, InputScheme? activeScheme )
+		{
 			EnsureMatchCapacity( candidateIndices.Length );
 
 			int count = 0;
@@ -132,7 +141,8 @@ namespace Nomad.Input.Private.Services {
 			);
 		}
 
-		private BindingMatchSet MatchAxes( CompiledBindingGraph graph, ReadOnlySpan<int> candidateIndices, uint activeContextMask, InputScheme? activeScheme ) {
+		private BindingMatchSet MatchAxes( CompiledBindingGraph graph, ReadOnlySpan<int> candidateIndices, uint activeContextMask, InputScheme? activeScheme )
+		{
 			EnsureMatchCapacity( candidateIndices.Length );
 
 			int count = 0;
@@ -162,7 +172,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private unsafe bool ModifiersSatisfied( in CompiledBinding binding ) {
+		private unsafe bool ModifiersSatisfied( in CompiledBinding binding )
+		{
 			if ( binding.Kind != InputBindingKind.Button ) {
 				return true;
 			}
@@ -177,12 +188,14 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static bool ContextMatches( uint bindingMask, uint activeMask ) {
+		private static bool ContextMatches( uint bindingMask, uint activeMask )
+		{
 			return bindingMask == 0 || (bindingMask & activeMask) != 0;
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void EnsureMatchCapacity( int requiredCapacity ) {
+		private void EnsureMatchCapacity( int requiredCapacity )
+		{
 			if ( _matchedBindingIndices.Length >= requiredCapacity ) {
 				return;
 			}
@@ -193,7 +206,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static InputDeviceSlot GetGamepadDeviceSlot( int deviceId ) {
+		private static InputDeviceSlot GetGamepadDeviceSlot( int deviceId )
+		{
 			return deviceId switch {
 				0 => InputDeviceSlot.Gamepad0,
 				1 => InputDeviceSlot.Gamepad1,

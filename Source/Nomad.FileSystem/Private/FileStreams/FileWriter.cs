@@ -18,11 +18,13 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Nomad.FileSystem.Private.FileStreams {
+namespace Nomad.FileSystem.Private.FileStreams
+{
 	/// <summary>
 	/// A unified writer that can write to either a text (StreamWriter) or binary (BinaryWriter) stream.
 	/// </summary>
-	internal readonly struct FileWriter {
+	internal readonly struct FileWriter
+	{
 		private readonly StreamWriter _textWriter;
 		private readonly BinaryWriter _binaryWriter;
 
@@ -30,7 +32,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// Initializes a new instance for text writing.
 		/// </summary>
 		/// <param name="writer">The underlying StreamWriter.</param>
-		public FileWriter( StreamWriter writer ) {
+		public FileWriter( StreamWriter writer )
+		{
 			_textWriter = writer;
 			_binaryWriter = null;
 		}
@@ -39,16 +42,19 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// Initializes a new instance for binary writing.
 		/// </summary>
 		/// <param name="writer">The underlying BinaryWriter.</param>
-		public FileWriter( BinaryWriter writer ) {
+		public FileWriter( BinaryWriter writer )
+		{
 			_textWriter = null;
 			_binaryWriter = writer;
 		}
 
-		public IDisposable GetStream() {
+		public IDisposable GetStream()
+		{
 			return _textWriter != null ? _textWriter : _binaryWriter;
 		}
 
-		public void Write( byte value ) {
+		public void Write( byte value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -56,7 +62,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( sbyte value ) {
+		public void Write( sbyte value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -64,7 +71,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( char value ) {
+		public void Write( char value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -72,7 +80,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( short value ) {
+		public void Write( short value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -80,7 +89,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( ushort value ) {
+		public void Write( ushort value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -88,7 +98,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( int value ) {
+		public void Write( int value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -96,7 +107,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( uint value ) {
+		public void Write( uint value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -104,7 +116,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( long value ) {
+		public void Write( long value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -112,7 +125,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( ulong value ) {
+		public void Write( ulong value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -120,7 +134,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( float value ) {
+		public void Write( float value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -128,7 +143,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( double value ) {
+		public void Write( double value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -136,7 +152,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( decimal value ) {
+		public void Write( decimal value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -144,7 +161,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( bool value ) {
+		public void Write( bool value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -152,7 +170,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( string value ) {
+		public void Write( string value )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( value );
 			} else {
@@ -164,7 +183,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		// Write methods for arrays / spans (if needed)
 		// -----------------------------------------------------------------
 
-		public void Write( byte[] buffer ) {
+		public void Write( byte[] buffer )
+		{
 			if ( _textWriter != null ) {
 				// StreamWriter doesn't have a Write(byte[]) overload,
 				// so we write as characters (maybe not ideal, but demonstrates the pattern).
@@ -175,7 +195,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( ReadOnlySpan<byte> buffer ) {
+		public void Write( ReadOnlySpan<byte> buffer )
+		{
 			if ( _textWriter != null ) {
 				// StreamWriter doesn't have a Write(byte[]) overload,
 				// so we write as characters (maybe not ideal, but demonstrates the pattern).
@@ -186,7 +207,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( char[] chars ) {
+		public void Write( char[] chars )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( chars );
 			} else {
@@ -194,7 +216,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Write( ReadOnlySpan<char> chars ) {
+		public void Write( ReadOnlySpan<char> chars )
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Write( chars );
 			} else {
@@ -202,7 +225,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public void Flush() {
+		public void Flush()
+		{
 			if ( _textWriter != null ) {
 				_textWriter.Flush();
 			} else {
@@ -210,7 +234,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 			}
 		}
 
-		public async ValueTask FlushAsync( CancellationToken ct = default ) {
+		public async ValueTask FlushAsync( CancellationToken ct = default )
+		{
 			if ( _textWriter != null ) {
 				await _textWriter.FlushAsync();
 			} else {

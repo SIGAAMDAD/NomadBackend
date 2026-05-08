@@ -18,7 +18,8 @@ using System.Collections.Generic;
 using Nomad.Audio.Fmod.Private.ValueObjects;
 using Nomad.Core.Logger;
 
-namespace Nomad.Audio.Fmod.Private.Repositories {
+namespace Nomad.Audio.Fmod.Private.Repositories
+{
 	/*
 	===================================================================================
 
@@ -30,7 +31,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 	/// Holds the currently available FMOD output devices and the active selection.
 	/// </summary>
 
-	internal sealed class FMODOutputDeviceRepository : IDisposable {
+	internal sealed class FMODOutputDeviceRepository : IDisposable
+	{
 		/// <summary>
 		/// A list of all output devices available to the FMOD API.
 		/// </summary>
@@ -61,7 +63,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="category"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public FMODOutputDeviceRepository( ILoggerCategory category ) {
+		public FMODOutputDeviceRepository( ILoggerCategory category )
+		{
 			_category = category ?? throw new ArgumentNullException( nameof( category ) );
 		}
 
@@ -73,7 +76,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			_devices = Array.Empty<FMODDeviceInfo>();
 			_outputDevices.Clear();
 			_outputDeviceIndex = -1;
@@ -89,7 +93,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="devices"></param>
 		/// <param name="outputDeviceIndex"></param>
-		public void Refresh( FMODDeviceInfo[] devices, int outputDeviceIndex ) {
+		public void Refresh( FMODDeviceInfo[] devices, int outputDeviceIndex )
+		{
 			_devices = devices ?? Array.Empty<FMODDeviceInfo>();
 
 			_outputDevices.Clear();
@@ -114,7 +119,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="deviceIndex"></param>
 		/// <returns></returns>
-		public bool ContainsDeviceIndex( int deviceIndex ) {
+		public bool ContainsDeviceIndex( int deviceIndex )
+		{
 			return deviceIndex >= 0 && deviceIndex < _devices.Length;
 		}
 
@@ -129,7 +135,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// <param name="deviceIndex"></param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		public FMODDeviceInfo GetDevice( int deviceIndex ) {
+		public FMODDeviceInfo GetDevice( int deviceIndex )
+		{
 			if ( !ContainsDeviceIndex( deviceIndex ) ) {
 				throw new ArgumentOutOfRangeException( nameof( deviceIndex ) );
 			}
@@ -146,7 +153,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		/// </summary>
 		/// <param name="deviceIndex"></param>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		public void SetCurrentDevice( int deviceIndex ) {
+		public void SetCurrentDevice( int deviceIndex )
+		{
 			if ( !ContainsDeviceIndex( deviceIndex ) ) {
 				throw new ArgumentOutOfRangeException( nameof( deviceIndex ) );
 			}

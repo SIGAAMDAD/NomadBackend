@@ -23,7 +23,8 @@ using Nomad.Core.Util;
 using Nomad.Core.Logger;
 using Nomad.Core.Compatibility.Guards;
 
-namespace Nomad.Save.Private.Entities {
+namespace Nomad.Save.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -35,7 +36,8 @@ namespace Nomad.Save.Private.Entities {
 	///
 	/// </summary>
 
-	internal sealed class SaveSectionWriter : ISaveSectionWriter {
+	internal sealed class SaveSectionWriter : ISaveSectionWriter
+	{
 		/// <summary>
 		/// This section's name.
 		/// </summary>
@@ -68,7 +70,8 @@ namespace Nomad.Save.Private.Entities {
 		/// <param name="category"></param>
 		/// <param name="name"></param>
 		/// <param name="writer"></param>
-		public SaveSectionWriter( SaveConfig config, ILoggerCategory category, string name, IMemoryFileWriteStream writer ) {
+		public SaveSectionWriter( SaveConfig config, ILoggerCategory category, string name, IMemoryFileWriteStream writer )
+		{
 			_name = name ?? throw new ArgumentException( "Section name cannot be null or empty" );
 			_fields = new Dictionary<string, SaveField>();
 			_writer = writer ?? throw new ArgumentNullException( nameof( writer ) );
@@ -84,7 +87,8 @@ namespace Nomad.Save.Private.Entities {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			lock ( _disposeLock ) {
 				if ( !_isDisposed ) {
 					long offset = _writer.Position;
@@ -134,7 +138,8 @@ namespace Nomad.Save.Private.Entities {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="fieldId"></param>
 		/// <param name="value"></param>
-		public void AddField<T>( string fieldId, T value ) {
+		public void AddField<T>( string fieldId, T value )
+		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
 			ArgumentGuard.ThrowIfNullOrEmpty( fieldId );
 
@@ -166,7 +171,8 @@ namespace Nomad.Save.Private.Entities {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="fieldId"></param>
 		/// <returns></returns>
-		public bool HasField<T>( string fieldId ) {
+		public bool HasField<T>( string fieldId )
+		{
 			return _fields.TryGetValue( fieldId, out var field ) && field.Type == Any.GetType<T>();
 		}
 	};

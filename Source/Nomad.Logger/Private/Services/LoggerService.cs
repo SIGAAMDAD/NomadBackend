@@ -1,4 +1,4 @@
-﻿/*
+/*
 ===========================================================================
 The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
@@ -22,7 +22,8 @@ using Nomad.Core.Logger;
 using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.CVars;
 
-namespace Nomad.Logger.Private.Services {
+namespace Nomad.Logger.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -34,7 +35,8 @@ namespace Nomad.Logger.Private.Services {
 	/// Handles the process of logging.
 	/// </summary>
 
-	internal sealed class LoggerService : ILoggerService {
+	internal sealed class LoggerService : ILoggerService
+	{
 		private ICVar<LogLevel>? _logDepth;
 		private readonly List<ILoggerSink> _sinks = new List<ILoggerSink>();
 
@@ -52,10 +54,11 @@ namespace Nomad.Logger.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		public LoggerService() {
+		public LoggerService()
+		{
 			_defaultCategory = new LoggerCategory( "Logger", LogLevel.Info, true, _messageBuilder );
 			_categories = new ConcurrentDictionary<string, LoggerCategory> {
-				[ "Default" ] = _defaultCategory as LoggerCategory
+				["Default"] = _defaultCategory as LoggerCategory
 			};
 		}
 
@@ -67,10 +70,11 @@ namespace Nomad.Logger.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				for ( int i = 0; i < _sinks.Count; i++ ) {
-					_sinks[ i ]?.Dispose();
+					_sinks[i]?.Dispose();
 				}
 				_sinks?.Clear();
 				foreach ( var category in _categories ) {
@@ -95,10 +99,11 @@ namespace Nomad.Logger.Private.Services {
 		/// <param name="level"></param>
 		/// <param name="enabled"></param>
 		/// <returns></returns>
-		public ILoggerCategory CreateCategory( string name, LogLevel level, bool enabled ) {
+		public ILoggerCategory CreateCategory( string name, LogLevel level, bool enabled )
+		{
 			var category = new LoggerCategory( name, level, enabled, _messageBuilder );
 			for ( int i = 0; i < _sinks.Count; i++ ) {
-				category.AddSink( _sinks[ i ] );
+				category.AddSink( _sinks[i] );
 			}
 			return category;
 		}
@@ -112,7 +117,8 @@ namespace Nomad.Logger.Private.Services {
 		/// Initializes the logging service.
 		/// </summary>
 		/// <param name="cvarSystem"></param>
-		public void InitConfig( ICVarSystemService cvarSystem ) {
+		public void InitConfig( ICVarSystemService cvarSystem )
+		{
 			_logDepth = cvarSystem.Register(
 				new CVarCreateInfo<LogLevel> {
 					Name = Constants.CVars.Console.CONSOLE_LOG_LEVEL,
@@ -133,7 +139,8 @@ namespace Nomad.Logger.Private.Services {
 		/// Adds a sink stream to the global logger service.
 		/// </summary>
 		/// <param name="sink"></param>
-		public void AddSink( ILoggerSink sink ) {
+		public void AddSink( ILoggerSink sink )
+		{
 			ArgumentGuard.ThrowIfNull( sink );
 			_sinks.Add( sink );
 
@@ -154,7 +161,8 @@ namespace Nomad.Logger.Private.Services {
 		/// <param name="level"></param>
 		/// <param name="message"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void PrintMessage( ILoggerCategory category, LogLevel level, string message ) {
+		private void PrintMessage( ILoggerCategory category, LogLevel level, string message )
+		{
 			if ( level < LogLevel.Info || level >= _logDepth?.Value ) {
 				return;
 			}
@@ -170,7 +178,8 @@ namespace Nomad.Logger.Private.Services {
 		///
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintLine( string message ) {
+		public void PrintLine( string message )
+		{
 			PrintMessage( _defaultCategory, LogLevel.Info, message );
 		}
 
@@ -183,7 +192,8 @@ namespace Nomad.Logger.Private.Services {
 		///
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintDebug( string message ) {
+		public void PrintDebug( string message )
+		{
 			PrintMessage( _defaultCategory, LogLevel.Debug, message );
 		}
 
@@ -196,7 +206,8 @@ namespace Nomad.Logger.Private.Services {
 		///
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintWarning( string message ) {
+		public void PrintWarning( string message )
+		{
 			PrintMessage( _defaultCategory, LogLevel.Warning, message );
 		}
 
@@ -209,7 +220,8 @@ namespace Nomad.Logger.Private.Services {
 		///
 		/// </summary>
 		/// <param name="message"></param>
-		public void PrintError( string message ) {
+		public void PrintError( string message )
+		{
 			PrintMessage( _defaultCategory, LogLevel.Error, message );
 		}
 
@@ -221,9 +233,10 @@ namespace Nomad.Logger.Private.Services {
 		/// <summary>
 		/// Clears all sinks.
 		/// </summary>
-		public void Clear() {
+		public void Clear()
+		{
 			for ( int i = 0; i < _sinks.Count; i++ ) {
-				_sinks[ i ].Clear();
+				_sinks[i].Clear();
 			}
 		}
 	};

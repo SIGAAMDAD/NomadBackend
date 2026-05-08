@@ -17,7 +17,8 @@ using System;
 using System.Runtime.CompilerServices;
 using Nomad.Core.Collections;
 
-namespace Nomad.Events.Private {
+namespace Nomad.Events.Private
+{
 	/*
 	===================================================================================
 
@@ -30,7 +31,8 @@ namespace Nomad.Events.Private {
 	/// </summary>
 
 	internal sealed class SubscriptionCache<TArgs, TCallback> : IDisposable
-		where TArgs : struct {
+		where TArgs : struct
+	{
 		public int Count => _subscriptions != null ? _subscriptions.Count : 0;
 
 		public TCallback this[int index] {
@@ -48,7 +50,8 @@ namespace Nomad.Events.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			_subscriptions?.Clear();
 		}
 
@@ -61,7 +64,8 @@ namespace Nomad.Events.Private {
 		///
 		/// </summary>
 		/// <param name="entry"></param>
-		public void Add( TCallback entry ) {
+		public void Add( TCallback entry )
+		{
 			_subscriptions ??= new FixedList8<TCallback>();
 			_subscriptions.Add( entry );
 		}
@@ -75,7 +79,8 @@ namespace Nomad.Events.Private {
 		///
 		/// </summary>
 		/// <param name="index"></param>
-		public void RemoveAt( int index ) {
+		public void RemoveAt( int index )
+		{
 			_subscriptions ??= new FixedList8<TCallback>();
 			_subscriptions.RemoveAtSwapBack( index );
 		}

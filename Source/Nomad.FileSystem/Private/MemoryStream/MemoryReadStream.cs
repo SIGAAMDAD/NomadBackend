@@ -25,7 +25,8 @@ using Nomad.Core.FileSystem.Configs;
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.Memory.Buffers;
 
-namespace Nomad.FileSystem.Private.MemoryStream {
+namespace Nomad.FileSystem.Private.MemoryStream
+{
 	/*
 	===================================================================================
 
@@ -37,7 +38,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 	///
 	/// </summary>
 
-	internal class MemoryReadStream : MemoryStreamBase, IMemoryReadStream {
+	internal class MemoryReadStream : MemoryStreamBase, IMemoryReadStream
+	{
 		/// <summary>
 		/// Whether the stream can be read from.
 		/// </summary>
@@ -59,7 +61,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="config"></param>
 		/// <param name="createBuffer"></param>
 		public MemoryReadStream( MemoryReadConfig config, bool createBuffer = true )
-			: base( config.Strategy ) {
+			: base( config.Strategy )
+		{
 			long maxCapacity = config.MaxCapacity ?? Constants.FileSystem.MAXIMUM_MEMORY_STREAM_CAPACITY;
 			if ( createBuffer ) {
 				buffer = config.Buffer ?? AllocateBuffer( maxCapacity );
@@ -79,7 +82,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// Flushes the stream. (Not implemented for read-only streams)
 		/// </summary>
 		/// <exception cref="NotSupportedException"></exception>
-		public override void Flush() {
+		public override void Flush()
+		{
 			throw new NotSupportedException( "Cannot flush a MemoryReadStream" );
 		}
 
@@ -94,7 +98,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous flush operation.</returns>
 		/// <exception cref="NotSupportedException"></exception>
-		public override async ValueTask FlushAsync( CancellationToken ct = default ) {
+		public override async ValueTask FlushAsync( CancellationToken ct = default )
+		{
 			throw new NotSupportedException( "Cannot flush a MemoryReadStream" );
 		}
 
@@ -107,7 +112,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// 
 		/// </summary>
 		/// <param name="length"></param>
-		public override void SetLength( long length ) {
+		public override void SetLength( long length )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			this.length = length;
 		}
@@ -124,7 +130,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="offset">The zero-based byte offset in buffer at which to begin storing the data read from the current stream.</param>
 		/// <param name="count">The maximum number of bytes to be read from the current stream.</param>
 		/// <returns>The total number of bytes read into the buffer. This can be less than the number of bytes requested if that many bytes are not currently available, or zero if the end of the stream has been reached.</returns>
-		public int Read( byte[] buffer, int offset, int count ) {
+		public int Read( byte[] buffer, int offset, int count )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			if ( offset + count >= buffer.Length ) {
@@ -160,7 +167,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="offset">The zero-based byte offset in buffer at which to begin storing the data read from the current stream.</param>
 		/// <param name="count">The maximum number of bytes to be read from the current stream.</param>
 		/// <returns>The total number of bytes read into the span. This can be less than the length of the span if that many bytes are not currently available, or zero if the end of the stream has been reached.</returns>
-		public int Read( Span<byte> buffer, int offset, int count ) {
+		public int Read( Span<byte> buffer, int offset, int count )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			if ( offset + count >= buffer.Length ) {
@@ -197,7 +205,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="count">The maximum number of bytes to be read from the current stream.</param>
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous read operation, containing the total number of bytes read into the buffer.</returns>
-		public async ValueTask<int> ReadAsync( byte[] buffer, int offset, int count, CancellationToken ct = default ) {
+		public async ValueTask<int> ReadAsync( byte[] buffer, int offset, int count, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			ct.ThrowIfCancellationRequested();
@@ -215,7 +224,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="buffer">A memory buffer. When this method returns, the buffer contains the bytes read from the current source.</param>
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous read operation, containing the total number of bytes read into the buffer.</returns>
-		public async ValueTask<int> ReadAsync( Memory<byte> buffer, CancellationToken ct = default ) {
+		public async ValueTask<int> ReadAsync( Memory<byte> buffer, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( buffer );
 
@@ -232,7 +242,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// Reads all remaining bytes from the current position to the end of the stream.
 		/// </summary>
 		/// <returns>A byte array containing the remaining data in the stream.</returns>
-		public byte[] ReadToEnd() {
+		public byte[] ReadToEnd()
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			long remaining = length - position;
@@ -252,7 +263,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="cancellationToken">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous read operation, containing a byte array with the remaining data.</returns>
-		public async ValueTask<byte[]> ReadToEndAsync( CancellationToken cancellationToken = default ) {
+		public async ValueTask<byte[]> ReadToEndAsync( CancellationToken cancellationToken = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			cancellationToken.ThrowIfCancellationRequested();
@@ -268,7 +280,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// Writes the entire content of this stream to the provided stream.
 		/// </summary>
 		/// <param name="stream">The stream to write to.</param>
-		public void WriteToStream( IWriteStream stream ) {
+		public void WriteToStream( IWriteStream stream )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			stream.Write( buffer!.Span, 0, (int)length );
@@ -284,7 +297,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="stream">The stream to write to.</param>
 		/// <param name="ct">The token to monitor for cancellation requests.</param>
-		public async ValueTask WriteToStreamAsync( IWriteStream stream, CancellationToken ct = default ) {
+		public async ValueTask WriteToStreamAsync( IWriteStream stream, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ct.ThrowIfCancellationRequested();
 
@@ -576,7 +590,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// Reads a UTF-8 encoded string from the stream, prefixed with its length as a 7-bit encoded integer.
 		/// </summary>
 		/// <returns>The string read from the stream.</returns>
-		public string ReadString() {
+		public string ReadString()
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			int byteCount = Read7BitEncodedInt();
@@ -604,7 +619,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <returns></returns>
 		/// <exception cref="FormatException"></exception>
-		public int Read7BitEncodedInt() {
+		public int Read7BitEncodedInt()
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			int value = 0;
@@ -635,7 +651,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private T Read<T>( int size )
-			where T : unmanaged {
+			where T : unmanaged
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			if ( position + size > length ) {
 				throw new EndOfStreamException();

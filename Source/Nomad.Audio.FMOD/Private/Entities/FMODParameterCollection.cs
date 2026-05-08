@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System.Collections.Generic;
 using Nomad.Audio.Interfaces;
 
-namespace Nomad.Audio.Fmod.Private.Entities {
+namespace Nomad.Audio.Fmod.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -28,13 +29,15 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 	///
 	/// </summary>
 
-	internal sealed class FMODParameterCollection : IParameterCollection {
+	internal sealed class FMODParameterCollection : IParameterCollection
+	{
 		public int ParameterCount => _parameters.Count;
 
 		private readonly Dictionary<string, FMOD.Studio.PARAMETER_ID> _parameters;
 		private readonly FMOD.Studio.EventInstance _instance;
 
-		public FMODParameterCollection( FMOD.Studio.EventDescription owner, FMOD.Studio.EventInstance instance ) {
+		public FMODParameterCollection( FMOD.Studio.EventDescription owner, FMOD.Studio.EventInstance instance )
+		{
 			_instance = instance;
 
 			FMODValidator.ValidateCall( owner.getParameterDescriptionCount( out int parameterCount ) );
@@ -56,7 +59,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public float GetParameter( string id ) {
+		public float GetParameter( string id )
+		{
 			_instance.getParameterByName( id, out float value );
 			return value;
 		}
@@ -71,7 +75,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public bool ParameterExists( string id ) {
+		public bool ParameterExists( string id )
+		{
 			return _parameters.ContainsKey( id );
 		}
 
@@ -85,7 +90,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="value"></param>
-		public void SetParameter( string id, float value ) {
+		public void SetParameter( string id, float value )
+		{
 			if ( _parameters.TryGetValue( id, out var parameter ) ) {
 				_instance.setParameterByID( parameter, value );
 			}

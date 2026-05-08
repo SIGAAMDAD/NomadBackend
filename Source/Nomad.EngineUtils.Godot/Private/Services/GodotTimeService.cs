@@ -15,7 +15,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using Nomad.Core.Engine.Services;
 
-namespace Nomad.EngineUtils.Private.Godot {
+namespace Nomad.EngineUtils.Private.Godot
+{
 	/*
 	===================================================================================
 	
@@ -26,12 +27,14 @@ namespace Nomad.EngineUtils.Private.Godot {
 	/// <summary>
 	/// 
 	/// </summary>
-	
-	internal sealed class GodotTimeService : ITimeService {
+
+	internal sealed class GodotTimeService : ITimeService
+	{
 		public float TimeScale => _timeScale;
 		private float _timeScale;
 
-		public GodotTimeService() {
+		public GodotTimeService()
+		{
 			_timeScale = (float)global::Godot.Engine.TimeScale;
 		}
 
@@ -44,7 +47,8 @@ namespace Nomad.EngineUtils.Private.Godot {
 		/// 
 		/// </summary>
 		/// <param name="timeScale"></param>
-		public void SetTimeScale( float timeScale ) {
+		public void SetTimeScale( float timeScale )
+		{
 			if ( _timeScale == timeScale ) {
 				return;
 			}

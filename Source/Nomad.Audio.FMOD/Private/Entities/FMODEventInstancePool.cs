@@ -15,7 +15,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System.Collections.Generic;
 
-namespace Nomad.Audio.Fmod.Private.Entities {
+namespace Nomad.Audio.Fmod.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -27,7 +28,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 	///
 	/// </summary>
 
-	internal sealed class FMODEventInstancePool {
+	internal sealed class FMODEventInstancePool
+	{
 		private readonly Dictionary<string, Queue<FMOD.Studio.EventInstance>> _pool;
 
 		/*
@@ -35,7 +37,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 		FMODEventInstancePool
 		===============
 		*/
-		public FMODEventInstancePool( int maxChannels ) {
+		public FMODEventInstancePool( int maxChannels )
+		{
 			_pool = new Dictionary<string, Queue<FMOD.Studio.EventInstance>>();
 		}
 	};

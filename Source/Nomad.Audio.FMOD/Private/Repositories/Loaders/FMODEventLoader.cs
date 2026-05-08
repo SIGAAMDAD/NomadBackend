@@ -22,7 +22,8 @@ using Nomad.Core.Util;
 using Nomad.Core.ResourceCache;
 using System;
 
-namespace Nomad.Audio.Fmod.Private.Repositories.Loaders {
+namespace Nomad.Audio.Fmod.Private.Repositories.Loaders
+{
 	/*
 	===================================================================================
 
@@ -34,7 +35,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories.Loaders {
 	///
 	/// </summary>
 
-	internal sealed class FMODEventLoader : IResourceLoader {
+	internal sealed class FMODEventLoader : IResourceLoader
+	{
 		private readonly FMODDevice _fmodSystem;
 		private readonly FMODGuidRepository _guidRepository;
 		private readonly ILoggerCategory _category;
@@ -50,7 +52,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories.Loaders {
 		/// <param name="fmodSystem"></param>
 		/// <param name="guidRepository"></param>
 		/// <param name="category"></param>
-		public FMODEventLoader( FMODDevice fmodSystem, FMODGuidRepository guidRepository, ILoggerCategory category ) {
+		public FMODEventLoader( FMODDevice fmodSystem, FMODGuidRepository guidRepository, ILoggerCategory category )
+		{
 			_fmodSystem = fmodSystem;
 			_guidRepository = guidRepository;
 			_category = category;
@@ -66,7 +69,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories.Loaders {
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public Result<TResource> Load<TResource, TId>( TId id ) {
+		public Result<TResource> Load<TResource, TId>( TId id )
+		{
 			if ( id is not string path ) {
 				throw new InvalidCastException();
 			}
@@ -99,7 +103,8 @@ namespace Nomad.Audio.Fmod.Private.Repositories.Loaders {
 		/// <param name="id"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public async Task<Result<TResource>> LoadAsync<TResource, TId>( TId id, CancellationToken ct = default ) {
+		public async Task<Result<TResource>> LoadAsync<TResource, TId>( TId id, CancellationToken ct = default )
+		{
 			if ( id is not string path ) {
 				throw new InvalidCastException();
 			}

@@ -22,7 +22,8 @@ using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.FileSystem.Configs;
 
-namespace Nomad.FileSystem.Private.FileStreams {
+namespace Nomad.FileSystem.Private.FileStreams
+{
 	/*
 	===================================================================================
 
@@ -34,7 +35,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 	/// Represents a write-only file stream.
 	/// </summary>
 
-	internal sealed class FileWriteStream : FileStreamBase, IFileWriteStream {
+	internal sealed class FileWriteStream : FileStreamBase, IFileWriteStream
+	{
 		/// <summary>
 		/// Indicates whether the stream supports reading.
 		/// </summary>
@@ -65,7 +67,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// </summary>
 		/// <param name="config"></param>
 		public FileWriteStream( FileWriteConfig config )
-			: base( config.FilePath, config.Append ? FileMode.Append : FileMode.Create, FileAccess.Write ) {
+			: base( config.FilePath, config.Append ? FileMode.Append : FileMode.Create, FileAccess.Write )
+		{
 			ArgumentGuard.ThrowIfNull( fileStream );
 			_format = config.Format;
 			switch ( _format ) {
@@ -89,7 +92,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected override void Dispose( bool disposing ) {
+		protected override void Dispose( bool disposing )
+		{
 			if ( isDisposed ) {
 				return;
 			}
@@ -108,7 +112,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <summary>
 		/// Flushes the file stream's buffer to the underlying file.
 		/// </summary>
-		public override void Flush() {
+		public override void Flush()
+		{
 			base.Flush();
 			_streamWriter.Flush();
 		}
@@ -121,7 +126,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <summary>
 		/// Flushes the file stream's buffer to the underlying file.
 		/// </summary>
-		public override async ValueTask FlushAsync( CancellationToken ct = default ) {
+		public override async ValueTask FlushAsync( CancellationToken ct = default )
+		{
 			await base.FlushAsync( ct );
 			await _streamWriter.FlushAsync( ct );
 		}
@@ -137,7 +143,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <param name="buffer">An array of bytes. This method copies count bytes from buffer to the current stream.</param>
 		/// <param name="offset">The zero-based byte offset in buffer at which to begin copying bytes to the current stream.</param>
 		/// <param name="count">The number of bytes to be written to the current stream.</param>
-		public void Write( byte[] buffer, int offset, int count ) {
+		public void Write( byte[] buffer, int offset, int count )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( fileStream );
 			fileStream.Write( buffer, offset, count );
@@ -166,7 +173,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <param name="buffer">A read-only span of bytes. This method copies the contents of the span to the current stream.</param>
 		/// <param name="offset">The zero-based byte offset in buffer at which to begin copying bytes to the current stream.</param>
 		/// <param name="count">The number of bytes to be written to the current stream.</param>
-		public void Write( ReadOnlySpan<byte> buffer, int offset, int count ) {
+		public void Write( ReadOnlySpan<byte> buffer, int offset, int count )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( fileStream );
 			fileStream.Write( buffer.Slice( offset, count ) );
@@ -197,7 +205,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <param name="count">The number of bytes to be written to the current stream.</param>
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous write operation.</returns>
-		public async ValueTask WriteAsync( byte[] buffer, int offset, int count, CancellationToken ct = default ) {
+		public async ValueTask WriteAsync( byte[] buffer, int offset, int count, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( fileStream );
 			ArgumentGuard.ThrowIfNull( buffer );
@@ -219,7 +228,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <param name="count">The number of bytes to be written to the current stream.</param>
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous write operation.</returns>
-		public async ValueTask WriteAsync( ReadOnlyMemory<byte> buffer, int offset, int count, CancellationToken ct = default ) {
+		public async ValueTask WriteAsync( ReadOnlyMemory<byte> buffer, int offset, int count, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( fileStream );
 			ArgumentGuard.ThrowIfNull( buffer );
@@ -239,7 +249,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <param name="buffer">A read-only memory buffer. This method copies the contents of the buffer to the current stream.</param>
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous write operation.</returns>
-		public async ValueTask WriteAsync( ReadOnlyMemory<byte> buffer, CancellationToken ct = default ) {
+		public async ValueTask WriteAsync( ReadOnlyMemory<byte> buffer, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( fileStream );
 			ArgumentGuard.ThrowIfNull( buffer );
@@ -257,7 +268,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// 
 		/// </summary>
 		/// <param name="value"></param>
-		public void Write7BitEncodedInt( int value ) {
+		public void Write7BitEncodedInt( int value )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 
 			uint uValue = (uint)value;
@@ -337,7 +349,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// Reads all bytes from the specified read stream and writes them to the file stream.
 		/// </summary>
 		/// <param name="stream">The read stream to copy from.</param>
-		public void WriteFromStream( IReadStream stream ) {
+		public void WriteFromStream( IReadStream stream )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( stream );
 			ArgumentGuard.ThrowIfNull( fileStream );
@@ -364,7 +377,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <param name="stream">The read stream to copy from.</param>
 		/// <param name="ct">A token to cancel the operation.</param>
 		/// <returns>A task that represents the asynchronous copy operation.</returns>
-		public async ValueTask WriteFromStreamAsync( IReadStream stream, CancellationToken ct = default ) {
+		public async ValueTask WriteFromStreamAsync( IReadStream stream, CancellationToken ct = default )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			ArgumentGuard.ThrowIfNull( stream );
 			ArgumentGuard.ThrowIfNull( fileStream );
@@ -613,7 +627,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// 
 		/// </summary>
 		/// <param name="line"></param>
-		public void WriteLine( ReadOnlySpan<char> line ) {
+		public void WriteLine( ReadOnlySpan<char> line )
+		{
 			_streamWriter.Write( line );
 			_streamWriter.Write( '\n' );
 		}
@@ -629,7 +644,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <param name="line"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public async ValueTask WriteLineAsync( string line, CancellationToken ct = default ) {
+		public async ValueTask WriteLineAsync( string line, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			_streamWriter.Write( $"{line}\n" );
 		}
@@ -645,7 +661,8 @@ namespace Nomad.FileSystem.Private.FileStreams {
 		/// <param name="line"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public async ValueTask WriteLineAsync( ReadOnlyMemory<char> line, CancellationToken ct = default ) {
+		public async ValueTask WriteLineAsync( ReadOnlyMemory<char> line, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			_streamWriter.Write( line.Span );
 			_streamWriter.Write( '\n' );

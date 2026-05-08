@@ -20,7 +20,8 @@ using Nomad.Core.Engine.Services;
 using Nomad.Core.Logger;
 using Nomad.Core.Util;
 
-namespace Nomad.EngineUtils.Godot.Private.Services {
+namespace Nomad.EngineUtils.Godot.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -31,8 +32,9 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 	/// <summary>
 	/// 
 	/// </summary>
-	
-	internal sealed class GodotLocalizationService : ILocalizationService {
+
+	internal sealed class GodotLocalizationService : ILocalizationService
+	{
 		/// <summary>
 		///
 		/// </summary>
@@ -48,7 +50,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public GodotLocalizationService() {
+		public GodotLocalizationService()
+		{
 			TranslationServer.SetLocale( OS.GetLocale() );
 
 			LocalizationService.Initialize( this );
@@ -64,7 +67,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services {
 		/// </summary>
 		/// <param name="key"></param>
 		/// <returns></returns>
-		public string Translate( InternString key ) {
+		public string Translate( InternString key )
+		{
 			return _translations.GetOrAdd( key, f => TranslationServer.Translate( (string)key ) );
 		}
 	}

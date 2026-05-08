@@ -20,7 +20,8 @@ using Nomad.Core.CVars;
 using Nomad.Core.Compatibility.Guards;
 using System.Collections.Immutable;
 
-namespace Nomad.CVars.Private.Entities {
+namespace Nomad.CVars.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -32,7 +33,8 @@ namespace Nomad.CVars.Private.Entities {
 	///
 	/// </summary>
 
-	internal sealed class CVarGroup : ICVarGroup {
+	internal sealed class CVarGroup : ICVarGroup
+	{
 		public string Name => _name;
 		private readonly InternString _name;
 
@@ -51,7 +53,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="category"></param>
-		public CVarGroup( string name, ILoggerCategory category ) {
+		public CVarGroup( string name, ILoggerCategory category )
+		{
 			_name = new InternString( name );
 			_category = category;
 		}
@@ -65,7 +68,8 @@ namespace Nomad.CVars.Private.Entities {
 		///
 		/// </summary>
 		/// <param name="cvar"></param>
-		public void AddCVar( ICVar cvar ) {
+		public void AddCVar( ICVar cvar )
+		{
 			ArgumentGuard.ThrowIfNull( cvar );
 
 			if ( _cvars.Contains( cvar ) ) {
@@ -84,7 +88,8 @@ namespace Nomad.CVars.Private.Entities {
 		/// 
 		/// </summary>
 		/// <param name="cvar"></param>
-		public void RemoveCVar( ICVar cvar ) {
+		public void RemoveCVar( ICVar cvar )
+		{
 			ArgumentGuard.ThrowIfNull( cvar );
 
 			if ( !_cvars.Contains( cvar ) ) {

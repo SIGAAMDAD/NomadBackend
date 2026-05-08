@@ -18,7 +18,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO.Hashing;
 using System.Runtime.CompilerServices;
 
-namespace Nomad.Save.Private.ValueObjects {
+namespace Nomad.Save.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -30,7 +31,8 @@ namespace Nomad.Save.Private.ValueObjects {
 	///
 	/// </summary>
 
-	internal readonly struct Checksum {
+	internal readonly struct Checksum
+	{
 		/// <summary>
 		///
 		/// </summary>
@@ -50,7 +52,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		///
 		/// </summary>
 		/// <param name="value"></param>
-		public Checksum( ulong value ) {
+		public Checksum( ulong value )
+		{
 			Value = value;
 		}
 
@@ -64,7 +67,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// </summary>
 		/// <param name="buffer"></param>
 		/// <returns></returns>
-		public static Checksum Compute( ReadOnlySpan<byte> buffer ) {
+		public static Checksum Compute( ReadOnlySpan<byte> buffer )
+		{
 			Crc64 checksum64 = new Crc64();
 			checksum64.Append( buffer );
 			return new Checksum( checksum64.GetCurrentHashAsUInt64() );
@@ -81,7 +85,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// <param name="obj"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public override bool Equals( [NotNullWhen( true )] object? obj ) {
+		public override bool Equals( [NotNullWhen( true )] object? obj )
+		{
 			return obj is Checksum checksum && checksum.Value == Value;
 		}
 
@@ -95,7 +100,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// </summary>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public override int GetHashCode() {
+		public override int GetHashCode()
+		{
 			return base.GetHashCode();
 		}
 
@@ -111,7 +117,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// <param name="b"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static bool operator ==( Checksum a, Checksum b ) {
+		public static bool operator ==( Checksum a, Checksum b )
+		{
 			return a.Value == b.Value;
 		}
 
@@ -127,7 +134,8 @@ namespace Nomad.Save.Private.ValueObjects {
 		/// <param name="b"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public static bool operator !=( Checksum a, Checksum b ) {
+		public static bool operator !=( Checksum a, Checksum b )
+		{
 			return a.Value != b.Value;
 		}
 	};

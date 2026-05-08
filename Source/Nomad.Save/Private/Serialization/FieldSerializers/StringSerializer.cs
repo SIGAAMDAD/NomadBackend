@@ -17,7 +17,8 @@ using System.Runtime.CompilerServices;
 using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.Util;
 
-namespace Nomad.Save.Private.Serialization.FieldSerializers {
+namespace Nomad.Save.Private.Serialization.FieldSerializers
+{
 	/*
 	===================================================================================
 
@@ -29,7 +30,8 @@ namespace Nomad.Save.Private.Serialization.FieldSerializers {
 	///
 	/// </summary>
 
-	internal sealed class StringSerializer : IFieldSerializer<string> {
+	internal sealed class StringSerializer : IFieldSerializer<string>
+	{
 		public AnyType FieldType => AnyType.String;
 
 		/*
@@ -57,7 +59,8 @@ namespace Nomad.Save.Private.Serialization.FieldSerializers {
 		/// <param name="stream"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public Any Deserialize( IReadStream stream ) {
+		public Any Deserialize( IReadStream stream )
+		{
 			string str = stream.ReadString() ?? string.Empty;
 			return new Any( str );
 		}

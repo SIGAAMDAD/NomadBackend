@@ -25,7 +25,8 @@ using Nomad.Core.Events;
 using Nomad.Core.Util;
 using Nomad.CVars;
 
-namespace Nomad.Audio.Fmod.Private.Services {
+namespace Nomad.Audio.Fmod.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -37,7 +38,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class FMODChannelStealCalculator : IDisposable {
+	internal sealed class FMODChannelStealCalculator : IDisposable
+	{
 		private float _distanceWeight;
 		private float _volumeWeight = 0.2f;
 
@@ -59,7 +61,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <param name="cvarSystem"></param>
 		/// <param name="priorityCalculator"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public FMODChannelStealCalculator( ICVarSystemService cvarSystem, FMODPriorityCalculator priorityCalculator ) {
+		public FMODChannelStealCalculator( ICVarSystemService cvarSystem, FMODPriorityCalculator priorityCalculator )
+		{
 			_priorityCalculator = priorityCalculator ?? throw new ArgumentNullException( nameof( priorityCalculator ) );
 
 			var distanceWeight = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.DISTANCE_WEIGHT );
@@ -79,7 +82,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_distanceWeightEvent?.Dispose();
 			}
@@ -101,7 +105,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <param name="newPriority"></param>
 		/// <param name="category"></param>
 		/// <returns></returns>
-		public float CalculateStealScore( float currentTime, in Vector2 listenerPos, FMODChannel candidate, float newPriority, SoundCategory category ) {
+		public float CalculateStealScore( float currentTime, in Vector2 listenerPos, FMODChannel candidate, float newPriority, SoundCategory category )
+		{
 			Vector2 pos = candidate.Instance.Position;
 			float dx = pos.X - listenerPos.X;
 			float dy = pos.Y - listenerPos.Y;
@@ -140,7 +145,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnDistanceWeightValueChanged( in CVarValueChangedEventArgs<float> args ) {
+		private void OnDistanceWeightValueChanged( in CVarValueChangedEventArgs<float> args )
+		{
 			_distanceWeight = args.NewValue;
 		}
 
@@ -153,7 +159,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnVolumeWeightValueChanged( in CVarValueChangedEventArgs<float> args ) {
+		private void OnVolumeWeightValueChanged( in CVarValueChangedEventArgs<float> args )
+		{
 			_volumeWeight = args.NewValue;
 		}
 	};

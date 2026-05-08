@@ -19,17 +19,17 @@ using Nomad.EngineTemplates.Attributes.Events;
 
 namespace Nomad.EngineTemplates.UI
 {
-	[TemplateClass(Contract = typeof(IPresentationLayer), GodotBase = "Godot.CanvasLayer")]
-	[TemplateNamespace(Name = "UI")]
-	[TemplateProperty(Name = "Visible", Type = typeof(bool))]
-	[TemplateProperty(
-		Name = "RenderOrder",
-		Type = typeof(int),
-		GodotGetterExpression = "base.Layer",
-		GodotSetterExpression = "base.Layer = value"
-	)]
-	[TemplateDisplayStateChangedEvent]
-	internal sealed class PresentationLayer
-	{
-	}
+    [TemplateClass(Contract = typeof(IPresentationLayer), GodotBase = "Godot.CanvasLayer")]
+    [TemplateNamespace(Name = "UI")]
+    [TemplateProperty(Name = "Visible", Type = typeof(bool))]
+    [TemplateProperty(
+        Name = "RenderOrder",
+        Type = typeof(int),
+        GodotGetterExpression = "base.Layer",
+        GodotSetterExpression = "base.Layer = value"
+    )]
+    [TemplateDisplayStateChangedEvent]
+    internal sealed class PresentationLayer
+    {
+    }
 }

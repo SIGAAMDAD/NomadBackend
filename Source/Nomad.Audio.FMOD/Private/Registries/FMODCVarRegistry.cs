@@ -17,7 +17,8 @@ using Nomad.Audio.Fmod.ValueObjects;
 using Nomad.Core;
 using Nomad.Core.CVars;
 
-namespace Nomad.Audio.Fmod.Private.Registries {
+namespace Nomad.Audio.Fmod.Private.Registries
+{
 	/*
 	===================================================================================
 
@@ -29,7 +30,8 @@ namespace Nomad.Audio.Fmod.Private.Registries {
 	///
 	/// </summary>
 
-	internal static class FMODCVarRegistry {
+	internal static class FMODCVarRegistry
+	{
 		/*
 		===============
 		Register
@@ -39,7 +41,8 @@ namespace Nomad.Audio.Fmod.Private.Registries {
 		///
 		/// </summary>
 		/// <param name="cvarSystem"></param>
-		public static void Register( ICVarSystemService cvarSystem ) {
+		public static void Register( ICVarSystemService cvarSystem )
+		{
 			cvarSystem.Register(
 				new CVarCreateInfo<int> {
 					Name = Constants.CVars.EngineUtils.Audio.FMOD.STREAM_BUFFER_SIZE,

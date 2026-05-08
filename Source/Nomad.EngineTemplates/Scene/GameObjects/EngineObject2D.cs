@@ -19,12 +19,12 @@ using Nomad.EngineTemplates.BaseClasses;
 
 namespace Nomad.EngineTemplates.Scene.GameObjects
 {
-	/// <summary>
-	/// Declares the engine template for scene objects.
-	/// </summary>
+    /// <summary>
+    /// Declares the engine template for scene objects.
+    /// </summary>
     [TemplateClass(Contract = typeof(IObject2D), GodotBase = "Godot.Node2D", UnityBase = "UnityEngine.MonoBehaviour")]
     [TemplateNamespace(Name = "Scene.GameObjects")]
-	[TemplateObject2D]
+    [TemplateObject2D]
     internal class EngineObject2D
     {
     }

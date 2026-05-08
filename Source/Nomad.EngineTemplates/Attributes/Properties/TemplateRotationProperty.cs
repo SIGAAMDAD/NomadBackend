@@ -17,11 +17,11 @@ using System;
 
 namespace Nomad.EngineTemplates.Attributes.Properties
 {
-	/// <summary>
-	/// Declares the shared template metadata for rotation properties.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Class, Inherited = true)]
-	[TemplateProperty(
+    /// <summary>
+    /// Declares the shared template metadata for rotation properties.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
+    [TemplateProperty(
         Name = "Rotation",
         Type = typeof(float),
         Documentation = "Represents a SceneObject's rotation in degrees.",
@@ -29,7 +29,7 @@ namespace Nomad.EngineTemplates.Attributes.Properties
         GodotGetterExpression = "base.RotationDegrees",
         UnityGetterExpression = "transform.eulerAngles.z",
         UnitySetterExpression = "transform.rotation = global::UnityEngine.Quaternion.Euler(0f, 0f, value)")]
-	internal class TemplateRotationProperty : Attribute
-	{
-	}
+    internal class TemplateRotationProperty : Attribute
+    {
+    }
 }

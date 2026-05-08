@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using Godot;
 using System;
 
-namespace Nomad.EngineUtils.Godot.Private {
+namespace Nomad.EngineUtils.Godot.Private
+{
 	/*
 	===================================================================================
 
@@ -28,7 +29,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 	///
 	/// </summary>
 
-	internal sealed class GodotConsoleOutputView : IDisposable {
+	internal sealed class GodotConsoleOutputView : IDisposable
+	{
 		private static readonly NodePath _valueNodePath = "value";
 
 		public Control Node => _richLabel;
@@ -44,7 +46,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public GodotConsoleOutputView() {
+		public GodotConsoleOutputView()
+		{
 			_richLabel = new RichTextLabel() {
 				Name = nameof( _richLabel ),
 				SelectionEnabled = true,
@@ -66,7 +69,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _isDisposed ) {
 				return;
 			}
@@ -84,7 +88,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// Appends a string message on a new line into the in-game quake console.
 		/// </summary>
 		/// <param name="message"></param>
-		public void Print( string message ) {
+		public void Print( string message )
+		{
 			_richLabel.CallDeferred( RichTextLabel.MethodName.AppendText, $"{message}\n" );
 		}
 
@@ -96,7 +101,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <summary>
 		/// Clears the in-game quake console.
 		/// </summary>
-		public void Clear() {
+		public void Clear()
+		{
 			_richLabel.CallDeferred( RichTextLabel.MethodName.Clear );
 		}
 
@@ -108,7 +114,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public void ScrollToBottom() {
+		public void ScrollToBottom()
+		{
 			VScrollBar scroll = _richLabel.GetVScrollBar();
 			scroll.Value = scroll.MaxValue - scroll.Page;
 		}
@@ -121,7 +128,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public void PageUp() {
+		public void PageUp()
+		{
 			VScrollBar scroll = _richLabel.GetVScrollBar();
 			Tween tween = _richLabel.CreateTween();
 			tween.TweenProperty( scroll, _valueNodePath, scroll.Value - (scroll.Page - scroll.Page * 0.1f), 0.1f );
@@ -136,7 +144,8 @@ namespace Nomad.EngineUtils.Godot.Private {
 		/// <summary>
 		///
 		/// </summary>
-		public void PageDown() {
+		public void PageDown()
+		{
 			VScrollBar scroll = _richLabel.GetVScrollBar();
 			Tween tween = _richLabel.CreateTween();
 			tween.TweenProperty( scroll, _valueNodePath, scroll.Value + (scroll.Page - scroll.Page * 0.1f), 0.1f );

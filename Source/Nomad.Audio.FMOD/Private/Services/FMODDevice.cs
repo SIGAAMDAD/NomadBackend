@@ -33,7 +33,8 @@ using Nomad.Core.Engine.Services;
 using System.Collections.Generic;
 using Nomad.Audio.ValueObjects;
 
-namespace Nomad.Audio.Fmod.Private.Services {
+namespace Nomad.Audio.Fmod.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -45,7 +46,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	///
 	/// </summary>
 
-	internal sealed class FMODDevice : IAudioDevice {
+	internal sealed class FMODDevice : IAudioDevice
+	{
 		public int OutputDevice => _outputDeviceRepository.OutputDeviceIndex;
 		public string AudioDriver => _driverRepository.Driver;
 
@@ -85,7 +87,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// </summary>
 		/// <param name="locator"></param>
 		/// <param name="registry"></param>
-		public FMODDevice( IServiceLocator locator, IServiceRegistry registry ) {
+		public FMODDevice( IServiceLocator locator, IServiceRegistry registry )
+		{
 			var logger = locator.GetService<ILoggerService>();
 
 			var cvarSystem = locator.GetService<ICVarSystemService>();
@@ -124,7 +127,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_category.PrintLine( "Shutting down FMOD sound system..." );
 
@@ -150,7 +154,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		///
 		/// </summary>
 		/// <param name="assetPath"></param>
-		public void LoadBank( string assetPath ) {
+		public void LoadBank( string assetPath )
+		{
 			_bankRepository.GetCached( assetPath );
 		}
 
@@ -163,7 +168,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		///
 		/// </summary>
 		/// <param name="assetPath"></param>
-		public void UnloadBank( string assetPath ) {
+		public void UnloadBank( string assetPath )
+		{
 			_bankRepository.Unload( assetPath );
 		}
 
@@ -175,7 +181,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		public void UnloadBanks() {
+		public void UnloadBanks()
+		{
 			_bankRepository.UnloadAll();
 		}
 
@@ -188,7 +195,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// 
 		/// </summary>
 		/// <param name="deltaTime"></param>
-		public void Update( float deltaTime ) {
+		public void Update( float deltaTime )
+		{
 			_systemHandle.Update();
 		}
 
@@ -202,7 +210,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// </summary>
 		/// <param name="cvarSystem"></param>
 		/// <exception cref="Exception"></exception>
-		private void ConfigureFMODDevice( ICVarSystemService cvarSystem ) {
+		private void ConfigureFMODDevice( ICVarSystemService cvarSystem )
+		{
 			var streamBufferSize = cvarSystem.GetCVarOrThrow<int>( Constants.CVars.EngineUtils.Audio.FMOD.STREAM_BUFFER_SIZE );
 			var maxChannels = cvarSystem.GetCVarOrThrow<int>( Constants.CVars.EngineUtils.Audio.MAX_CHANNELS );
 			var dspBufferSize = cvarSystem.GetCVarOrThrow<uint>( Constants.CVars.EngineUtils.Audio.FMOD.DSP_BUFFER_SIZE );

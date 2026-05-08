@@ -17,7 +17,8 @@ using System;
 using System.Threading.Tasks;
 using Nomad.Core.Abstractions;
 
-namespace Nomad.ResourceCache.Private.Entities {
+namespace Nomad.ResourceCache.Private.Entities
+{
 	/*
 	===================================================================================
 
@@ -31,7 +32,8 @@ namespace Nomad.ResourceCache.Private.Entities {
 
 	internal sealed class CacheEntry<TResource, TId> : ICacheEntry<TResource, TId>
 		where TResource : notnull, IDisposable
-		where TId : IEquatable<TId> {
+		where TId : IEquatable<TId>
+	{
 		public TId Id => _id;
 		private readonly TId _id;
 
@@ -76,7 +78,8 @@ namespace Nomad.ResourceCache.Private.Entities {
 		/// <param name="memorySize"></param>
 		/// <param name="loadTime"></param>
 		/// <param name="loadState"></param>
-		public CacheEntry( IResourceCacheService<TResource, TId> owner, TId id, TResource cached, int memorySize, TimeSpan loadTime, ResourceLoadState loadState ) {
+		public CacheEntry( IResourceCacheService<TResource, TId> owner, TId id, TResource cached, int memorySize, TimeSpan loadTime, ResourceLoadState loadState )
+		{
 			_id = id;
 			_loadTimer = loadTime;
 			_cached = cached;
@@ -93,7 +96,8 @@ namespace Nomad.ResourceCache.Private.Entities {
 		///
 		/// </summary>
 		/// <param name="resource"></param>
-		public void Get( out TResource resource ) {
+		public void Get( out TResource resource )
+		{
 			UpdateAccessStats();
 			resource = _cached;
 		}
@@ -107,7 +111,8 @@ namespace Nomad.ResourceCache.Private.Entities {
 		///
 		/// </summary>
 		/// <returns></returns>
-		public async ValueTask<TResource> GetAsync() {
+		public async ValueTask<TResource> GetAsync()
+		{
 			UpdateAccessStats();
 			return _cached;
 		}
@@ -120,7 +125,8 @@ namespace Nomad.ResourceCache.Private.Entities {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			_cached?.Dispose();
 			ReferenceCount = 0;
 		}
@@ -135,7 +141,8 @@ namespace Nomad.ResourceCache.Private.Entities {
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
-		public bool Equals( IEntity<TId>? other ) {
+		public bool Equals( IEntity<TId>? other )
+		{
 			return other is not null && other.Id.Equals( Id );
 		}
 
@@ -147,7 +154,8 @@ namespace Nomad.ResourceCache.Private.Entities {
 		/// <summary>
 		///
 		/// </summary>
-		public void UpdateAccessStats() {
+		public void UpdateAccessStats()
+		{
 			lock ( _statsLock ) {
 				_accessStats = _accessStats with {
 					LastAccessTime = DateTime.UtcNow,

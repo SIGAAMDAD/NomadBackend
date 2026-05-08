@@ -15,12 +15,15 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using Nomad.Core.Exceptions;
 
-namespace Nomad.Audio.Fmod {
-	internal sealed class FMODException : NomadException {
+namespace Nomad.Audio.Fmod
+{
+	internal sealed class FMODException : NomadException
+	{
 		public readonly string Error;
 
 		public FMODException( string errorString )
-			: base( errorString ) {
+			: base( errorString )
+		{
 			Error = errorString;
 		}
 	}

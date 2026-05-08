@@ -15,7 +15,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 
-namespace Nomad.Audio.Fmod.Private.ValueObjects {
+namespace Nomad.Audio.Fmod.Private.ValueObjects
+{
 	/*
 	===================================================================================
 

@@ -15,7 +15,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System.Collections.Generic;
 
-namespace Nomad.Input.Private.ValueObjects {
+namespace Nomad.Input.Private.ValueObjects
+{
 	/*
 	===================================================================================
 	
@@ -27,7 +28,8 @@ namespace Nomad.Input.Private.ValueObjects {
 	/// 
 	/// </summary>
 
-	internal sealed class BindMapping {
+	internal sealed class BindMapping
+	{
 		/// <summary>
 		/// 
 		/// </summary>

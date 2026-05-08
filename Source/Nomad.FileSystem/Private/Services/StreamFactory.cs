@@ -23,7 +23,8 @@ using Nomad.Core.FileSystem.Streams;
 using Nomad.FileSystem.Private.FileStreams;
 using Nomad.FileSystem.Private.MemoryStream;
 
-namespace Nomad.FileSystem.Private.Services {
+namespace Nomad.FileSystem.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -36,7 +37,8 @@ namespace Nomad.FileSystem.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class StreamFactory : IDisposable {
+	internal sealed class StreamFactory : IDisposable
+	{
 		private readonly RecursiveFileSearcher _searchHelper;
 
 		private bool _isDisposed = false;
@@ -49,7 +51,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public StreamFactory( RecursiveFileSearcher searchHelper ) {
+		public StreamFactory( RecursiveFileSearcher searchHelper )
+		{
 			ArgumentGuard.ThrowIfNull( searchHelper );
 			_searchHelper = searchHelper;
 		}
@@ -62,7 +65,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				GC.SuppressFinalize( this );
 				_isDisposed = true;
@@ -79,7 +83,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="config"></param>
 		/// <returns></returns>
-		public IMemoryFileReadStream? OpenRead( MemoryFileReadConfig config ) {
+		public IMemoryFileReadStream? OpenRead( MemoryFileReadConfig config )
+		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
 			ArgumentGuard.ThrowIfNull( config );
 			ArgumentGuard.ThrowIfNullOrEmpty( config.FilePath, nameof( config.FilePath ) );
@@ -103,7 +108,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="config"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public ValueTask<IMemoryFileReadStream?> OpenReadAsync( MemoryFileReadConfig config, CancellationToken ct = default ) {
+		public ValueTask<IMemoryFileReadStream?> OpenReadAsync( MemoryFileReadConfig config, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			return new ValueTask<IMemoryFileReadStream?>( OpenRead( config ) );
 		}
@@ -118,7 +124,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="config"></param>
 		/// <returns></returns>
-		public IMemoryReadStream OpenRead( MemoryReadConfig config ) {
+		public IMemoryReadStream OpenRead( MemoryReadConfig config )
+		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
 			ArgumentGuard.ThrowIfNull( config );
 			return new MemoryReadStream( config );
@@ -135,7 +142,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="config"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public ValueTask<IMemoryReadStream> OpenReadAsync( MemoryReadConfig config, CancellationToken ct = default ) {
+		public ValueTask<IMemoryReadStream> OpenReadAsync( MemoryReadConfig config, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			return new ValueTask<IMemoryReadStream>( OpenRead( config ) );
 		}
@@ -150,7 +158,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="config"></param>
 		/// <returns></returns>
-		public IMemoryFileWriteStream OpenWrite( MemoryFileWriteConfig config ) {
+		public IMemoryFileWriteStream OpenWrite( MemoryFileWriteConfig config )
+		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
 			ArgumentGuard.ThrowIfNull( config );
 			ArgumentGuard.ThrowIfNullOrEmpty( config.FilePath, nameof( config.FilePath ) );
@@ -168,7 +177,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="config"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public ValueTask<IMemoryFileWriteStream> OpenWriteAsync( MemoryFileWriteConfig config, CancellationToken ct = default ) {
+		public ValueTask<IMemoryFileWriteStream> OpenWriteAsync( MemoryFileWriteConfig config, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			return new ValueTask<IMemoryFileWriteStream>( OpenWrite( config ) );
 		}
@@ -183,7 +193,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="config"></param>
 		/// <returns></returns>
-		public IMemoryWriteStream OpenWrite( MemoryWriteConfig config ) {
+		public IMemoryWriteStream OpenWrite( MemoryWriteConfig config )
+		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
 			ArgumentGuard.ThrowIfNull( config );
 			return new MemoryWriteStream( config );
@@ -200,7 +211,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="config"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public ValueTask<IMemoryWriteStream> OpenWriteAsync( MemoryWriteConfig config, CancellationToken ct = default ) {
+		public ValueTask<IMemoryWriteStream> OpenWriteAsync( MemoryWriteConfig config, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			return new ValueTask<IMemoryWriteStream>( OpenWrite( config ) );
 		}
@@ -215,7 +227,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="config"></param>
 		/// <returns></returns>
-		public IFileReadStream? OpenRead( FileReadConfig config ) {
+		public IFileReadStream? OpenRead( FileReadConfig config )
+		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
 			ArgumentGuard.ThrowIfNull( config );
 			ArgumentGuard.ThrowIfNullOrEmpty( config.FilePath, nameof( config.FilePath ) );
@@ -239,7 +252,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="config"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public ValueTask<IFileReadStream?> OpenReadAsync( FileReadConfig config, CancellationToken ct = default ) {
+		public ValueTask<IFileReadStream?> OpenReadAsync( FileReadConfig config, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			return new ValueTask<IFileReadStream?>( OpenRead( config ) );
 		}
@@ -254,7 +268,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="config"></param>
 		/// <returns></returns>
-		public IFileWriteStream OpenWrite( FileWriteConfig config ) {
+		public IFileWriteStream OpenWrite( FileWriteConfig config )
+		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
 			ArgumentGuard.ThrowIfNull( config );
 			ArgumentGuard.ThrowIfNullOrEmpty( config.FilePath, nameof( config.FilePath ) );
@@ -272,7 +287,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="config"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public ValueTask<IFileWriteStream> OpenWriteAsync( FileWriteConfig config, CancellationToken ct = default ) {
+		public ValueTask<IFileWriteStream> OpenWriteAsync( FileWriteConfig config, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			return new ValueTask<IFileWriteStream>( OpenWrite( config ) );
 		}

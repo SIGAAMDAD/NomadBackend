@@ -30,7 +30,8 @@ using Nomad.Save.Private.Repositories;
 using Nomad.Save.Private.ValueObjects;
 using Nomad.Save.ValueObjects;
 
-namespace Nomad.Save.Private.Services {
+namespace Nomad.Save.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -42,7 +43,8 @@ namespace Nomad.Save.Private.Services {
 	///
 	/// </summary>
 
-	internal sealed class SaveWriterService : ISaveWriterService {
+	internal sealed class SaveWriterService : ISaveWriterService
+	{
 		public int SectionCount => _sections.Count;
 
 		private readonly ConcurrentDictionary<string, SaveSectionWriter> _sections = new ConcurrentDictionary<string, SaveSectionWriter>();
@@ -73,7 +75,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="fileSystem"></param>
 		/// <param name="logger"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public SaveWriterService( SaveConfig config, AtomicWriterService atomicWriter, SlotRepository slotRepository, IFileSystem fileSystem, ILoggerService logger ) {
+		public SaveWriterService( SaveConfig config, AtomicWriterService atomicWriter, SlotRepository slotRepository, IFileSystem fileSystem, ILoggerService logger )
+		{
 			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
 			ArgumentGuard.ThrowIfNull( fileSystem, nameof( fileSystem ) );
 			ArgumentGuard.ThrowIfNull( slotRepository, nameof( slotRepository ) );
@@ -96,7 +99,8 @@ namespace Nomad.Save.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_category?.Dispose();
 				_slotRepository?.Dispose();
@@ -116,7 +120,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="gameVersion"></param>
-		void ISaveWriterService.BeginSave( string name, GameVersion gameVersion ) {
+		void ISaveWriterService.BeginSave( string name, GameVersion gameVersion )
+		{
 			string filepath = _slotRepository.AddSaveFile( name, false );
 
 			_writer = _fileSystem.OpenWrite( new MemoryFileWriteConfig { FilePath = AtomicWriterService.GetAtomicPathName() } )
@@ -139,7 +144,8 @@ namespace Nomad.Save.Private.Services {
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="gameVersion"></param>
-		void ISaveWriterService.EndSave( string name, GameVersion gameVersion ) {
+		void ISaveWriterService.EndSave( string name, GameVersion gameVersion )
+		{
 			if ( _writer == null ) {
 				throw new InvalidOperationException( "EndSave called before a save operation was started." );
 			}
@@ -187,7 +193,8 @@ namespace Nomad.Save.Private.Services {
 		/// <param name="sectionId">The name of the section to add.</param>
 		/// <returns>The new write-dedicated section.</returns>
 		/// <exception cref="DuplicateSectionException">Thrown if <paramref name="sectionId"/> already exists in the section cache.</exception>
-		public ISaveSectionWriter AddSection( string sectionId ) {
+		public ISaveSectionWriter AddSection( string sectionId )
+		{
 			if ( _writer == null ) {
 				throw new InvalidOperationException( "AddSection called before a save operation was started." );
 			}

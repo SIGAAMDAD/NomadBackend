@@ -28,10 +28,10 @@ namespace Nomad.EngineTemplates.Attributes
         /// </summary>
         public Type Contract { get; set; }
 
-		/// <summary>
-		/// Indicates this is a managed asset class.
-		/// </summary>
-		public bool IsAsset { get; set; } = false;
+        /// <summary>
+        /// Indicates this is a managed asset class.
+        /// </summary>
+        public bool IsAsset { get; set; } = false;
 
         /// <summary>
         /// The base godot class to inherit from.

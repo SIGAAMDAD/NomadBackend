@@ -13,9 +13,12 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Input.Private {
-	internal static class Constants {
-		internal static class CVars {
+namespace Nomad.Input.Private
+{
+	internal static class Constants
+	{
+		internal static class CVars
+		{
 			public const string NAMESPACE = "Nomad.Input";
 
 			public const string DEFAULTS_PATH = NAMESPACE + ".DefaultsPath";

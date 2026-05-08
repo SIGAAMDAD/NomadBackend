@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using System.Runtime.InteropServices;
 
-namespace Nomad.Audio.Fmod.Private.Services {
+namespace Nomad.Audio.Fmod.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -28,7 +29,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	///
 	/// </summary>
 
-	internal unsafe sealed class FMODChannelStorage : IDisposable {
+	internal unsafe sealed class FMODChannelStorage : IDisposable
+	{
 		private byte* _base;
 		private readonly nuint _bytes;
 
@@ -58,7 +60,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		public readonly int* SlotNextInCategory;
 		public readonly int* SlotPrevInCategory;
 
-		public FMODChannelStorage( int capacity ) {
+		public FMODChannelStorage( int capacity )
+		{
 			Capacity = capacity;
 
 			long totalBytes = 0;
@@ -114,7 +117,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			new Span<byte>( _base, (int)totalBytes ).Clear();
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( _base != null ) {
 #if NET6_0_OR_GREATER
 				NativeMemory.Free( _base );
@@ -131,7 +135,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <param name="size"></param>
 		/// <param name="alignment"></param>
 		/// <returns></returns>
-		private static long PadBytes( long size, long alignment ) {
+		private static long PadBytes( long size, long alignment )
+		{
 			return (size + alignment - 1) & ~(alignment - 1);
 		}
 	};

@@ -16,8 +16,10 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System.Numerics;
 using Nomad.Audio.Fmod.Private.Entities;
 
-namespace Nomad.Audio.Fmod.Private.ValueObjects {
-	internal readonly struct FMODChannelView {
+namespace Nomad.Audio.Fmod.Private.ValueObjects
+{
+	internal readonly struct FMODChannelView
+	{
 		public readonly FMODChannelHandle Handle;
 		public readonly string EventId;
 		public readonly ushort EventNumericId;
@@ -44,7 +46,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 			float volume,
 			bool isEssential,
 			bool isPlaying
-		) {
+		)
+		{
 			Handle = handle;
 			EventId = eventId;
 			EventNumericId = eventNumericId;

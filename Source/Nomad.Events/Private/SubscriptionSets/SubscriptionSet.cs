@@ -22,7 +22,8 @@ using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
 
-namespace Nomad.Events.Private.SubscriptionSets {
+namespace Nomad.Events.Private.SubscriptionSets
+{
 	/*
 	===================================================================================
 
@@ -35,7 +36,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 	/// </summary>
 
 	internal sealed class SubscriptionSet<TArgs> : SubscriptionSetBase<TArgs>
-		where TArgs : struct {
+		where TArgs : struct
+	{
 		private readonly SubscriptionCache<TArgs, EventCallback<TArgs>> _genericSubscriptions;
 		private readonly SubscriptionCache<TArgs, AsyncEventCallback<TArgs>> _asyncSubscriptions;
 
@@ -51,7 +53,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="logger"></param>
 		/// <param name="exceptionPolicy"></param>
 		public SubscriptionSet( IGameEvent<TArgs> eventData, ILoggerService logger, EventExceptionPolicy exceptionPolicy )
-			: base( eventData, logger, exceptionPolicy ) {
+			: base( eventData, logger, exceptionPolicy )
+		{
 			_genericSubscriptions = new SubscriptionCache<TArgs, EventCallback<TArgs>>();
 			_asyncSubscriptions = new SubscriptionCache<TArgs, AsyncEventCallback<TArgs>>();
 		}
@@ -64,7 +67,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <summary>
 		///
 		/// </summary>
-		protected override void OnDispose() {
+		protected override void OnDispose()
+		{
 			_genericSubscriptions?.Dispose();
 			_asyncSubscriptions?.Dispose();
 		}
@@ -79,7 +83,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback">The method that is called whenever the event triggers.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
-		public override bool AddSubscription( EventCallback<TArgs> callback ) {
+		public override bool AddSubscription( EventCallback<TArgs> callback )
+		{
 			ThrowIfDisposed();
 			ArgumentGuard.ThrowIfNull( callback );
 
@@ -100,7 +105,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback">The method that is called whenever the event triggers.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
-		public override bool AddSubscriptionAsync( AsyncEventCallback<TArgs> callback ) {
+		public override bool AddSubscriptionAsync( AsyncEventCallback<TArgs> callback )
+		{
 			ThrowIfDisposed();
 			ArgumentGuard.ThrowIfNull( callback );
 
@@ -125,7 +131,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// Removes the provided <paramref name="callback"/> from the event's subscription list.
 		/// </summary>
 		/// <param name="callback">The callback to remove from the subscription list.</param>
-		public override bool RemoveSubscription( EventCallback<TArgs> callback ) {
+		public override bool RemoveSubscription( EventCallback<TArgs> callback )
+		{
 			ThrowIfDisposed();
 			ArgumentGuard.ThrowIfNull( callback );
 
@@ -151,7 +158,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="callback">The callback to remove from the subscription list.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
-		public override bool RemoveSubscriptionAsync( AsyncEventCallback<TArgs> callback ) {
+		public override bool RemoveSubscriptionAsync( AsyncEventCallback<TArgs> callback )
+		{
 			ThrowIfDisposed();
 			ArgumentGuard.ThrowIfNull( callback );
 
@@ -176,7 +184,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// "Publishes" an event to all subscribers with thread-safety.
 		/// </summary>
 		/// <param name="args"></param>
-		public override void Pump( in TArgs args ) {
+		public override void Pump( in TArgs args )
+		{
 			ThrowIfDisposed();
 
 			List<EventHandlerException>? failures = null;
@@ -207,7 +216,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="args"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public override async Task PumpAsync( TArgs args, CancellationToken ct ) {
+		public override async Task PumpAsync( TArgs args, CancellationToken ct )
+		{
 			ThrowIfDisposed();
 
 			AsyncEventCallback<TArgs>[] subscriptions;
@@ -246,7 +256,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="callback"></param>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public override bool ContainsCallback( EventCallback<TArgs> callback, out int index ) {
+		public override bool ContainsCallback( EventCallback<TArgs> callback, out int index )
+		{
 			ThrowIfDisposed();
 
 			lock ( _genericSubscriptions ) {
@@ -265,7 +276,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="callback"></param>
 		/// <param name="index"></param>
 		/// <returns></returns>
-		public override bool ContainsCallbackAsync( AsyncEventCallback<TArgs> callback, out int index ) {
+		public override bool ContainsCallbackAsync( AsyncEventCallback<TArgs> callback, out int index )
+		{
 			ThrowIfDisposed();
 
 			lock ( _asyncSubscriptions ) {

@@ -21,7 +21,8 @@ using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.FileSystem.Configs;
 using Nomad.Core.Memory.Buffers;
 
-namespace Nomad.FileSystem.Private.MemoryStream {
+namespace Nomad.FileSystem.Private.MemoryStream
+{
 	/*
 	===================================================================================
 
@@ -33,7 +34,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 	///
 	/// </summary>
 
-	internal abstract class MemoryStreamBase : BaseStream, IMemoryStream {
+	internal abstract class MemoryStreamBase : BaseStream, IMemoryStream
+	{
 		public override long Length {
 			get => !isDisposed ? length : throw new ObjectDisposedException( nameof( MemoryStreamBase ) );
 			set => SetLength( value );
@@ -66,7 +68,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// 
 		/// </summary>
 		/// <param name="strategy"></param>
-		public MemoryStreamBase( AllocationStrategy strategy ) {
+		public MemoryStreamBase( AllocationStrategy strategy )
+		{
 			this.strategy = strategy;
 		}
 
@@ -78,7 +81,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <summary>
 		/// 
 		/// </summary>
-		public override void Dispose() {
+		public override void Dispose()
+		{
 			Dispose( true );
 			GC.SuppressFinalize( this );
 		}
@@ -92,7 +96,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// 
 		/// </summary>
 		/// <param name="disposing"></param>
-		protected virtual void Dispose( bool disposing ) {
+		protected virtual void Dispose( bool disposing )
+		{
 			if ( isDisposed ) {
 				return;
 			}
@@ -111,7 +116,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <summary>
 		/// 
 		/// </summary>
-		public override async ValueTask DisposeAsync() {
+		public override async ValueTask DisposeAsync()
+		{
 			await DisposeAsyncCore().ConfigureAwait( false );
 			Dispose( false );
 			GC.SuppressFinalize( this );
@@ -126,7 +132,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		///
 		/// </summary>
 		/// <returns>The <see cref="ValueTask"/> for the disposal method.</returns>
-		protected virtual ValueTask DisposeAsyncCore() {
+		protected virtual ValueTask DisposeAsyncCore()
+		{
 			if ( buffer != null ) {
 				if ( buffer is IAsyncDisposable asyncBuffer ) {
 					return asyncBuffer.DisposeAsync();
@@ -150,7 +157,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <param name="origin"></param>
 		/// <returns></returns>
 		/// <exception cref="IOException"></exception>
-		public override long Seek( long offset, SeekOrigin origin ) {
+		public override long Seek( long offset, SeekOrigin origin )
+		{
 			StateGuard.ThrowIfDisposed( isDisposed, this );
 			switch ( origin ) {
 				case SeekOrigin.Begin:

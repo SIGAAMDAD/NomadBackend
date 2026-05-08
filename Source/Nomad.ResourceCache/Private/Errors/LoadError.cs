@@ -15,12 +15,15 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using Nomad.Core.Util;
 
-namespace Nomad.ResourceCache.Private.Errors {
+namespace Nomad.ResourceCache.Private.Errors
+{
 	internal sealed record LoadError(
 		string Message,
 		ErrorType Type = ErrorType.Infrastructure
-	) : IError {
-		public static LoadError Create( string message ) {
+	) : IError
+	{
+		public static LoadError Create( string message )
+		{
 			return new LoadError( message );
 		}
 	};

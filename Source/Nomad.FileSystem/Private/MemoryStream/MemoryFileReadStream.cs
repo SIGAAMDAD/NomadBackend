@@ -20,7 +20,8 @@ using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.FileSystem.Configs;
 using Nomad.Core.Memory.Buffers;
 
-namespace Nomad.FileSystem.Private.MemoryStream {
+namespace Nomad.FileSystem.Private.MemoryStream
+{
 	/*
 	===================================================================================
 
@@ -32,7 +33,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 	///
 	/// </summary>
 
-	internal sealed class MemoryFileReadStream : MemoryReadStream, IMemoryFileReadStream {
+	internal sealed class MemoryFileReadStream : MemoryReadStream, IMemoryFileReadStream
+	{
 		/// <summary>
 		/// 
 		/// </summary>
@@ -54,7 +56,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="config"></param>
 		public MemoryFileReadStream( MemoryFileReadConfig config )
-			: base( config, false ) {
+			: base( config, false )
+		{
 			_filepath = config.FilePath;
 			Open( _filepath );
 		}
@@ -67,7 +70,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected override void Dispose( bool disposing ) {
+		protected override void Dispose( bool disposing )
+		{
 			if ( isDisposed ) {
 				return;
 			}
@@ -83,7 +87,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected override async ValueTask DisposeAsyncCore() {
+		protected override async ValueTask DisposeAsyncCore()
+		{
 			await base.DisposeAsyncCore();
 		}
 
@@ -95,7 +100,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Close() {
+		public void Close()
+		{
 			Dispose();
 		}
 
@@ -109,7 +115,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="filepath">The path to the file to open.</param>
 		/// <returns><c>true</c> if the file was opened successfully; otherwise, <c>false.</c></returns>
-		private bool Open( string filepath ) {
+		private bool Open( string filepath )
+		{
 			position = 0;
 
 			try {
@@ -132,7 +139,8 @@ namespace Nomad.FileSystem.Private.MemoryStream {
 		/// </summary>
 		/// <param name="length"></param>
 		/// <returns></returns>
-		protected override IBufferHandle AllocateBuffer( long length ) {
+		protected override IBufferHandle AllocateBuffer( long length )
+		{
 			switch ( strategy ) {
 				case AllocationStrategy.FromFile: {
 						byte[] fileBuffer = File.ReadAllBytes( _filepath );

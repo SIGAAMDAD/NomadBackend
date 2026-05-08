@@ -24,7 +24,8 @@ using Nomad.Save.Private.Entities;
 using Nomad.Save.Private.ValueObjects;
 using Nomad.Save.ValueObjects;
 
-namespace Nomad.Save.Private.Repositories {
+namespace Nomad.Save.Private.Repositories
+{
 	/*
 	===================================================================================
 	
@@ -36,7 +37,8 @@ namespace Nomad.Save.Private.Repositories {
 	/// 
 	/// </summary>
 
-	internal sealed class SlotRepository : IDisposable {
+	internal sealed class SlotRepository : IDisposable
+	{
 		private readonly Dictionary<string, SaveSlot> _saveSlots = new Dictionary<string, SaveSlot>();
 
 		private readonly IFileSystem _fileSystem;
@@ -59,7 +61,8 @@ namespace Nomad.Save.Private.Repositories {
 		/// <param name="fileSystem"></param>
 		/// <param name="logger"></param>
 		/// <param name="config"></param>
-		public SlotRepository( IFileSystem fileSystem, ILoggerService logger, SaveConfig config ) {
+		public SlotRepository( IFileSystem fileSystem, ILoggerService logger, SaveConfig config )
+		{
 			_fileSystem = fileSystem;
 			_logger = logger;
 			_config = config;
@@ -78,7 +81,8 @@ namespace Nomad.Save.Private.Repositories {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_fileWatcher?.Dispose();
 			}
@@ -98,7 +102,8 @@ namespace Nomad.Save.Private.Repositories {
 		/// <param name="name"></param>
 		/// <param name="autoSave"></param>
 		/// <returns></returns>
-		public string AddSaveFile( string name, bool autoSave = false ) {
+		public string AddSaveFile( string name, bool autoSave = false )
+		{
 			DateTime lastAccessTime = DateTime.Now;
 			SaveFileMetadata metadata;
 			string fileName = string.Empty;
@@ -143,7 +148,8 @@ namespace Nomad.Save.Private.Repositories {
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public IReadOnlyList<SaveFileMetadata> GetMetadataList() {
+		public IReadOnlyList<SaveFileMetadata> GetMetadataList()
+		{
 			SaveFileMetadata[] metadata = new SaveFileMetadata[_saveSlots.Count];
 			int index = 0;
 
@@ -162,7 +168,8 @@ namespace Nomad.Save.Private.Repositories {
 		/// <summary>
 		/// 
 		/// </summary>
-		private void RefreshSlots() {
+		private void RefreshSlots()
+		{
 			var slots = _fileSystem.GetFiles( _config.DataPath, "*.ngd", false );
 
 			for ( int i = 0; i < slots.Count; i++ ) {
@@ -205,7 +212,8 @@ namespace Nomad.Save.Private.Repositories {
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
-		private void OnSaveFileChanged( object sender, FileSystemEventArgs e ) {
+		private void OnSaveFileChanged( object sender, FileSystemEventArgs e )
+		{
 			if ( e.ChangeType.HasFlag( WatcherChangeTypes.Changed ) ) {
 				// something has changed, we don't know what, but refresh either way.
 				RefreshSlots();

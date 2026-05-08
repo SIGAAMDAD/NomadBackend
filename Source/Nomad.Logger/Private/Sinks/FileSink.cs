@@ -1,4 +1,4 @@
-﻿/*
+/*
 ===========================================================================
 The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
@@ -20,7 +20,8 @@ using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.Logger;
 using System;
 
-namespace Nomad.Logger.Private.Sinks {
+namespace Nomad.Logger.Private.Sinks
+{
 	/*
 	===================================================================================
 
@@ -32,7 +33,8 @@ namespace Nomad.Logger.Private.Sinks {
 	///
 	/// </summary>
 
-	internal sealed class FileSink : SinkBase {
+	internal sealed class FileSink : SinkBase
+	{
 		private readonly IFileWriteStream? _writer = null;
 
 		/*
@@ -45,7 +47,8 @@ namespace Nomad.Logger.Private.Sinks {
 		/// </summary>
 		/// <param name="cvarSystem"></param>
 		/// <param name="fileSystem"></param>
-		public FileSink( ICVarSystemService cvarSystem, IFileSystem fileSystem ) {
+		public FileSink( ICVarSystemService cvarSystem, IFileSystem fileSystem )
+		{
 			var logfile = cvarSystem.Register(
 				new CVarCreateInfo<string> {
 					Name = "console.LogFile",
@@ -79,7 +82,8 @@ namespace Nomad.Logger.Private.Sinks {
 		/// <summary>
 		/// 
 		/// </summary>
-		protected override void Dispose( bool disposing ) {
+		protected override void Dispose( bool disposing )
+		{
 			if ( !isDisposed ) {
 				_writer?.Dispose();
 			}
@@ -95,7 +99,8 @@ namespace Nomad.Logger.Private.Sinks {
 		/// Writes a string of characters to the file stream asynchronously.
 		/// </summary>
 		/// <param name="message"></param>
-		public override void Print( string message ) {
+		public override void Print( string message )
+		{
 			_writer?.WriteLine( message );
 		}
 
@@ -107,7 +112,8 @@ namespace Nomad.Logger.Private.Sinks {
 		/// <summary>
 		/// Clears the file stream.
 		/// </summary>
-		public override void Clear() {
+		public override void Clear()
+		{
 			_writer?.SetLength( 0 );
 		}
 
@@ -119,7 +125,8 @@ namespace Nomad.Logger.Private.Sinks {
 		/// <summary>
 		/// Flushes the contents of the stream writer to the logfile.
 		/// </summary>
-		public override void Flush() {
+		public override void Flush()
+		{
 			_writer?.Flush();
 		}
 	};

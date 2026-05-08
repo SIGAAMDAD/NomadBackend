@@ -15,7 +15,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 
-namespace Nomad.Input.Private.ValueObjects {
+namespace Nomad.Input.Private.ValueObjects
+{
 	/*
 	===================================================================================
 	
@@ -27,7 +28,8 @@ namespace Nomad.Input.Private.ValueObjects {
 	/// 
 	/// </summary>
 
-	internal sealed class CompiledBindingGraph {
+	internal sealed class CompiledBindingGraph
+	{
 		public static readonly CompiledBindingGraph Empty = new(
 			Array.Empty<CompiledBinding>(),
 			Array.Empty<CompiledActionInfo>(),
@@ -67,7 +69,8 @@ namespace Nomad.Input.Private.ValueObjects {
 			int[] deltaBindingIndices,
 			int[] composite1DBindingIndices,
 			int[] composite2DBindingIndices
-		) {
+		)
+		{
 			Bindings = bindings;
 			Actions = actions;
 			ButtonBuckets = buttonBuckets;

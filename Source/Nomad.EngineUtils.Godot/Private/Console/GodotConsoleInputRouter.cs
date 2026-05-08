@@ -19,7 +19,8 @@ using Nomad.Console.Events;
 using Nomad.Console;
 using Nomad.Core.Events;
 
-namespace Nomad.EngineUtils.Godot.Private.Console {
+namespace Nomad.EngineUtils.Godot.Private.Console
+{
 	/*
 	===================================================================================
 	
@@ -30,8 +31,9 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 	/// <summary>
 	/// 
 	/// </summary>
-	
-	internal sealed partial class GodotConsoleInputRouter : Control, IConsoleInputRouter {
+
+	internal sealed partial class GodotConsoleInputRouter : Control, IConsoleInputRouter
+	{
 		private readonly GodotConsoleInput _inputLine;
 
 		public IGameEvent<ConsoleToggleRequestedEventArgs> ConsoleToggleRequested => _toggleRequestedEvent;
@@ -52,7 +54,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 		public GodotConsoleInputRouter(
 			IGameEventRegistryService eventRegistry,
 			GodotConsoleInput inputLine
-		) {
+		)
+		{
 			ArgumentNullException.ThrowIfNull( eventRegistry );
 
 			_inputLine = inputLine ?? throw new ArgumentNullException( nameof( inputLine ) );
@@ -83,7 +86,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 			);
 		}
 
-		public override void _Ready() {
+		public override void _Ready()
+		{
 			base._Ready();
 
 			Name = nameof( GodotConsoleInputRouter );
@@ -94,7 +98,8 @@ namespace Nomad.EngineUtils.Godot.Private.Console {
 			AnchorBottom = 1.0f;
 		}
 
-		public override void _UnhandledInput( InputEvent @event ) {
+		public override void _UnhandledInput( InputEvent @event )
+		{
 			base._UnhandledInput( @event );
 
 			if ( @event is not InputEventKey key || !key.Pressed || key.Echo ) {

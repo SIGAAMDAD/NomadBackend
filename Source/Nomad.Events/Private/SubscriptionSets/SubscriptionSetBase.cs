@@ -24,7 +24,8 @@ using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
 
-namespace Nomad.Events.Private.SubscriptionSets {
+namespace Nomad.Events.Private.SubscriptionSets
+{
 	/*
 	===================================================================================
 
@@ -37,7 +38,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 	/// Handles common lifecycle, counters, event metadata, and callback lookup helpers.
 	/// </summary>
 	internal abstract class SubscriptionSetBase<TArgs> : ISubscriptionSet<TArgs>
-		where TArgs : struct {
+		where TArgs : struct
+	{
 		public int SubscriberCount => _subscriberCount;
 		private int _subscriberCount = 0;
 
@@ -63,7 +65,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="logger"></param>
 		/// <param name="exceptionPolicy"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		protected SubscriptionSetBase( IGameEvent<TArgs> eventData, ILoggerService logger, EventExceptionPolicy exceptionPolicy ) {
+		protected SubscriptionSetBase( IGameEvent<TArgs> eventData, ILoggerService logger, EventExceptionPolicy exceptionPolicy )
+		{
 			EventData = eventData ?? throw new ArgumentNullException( nameof( eventData ) );
 			Logger = logger ?? throw new ArgumentNullException( nameof( logger ) );
 			ExceptionPolicy = exceptionPolicy;
@@ -77,7 +80,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( IsDisposed ) {
 				return;
 			}
@@ -108,7 +112,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		///
 		/// </summary>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		protected void ThrowIfDisposed() {
+		protected void ThrowIfDisposed()
+		{
 			StateGuard.ThrowIfDisposed( IsDisposed, this );
 		}
 
@@ -121,7 +126,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		///
 		/// </summary>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		protected void IncrementSubscriberCount() {
+		protected void IncrementSubscriberCount()
+		{
 			Interlocked.Increment( ref _subscriberCount );
 		}
 
@@ -134,7 +140,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		///
 		/// </summary>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		protected void DecrementSubscriberCount() {
+		protected void DecrementSubscriberCount()
+		{
 			Interlocked.Decrement( ref _subscriberCount );
 		}
 
@@ -147,7 +154,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		///
 		/// </summary>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		protected void IncrementPublishCount() {
+		protected void IncrementPublishCount()
+		{
 			Interlocked.Increment( ref _publishCount );
 		}
 
@@ -168,7 +176,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 			SubscriptionCache<TArgs, TCallback> subscriptions,
 			TCallback callback,
 			out int index
-		) {
+		)
+		{
 			for ( int i = 0; i < subscriptions.Count; i++ ) {
 				if ( EqualityComparer<TCallback>.Default.Equals( subscriptions[i], callback ) ) {
 					index = i;
@@ -218,7 +227,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="ct"></param>
 		/// <returns></returns>
 		/// <exception cref="EventPublishException"></exception>
-		protected async Task PumpAsyncSnapshot( AsyncEventCallback<TArgs>[] subscriptions, int subscriptionCount, TArgs args, CancellationToken ct ) {
+		protected async Task PumpAsyncSnapshot( AsyncEventCallback<TArgs>[] subscriptions, int subscriptionCount, TArgs args, CancellationToken ct )
+		{
 			ct.ThrowIfCancellationRequested();
 
 			if ( subscriptionCount == 0 ) {
@@ -314,7 +324,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="ct"></param>
 		/// <returns></returns>
 		/// <exception cref="EventPublishException"></exception>
-		private async Task PumpSingleAsync( AsyncEventCallback<TArgs> callback, int index, TArgs args, CancellationToken ct ) {
+		private async Task PumpSingleAsync( AsyncEventCallback<TArgs> callback, int index, TArgs args, CancellationToken ct )
+		{
 			try {
 				Task task = callback.Invoke( args, ct ) ?? Task.CompletedTask;
 				await task.ConfigureAwait( false );
@@ -345,7 +356,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="index"></param>
 		/// <param name="ex"></param>
 		/// <returns></returns>
-		private EventHandlerException CreateAsyncFailure( AsyncEventCallback<TArgs> callback, int index, Exception ex ) {
+		private EventHandlerException CreateAsyncFailure( AsyncEventCallback<TArgs> callback, int index, Exception ex )
+		{
 			return new EventHandlerException(
 				EventData.DebugName,
 				typeof( TArgs ),
@@ -367,7 +379,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// <param name="index"></param>
 		/// <param name="args"></param>
 		/// <returns></returns>
-		protected EventHandlerException? InvokeCallback( EventCallback<TArgs> callback, int index, in TArgs args ) {
+		protected EventHandlerException? InvokeCallback( EventCallback<TArgs> callback, int index, in TArgs args )
+		{
 			EventHandlerException? failure = null;
 			try {
 				callback.Invoke( in args );
@@ -403,7 +416,8 @@ namespace Nomad.Events.Private.SubscriptionSets {
 		/// </summary>
 		/// <param name="failures"></param>
 		/// <exception cref="EventPublishException"></exception>
-		protected void CheckAggregateException( List<EventHandlerException> failures ) {
+		protected void CheckAggregateException( List<EventHandlerException> failures )
+		{
 			if ( failures is { Count: > 0 } && ExceptionPolicy == EventExceptionPolicy.AggregateAfterDispatch ) {
 				throw new EventPublishException(
 					EventData.DebugName,

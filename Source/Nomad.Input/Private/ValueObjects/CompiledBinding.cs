@@ -17,8 +17,10 @@ using Nomad.Core.Input;
 using Nomad.Core.Util;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.ValueObjects {
-	internal readonly struct CompiledBinding {
+namespace Nomad.Input.Private.ValueObjects
+{
+	internal readonly struct CompiledBinding
+	{
 		public readonly InternString ActionName;
 		public readonly InternString ActionId;
 		public readonly int ActionIndex;
@@ -65,7 +67,8 @@ namespace Nomad.Input.Private.ValueObjects {
 			Axis2DBinding axis2D,
 			Axis2DCompositeBinding axis2DComposite,
 			Delta2DBinding delta2D
-		) {
+		)
+		{
 			ActionName = actionName;
 			ActionId = actionId;
 			ActionIndex = actionIndex;

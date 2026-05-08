@@ -17,7 +17,8 @@ using System;
 using Nomad.Core.Engine.SceneManagement;
 using Nomad.Core.Scene.GameObjects;
 
-namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
+namespace Nomad.EngineUtils.Godot.Private.SceneManagement
+{
 	/*
 	===================================================================================
 	
@@ -28,8 +29,9 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 	/// <summary>
 	/// 
 	/// </summary>
-	
-	internal sealed class GodotScene : IScene {
+
+	internal sealed class GodotScene : IScene
+	{
 		public string Path => _root.Node.SceneFilePath;
 
 		/// <summary>
@@ -54,7 +56,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		///
 		/// </summary>
 		/// <param name="root"></param>
-		public GodotScene( GodotGameObject root ) {
+		public GodotScene( GodotGameObject root )
+		{
 			_root = root;
 		}
 
@@ -66,7 +69,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_root?.Dispose();
 			}
@@ -83,7 +87,8 @@ namespace Nomad.EngineUtils.Godot.Private.SceneManagement {
 		/// 
 		/// </summary>
 		/// <param name="scene"></param>
-		public void AddScene( GodotGameObject scene ) {
+		public void AddScene( GodotGameObject scene )
+		{
 			_root.Node.AddChild( scene.Node );
 		}
 	};

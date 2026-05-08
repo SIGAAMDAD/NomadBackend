@@ -24,7 +24,8 @@ using Nomad.Core.CVars;
 using Nomad.Core.Events;
 using Nomad.CVars;
 
-namespace Nomad.Audio.Fmod.Private.Services {
+namespace Nomad.Audio.Fmod.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -34,7 +35,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	*/
 	/// <summary>
 	/// </summary>
-	internal sealed class FMODPriorityCalculator : IDisposable {
+	internal sealed class FMODPriorityCalculator : IDisposable
+	{
 		private float _distanceFalloffStart;
 		private float _distanceFalloffEnd;
 		private float _invDistanceFalloffRange;
@@ -61,7 +63,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <param name="cvarSystem"></param>
 		/// <param name="listenerService"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public FMODPriorityCalculator( ICVarSystemService cvarSystem, IListenerService listenerService ) {
+		public FMODPriorityCalculator( ICVarSystemService cvarSystem, IListenerService listenerService )
+		{
 			_listenerService = listenerService ?? throw new ArgumentNullException( nameof( listenerService ) );
 
 			var distanceFalloffStart = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.DISTANCE_FALLOFF_START );
@@ -87,7 +90,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_distanceFalloffStartEvent?.Dispose();
 				_distanceFalloffEndEvent?.Dispose();
@@ -119,7 +123,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			SoundCategory category,
 			float? lastTimePlayed,
 			int consecutiveStealCount
-		 ) {
+		 )
+		{
 			Vector2 listener = _listenerService.ActiveListener;
 			float dx = position.X - listener.X;
 			float dy = position.Y - listener.Y;
@@ -149,7 +154,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// </summary>
 		/// <param name="distance"></param>
 		/// <returns></returns>
-		public float CalculateDistanceFactor( float distance ) {
+		public float CalculateDistanceFactor( float distance )
+		{
 			if ( distance <= _distanceFalloffStart ) {
 				return 1.0f;
 			}
@@ -171,7 +177,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <param name="startTime"></param>
 		/// <param name="lastTimePlayed"></param>
 		/// <returns></returns>
-		private static float CalculateTimePenalty( float startTime, float? lastTimePlayed ) {
+		private static float CalculateTimePenalty( float startTime, float? lastTimePlayed )
+		{
 			if ( !lastTimePlayed.HasValue ) {
 				return 0.0f;
 			}
@@ -195,7 +202,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// </summary>
 		/// <param name="consecutiveStealCount"></param>
 		/// <returns></returns>
-		private static float CalculateFrequencyPenalty( int consecutiveStealCount ) {
+		private static float CalculateFrequencyPenalty( int consecutiveStealCount )
+		{
 			return Math.Clamp( consecutiveStealCount * 0.1f, 0.0f, 0.5f );
 		}
 
@@ -208,7 +216,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnDistanceFalloffEndValueChanged( in CVarValueChangedEventArgs<float> args ) {
+		private void OnDistanceFalloffEndValueChanged( in CVarValueChangedEventArgs<float> args )
+		{
 			_distanceFalloffEnd = args.NewValue;
 			RecomputeDistanceRange();
 		}
@@ -222,7 +231,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnDistanceFalloffStartValueChanged( in CVarValueChangedEventArgs<float> args ) {
+		private void OnDistanceFalloffStartValueChanged( in CVarValueChangedEventArgs<float> args )
+		{
 			_distanceFalloffStart = args.NewValue;
 			RecomputeDistanceRange();
 		}
@@ -236,12 +246,14 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		///
 		/// </summary>
 		/// <param name="args"></param>
-		private void OnFrequencyPenaltyValueChanged( in CVarValueChangedEventArgs<float> args ) {
+		private void OnFrequencyPenaltyValueChanged( in CVarValueChangedEventArgs<float> args )
+		{
 			_frequencyPenalty = args.NewValue;
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void RecomputeDistanceRange() {
+		private void RecomputeDistanceRange()
+		{
 			float range = _distanceFalloffEnd - _distanceFalloffStart;
 			if ( range < 0.0001f ) {
 				range = 0.0001f;

@@ -13,8 +13,10 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Input.Private.ValueObjects {
-	internal readonly struct BindingMatch {
+namespace Nomad.Input.Private.ValueObjects
+{
+	internal readonly struct BindingMatch
+	{
 		public CompiledBinding Binding { get; init; }
 		public int Score { get; init; }
 	};

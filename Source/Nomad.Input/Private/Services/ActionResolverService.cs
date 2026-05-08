@@ -21,7 +21,8 @@ using Nomad.Input.Private.Repositories;
 using Nomad.Input.Private.ValueObjects;
 using Nomad.Input.ValueObjects;
 
-namespace Nomad.Input.Private.Services {
+namespace Nomad.Input.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -33,7 +34,8 @@ namespace Nomad.Input.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class ActionResolverService {
+	internal sealed class ActionResolverService
+	{
 		private const int RESOLVED_ACTION_BUFFER_RING_SIZE = 8;
 
 		private readonly CompiledBindingRepository _compiledBindings;
@@ -57,12 +59,14 @@ namespace Nomad.Input.Private.Services {
 		private ResolvedAction[][] _resolvedActionBuffers = Array.Empty<ResolvedAction[]>();
 		private int _resolvedActionBufferCursor;
 
-		public ActionResolverService( CompiledBindingRepository compiledBindings, InputStateService stateService ) {
+		public ActionResolverService( CompiledBindingRepository compiledBindings, InputStateService stateService )
+		{
 			_compiledBindings = compiledBindings ?? throw new ArgumentNullException( nameof( compiledBindings ) );
 			_stateService = stateService ?? throw new ArgumentNullException( nameof( stateService ) );
 		}
 
-		public ReadOnlySpan<ResolvedAction> ResolveMatchesNonAlloc( CompiledBindingGraph graph, BindingMatchSet matches, long timeStamp ) {
+		public ReadOnlySpan<ResolvedAction> ResolveMatchesNonAlloc( CompiledBindingGraph graph, BindingMatchSet matches, long timeStamp )
+		{
 			BeginPass( graph.Actions.Length );
 
 			for ( int i = 0; i < matches.Length; i++ ) {
@@ -88,7 +92,8 @@ namespace Nomad.Input.Private.Services {
 			return MaterializeResolvedActions( graph, timeStamp );
 		}
 
-		public ReadOnlySpan<ResolvedAction> ResolveKeyboardCompositesNonAlloc( CompiledBindingGraph graph, uint activeContextMask, InputScheme? activeScheme, long timeStamp ) {
+		public ReadOnlySpan<ResolvedAction> ResolveKeyboardCompositesNonAlloc( CompiledBindingGraph graph, uint activeContextMask, InputScheme? activeScheme, long timeStamp )
+		{
 			BeginPass( graph.Actions.Length );
 
 			bool hasActiveScheme = activeScheme.HasValue;
@@ -148,7 +153,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private void BeginPass( int actionCount ) {
+		private void BeginPass( int actionCount )
+		{
 			EnsureActionCapacity( actionCount );
 			_touchedCount = 0;
 
@@ -169,7 +175,8 @@ namespace Nomad.Input.Private.Services {
 			float floatValue,
 			Vector2 vector2Value,
 			float magnitude
-		) {
+		)
+		{
 			if ( _slotGeneration[actionSlot] != _generation ) {
 				_slotGeneration[actionSlot] = _generation;
 				_touchedSlots[_touchedCount++] = actionSlot;
@@ -200,7 +207,8 @@ namespace Nomad.Input.Private.Services {
 			_bestVector2Value[actionSlot] = vector2Value;
 		}
 
-		private ReadOnlySpan<ResolvedAction> MaterializeResolvedActions( CompiledBindingGraph graph, long timeStamp ) {
+		private ReadOnlySpan<ResolvedAction> MaterializeResolvedActions( CompiledBindingGraph graph, long timeStamp )
+		{
 			ResolvedAction[] resolvedActionBuffer = GetResolvedActionBuffer( _touchedCount );
 
 			int actionCount = 0;
@@ -235,7 +243,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private bool TryResolvePhase( int actionSlot, bool isActive, out InputActionPhase phase ) {
+		private bool TryResolvePhase( int actionSlot, bool isActive, out InputActionPhase phase )
+		{
 			InputActionPhase previousPhase = _phaseByAction[actionSlot];
 			bool wasActive = previousPhase is InputActionPhase.Started or InputActionPhase.Performed;
 
@@ -255,7 +264,8 @@ namespace Nomad.Input.Private.Services {
 			return false;
 		}
 
-		private bool TryEvaluateBinding( in CompiledBinding binding, out InputValueType valueType, out bool buttonValue, out float floatValue, out Vector2 vector2Value, out float magnitude ) {
+		private bool TryEvaluateBinding( in CompiledBinding binding, out InputValueType valueType, out bool buttonValue, out float floatValue, out Vector2 vector2Value, out float magnitude )
+		{
 			switch ( binding.Kind ) {
 				case InputBindingKind.Button: {
 						bool pressed = _stateService.IsPressed( binding.Button.DeviceId, binding.Button.ControlId );
@@ -317,7 +327,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private float ResolveComposite1D( in Axis1DCompositeBinding binding ) {
+		private float ResolveComposite1D( in Axis1DCompositeBinding binding )
+		{
 			float negative = _stateService.IsPressed( InputDeviceSlot.Keyboard, binding.Negative ) ? 1.0f : 0.0f;
 			float positive = _stateService.IsPressed( InputDeviceSlot.Keyboard, binding.Positive ) ? 1.0f : 0.0f;
 			float value = (positive - negative) * binding.Scale;
@@ -330,7 +341,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private Vector2 ResolveComposite2D( in Axis2DCompositeBinding binding ) {
+		private Vector2 ResolveComposite2D( in Axis2DCompositeBinding binding )
+		{
 			float up = _stateService.IsPressed( InputDeviceSlot.Keyboard, binding.Up ) ? 1.0f : 0.0f;
 			float down = _stateService.IsPressed( InputDeviceSlot.Keyboard, binding.Down ) ? 1.0f : 0.0f;
 			float left = _stateService.IsPressed( InputDeviceSlot.Keyboard, binding.Left ) ? 1.0f : 0.0f;
@@ -349,7 +361,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static float ApplyAxis1DProcessors( float value, in Axis1DBinding binding ) {
+		private static float ApplyAxis1DProcessors( float value, in Axis1DBinding binding )
+		{
 			if ( MathF.Abs( value ) < binding.Deadzone ) {
 				value = 0.0f;
 			}
@@ -361,7 +374,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static Vector2 ApplyAxis2DProcessors( Vector2 value, in Axis2DBinding binding ) {
+		private static Vector2 ApplyAxis2DProcessors( Vector2 value, in Axis2DBinding binding )
+		{
 			float deadzoneSq = binding.Deadzone * binding.Deadzone;
 			if ( value.LengthSquared() < deadzoneSq ) {
 				return Vector2.Zero;
@@ -379,7 +393,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static Vector2 ApplyDelta2DProcessors( Vector2 value, in Delta2DBinding binding ) {
+		private static Vector2 ApplyDelta2DProcessors( Vector2 value, in Delta2DBinding binding )
+		{
 			if ( binding.InvertX ) {
 				value.X = -value.X;
 			}
@@ -393,11 +408,13 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private static bool ContextMatches( uint bindingMask, uint activeMask ) {
+		private static bool ContextMatches( uint bindingMask, uint activeMask )
+		{
 			return bindingMask == 0 || (bindingMask & activeMask) != 0;
 		}
 
-		private void EnsureActionCapacity( int actionCount ) {
+		private void EnsureActionCapacity( int actionCount )
+		{
 			if ( _phaseByAction.Length >= actionCount ) {
 				return;
 			}
@@ -418,7 +435,8 @@ namespace Nomad.Input.Private.Services {
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private ResolvedAction[] GetResolvedActionBuffer( int requiredCapacity ) {
+		private ResolvedAction[] GetResolvedActionBuffer( int requiredCapacity )
+		{
 			if ( _resolvedActionBuffers.Length == 0 ) {
 				_resolvedActionBuffers = new ResolvedAction[RESOLVED_ACTION_BUFFER_RING_SIZE][];
 				Array.Fill( _resolvedActionBuffers, Array.Empty<ResolvedAction>() );

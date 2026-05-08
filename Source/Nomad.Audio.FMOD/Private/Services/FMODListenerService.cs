@@ -20,7 +20,8 @@ using Nomad.Core.Logger;
 using System;
 using System.Numerics;
 
-namespace Nomad.Audio.Fmod.Private.Services {
+namespace Nomad.Audio.Fmod.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -32,7 +33,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	/// Manages FMOD listener instances.
 	/// </summary>
 
-	internal sealed class FMODListenerService : IListenerService {
+	internal sealed class FMODListenerService : IListenerService
+	{
 		private const int MAX_LISTENERS = 4;
 
 		public int ListenerCount => _listenerCount;
@@ -56,7 +58,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// </summary>
 		/// <param name="logger"></param>
 		/// <param name="system"></param>
-		public FMODListenerService( ILoggerService logger, FMODDevice system ) {
+		public FMODListenerService( ILoggerService logger, FMODDevice system )
+		{
 			_system = system;
 			_logger = logger;
 
@@ -71,7 +74,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			ClearListeners();
 		}
 
@@ -85,7 +89,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// </summary>
 		/// <param name="listenerIndex"></param>
 		/// <param name="position"></param>
-		public void SetListenerPosition( int listenerIndex, Vector2 position ) {
+		public void SetListenerPosition( int listenerIndex, Vector2 position )
+		{
 			RangeGuard.ThrowIfLessThan( listenerIndex, 0, nameof( listenerIndex ) );
 			RangeGuard.ThrowIfGreaterThanOrEqual( listenerIndex, MAX_LISTENERS, nameof( listenerIndex ) );
 
@@ -104,7 +109,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <summary>
 		/// Removes all active listeners from FMOD.
 		/// </summary>
-		public void ClearListeners() {
+		public void ClearListeners()
+		{
 			_logger.PrintLine( $"FMODListenerService.ClearListeners: cleaning up listener data..." );
 
 			for ( int i = 0; i < _listenerCount; i++ ) {
@@ -124,7 +130,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 		/// <summary>
 		/// Creates the default listener.
 		/// </summary>
-		private void CreateDefaultListener() {
+		private void CreateDefaultListener()
+		{
 			_currentListener = new FMODListener( _system.StudioSystem, 0 ) { Position = Vector2.Zero };
 			_listeners[0] = _currentListener;
 			_listenerCount++;

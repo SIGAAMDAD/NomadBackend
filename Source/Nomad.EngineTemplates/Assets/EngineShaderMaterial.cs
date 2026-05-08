@@ -31,6 +31,6 @@ namespace Nomad.Engine.Assets
         UnityGetterExpression = "base.shader != null ? base.shader.name : string.Empty",
         UnitySetterExpression = "base.shader = global::UnityEngine.Shader.Find(value)")]
     internal class EngineShaderMaterial
-	{
-	}
+    {
+    }
 }

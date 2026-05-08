@@ -17,7 +17,8 @@ using System;
 using System.Runtime.CompilerServices;
 using Nomad.Core.Util;
 
-namespace Nomad.Events.Private {
+namespace Nomad.Events.Private
+{
 	/*
 	===================================================================================
 
@@ -29,7 +30,8 @@ namespace Nomad.Events.Private {
 	/// Represents a game event's unique identifier.
 	/// </summary>
 
-	internal readonly struct EventKey : IEquatable<EventKey> {
+	internal readonly struct EventKey : IEquatable<EventKey>
+	{
 		private readonly int _hashCode;
 
 		/*
@@ -43,7 +45,8 @@ namespace Nomad.Events.Private {
 		/// <param name="name"></param>
 		/// <param name="nameSpace"></param>
 		/// <param name="argsType"></param>
-		public EventKey( InternString name, InternString nameSpace, Type argsType ) {
+		public EventKey( InternString name, InternString nameSpace, Type argsType )
+		{
 			_hashCode = HashCode.Combine(
 				nameSpace.GetHashCode(),
 				name.GetHashCode(),

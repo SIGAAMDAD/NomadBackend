@@ -16,7 +16,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using Nomad.Core.CVars;
 using Nomad.Core.Engine.Services;
 
-namespace Nomad.Save.Private.Registries {
+namespace Nomad.Save.Private.Registries
+{
 	/*
 	===================================================================================
 
@@ -28,7 +29,8 @@ namespace Nomad.Save.Private.Registries {
 	///
 	/// </summary>
 
-	internal static class SaveCVarRegistry {
+	internal static class SaveCVarRegistry
+	{
 		/*
 		===============
 		RegisterCVars
@@ -39,7 +41,8 @@ namespace Nomad.Save.Private.Registries {
 		/// </summary>
 		/// <param name="engineService"></param>
 		/// <param name="cvarSystem"></param>
-		public static void RegisterCVars( IEngineService engineService, ICVarSystemService cvarSystem ) {
+		public static void RegisterCVars( IEngineService engineService, ICVarSystemService cvarSystem )
+		{
 			cvarSystem.Register(
 				new CVarCreateInfo<string> {
 					Name = Constants.CVars.DATA_PATH,

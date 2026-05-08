@@ -15,7 +15,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 
-namespace Nomad.Audio.Fmod.Private.Services {
+namespace Nomad.Audio.Fmod.Private.Services
+{
 	/*
 	===================================================================================
 	
@@ -27,7 +28,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 	/// 
 	/// </summary>
 
-	internal sealed class FMODCallbackDispatcher : IDisposable {
+	internal sealed class FMODCallbackDispatcher : IDisposable
+	{
 		public event Action<FMOD.System> DeviceListChanged;
 		public event Action<FMOD.System> DeviceLost;
 		public event Action<FMOD.System> DeviceReinitialized;
@@ -37,7 +39,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 
 		private bool _isDisposed = false;
 
-		public FMODCallbackDispatcher( FMOD.System system ) {
+		public FMODCallbackDispatcher( FMOD.System system )
+		{
 			_system = system;
 			_systemCallback = OnFMODSystemCallback;
 
@@ -51,7 +54,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			);
 		}
 
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed && _system.hasHandle() ) {
 				FMODValidator.ValidateCall(
 					_system.setCallback(
@@ -66,7 +70,8 @@ namespace Nomad.Audio.Fmod.Private.Services {
 			_isDisposed = true;
 		}
 
-		private FMOD.RESULT OnFMODSystemCallback( nint system, FMOD.SYSTEM_CALLBACK_TYPE type, nint commanddata1, nint commanddata2, nint userdata ) {
+		private FMOD.RESULT OnFMODSystemCallback( nint system, FMOD.SYSTEM_CALLBACK_TYPE type, nint commanddata1, nint commanddata2, nint userdata )
+		{
 			var fmodSystem = new FMOD.System( system );
 			switch ( type ) {
 				case FMOD.SYSTEM_CALLBACK_TYPE.DEVICELISTCHANGED:

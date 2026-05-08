@@ -19,17 +19,17 @@ using Nomad.EngineTemplates.BaseClasses;
 
 namespace Nomad.EngineTemplates.UI
 {
-	[TemplateClass(Contract = typeof(IPaddingContainer), GodotBase = "Godot.MarginContainer", UnityBase = "UnityEngine.MonoBehaviour")]
-	[TemplateNamespace(Name = "UI")]
-	[TemplateUIElement]
-	[TemplateProperty(
-		Name = "Padding",
-		Type = typeof(Thickness),
-		GodotGetterExpression =
-			"new global::Nomad.Core.UI.Thickness(GetThemeConstant(\"margin_left\"), GetThemeConstant(\"margin_top\"), GetConstant(\"margin_right\"), GetThemeConstant(\"margin_bottom\"))",
-		IsReadOnly = true
-	)]
-	internal class PaddingContainer
-	{
-	}
+    [TemplateClass(Contract = typeof(IPaddingContainer), GodotBase = "Godot.MarginContainer", UnityBase = "UnityEngine.MonoBehaviour")]
+    [TemplateNamespace(Name = "UI")]
+    [TemplateUIElement]
+    [TemplateProperty(
+        Name = "Padding",
+        Type = typeof(Thickness),
+        GodotGetterExpression =
+            "new global::Nomad.Core.UI.Thickness(GetThemeConstant(\"margin_left\"), GetThemeConstant(\"margin_top\"), GetConstant(\"margin_right\"), GetThemeConstant(\"margin_bottom\"))",
+        IsReadOnly = true
+    )]
+    internal class PaddingContainer
+    {
+    }
 }

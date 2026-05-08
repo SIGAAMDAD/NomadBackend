@@ -13,12 +13,15 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Input.Private.ValueObjects {
-	internal readonly struct Bucket {
+namespace Nomad.Input.Private.ValueObjects
+{
+	internal readonly struct Bucket
+	{
 		public readonly int Start;
 		public readonly int Length;
 
-		public Bucket( int start, int length ) {
+		public Bucket( int start, int length )
+		{
 			Start = start;
 			Length = length;
 		}

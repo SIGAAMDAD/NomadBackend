@@ -16,13 +16,16 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Nomad.Audio.Fmod.Private.Entities {
-	internal readonly struct FMODChannelHandle {
+namespace Nomad.Audio.Fmod.Private.Entities
+{
+	internal readonly struct FMODChannelHandle
+	{
 		public readonly int Slot;
 		public readonly uint Generation;
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		public FMODChannelHandle( int slot, uint generation ) {
+		public FMODChannelHandle( int slot, uint generation )
+		{
 			Slot = slot;
 			Generation = generation;
 		}

@@ -28,7 +28,8 @@ using Nomad.Core.Memory.Buffers;
 using Nomad.Core.FileSystem.Configs;
 using Nomad.Core.FileSystem.Streams;
 
-namespace Nomad.FileSystem.Private.Services {
+namespace Nomad.FileSystem.Private.Services
+{
 	/*
 	===================================================================================
 
@@ -40,7 +41,8 @@ namespace Nomad.FileSystem.Private.Services {
 	///
 	/// </summary>
 
-	internal sealed class FileSystemService : IFileSystem {
+	internal sealed class FileSystemService : IFileSystem
+	{
 		private readonly IEngineService _engineService;
 		private readonly RecursiveFileSearcher _searchHelper;
 
@@ -58,7 +60,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="engineService"></param>
 		/// <param name="logger"></param>
-		public FileSystemService( IEngineService engineService, ILoggerService logger ) {
+		public FileSystemService( IEngineService engineService, ILoggerService logger )
+		{
 			ArgumentGuard.ThrowIfNull( engineService );
 			ArgumentGuard.ThrowIfNull( logger );
 
@@ -79,7 +82,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <summary>
 		///
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			if ( !_isDisposed ) {
 				_searchHelper?.Dispose();
 				_category?.Dispose();
@@ -97,7 +101,8 @@ namespace Nomad.FileSystem.Private.Services {
 		///
 		/// </summary>
 		/// <param name="directory"></param>
-		public void AddSearchDirectory( string directory ) {
+		public void AddSearchDirectory( string directory )
+		{
 			_searchHelper.AddSearchDirectory( ResolveDirectoryPath( directory ) ?? directory );
 		}
 
@@ -112,7 +117,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="sourcePath"></param>
 		/// <param name="destinationPath"></param>
 		/// <param name="overwrite"></param>
-		public void CopyFile( string sourcePath, string destinationPath, bool overwrite ) {
+		public void CopyFile( string sourcePath, string destinationPath, bool overwrite )
+		{
 			File.Copy( sourcePath, destinationPath, overwrite );
 		}
 
@@ -127,7 +133,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="sourcePath"></param>
 		/// <param name="destPath"></param>
 		/// <param name="destBackupPath"></param>
-		public void ReplaceFile( string sourcePath, string destPath, string destBackupPath ) {
+		public void ReplaceFile( string sourcePath, string destPath, string destBackupPath )
+		{
 			//
 			// NOTE: File.Replace does not work reliably with the VFS nor does it play very nice with temporary files. So this is here
 			// because it is the only way to reliably replace files across platforms. In testing, the temporary file existed, and File.Replace
@@ -192,7 +199,8 @@ namespace Nomad.FileSystem.Private.Services {
 		///
 		/// </summary>
 		/// <param name="path"></param>
-		public void CreateDirectory( string path ) {
+		public void CreateDirectory( string path )
+		{
 			Directory.CreateDirectory( path );
 		}
 
@@ -206,7 +214,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns></returns>
-		public bool DirectoryExists( string path ) {
+		public bool DirectoryExists( string path )
+		{
 			if ( string.IsNullOrWhiteSpace( path ) ) {
 				return false;
 			}
@@ -224,7 +233,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="path"></param>
 		/// <param name="recursive"></param>
-		public void DeleteDirectory( string path, bool recursive ) {
+		public void DeleteDirectory( string path, bool recursive )
+		{
 			Directory.Delete( path, recursive );
 		}
 
@@ -237,7 +247,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// Deletes a file at the specified path.
 		/// </summary>
 		/// <param name="path">The path of the file to delete.</param>
-		public void DeleteFile( string path ) {
+		public void DeleteFile( string path )
+		{
 			File.Delete( path );
 		}
 
@@ -251,7 +262,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns></returns>
-		public bool FileExists( string path ) {
+		public bool FileExists( string path )
+		{
 			if ( string.IsNullOrWhiteSpace( path ) ) {
 				return false;
 			}
@@ -272,7 +284,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// Gets the configuration path.
 		/// </summary>
 		/// <returns></returns>
-		public string GetConfigPath() {
+		public string GetConfigPath()
+		{
 			return _engineService.GetStoragePath( "Config", StorageScope.UserData );
 		}
 
@@ -285,7 +298,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// Gets the resource path.
 		/// </summary>
 		/// <returns>The resource path.</returns>
-		public string GetResourcePath() {
+		public string GetResourcePath()
+		{
 			return _engineService.GetStoragePath( StorageScope.StreamingAssets );
 		}
 
@@ -298,7 +312,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// Gets the save directory.
 		/// </summary>
 		/// <returns>The save directory path.</returns>
-		public string GetSavePath() {
+		public string GetSavePath()
+		{
 			return _engineService.GetStoragePath( "SaveData", StorageScope.UserData );
 		}
 
@@ -311,7 +326,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// Gets the user data directory.
 		/// </summary>
 		/// <returns>The user data directory path.</returns>
-		public string GetUserDataPath() {
+		public string GetUserDataPath()
+		{
 			return _engineService.GetStoragePath( StorageScope.UserData );
 		}
 
@@ -325,7 +341,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="path">The path to get directories from.</param>
 		/// <returns>A list of directory paths.</returns>
-		public IReadOnlyList<string> GetDirectories( string path ) {
+		public IReadOnlyList<string> GetDirectories( string path )
+		{
 			string? resolvedPath = ResolveDirectoryPath( path );
 			return resolvedPath == null
 				? Array.Empty<string>()
@@ -344,7 +361,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="searchPattern">The search pattern to use.</param>
 		/// <param name="recursive">Whether to search recursively.</param>
 		/// <returns>A list of file paths.</returns>
-		public IReadOnlyList<string> GetFiles( string path, string searchPattern, bool recursive ) {
+		public IReadOnlyList<string> GetFiles( string path, string searchPattern, bool recursive )
+		{
 			string? resolvedPath = ResolveDirectoryPath( path );
 			return resolvedPath == null
 				? Array.Empty<string>()
@@ -361,7 +379,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="path">The path of the file to get the size of.</param>
 		/// <returns>The size of the file in bytes.</returns>
-		public long GetFileSize( string path ) {
+		public long GetFileSize( string path )
+		{
 			var info = new FileInfo( path );
 			return info.Length;
 		}
@@ -376,7 +395,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="path">The path of the file to get the last write time of.</param>
 		/// <returns>The last write time of the file.</returns>
-		public DateTime GetLastWriteTime( string path ) {
+		public DateTime GetLastWriteTime( string path )
+		{
 			var info = new FileInfo( path );
 			return info.LastWriteTime;
 		}
@@ -392,7 +412,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="sourcePath">The path of the file to move.</param>
 		/// <param name="destinationPath">The path to move the file to.</param>
 		/// <param name="overwrite"></param>
-		public void MoveFile( string sourcePath, string destinationPath, bool overwrite = false ) {
+		public void MoveFile( string sourcePath, string destinationPath, bool overwrite = false )
+		{
 #if NETSTANDARD2_1
 			if ( overwrite && FileExists( destinationPath ) ) {
 				DeleteFile( destinationPath );
@@ -413,7 +434,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="config">How to create the stream and rules around how it should be handled.</param>
 		/// <returns>The read stream for the specified file path.</returns>
-		public IReadStream? OpenRead( IReadConfig config ) {
+		public IReadStream? OpenRead( IReadConfig config )
+		{
 			ArgumentGuard.ThrowIfNull( config );
 
 			switch ( config.Type ) {
@@ -457,7 +479,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="config">How to create the stream and rules around how it should be handled.</param>
 		/// <param name="ct">The cancellation token.</param>
 		/// <returns>The read stream for the specified file path.</returns>
-		public async ValueTask<IReadStream?> OpenReadAsync( IReadConfig config, CancellationToken ct = default ) {
+		public async ValueTask<IReadStream?> OpenReadAsync( IReadConfig config, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			return OpenRead( config );
 		}
@@ -472,7 +495,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="config">How to create the stream and rules around how it should be handled.</param>
 		/// <returns>The write stream for the specified file path.</returns>
-		public IWriteStream? OpenWrite( IWriteConfig config ) {
+		public IWriteStream? OpenWrite( IWriteConfig config )
+		{
 			ArgumentGuard.ThrowIfNull( config );
 
 			return config.Type switch {
@@ -500,7 +524,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="config">How to create the stream and rules around how it should be handled.</param>
 		/// <param name="ct">The cancellation token.</param>
 		/// <returns>The write stream with the specified configuration.</returns>
-		public async ValueTask<IWriteStream?> OpenWriteAsync( IWriteConfig config, CancellationToken ct = default ) {
+		public async ValueTask<IWriteStream?> OpenWriteAsync( IWriteConfig config, CancellationToken ct = default )
+		{
 			ct.ThrowIfCancellationRequested();
 			return OpenWrite( config );
 		}
@@ -519,7 +544,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="length"></param>
 		/// <returns></returns>
 		/// <exception cref="NotImplementedException"></exception>
-		public IDataStream CreateStream( FileAccess accessMode, StreamType type, string outputFile = "", int length = 0 ) {
+		public IDataStream CreateStream( FileAccess accessMode, StreamType type, string outputFile = "", int length = 0 )
+		{
 			throw new NotImplementedException();
 		}
 
@@ -534,7 +560,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="path"></param>
 		/// <returns></returns>
 		/// <exception cref="IOException"></exception>
-		public IBufferHandle? LoadFile( string path ) {
+		public IBufferHandle? LoadFile( string path )
+		{
 			var fullPath = _searchHelper.FindFile( path );
 			if ( fullPath == null ) {
 				return null;
@@ -559,7 +586,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="ct"></param>
 		/// <returns></returns>
 		/// <exception cref="IOException"></exception>
-		public async ValueTask<IBufferHandle?> LoadFileAsync( string path, CancellationToken ct = default ) {
+		public async ValueTask<IBufferHandle?> LoadFileAsync( string path, CancellationToken ct = default )
+		{
 			var fullPath = _searchHelper.FindFile( path );
 			if ( fullPath == null ) {
 				return null;
@@ -585,7 +613,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="buffer"></param>
 		/// <param name="offset"></param>
 		/// <param name="length"></param>
-		public void WriteFile( string path, byte[] buffer, int offset, int length ) {
+		public void WriteFile( string path, byte[] buffer, int offset, int length )
+		{
 			using var stream = OpenWrite( new FileWriteConfig { FilePath = path } ) ?? throw new IOException( $"Error opening file {path}" );
 			stream.Write( buffer, offset, length );
 		}
@@ -603,7 +632,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// <param name="offset"></param>
 		/// <param name="length"></param>
 		/// <param name="ct"></param>
-		public async ValueTask WriteFileAsync( string path, ReadOnlyMemory<byte> buffer, int offset, int length, CancellationToken ct = default ) {
+		public async ValueTask WriteFileAsync( string path, ReadOnlyMemory<byte> buffer, int offset, int length, CancellationToken ct = default )
+		{
 			ArgumentGuard.ThrowIfNull( buffer );
 
 			ct.ThrowIfCancellationRequested();
@@ -621,7 +651,8 @@ namespace Nomad.FileSystem.Private.Services {
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns></returns>
-		private string? ResolveDirectoryPath( string path ) {
+		private string? ResolveDirectoryPath( string path )
+		{
 			if ( string.IsNullOrWhiteSpace( path ) ) {
 				return null;
 			}

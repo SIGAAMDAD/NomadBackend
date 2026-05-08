@@ -17,7 +17,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Nomad.Audio.Interfaces;
 
-namespace Nomad.Audio.Fmod.Private.ValueObjects {
+namespace Nomad.Audio.Fmod.Private.ValueObjects
+{
 	/*
 	===================================================================================
 
@@ -29,7 +30,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 	///
 	/// </summary>
 
-	internal readonly struct FMODBankResource : IAudioResource {
+	internal readonly struct FMODBankResource : IAudioResource
+	{
 		private readonly FMOD.Studio.Bank _instance;
 
 		public readonly bool IsValid => _instance.isValid();
@@ -43,7 +45,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		/// 
 		/// </summary>
 		/// <param name="instance"></param>
-		public FMODBankResource( FMOD.Studio.Bank instance ) {
+		public FMODBankResource( FMOD.Studio.Bank instance )
+		{
 			_instance = instance;
 		}
 
@@ -55,7 +58,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Dispose() {
+		public void Dispose()
+		{
 			Unload();
 		}
 
@@ -67,7 +71,8 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects {
 		/// <summary>
 		/// 
 		/// </summary>
-		public void Unload() {
+		public void Unload()
+		{
 			if ( _instance.isValid() ) {
 				FMODValidator.ValidateCall( _instance.unloadSampleData() );
 				FMODValidator.ValidateCall( _instance.unload() );

@@ -19,7 +19,8 @@ using Nomad.Audio.Fmod.ValueObjects;
 using Nomad.Audio.Interfaces;
 using Nomad.Audio.ValueObjects;
 
-namespace Nomad.Audio.Fmod.Private.Entities {
+namespace Nomad.Audio.Fmod.Private.Entities
+{
 	/*
 	===================================================================================
 	
@@ -31,7 +32,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 	/// 
 	/// </summary>
 
-	internal sealed class FMODEmitter : IAudioEmitter {
+	internal sealed class FMODEmitter : IAudioEmitter
+	{
 		public Vector2 Position {
 			get => _position;
 			set {
@@ -87,12 +89,14 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 			}
 		}
 
-		public FMODEmitter( FMODChannelService channelService, SoundCategory category ) {
+		public FMODEmitter( FMODChannelService channelService, SoundCategory category )
+		{
 			_channelService = channelService;
 			_category = category;
 		}
 
-		public void PlaySound( string id, float priority = 0.5f ) {
+		public void PlaySound( string id, float priority = 0.5f )
+		{
 			// We do not need to unhook events anymore because handles are value types.
 			_currentHandle = null;
 
@@ -110,7 +114,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 			ApplyCachedState();
 		}
 
-		public void Stop() {
+		public void Stop()
+		{
 			if ( TryResolveCurrentHandle( out var handle ) ) {
 				_channelService.TryStopChannel( handle, false );
 			}
@@ -118,7 +123,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 			_currentHandle = null;
 		}
 
-		private void ApplyCachedState() {
+		private void ApplyCachedState()
+		{
 			if ( !TryResolveCurrentHandle( out var handle ) ) {
 				return;
 			}
@@ -128,7 +134,8 @@ namespace Nomad.Audio.Fmod.Private.Entities {
 			_channelService.TrySetPitch( handle, _pitch );
 		}
 
-		private bool TryResolveCurrentHandle( out FMODChannelHandle handle ) {
+		private bool TryResolveCurrentHandle( out FMODChannelHandle handle )
+		{
 			if ( _currentHandle is FMODChannelHandle existing && _channelService.IsAlive( existing ) ) {
 				handle = existing;
 				return true;
