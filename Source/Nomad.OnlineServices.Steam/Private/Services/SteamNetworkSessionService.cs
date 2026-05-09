@@ -14,11 +14,14 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.Events;
 using Nomad.Core.OnlineServices;
 using Nomad.OnlineServices.Steam.Private.Repositories;
+using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Nomad.OnlineServices.Steam.Services.NetworkServices;
 
 namespace Nomad.OnlineServices.Steam.Private.Services
@@ -60,7 +63,6 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 			_lobbyService = lobbyService ?? throw new ArgumentNullException( nameof( lobbyService ) );
 			_lobbyRepository = repository ?? throw new ArgumentNullException( nameof( repository ) );
 
-
 			_lobbyService.LobbyJoined.Subscribe( OnLobbyJoined );
 			_lobbyService.LobbyLeft.Subscribe( OnLobbyLeft );
 			_lobbyService.LobbyStarted.Subscribe( OnLobbyStarted );
@@ -78,19 +80,28 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		{
 		}
 
-		public async ValueTask BroadcastAsync<TMessage>( TMessage message, CancellationToken ct = default )
+		public void Broadcast<TMessage>( ref TMessage message )
 			where TMessage : struct
 		{
+			ReadOnlySpan<byte> memory = MemoryMarshal.AsBytes( MemoryMarshal.CreateReadOnlySpan( ref message, 1 ) );
+
+			for ( int i = 0; i < _currentSession.Peers.Count; i++ ) {
+				_packetSender.SendToPeer( null, new() );
+			}
 		}
 
-		public async ValueTask SendToHostAsync<TMessage>( TMessage message, CancellationToken ct = default )
+		public void SendToHost<TMessage>( TMessage message )
 			where TMessage : struct
 		{
+			ReadOnlySpan<byte> memory = MemoryMarshal.AsBytes( MemoryMarshal.CreateReadOnlySpan( ref message, 1 ) );
+			_packetSender.SendToPeer( null, new() );
 		}
 
-		public async ValueTask SendToPeerAsync<TMessage>( PeerId peerId, TMessage message, CancellationToken ct = default )
+		public void SendToPeer<TMessage>( PeerId peerId, ref TMessage message)
 			where TMessage : struct
 		{
+			ReadOnlySpan<byte> memory = MemoryMarshal.AsBytes( MemoryMarshal.CreateReadOnlySpan( ref message, 1 ) );
+			_packetSender.SendToPeer( null, new() );
 		}
 
 		public async Task<bool> StartHostAsync( LobbyInfo info, CancellationToken ct = default )

@@ -38,13 +38,13 @@ namespace Nomad.Core.OnlineServices
         Task<bool> JoinAsClientAsync(Guid id, CancellationToken ct = default);
         Task StopAsync(CancellationToken ct = default);
 
-        ValueTask SendToHostAsync<TMessage>(TMessage message, CancellationToken ct = default)
+        void SendToHost<TMessage>(ref TMessage message)
             where TMessage : struct;
 
-        ValueTask SendToPeerAsync<TMessage>(PeerId peerId, TMessage message, CancellationToken ct = default)
+        void SendToPeer<TMessage>(PeerId peerId, ref TMessage message)
             where TMessage : struct;
 
-        ValueTask BroadcastAsync<TMessage>(TMessage message, CancellationToken ct = default)
+        void Broadcast<TMessage>(ref TMessage message)
             where TMessage : struct;
     }
 }

@@ -57,7 +57,6 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 
 		private readonly Callback<LobbyInvite_t> _lobbyInvite;
 		private readonly Callback<LobbyChatMsg_t> _lobbyChatMsg;
-		private readonly Callback<LobbyChatUpdate_t> _lobbyMemberStatusChanged;
 		private readonly Callback<LobbyKicked_t> _lobbyKicked;
 
 		private readonly SteamAsyncCallbackDispatcher<LobbyEnter_t, bool> _lobbyEnter;
@@ -102,7 +101,6 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 
 			_lobbyInvite = Callback<LobbyInvite_t>.Create( OnLobbyInvite );
 			_lobbyChatMsg = Callback<LobbyChatMsg_t>.Create( OnLobbyChatMsg );
-			_lobbyMemberStatusChanged = Callback<LobbyChatUpdate_t>.Create( OnLobbyMemberStatusChanged );
 			_lobbyEnter = new SteamAsyncCallbackDispatcher<LobbyEnter_t, bool>();
 			_lobbyCreated = new SteamAsyncCallbackDispatcher<LobbyCreated_t, SteamLobbyData>();
 			_lobbyStatusChanged = new SteamAsyncCallbackDispatcher<LobbyChatUpdate_t, bool>();
@@ -122,29 +120,6 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 					LobbyLeaveResultEventArgs.Name,
 					LobbyLeaveResultEventArgs.NameSpace
 				);
-		}
-
-		/*
-		===============
-		OnLobbyMemberStatusChanged
-		===============
-		*/
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="pCallback"></param>
-		private void OnLobbyMemberStatusChanged( LobbyChatUpdate_t pCallback )
-		{
-			CSteamID userChangedId = (CSteamID)pCallback.m_ulSteamIDUserChanged;
-			switch ( (EChatMemberStateChange)pCallback.m_rgfChatMemberStateChange ) {
-				case EChatMemberStateChange.k_EChatMemberStateChangeBanned:
-				case EChatMemberStateChange.k_EChatMemberStateChangeDisconnected:
-				case EChatMemberStateChange.k_EChatMemberStateChangeLeft:
-				case EChatMemberStateChange.k_EChatMemberStateChangeKicked:
-					break;
-				case EChatMemberStateChange.k_EChatMemberStateChangeEntered:
-					break;
-			}
 		}
 
 		/*

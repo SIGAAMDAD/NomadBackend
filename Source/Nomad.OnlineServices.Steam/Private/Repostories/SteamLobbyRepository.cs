@@ -54,6 +54,7 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories
 		/// <summary>
 		///
 		/// </summary>
+		/// <param name="cvarSystem"></param>
 		public SteamLobbyRepository( ICVarSystemService cvarSystem )
 		{
 			var lobbyPurgeTimeout = cvarSystem.GetCVarOrThrow<int>( Constants.CVars.LOBBY_PURGE_INTERVAL );
