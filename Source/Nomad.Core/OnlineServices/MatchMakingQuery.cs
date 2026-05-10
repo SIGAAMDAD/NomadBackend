@@ -13,17 +13,17 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+using System.Collections.Generic;
+
+namespace Nomad.Core.OnlineServices
 {
-	internal enum NetworkPacketType : ushort
+    public sealed record MatchMakingQuery
 	{
-		Invalid = 0,
-
-		Handshake = 1,
-		Ping = 2,
-		Pong = 3,
-
-		Payload = 100,
-		Chat = 101
-	};
-};
+		public IReadOnlyList<string>? Maps { get; init; }
+		public IReadOnlyList<string>? GameModes { get; init; }
+		public IReadOnlyDictionary<string, string>? Metadata { get; init; }
+		public bool FriendsOnly { get; init; }
+		public ServerRange Range { get; init; }
+		public int MaxResults { get; init; } = 50;
+	}
+}

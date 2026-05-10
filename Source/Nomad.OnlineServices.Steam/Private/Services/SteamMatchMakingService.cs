@@ -23,8 +23,8 @@ using Nomad.Core.CVars;
 using Nomad.Core.Events;
 using Nomad.Core.OnlineServices;
 using Nomad.CVars;
-using Nomad.OnlineServices.Steam.Private.Repositories;
-using Nomad.OnlineServices.Steam.Private.Services;
+using Nomad.OnlineServices.Steam.Private.Lobby;
+using Nomad.OnlineServices.Steam.Private.Util;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 

@@ -18,13 +18,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Services
+namespace Nomad.OnlineServices.Steam.Private.Util
 {
 	/*
 	===================================================================================
-	
+
 	SteamAsyncCallbackDispatcher
-	
+
 	===================================================================================
 	*/
 	/// <summary>
@@ -50,7 +50,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <exception cref="InvalidOperationException"></exception>
 		public SteamAsyncCallbackDispatcher()
@@ -66,7 +66,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Dispose()
 		{
@@ -88,7 +88,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <param name="steamCallback"></param>
@@ -111,7 +111,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <param name="steamCallback"></param>
@@ -152,7 +152,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="pCallback"></param>
 		private void OnCallback( TCallbackArgs pCallback )

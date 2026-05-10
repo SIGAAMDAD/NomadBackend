@@ -21,7 +21,7 @@ using Nomad.Core.Logger;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Services.NetworkServices
+namespace Nomad.OnlineServices.Steam.Private.Network
 {
 	internal sealed class SteamNetworkPacketReceiver
 	{

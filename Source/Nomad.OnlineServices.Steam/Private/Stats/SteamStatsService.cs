@@ -17,9 +17,8 @@ using System;
 using System.Threading.Tasks;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
-using Nomad.OnlineServices.Steam.Private.Repositories;
 
-namespace Nomad.OnlineServices.Steam
+namespace Nomad.OnlineServices.Steam.Private.Stats
 {
 	/*
 	===================================================================================
@@ -48,7 +47,7 @@ namespace Nomad.OnlineServices.Steam
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="statsRepository"></param>
 		/// <param name="logger"></param>
@@ -65,7 +64,7 @@ namespace Nomad.OnlineServices.Steam
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Dispose()
 		{

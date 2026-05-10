@@ -25,26 +25,44 @@ namespace Nomad.Core.OnlineServices
     /// </summary>
     public interface INetworkSessionService
     {
+        /// <summary>
+        ///
+        /// </summary>
         bool IsSessionActive { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
         bool IsHost { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
         bool IsClient { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
         NetworkSessionInfo? CurrentSession { get; }
 
         IGameEvent<EmptyEventArgs> SessionChanged { get; }
-        IGameEvent<PeerId> PeerConnected { get; }
-        IGameEvent<PeerId> PeerDisconnected { get; }
 
-        Task<bool> StartHostAsync(LobbyInfo info, CancellationToken ct = default);
-        Task<bool> JoinAsClientAsync(Guid id, CancellationToken ct = default);
+        [Event(nameSpace: "Nomad.Core.OnlineServices")]
+        [EventPayload("PeerId", typeof(PeerId), Order = 1)]
+        IGameEvent<PeerConnectedEventArgs> PeerConnected { get; }
+
+        [Event(nameSpace: "Nomad.Core.OnlineServices")]
+        [EventPayload("PeerId", typeof(PeerId), Order = 1)]
+        [EventPayload("LeaveReason", typeof(LobbyLeaveReason), Order = 2)]
+        IGameEvent<PeerDisconnectedEventArgs> PeerDisconnected { get; }
+
+        Task<bool> StartHostAsync(LobbyCreateInfo info, CancellationToken ct = default);
+        Task<bool> JoinAsClientAsync(LobbyId lobbyId, CancellationToken ct = default);
         Task StopAsync(CancellationToken ct = default);
 
-        void SendToHost<TMessage>(ref TMessage message)
-            where TMessage : struct;
-
-        void SendToPeer<TMessage>(PeerId peerId, ref TMessage message)
-            where TMessage : struct;
-
-        void Broadcast<TMessage>(ref TMessage message)
-            where TMessage : struct;
+        void SendToHost(ReadOnlySpan<byte> payload, NetworkSendMode mode = NetworkSendMode.Unreliable);
+        void SendToPeer(PeerId peerId, ReadOnlySpan<byte> payload, NetworkSendMode mode = NetworkSendMode.Unreliable);
+        void Broadcast(ReadOnlySpan<byte> payload, NetworkSendMode mode = NetworkSendMode.Unreliable);
+        bool TryReceive(Span<byte> destination, out NetworkPacketInfo info);
     }
 }

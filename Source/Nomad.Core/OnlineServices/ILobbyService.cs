@@ -16,7 +16,9 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Nomad.Core.Events;
+using Nomad.Core.Util;
 
 namespace Nomad.Core.OnlineServices
 {
@@ -69,7 +71,13 @@ namespace Nomad.Core.OnlineServices
         /// <param name="lobbyInfo">The information to create the lobby with.</param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        Task<Guid> CreateLobby(LobbyInfo lobbyInfo, CancellationToken ct = default);
+        [ResultObject("LobbyCreateResult", isRecord: true, Namespace = "Nomad.Core.OnlineServices")]
+        [ResultObjectPayload("Id", typeof(LobbyId), order: 1)]
+        [ResultObjectPayload("Lobby", typeof(LobbyInfo), order: 2, IsOptional = true)]
+        [ResultObjectPayload("Reason", typeof(NetworkSessionFailureReason), order: 3)]
+        [ResultObjectFailure("Reason", MethodName = "Failure")]
+        [ResultObjectSuccess("Id", MethodName = "Created")]
+        Task<LobbyCreateResult> CreateLobby(LobbyCreateInfo lobbyInfo, CancellationToken ct = default);
 
         /// <summary>
         ///
@@ -77,7 +85,12 @@ namespace Nomad.Core.OnlineServices
         /// <param name="lobbyId">The lobby's unique 64-bit id.</param>
         /// <param name="ct"></param>
         /// <returns>True if the lobby was joined successfully, false otherwise.</returns>
-        Task<bool> JoinLobby(Guid lobbyId, CancellationToken ct = default);
+        [ResultObject("LobbyJoinResult", isRecord: true, Namespace = "Nomad.Core.OnlineServices")]
+        [ResultObjectPayload("LobbyData", typeof(LobbyInfo), order: 2, IsOptional = true)]
+        [ResultObjectPayload("Reason", typeof(NetworkSessionFailureReason), order: 3, IsOptional = true)]
+        [ResultObjectFailure("Reason", MethodName = "Failure")]
+        [ResultObjectSuccess("LobbyData", MethodName = "Joined")]
+        Task<LobbyJoinResult> JoinLobby(LobbyId lobbyId, CancellationToken ct = default);
 
         /// <summary>
         /// Leaves the current lobby.
@@ -87,11 +100,9 @@ namespace Nomad.Core.OnlineServices
         Task<bool> LeaveLobby(CancellationToken ct = default);
 
         /// <summary>
-        /// Promotes a member to lobby leader.
+        ///
         /// </summary>
-        /// <param name="player">The player to promote.</param>
-        /// <param name="ct"></param>
-        /// <returns><c>True</c> if the player was promoted successfully, <c>false</c> otherwise.</returns>
-        Task<bool> PromoteMember(Guid player, CancellationToken ct = default);
+        /// <returns></returns>
+        IReadOnlyList<LobbyMemberInfo> GetMembers();
     }
 }

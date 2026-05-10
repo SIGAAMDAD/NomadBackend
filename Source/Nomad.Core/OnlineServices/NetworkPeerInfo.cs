@@ -15,6 +15,9 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 namespace Nomad.Core.OnlineServices
 {
+    /// <summary>
+    ///
+    /// </summary>
     public readonly struct NetworkPeerInfo
     {
         public PeerId PeerId { get; }
@@ -23,8 +26,17 @@ namespace Nomad.Core.OnlineServices
         public bool IsLocal { get; }
         public bool IsReady { get; }
         public int PlayerSlot { get; }
+        public NetworkConnectionState State { get; }
 
-        public NetworkPeerInfo(PeerId peerId, string displayName, bool isHost, bool isLocal, bool isReady, int playerSlot)
+        public NetworkPeerInfo(
+            PeerId peerId,
+            string displayName,
+            bool isHost,
+            bool isLocal,
+            bool isReady,
+            int playerSlot,
+            NetworkConnectionState state
+        )
         {
             PeerId = peerId;
             DisplayName = displayName;
@@ -32,6 +44,7 @@ namespace Nomad.Core.OnlineServices
             IsLocal = isLocal;
             IsReady = isReady;
             PlayerSlot = playerSlot;
+            State = state;
         }
     }
 }

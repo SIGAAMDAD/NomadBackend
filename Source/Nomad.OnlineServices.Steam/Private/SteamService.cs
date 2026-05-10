@@ -21,9 +21,10 @@ using Nomad.Core.Events;
 using Nomad.Core.FileSystem;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
+using Nomad.OnlineServices.Steam.Private.Lobby;
 using Nomad.OnlineServices.Steam.Private.Registries;
-using Nomad.OnlineServices.Steam.Private.Repositories;
 using Nomad.OnlineServices.Steam.Private.Services;
+using Nomad.OnlineServices.Steam.Private.Stats;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 

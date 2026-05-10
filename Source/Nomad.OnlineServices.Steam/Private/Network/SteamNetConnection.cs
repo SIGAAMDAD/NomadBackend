@@ -17,17 +17,17 @@ using System;
 using Nomad.Core.OnlineServices;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+namespace Nomad.OnlineServices.Steam.Private.Network
 {
 	/*
 	===================================================================================
-	
+
 	SteamNetConnection
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal sealed class SteamNetConnection
@@ -51,7 +51,7 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="connection"></param>
 		/// <param name="remoteIdentity"></param>
@@ -67,7 +67,11 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 
 		public void SetStatus( NetworkConnectionState state )
 		{
+			if ( _status == state ) {
+				return;
+			}
 			_status = state;
+			LastStateChangeUtc = DateTime.UtcNow;
 		}
 	};
 };

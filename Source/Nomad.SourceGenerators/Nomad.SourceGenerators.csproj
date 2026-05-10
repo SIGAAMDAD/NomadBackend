@@ -15,7 +15,7 @@
     <AssemblyName>Nomad.SourceGenerators</AssemblyName>
     <RootNamespace>Nomad.SourceGenerators</RootNamespace>
 
-    <NoWarn>$(NoWarn);RS2008;CA1502;CA1506</NoWarn>
+    <NoWarn>$(NoWarn);RS2008;CA1502;CA1506;CA1308</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

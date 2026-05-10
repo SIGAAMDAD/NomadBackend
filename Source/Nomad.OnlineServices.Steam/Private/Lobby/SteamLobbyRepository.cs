@@ -18,11 +18,11 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Nomad.Core.CVars;
-using System.Threading;
+using System.Timers;
 using Nomad.CVars;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Repositories
+namespace Nomad.OnlineServices.Steam.Private.Lobby
 {
 	/*
 	===================================================================================
@@ -60,7 +60,13 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories
 			var lobbyPurgeTimeout = cvarSystem.GetCVarOrThrow<int>( Constants.CVars.LOBBY_PURGE_INTERVAL );
 			_lobbyPurgeTimeout = lobbyPurgeTimeout.Value;
 
-			_purgeTimer = new Timer( _ => RemoveStaleLobbies(), null, TimeSpan.FromSeconds( _lobbyPurgeTimeout ), TimeSpan.FromSeconds( _lobbyPurgeTimeout ) );
+			_purgeTimer = new Timer() {
+				AutoReset = true,
+				Enabled = true,
+				Interval = TimeSpan.FromSeconds( _lobbyPurgeTimeout ).TotalMilliseconds
+			};
+			_purgeTimer.Elapsed += (sender, args) => RemoveStaleLobbies();
+			_purgeTimer.Start();
 		}
 
 		/*
@@ -74,11 +80,29 @@ namespace Nomad.OnlineServices.Steam.Private.Repositories
 		public void Dispose()
 		{
 			if ( !_isDisposed ) {
-				_purgeTimer?.Change( Timeout.Infinite, Timeout.Infinite );
+				_purgeTimer?.Stop();
 				_purgeTimer?.Dispose();
 			}
 			GC.SuppressFinalize( this );
 			_isDisposed = true;
+		}
+
+		/*
+		===============
+		SetPollingEnabled
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="enabled"></param>
+		public void SetPollingEnabled( bool enabled )
+		{
+			if ( enabled ) {
+				_purgeTimer.Start();
+			} else {
+				_purgeTimer.Stop();
+			}
 		}
 
 		/*

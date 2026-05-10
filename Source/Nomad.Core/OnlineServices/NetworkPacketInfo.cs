@@ -13,17 +13,19 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+namespace Nomad.Core.OnlineServices
 {
-	internal enum NetworkPacketType : ushort
-	{
-		Invalid = 0,
+    public readonly struct NetworkPacketInfo
+    {
+        public readonly PeerId From;
+        public readonly int BytesWritten;
+        public readonly NetworkSendMode Mode;
 
-		Handshake = 1,
-		Ping = 2,
-		Pong = 3,
-
-		Payload = 100,
-		Chat = 101
-	};
-};
+        public NetworkPacketInfo(PeerId from, int bytesWritten, NetworkSendMode mode)
+        {
+            From = from;
+            BytesWritten = bytesWritten;
+            Mode = mode;
+        }
+    }
+}

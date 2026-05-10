@@ -14,18 +14,29 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
-using System.Buffers.Binary;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.Events;
 using Nomad.Core.OnlineServices;
-using Nomad.OnlineServices.Steam.Private.Repositories;
+using Nomad.OnlineServices.Steam.Private.Lobby;
+using Nomad.OnlineServices.Steam.Private.Network;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
-using Nomad.OnlineServices.Steam.Services.NetworkServices;
+using Steamworks;
 
 namespace Nomad.OnlineServices.Steam.Private.Services
 {
+	/*
+	===================================================================================
+
+	SteamNetworkSessionService
+
+	===================================================================================
+	*/
+	/// <summary>
+	///
+	/// </summary>
+
 	internal sealed class SteamNetworkSessionService : INetworkSessionService
 	{
 		public bool IsSessionActive => _lobbyService.IsInLobby;
@@ -41,31 +52,36 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 			}
 		}
 
-		public IGameEvent<PeerId> PeerConnected {
-			get {
-				throw new NotImplementedException();
-			}
-		}
+		public IGameEvent<PeerConnectedEventArgs> PeerConnected => _peerConnected;
+		private readonly IGameEvent<PeerConnectedEventArgs> _peerConnected = default;
 
-		public IGameEvent<PeerId> PeerDisconnected {
-			get {
-				throw new NotImplementedException();
-			}
-		}
+		public IGameEvent<PeerDisconnectedEventArgs> PeerDisconnected => _peerDisconnected;
+		private readonly IGameEvent<PeerDisconnectedEventArgs> _peerDisconnected = default;
 
-		private readonly ILobbyService _lobbyService;
-		private readonly SteamLobbyRepository _lobbyRepository;
-		private readonly SteamNetworkPacketSender _packetSender;
-		private readonly SteamNetworkPacketReceiver _packetReceiver;
+		private readonly Dictionary<PeerId, HSteamNetConnection> _peerToConnection = new();
 
-		public SteamNetworkSessionService( ILobbyService lobbyService, SteamLobbyRepository repository, SteamConnectionRepository connectionRepository )
+		private readonly SteamLobbyService _lobbyService;
+		private readonly SteamNetDriver _netDriver;
+
+		public SteamNetworkSessionService( SteamLobbyService lobbyService, SteamNetDriver netDriver )
 		{
 			_lobbyService = lobbyService ?? throw new ArgumentNullException( nameof( lobbyService ) );
-			_lobbyRepository = repository ?? throw new ArgumentNullException( nameof( repository ) );
+			_netDriver = netDriver ?? throw new ArgumentNullException( nameof( netDriver ) );
+
+			_netDriver.ConnectionClosed += OnConnectionClosed;
+			_netDriver.ConnectionEstablished += OnConnectionCreated;
 
 			_lobbyService.LobbyJoined.Subscribe( OnLobbyJoined );
 			_lobbyService.LobbyLeft.Subscribe( OnLobbyLeft );
 			_lobbyService.LobbyStarted.Subscribe( OnLobbyStarted );
+		}
+
+		private void OnConnectionCreated( SteamNetConnection connection )
+		{
+		}
+
+		private void OnConnectionClosed( SteamNetConnection connection )
+		{
 		}
 
 		private void OnLobbyStarted( in LobbyStartResultEventArgs args )
@@ -80,66 +96,105 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		{
 		}
 
-		public void Broadcast<TMessage>( ref TMessage message )
-			where TMessage : struct
+		public void Broadcast( ReadOnlySpan<byte> payload, NetworkSendMode mode )
 		{
-			ReadOnlySpan<byte> memory = MemoryMarshal.AsBytes( MemoryMarshal.CreateReadOnlySpan( ref message, 1 ) );
+			var current = _lobbyService.ActiveLobby ?? throw new InvalidOperationException();
 
 			for ( int i = 0; i < _currentSession.Peers.Count; i++ ) {
-				_packetSender.SendToPeer( null, new() );
+				if ( !current.Members.TryGetValue( _currentSession.Peers[i].PeerId, out var sessionPeer ) ) {
+					continue;
+				}
+				if ( !_netDriver.TryGetConnection( sessionPeer.SteamId, out var connection ) ) {
+					continue;
+				}
+				_netDriver.Send(
+					connection,
+					payload,
+					NetworkPacketType.Payload,
+					mode
+				);
 			}
 		}
 
-		public void SendToHost<TMessage>( TMessage message )
-			where TMessage : struct
+		public void SendToHost( ReadOnlySpan<byte> payload, NetworkSendMode mode )
 		{
-			ReadOnlySpan<byte> memory = MemoryMarshal.AsBytes( MemoryMarshal.CreateReadOnlySpan( ref message, 1 ) );
-			_packetSender.SendToPeer( null, new() );
+			var current = _lobbyService.ActiveLobby;
+			if ( current == null ) {
+				return;
+			}
+
+			if ( !current.Members.TryGetValue( _currentSession.HostPeerId, out var sessionPeer ) ) {
+				return;
+			}
+			if ( !_netDriver.TryGetConnection( sessionPeer.SteamId, out var connection ) ) {
+				return;
+			}
+			_netDriver.Send(
+				connection,
+				payload,
+				NetworkPacketType.Payload,
+				mode
+			);
 		}
 
-		public void SendToPeer<TMessage>( PeerId peerId, ref TMessage message)
-			where TMessage : struct
+		public void SendToPeer( PeerId peerId, ReadOnlySpan<byte> payload, NetworkSendMode mode )
 		{
-			ReadOnlySpan<byte> memory = MemoryMarshal.AsBytes( MemoryMarshal.CreateReadOnlySpan( ref message, 1 ) );
-			_packetSender.SendToPeer( null, new() );
+			if ( !_lobbyService.ActiveLobby.Members.TryGetValue( peerId, out var sessionPeer ) ) {
+				return;
+			}
+			if ( !_netDriver.TryGetConnection( sessionPeer.SteamId, out var connection ) ) {
+				return;
+			}
+			_netDriver.Send(
+				connection,
+				payload,
+				NetworkPacketType.Payload,
+				mode
+			);
 		}
 
-		public async Task<bool> StartHostAsync( LobbyInfo info, CancellationToken ct = default )
+		public async Task<bool> StartHostAsync( LobbyCreateInfo info, CancellationToken ct = default )
 		{
 			var lobby = await _lobbyService.CreateLobby( info, ct );
-			if ( lobby == Guid.Empty ) {
+			if ( lobby.IsFailure ) {
 				return false;
 			}
-			_currentSession = new NetworkSessionInfo {
-				SessionId = lobby,
-				Mode = NetworkSessionMode.Host,
-				State = NetworkConnectionState.StartingHost,
-			};
+			CreateSession( lobby.Lobby, true );
 			return true;
 		}
 
-		public async Task<bool> JoinAsClientAsync( Guid id, CancellationToken ct = default )
+		public async Task<bool> JoinAsClientAsync( LobbyId id, CancellationToken ct = default )
 		{
 			var result = await _lobbyService.JoinLobby( id, ct );
-			if ( !result ) {
+			if ( !result.IsSuccess ) {
 				return false;
 			}
-			_currentSession = new NetworkSessionInfo { };
+			CreateSession( result.LobbyData, false );
 			return false;
-		}
-
-		private void CreateSession( Guid lobbyId, bool isHost )
-		{
-			_currentSession = new NetworkSessionInfo {
-				SessionId = Guid.NewGuid(),
-				Mode = isHost ? NetworkSessionMode.Host : NetworkSessionMode.Client,
-				State = isHost ? NetworkConnectionState.StartingHost : NetworkConnectionState.Connecting,
-			};
 		}
 
 		public async Task StopAsync( CancellationToken ct = default )
 		{
 			await _lobbyService.LeaveLobby( ct );
+		}
+
+		public bool TryReceive( Span<byte> destination, out NetworkPacketInfo info )
+		{
+			info = new NetworkPacketInfo();
+			foreach ( var connection in _peerToConnection ) {
+			}
+			return true;
+		}
+
+		private void CreateSession( LobbyInfo lobby, bool isHost )
+		{
+			_currentSession = new NetworkSessionInfo {
+				SessionId = Guid.NewGuid(),
+				Mode = isHost ? NetworkSessionMode.Host : NetworkSessionMode.Client,
+				State = isHost ? NetworkConnectionState.StartingHost : NetworkConnectionState.Connecting,
+				LobbyId = lobby.Id,
+				PeerCount = lobby.PlayerCount
+			};
 		}
 	};
 };

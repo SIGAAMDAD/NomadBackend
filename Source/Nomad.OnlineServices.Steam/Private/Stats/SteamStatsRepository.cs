@@ -24,7 +24,7 @@ using Nomad.Core.Util;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Repositories
+namespace Nomad.OnlineServices.Steam.Private.Stats
 {
 	/*
 	===================================================================================

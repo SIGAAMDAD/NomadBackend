@@ -18,18 +18,70 @@ using System.Collections.Generic;
 
 namespace Nomad.Core.OnlineServices
 {
-    /// <summary>
-    ///
-    /// </summary>
-    public sealed record NetworkSessionInfo
-    {
-        public Guid SessionId { get; init; }
-        public NetworkSessionMode Mode { get; init; }
-        public NetworkConnectionState State { get; init; }
-        public int MaxPlayers { get; init; }
-        public int MinPlayers { get; init; }
-        public PeerId LocalPeerId { get; init; }
-        public PeerId HostPeerId { get; init; }
-        public IReadOnlyList<NetworkPeerInfo> Peers { get; init; } = Array.Empty<NetworkPeerInfo>();
-    }
+	/// <summary>
+	/// Immutable public snapshot of the currently active network session.
+	/// </summary>
+	public sealed record NetworkSessionInfo
+	{
+		/// <summary>
+		/// Unique id for this gameplay session.
+		/// Usually matches the lobby id for lobby-backed sessions.
+		/// </summary>
+		public Guid SessionId { get; init; }
+
+		/// <summary>
+		/// The lobby that created or discovered this session, if any.
+		/// LobbyId.Invalid means this session is not backed by a lobby.
+		/// </summary>
+		public LobbyId LobbyId { get; init; }
+
+		/// <summary>
+		/// Whether this local machine is offline, host, client, or dedicated server.
+		/// </summary>
+		public NetworkSessionMode Mode { get; init; }
+
+		/// <summary>
+		/// Current high-level lifecycle state of the local session.
+		/// </summary>
+		public NetworkConnectionState State { get; init; }
+
+		/// <summary>
+		/// Minimum players required for this session to be considered startable.
+		/// </summary>
+		public int MinPlayers { get; init; }
+
+		/// <summary>
+		/// Maximum accepted gameplay peers, usually including the host/local player.
+		/// </summary>
+		public int MaxPlayers { get; init; }
+
+		/// <summary>
+		/// Number of accepted gameplay peers.
+		/// This is usually Peers.Count, but keeping it explicit avoids allocations
+		/// or repeated list traversal for UI.
+		/// </summary>
+		public int PeerCount { get; init; }
+
+		/// <summary>
+		/// Local peer id inside this session.
+		/// </summary>
+		public PeerId LocalPeerId { get; init; }
+
+		/// <summary>
+		/// Host peer id inside this session.
+		/// </summary>
+		public PeerId HostPeerId { get; init; }
+
+		/// <summary>
+		/// Accepted gameplay peers. This should not include mere lobby members
+		/// unless they have been accepted into the network session.
+		/// </summary>
+		public IReadOnlyList<NetworkPeerInfo> Peers { get; init; } = Array.Empty<NetworkPeerInfo>();
+
+		/// <summary>
+		/// When this session snapshot was produced.
+		/// Useful for UI/debugging and stale-state checks.
+		/// </summary>
+		public DateTime LastUpdatedUtc { get; init; } = DateTime.UtcNow;
+	}
 }

@@ -16,16 +16,15 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Nomad.Core.Logger;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Services
+namespace Nomad.OnlineServices.Steam.Private.Util
 {
 	/*
 	===================================================================================
-	
+
 	SteamAsyncCallResultDispatcher
-	
+
 	===================================================================================
 	*/
 	/// <summary>
@@ -51,7 +50,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public SteamAsyncCallResultDispatcher()
 		{
@@ -65,7 +64,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Dispose()
 		{
@@ -87,7 +86,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <param name="steamCallback"></param>
@@ -110,7 +109,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <param name="steamCallback"></param>
@@ -152,7 +151,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="pCallback"></param>
 		/// <param name="bIOFailure"></param>

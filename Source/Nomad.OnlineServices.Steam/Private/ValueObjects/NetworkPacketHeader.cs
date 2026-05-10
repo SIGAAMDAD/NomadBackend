@@ -19,34 +19,31 @@ using System.Runtime.InteropServices;
 
 namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 {
-	[StructLayout( LayoutKind.Explicit, Size = 20, Pack = 16 )]
+	[StructLayout( LayoutKind.Explicit, Size = 16, Pack = 8 )]
 	internal readonly struct NetworkPacketHeader
 	{
 		public const uint MAGIC = 0x4E4D504B; // "NPMK"
-		public const ushort VERSION = 1;
+		public const ushort PROTOCOL_VERSION = 1;
 		public const int SIZE = 20;
 
 		[FieldOffset( 0 )] public readonly uint Magic;
-		[FieldOffset( 4 )] public readonly ushort Version;
+		[FieldOffset( 4 )] public readonly ushort ProtocolVersion;
 		[FieldOffset( 6 )] public readonly NetworkPacketType Type;
 		[FieldOffset( 8 )] public readonly uint Sequence;
-		[FieldOffset( 12 )] public readonly uint Tick;
-		[FieldOffset( 16 )] public readonly ushort Flags;
-		[FieldOffset( 18 )] public readonly ushort PayloadLength;
+		[FieldOffset( 12 )] public readonly ushort Flags;
+		[FieldOffset( 14 )] public readonly ushort PayloadLength;
 
 		public NetworkPacketHeader(
 			NetworkPacketType type,
 			uint sequence,
-			uint tick,
 			ushort flags,
 			ushort payloadLength
 		)
 		{
 			Magic = MAGIC;
-			Version = VERSION;
+			ProtocolVersion = PROTOCOL_VERSION;
 			Type = type;
 			Sequence = sequence;
-			Tick = tick;
 			Flags = flags;
 			PayloadLength = payloadLength;
 		}
@@ -54,12 +51,11 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 		public void WriteTo( Span<byte> data )
 		{
 			BinaryPrimitives.WriteUInt32LittleEndian( data.Slice( 0, 4 ), Magic );
-			BinaryPrimitives.WriteUInt16LittleEndian( data.Slice( 4, 2 ), Version );
+			BinaryPrimitives.WriteUInt16LittleEndian( data.Slice( 4, 2 ), ProtocolVersion );
 			BinaryPrimitives.WriteUInt16LittleEndian( data.Slice( 6, 2 ), (ushort)Type );
 			BinaryPrimitives.WriteUInt32LittleEndian( data.Slice( 8, 4 ), Sequence );
-			BinaryPrimitives.WriteUInt32LittleEndian( data.Slice( 12, 4 ), Tick );
-			BinaryPrimitives.WriteUInt16LittleEndian( data.Slice( 16, 2 ), Flags );
-			BinaryPrimitives.WriteUInt32LittleEndian( data.Slice( 18, 2 ), PayloadLength );
+			BinaryPrimitives.WriteUInt16LittleEndian( data.Slice( 12, 2 ), Flags );
+			BinaryPrimitives.WriteUInt32LittleEndian( data.Slice( 14, 2 ), PayloadLength );
 		}
 
 		public static bool TryRead( ReadOnlySpan<byte> data, out NetworkPacketHeader header, out string error )
@@ -78,17 +74,16 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 				return false;
 			}
 
-			ushort version = BinaryPrimitives.ReadUInt16LittleEndian( data.Slice( 4, 2 ) );
-			if ( version != VERSION ) {
-				error = "Packet header has mismatched version";
+			ushort protocolVersion = BinaryPrimitives.ReadUInt16LittleEndian( data.Slice( 4, 2 ) );
+			if ( protocolVersion != PROTOCOL_VERSION ) {
+				error = "Packet header has mismatched protocol version";
 				return false;
 			}
 
 			NetworkPacketType type = (NetworkPacketType)BinaryPrimitives.ReadUInt16LittleEndian( data.Slice( 6, 2 ) );
 			uint sequence = BinaryPrimitives.ReadUInt32LittleEndian( data.Slice( 8, 4 ) );
-			uint tick = BinaryPrimitives.ReadUInt32LittleEndian( data.Slice( 12, 4 ) );
-			ushort flags = BinaryPrimitives.ReadUInt16LittleEndian( data.Slice( 16, 2 ) );
-			ushort payloadLength = BinaryPrimitives.ReadUInt16LittleEndian( data.Slice( 18, 2 ) );
+			ushort flags = BinaryPrimitives.ReadUInt16LittleEndian( data.Slice( 12, 2 ) );
+			ushort payloadLength = BinaryPrimitives.ReadUInt16LittleEndian( data.Slice( 14, 2 ) );
 
 			if ( data.Length - SIZE < payloadLength ) {
 				error = "Packet length is less than header + total size (corruption)";
@@ -98,7 +93,6 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 			header = new NetworkPacketHeader(
 				type,
 				sequence,
-				tick,
 				flags,
 				payloadLength
 			);

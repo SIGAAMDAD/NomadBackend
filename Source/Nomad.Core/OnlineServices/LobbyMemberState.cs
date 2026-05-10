@@ -17,19 +17,11 @@ using System.Collections.Generic;
 
 namespace Nomad.Core.OnlineServices
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public record LobbyMemberState
+    public enum LobbyMemberState : byte
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public ulong PlayerId { get; init; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public Dictionary<string, string>? Metadata { get; init; }
+        Connecting,
+        Connected,
+        Kicked,
+        Disconnecting
     }
 }

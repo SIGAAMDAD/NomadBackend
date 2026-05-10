@@ -14,27 +14,21 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using Nomad.Core.OnlineServices;
+using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Services.LobbyServices
+namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 {
-	internal sealed class SteamLobbyCommandService : IDisposable
+	/// <summary>
+	///
+	/// </summary>
+	public sealed record SteamLobbyMember
 	{
-		private bool _isDisposed = false;
-
-		/*
-		===============
-		Dispose
-		===============
-		*/
-		/// <summary>
-		/// 
-		/// </summary>
-		public void Dispose()
-		{
-			if ( !_isDisposed ) {
-			}
-			GC.SuppressFinalize( this );
-			_isDisposed = true;
-		}
+		public CSteamID SteamId { get; }
+		public string DisplayName { get; private set; }
+		public LobbyMemberState State { get; private set; }
+		public bool IsOwner { get; private set; }
+		public bool IsLocal { get; private set; }
+		public DateTime LastUpdatedUtc { get; private set; }
 	};
 };

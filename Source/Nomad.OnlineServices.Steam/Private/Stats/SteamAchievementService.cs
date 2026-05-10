@@ -19,9 +19,8 @@ using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
 using Nomad.Core.Util;
-using Nomad.OnlineServices.Steam.Private.Repositories;
 
-namespace Nomad.OnlineServices.Steam.Private.Services
+namespace Nomad.OnlineServices.Steam.Private.Stats
 {
 	/*
 	===================================================================================
@@ -58,7 +57,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="statsRepository"></param>
 		/// <param name="logger"></param>
@@ -82,7 +81,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Dispose()
 		{
@@ -102,7 +101,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="achievementId"></param>
 		public async Task LockAchievement( string achievementId )
@@ -127,7 +126,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="achievementId"></param>
 		public async Task UnlockAchievement( string achievementId )
@@ -139,7 +138,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="achievementId"></param>
 		/// <returns></returns>
@@ -152,7 +151,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="achievementId"></param>
 		/// <param name="current"></param>
@@ -168,7 +167,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="achievementId"></param>
 		private void OnAchievementUnlocked( string achievementId )

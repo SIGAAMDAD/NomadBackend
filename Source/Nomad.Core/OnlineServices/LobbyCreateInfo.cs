@@ -18,17 +18,12 @@ using System.Collections.Generic;
 namespace Nomad.Core.OnlineServices
 {
     /// <summary>
-    /// Creation information for lobbies.
+    ///
     /// </summary>
-    public sealed record LobbyInfo
+    public sealed record LobbyCreateInfo
     {
         /// <summary>
-        ///
-        /// </summary>
-        public LobbyId Id { get; init; }
-
-        /// <summary>
-        ///
+        /// The name of the lobby
         /// </summary>
         public string? Name { get; init; }
 
@@ -41,11 +36,6 @@ namespace Nomad.Core.OnlineServices
         ///
         /// </summary>
         public string? GameMode { get; init; }
-
-        /// <summary>
-        ///
-        /// </summary>
-        public ulong OwnerId { get; init; }
 
         /// <summary>
         ///

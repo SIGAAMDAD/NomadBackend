@@ -18,7 +18,7 @@ using System.Buffers;
 using System.Threading.Tasks;
 using Nomad.Core.Events;
 using Nomad.Core.OnlineServices;
-using Nomad.OnlineServices.Steam.Private.Repositories;
+using Nomad.OnlineServices.Steam.Private.Lobby;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 

@@ -13,17 +13,22 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+namespace Nomad.Core.OnlineServices
 {
-	internal enum NetworkPacketType : ushort
+	public sealed record NetworkSessionJoinResult
 	{
-		Invalid = 0,
+		public bool Success { get; init; }
+		public NetworkSessionInfo? Session { get; init; }
+		public NetworkSessionFailureReason Reason { get; init; }
 
-		Handshake = 1,
-		Ping = 2,
-		Pong = 3,
+		public static NetworkSessionJoinResult Failed( NetworkSessionFailureReason reason )
+		{
+			return new NetworkSessionJoinResult { Success = false, Reason = reason };
+		}
 
-		Payload = 100,
-		Chat = 101
-	};
-};
+		public static NetworkSessionJoinResult Joined( NetworkSessionInfo session )
+		{
+			return new NetworkSessionJoinResult { Success = true, Session = session };
+		}
+	}
+}

@@ -14,6 +14,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.CVars;
@@ -21,12 +23,12 @@ using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
 using Nomad.CVars;
-using Nomad.OnlineServices.Steam.Private.Entities;
-using Nomad.OnlineServices.Steam.Private.Repositories;
+using Nomad.OnlineServices.Steam.Private.Network;
+using Nomad.OnlineServices.Steam.Private.Util;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Services
+namespace Nomad.OnlineServices.Steam.Private.Lobby
 {
 	/*
 	===================================================================================
@@ -45,8 +47,10 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		public bool IsLobbyLeader => _current != null && _current.Info.OwnerId == _userData.UserID.m_SteamID;
 
 		public LobbyInfo? Current => _current != null ? _current.Info.Info : null;
+		internal SteamLobbyInstance? ActiveLobby => _current;
 		private SteamLobbyInstance? _current = null;
 
+		public SteamLobbyRepository Repository => _repository;
 		private readonly SteamLobbyRepository _repository;
 
 		private readonly object _operationsLock = new object();
@@ -59,13 +63,15 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		private readonly Callback<LobbyChatMsg_t> _lobbyChatMsg;
 		private readonly Callback<LobbyKicked_t> _lobbyKicked;
 
-		private readonly SteamAsyncCallbackDispatcher<LobbyEnter_t, bool> _lobbyEnter;
+		private readonly SteamAsyncCallbackDispatcher<LobbyEnter_t, LobbyJoinResult> _lobbyEnter;
 		private readonly SteamAsyncCallbackDispatcher<LobbyCreated_t, SteamLobbyData> _lobbyCreated;
 		private readonly SteamAsyncCallbackDispatcher<LobbyChatUpdate_t, bool> _lobbyStatusChanged;
 
 		private readonly ICVarSystemService _cvarSystem;
 		private readonly ILoggerCategory _category;
 		private readonly IGameEventRegistryService _eventFactory;
+
+		private readonly SteamNetDriver _netDriver;
 
 		private bool _isDisposed = false;
 
@@ -97,11 +103,13 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 			_eventFactory = eventFactory ?? throw new ArgumentNullException( nameof( eventFactory ) );
 			_userData = userData;
 
+			_netDriver = new SteamNetDriver( eventFactory );
+
 			_category = logger.CreateCategory( nameof( SteamLobbyService ), LogLevel.Info, true );
 
 			_lobbyInvite = Callback<LobbyInvite_t>.Create( OnLobbyInvite );
 			_lobbyChatMsg = Callback<LobbyChatMsg_t>.Create( OnLobbyChatMsg );
-			_lobbyEnter = new SteamAsyncCallbackDispatcher<LobbyEnter_t, bool>();
+			_lobbyEnter = new SteamAsyncCallbackDispatcher<LobbyEnter_t, LobbyJoinResult>();
 			_lobbyCreated = new SteamAsyncCallbackDispatcher<LobbyCreated_t, SteamLobbyData>();
 			_lobbyStatusChanged = new SteamAsyncCallbackDispatcher<LobbyChatUpdate_t, bool>();
 
@@ -182,20 +190,20 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		/// <param name="lobbyInfo"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public async Task<Guid> CreateLobby( LobbyInfo lobbyInfo, CancellationToken ct = default )
+		public async Task<LobbyCreateResult> CreateLobby( LobbyCreateInfo lobbyInfo, CancellationToken ct = default )
 		{
 			SteamLobbyData? lobby = await CreateLobbyInternal( lobbyInfo, ct );
 			if ( lobby == null ) {
 				_lobbyStarted.Publish( new LobbyStartResultEventArgs( false, Guid.Empty ) );
-				return Guid.Empty;
+				return LobbyCreateResult.Failure( NetworkSessionFailureReason.Unknown );
 			}
 
 			lock ( _operationsLock ) {
 				_repository.AddLobby( lobby );
-				_current = new SteamLobbyInstance( lobby, _cvarSystem, _eventFactory );
+				_current = new SteamLobbyInstance( lobby, _netDriver, _cvarSystem, _eventFactory );
 				_lobbyStarted.Publish( new LobbyStartResultEventArgs( true, lobby.Guid ) );
 			}
-			return lobby.Guid;
+			return LobbyCreateResult.Created( new LobbyId( lobby.Guid ) );
 		}
 
 		/*
@@ -209,10 +217,10 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		/// <param name="lobbyId"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		public async Task<bool> JoinLobby( Guid lobbyId, CancellationToken ct = default )
+		public async Task<LobbyJoinResult> JoinLobby( LobbyId lobbyId, CancellationToken ct = default )
 		{
-			if ( !_repository.TryGetLobby( lobbyId, out SteamLobbyData? lobby ) ) {
-				return false;
+			if ( !_repository.TryGetLobby( lobbyId.Value, out SteamLobbyData? lobby ) ) {
+				return LobbyJoinResult.Failure( NetworkSessionFailureReason.SessionNotFound );
 			}
 			return await _lobbyEnter.Invoke(
 				result => {
@@ -227,17 +235,17 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 						case EChatRoomEnterResponse.k_EChatRoomEnterResponseMemberBlockedYou:
 						case EChatRoomEnterResponse.k_EChatRoomEnterResponseRatelimitExceeded:
 						case EChatRoomEnterResponse.k_EChatRoomEnterResponseYouBlockedMember:
-							return false;
+							return LobbyJoinResult.Failure( NetworkSessionFailureReason.SessionFull );
 						case EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess:
 							break;
 						default:
 							throw new ArgumentOutOfRangeException( nameof( result ) );
 					}
 					lock ( _operationsLock ) {
-						_current = new SteamLobbyInstance( lobby, _cvarSystem, _eventFactory );
+						_current = new SteamLobbyInstance( lobby, _netDriver, _cvarSystem, _eventFactory );
 						_lobbyJoined.Publish( new LobbyJoinedResultEventArgs( lobby.Guid ) );
 					}
-					return true;
+					return LobbyJoinResult.Joined( _current.Info.Info );
 				},
 				() => SteamMatchmaking.JoinLobby( lobby.Id ),
 				ct
@@ -263,11 +271,6 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 			return true;
 		}
 
-		public async Task<bool> PromoteMember( Guid player, CancellationToken ct = default )
-		{
-			return false;
-		}
-
 		/*
 		===============
 		CreateLobby
@@ -279,7 +282,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		/// <param name="info"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		private async Task<SteamLobbyData?> CreateLobbyInternal( LobbyInfo info, CancellationToken ct = default )
+		private async Task<SteamLobbyData?> CreateLobbyInternal( LobbyCreateInfo info, CancellationToken ct = default )
 		{
 			if ( info.MaxPlayers < 1 || info.MaxPlayers > _maxPlayers.Value ) {
 				throw new ArgumentOutOfRangeException( nameof( info ), "LobbyInfo.MaxPlayers is less than 1 or greater than MaxPlayers!" );
@@ -320,6 +323,48 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 				() => SteamMatchmaking.CreateLobby( type, info.MaxPlayers ),
 				ct
 			);
+		}
+
+		/*
+		===============
+		TryGetMember
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="peerId"></param>
+		/// <param name="member"></param>
+		/// <returns></returns>
+		public bool TryGetMember( PeerId peerId, out LobbyMemberInfo member )
+		{
+			member = null;
+			if ( _current == null ) {
+				return false;
+			}
+			if ( _current.Members.TryGetValue( peerId, out var sessionPeer ) ) {
+				member = sessionPeer.Info;
+				return true;
+			}
+			return false;
+		}
+
+		/*
+		===============
+		GetMembers
+		===============
+		*/
+		/// <summary>
+		/// Returns a snapshot of the current members in the steam lobby.
+		/// </summary>
+		/// <returns></returns>
+		public IReadOnlyList<LobbyMemberInfo> GetMembers()
+		{
+			var members = new List<LobbyMemberInfo>( _current.Members.Count );
+			foreach ( var member in _current.Members.Values ) {
+				members.Add( member.Info );
+			}
+			return members;
 		}
 	};
 };

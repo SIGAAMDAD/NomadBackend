@@ -39,7 +39,7 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 		public int MaxPlayers => _info.MaxPlayers;
 		public ulong OwnerId => _info.OwnerId;
 		public LobbyVisibility Visibility => _info.Visibility;
-		public Dictionary<string, string> Metadata => _info.Metadata;
+		public IReadOnlyDictionary<string, string> Metadata => _info.Metadata;
 
 		public LobbyInfo Info => _info;
 		private LobbyInfo _info;
@@ -52,6 +52,33 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 
 		public Guid Guid => _guid;
 		private readonly Guid _guid = Guid.NewGuid();
+
+		/*
+		===============
+		SteamLobbyData
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="info"></param>
+		/// <param name="guid"></param>
+		public SteamLobbyData( CSteamID id, LobbyCreateInfo info, Guid guid )
+		{
+			_id = id;
+			_info = new LobbyInfo() {
+				Id = new LobbyId( guid ),
+				Name = info.Name,
+				Map = info.Map,
+				GameMode = info.GameMode,
+				MaxPlayers = info.MaxPlayers,
+				PlayerCount = info.PlayerCount,
+				Visibility = info.Visibility,
+				Metadata = info.Metadata
+			};
+			_guid = guid;
+		}
 
 		/*
 		===============
@@ -107,8 +134,7 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 				Map = SteamMatchmaking.GetLobbyData( id, nameof( LobbyInfo.Map ) ),
 				GameMode = SteamMatchmaking.GetLobbyData( id, nameof( LobbyInfo.GameMode ) ),
 				MaxPlayers = SteamMatchmaking.GetLobbyMemberLimit( id ),
-				OwnerId = (ulong)SteamMatchmaking.GetLobbyOwner( id ),
-				//				Visibility = Enum.Parse<LobbyVisibility>( SteamMatchmaking.GetLobbyData( id, nameof( LobbyInfo.Visibility ) ) )
+				OwnerId = (ulong)SteamMatchmaking.GetLobbyOwner( id )
 			};
 		}
 	};
