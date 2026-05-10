@@ -19,6 +19,9 @@ namespace Nomad.Core.OnlineServices
     {
         Unreliable,
         UnreliableNoDelay,
-        Reliable
+        Reliable,
+
+        Min = Unreliable,
+        Max = Reliable
     }
 }

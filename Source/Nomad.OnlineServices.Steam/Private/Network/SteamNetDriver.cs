@@ -14,6 +14,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Collections.Generic;
+using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
@@ -49,24 +51,21 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		private const int DEFAULT_TIMEOUT_CONNECTED_MS = 1000000;
 
 		public bool IsListening => _listenSocket != HSteamListenSocket.Invalid;
-		public bool IsInitialized => _pollGroup != HSteamNetPollGroup.Invalid;
+		public bool IsInitialized => _receiver.IsOpen;
 
-		internal HSteamNetPollGroup PollGroup => _pollGroup;
-
-		public event Action<SteamNetConnection> ConnectionRequested = delegate { };
-		public event Action<SteamNetConnection> ConnectionEstablished = delegate { };
-		public event Action<SteamNetConnection> ConnectionClosed = delegate { };
+		public event Action<SteamNetConnection> ConnectionRequested;
+		public event Action<SteamNetConnection> ConnectionEstablished;
+		public event Action<SteamNetConnection> ConnectionClosed;
 
 		private readonly Callback<SteamNetConnectionStatusChangedCallback_t> _netConnectionStatusChanged;
 
 		private readonly SteamConnectionRepository _repository = new SteamConnectionRepository();
 		private readonly ILoggerCategory _category;
-		private SteamNetworkPacketReceiver _receiver;
+		private readonly SteamNetworkPacketReceiver _receiver;
 
 		private readonly SteamNetworkingConfigValue_t[] _socketOptions;
 
 		private HSteamListenSocket _listenSocket = HSteamListenSocket.Invalid;
-		private HSteamNetPollGroup _pollGroup = HSteamNetPollGroup.Invalid;
 
 		private bool _isDisposed = false;
 
@@ -80,11 +79,12 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		/// </summary>
 		/// <param name="eventFactory"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public SteamNetDriver( IGameEventRegistryService eventFactory )
+		public SteamNetDriver( IGameEventRegistryService eventFactory, ILoggerCategory category )
 		{
-			if ( eventFactory == null ) {
-				throw new ArgumentNullException( nameof( eventFactory ) );
-			}
+			ArgumentGuard.ThrowIfNull( eventFactory, nameof( eventFactory ) );
+
+			_category = category ?? throw new ArgumentNullException( nameof( category ) );
+			_receiver = new SteamNetworkPacketReceiver( _category );
 
 			_netConnectionStatusChanged = Callback<SteamNetConnectionStatusChangedCallback_t>.Create( OnNetConnectionStatusChanged );
 			_socketOptions = CreateSocketOptions();
@@ -111,11 +111,7 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 				_listenSocket = HSteamListenSocket.Invalid;
 			}
 
-			if ( _pollGroup != HSteamNetPollGroup.Invalid ) {
-				SteamNetworkingSockets.DestroyPollGroup( _pollGroup );
-				_pollGroup = HSteamNetPollGroup.Invalid;
-			}
-
+			_receiver.Dispose();
 			_netConnectionStatusChanged.Dispose();
 
 			_isDisposed = true;
@@ -134,11 +130,8 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		/// <returns></returns>
 		public bool Listen( int virtualPort = 0 )
 		{
-			ThrowIfDisposed();
+			StateGuard.ThrowIfDisposed( _isDisposed, this );
 
-			if ( !EnsurePollGroup() ) {
-				return false;
-			}
 			if ( _listenSocket != HSteamListenSocket.Invalid ) {
 				return true;
 			}
@@ -167,13 +160,9 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		/// <returns></returns>
 		public HSteamNetConnection ConnectP2P( CSteamID remoteSteamId, int virtualPort = 0 )
 		{
-			ThrowIfDisposed();
+			StateGuard.ThrowIfDisposed( _isDisposed, this );
 
 			if ( !remoteSteamId.IsValid() ) {
-				return HSteamNetConnection.Invalid;
-			}
-
-			if ( !EnsurePollGroup() ) {
 				return HSteamNetConnection.Invalid;
 			}
 
@@ -193,7 +182,7 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 				return HSteamNetConnection.Invalid;
 			}
 
-			if ( !SteamNetworkingSockets.SetConnectionPollGroup( handle, _pollGroup ) ) {
+			if ( !_receiver.OpenConnection( handle ) ) {
 				SteamNetworkingSockets.CloseConnection(
 					handle,
 					0,
@@ -207,8 +196,6 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			connection.SetStatus( NetworkConnectionState.Connecting );
 
 			_repository.Add( connection );
-
-			_receiver = new SteamNetworkPacketReceiver( _pollGroup, _category );
 
 			return handle;
 		}
@@ -225,13 +212,9 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		/// <returns></returns>
 		public bool Accept( HSteamNetConnection handle )
 		{
-			ThrowIfDisposed();
+			StateGuard.ThrowIfDisposed( _isDisposed, this );
 
 			if ( handle == HSteamNetConnection.Invalid ) {
-				return false;
-			}
-
-			if ( !EnsurePollGroup() ) {
 				return false;
 			}
 
@@ -245,7 +228,7 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 				return false;
 			}
 
-			if ( !SteamNetworkingSockets.SetConnectionPollGroup( handle, _pollGroup ) ) {
+			if ( !_receiver.OpenConnection( handle ) ) {
 				Close( connection, "Failed to assign Steam poll group" );
 				return false;
 			}
@@ -342,9 +325,16 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		/// <param name="mode"></param>
 		public void Send( SteamNetConnection connection, ReadOnlySpan<byte> payload, NetworkPacketType type, NetworkSendMode mode )
 		{
+			if ( payload.Length > ushort.MaxValue ) {
+				throw new ArgumentOutOfRangeException( nameof( payload ), "Steam network packets cannot exceed 65535 payload bytes." );
+			}
+
 			int packetLength = NetworkPacketHeader.SIZE + payload.Length;
 			Span<byte> buffer = stackalloc byte[packetLength];
-			NetworkPacketHeader header = new NetworkPacketHeader( type, 0, 0, (ushort)payload.Length );
+			NetworkPacketHeader header = new NetworkPacketHeader( type, 0, (ushort)mode, (ushort)payload.Length );
+
+			header.WriteTo( buffer );
+			payload.CopyTo( buffer.Slice( NetworkPacketHeader.SIZE ) );
 
 			unsafe {
 				fixed ( byte* ptr = buffer ) {
@@ -354,6 +344,23 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 					}
 				}
 			}
+		}
+
+		/*
+		===============
+		TryReceive
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="destination"></param>
+		/// <param name="packet"></param>
+		/// <returns></returns>
+		public bool TryReceive( Span<byte> destination, out ReceivedNetworkPacket packet )
+		{
+			packet = default;
+			return _receiver != null && _receiver.TryReceive( destination, out packet );
 		}
 
 		/*
@@ -475,41 +482,6 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 
 				default:
 					break;
-			}
-		}
-
-		/*
-		===============
-		EnsurePollGroup
-		===============
-		*/
-		/// <summary>
-		///
-		/// </summary>
-		/// <returns></returns>
-		private bool EnsurePollGroup()
-		{
-			if ( _pollGroup != HSteamNetPollGroup.Invalid ) {
-				return true;
-			}
-
-			_pollGroup = SteamNetworkingSockets.CreatePollGroup();
-			return _pollGroup != HSteamNetPollGroup.Invalid;
-		}
-
-		/*
-		===============
-		ThrowIfDisposed
-		===============
-		*/
-		/// <summary>
-		///
-		/// </summary>
-		/// <exception cref="ObjectDisposedException"></exception>
-		private void ThrowIfDisposed()
-		{
-			if ( _isDisposed ) {
-				throw new ObjectDisposedException( nameof( SteamNetDriver ) );
 			}
 		}
 

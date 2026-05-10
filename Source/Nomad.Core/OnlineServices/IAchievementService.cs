@@ -31,7 +31,7 @@ namespace Nomad.Core.OnlineServices
         bool SupportsAchievements { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         int NumAchievements { get; }
 
@@ -55,14 +55,14 @@ namespace Nomad.Core.OnlineServices
         /// </summary>
         /// <param name="achievementId">The ID of the achievement to unlock.</param>
         /// <returns></returns>
-        Task UnlockAchievement(string achievementId);
+        Task UnlockAchievement(InternString achievementId);
 
         /// <summary>
         /// Locks the specified achievement.
         /// </summary>
         /// <param name="achievementId">The ID of the achievement to lock.</param>
         /// <returns></returns>
-        Task LockAchievement(string achievementId);
+        Task LockAchievement(InternString achievementId);
 
         /// <summary>
         /// Sets the progress for the specified achievement.
@@ -70,12 +70,12 @@ namespace Nomad.Core.OnlineServices
         /// <param name="achievementId">The ID of the achievement to set progress for.</param>
         /// <param name="current">The current progress value.</param>
         /// <returns></returns>
-        Task SetAchievementProgress(string achievementId, float current);
+        Task SetAchievementProgress(InternString achievementId, float current);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
-        IAchievementInfo? GetAchievementInfo(string achievementId);
+        IAchievementInfo? GetAchievementInfo(InternString achievementId);
     }
 }

@@ -15,7 +15,6 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.CVars;
@@ -41,7 +40,7 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 	///
 	/// </summary>
 
-	internal sealed class SteamLobbyService : ILobbyService
+	internal sealed class SteamLobbyService : ILobbyService, IDisposable
 	{
 		public bool IsInLobby => _current != null;
 		public bool IsLobbyLeader => _current != null && _current.Info.OwnerId == _userData.UserID.m_SteamID;
@@ -61,17 +60,15 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 
 		private readonly Callback<LobbyInvite_t> _lobbyInvite;
 		private readonly Callback<LobbyChatMsg_t> _lobbyChatMsg;
-		private readonly Callback<LobbyKicked_t> _lobbyKicked;
 
 		private readonly SteamAsyncCallbackDispatcher<LobbyEnter_t, LobbyJoinResult> _lobbyEnter;
 		private readonly SteamAsyncCallbackDispatcher<LobbyCreated_t, SteamLobbyData> _lobbyCreated;
-		private readonly SteamAsyncCallbackDispatcher<LobbyChatUpdate_t, bool> _lobbyStatusChanged;
 
-		private readonly ICVarSystemService _cvarSystem;
-		private readonly ILoggerCategory _category;
-		private readonly IGameEventRegistryService _eventFactory;
+		private readonly ICVarSystemService _cvarSystem = null;
+		private readonly ILoggerCategory _category = null;
+		private readonly IGameEventRegistryService _eventFactory = null;
 
-		private readonly SteamNetDriver _netDriver;
+		private readonly SteamNetDriver _netDriver = null;
 
 		private bool _isDisposed = false;
 
@@ -93,25 +90,22 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 		///
 		/// </summary>
 		/// <param name="userData"></param>
-		/// <param name="appData"></param>
 		/// <param name="logger"></param>
 		/// <param name="cvarSystem"></param>
 		/// <param name="eventFactory"></param>
-		public SteamLobbyService( SteamUserData userData, SteamAppData appData, ILoggerService logger, ICVarSystemService cvarSystem, IGameEventRegistryService eventFactory )
+		public SteamLobbyService( SteamUserData userData, ILoggerService logger, ICVarSystemService cvarSystem, IGameEventRegistryService eventFactory )
 		{
 			_cvarSystem = cvarSystem ?? throw new ArgumentNullException( nameof( cvarSystem ) );
 			_eventFactory = eventFactory ?? throw new ArgumentNullException( nameof( eventFactory ) );
 			_userData = userData;
 
-			_netDriver = new SteamNetDriver( eventFactory );
-
 			_category = logger.CreateCategory( nameof( SteamLobbyService ), LogLevel.Info, true );
+			_netDriver = new SteamNetDriver( eventFactory, _category );
 
 			_lobbyInvite = Callback<LobbyInvite_t>.Create( OnLobbyInvite );
 			_lobbyChatMsg = Callback<LobbyChatMsg_t>.Create( OnLobbyChatMsg );
 			_lobbyEnter = new SteamAsyncCallbackDispatcher<LobbyEnter_t, LobbyJoinResult>();
 			_lobbyCreated = new SteamAsyncCallbackDispatcher<LobbyCreated_t, SteamLobbyData>();
-			_lobbyStatusChanged = new SteamAsyncCallbackDispatcher<LobbyChatUpdate_t, bool>();
 
 			_repository = new SteamLobbyRepository( cvarSystem );
 
@@ -128,6 +122,29 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 					LobbyLeaveResultEventArgs.Name,
 					LobbyLeaveResultEventArgs.NameSpace
 				);
+		}
+
+		/*
+		===============
+		Dispose
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		public void Dispose()
+		{
+			if ( !_isDisposed ) {
+				_current?.Dispose();
+
+				_repository?.Dispose();
+
+				_lobbyInvite?.Dispose();
+				_lobbyChatMsg?.Dispose();
+				_lobbyEnter?.Dispose();
+			}
+			GC.SuppressFinalize( this );
+			_isDisposed = true;
 		}
 
 		/*
@@ -154,29 +171,6 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 		/// <param name="pCallback"></param>
 		private void OnLobbyInvite( LobbyInvite_t pCallback )
 		{
-		}
-
-		/*
-		===============
-		Dispose
-		===============
-		*/
-		/// <summary>
-		///
-		/// </summary>
-		public void Dispose()
-		{
-			if ( !_isDisposed ) {
-				_current?.Dispose();
-
-				_repository?.Dispose();
-
-				_lobbyInvite?.Dispose();
-				_lobbyChatMsg?.Dispose();
-				_lobbyEnter?.Dispose();
-			}
-			GC.SuppressFinalize( this );
-			_isDisposed = true;
 		}
 
 		/*
@@ -365,6 +359,20 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 				members.Add( member.Info );
 			}
 			return members;
+		}
+
+		/*
+		===============
+		SetLobbyRefresh
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="active"></param>
+		public void SetLobbyRefresh( bool active )
+		{
+			_repository.SetPollingEnabled( active );
 		}
 	};
 };

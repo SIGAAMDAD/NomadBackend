@@ -24,7 +24,7 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 	{
 		public const uint MAGIC = 0x4E4D504B; // "NPMK"
 		public const ushort PROTOCOL_VERSION = 1;
-		public const int SIZE = 20;
+		public const int SIZE = 16;
 
 		[FieldOffset( 0 )] public readonly uint Magic;
 		[FieldOffset( 4 )] public readonly ushort ProtocolVersion;
@@ -55,7 +55,7 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 			BinaryPrimitives.WriteUInt16LittleEndian( data.Slice( 6, 2 ), (ushort)Type );
 			BinaryPrimitives.WriteUInt32LittleEndian( data.Slice( 8, 4 ), Sequence );
 			BinaryPrimitives.WriteUInt16LittleEndian( data.Slice( 12, 2 ), Flags );
-			BinaryPrimitives.WriteUInt32LittleEndian( data.Slice( 14, 2 ), PayloadLength );
+			BinaryPrimitives.WriteUInt16LittleEndian( data.Slice( 14, 2 ), PayloadLength );
 		}
 
 		public static bool TryRead( ReadOnlySpan<byte> data, out NetworkPacketHeader header, out string error )

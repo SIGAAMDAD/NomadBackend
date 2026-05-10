@@ -43,11 +43,6 @@ namespace Nomad.Core.OnlineServices
         public int MaxPlayers { get; init; }
 
         /// <summary>
-        /// The current number of players in the lobby.
-        /// </summary>
-        public int PlayerCount { get; init; }
-
-        /// <summary>
         ///
         /// </summary>
         public LobbyVisibility Visibility { get; init; }

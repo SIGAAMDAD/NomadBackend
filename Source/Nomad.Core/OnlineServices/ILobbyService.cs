@@ -104,5 +104,11 @@ namespace Nomad.Core.OnlineServices
         /// </summary>
         /// <returns></returns>
         IReadOnlyList<LobbyMemberInfo> GetMembers();
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="active"></param>
+        void SetLobbyRefresh(bool active);
     }
 }

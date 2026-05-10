@@ -15,8 +15,10 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using System.Threading.Tasks;
+using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
+using Nomad.Core.Util;
 
 namespace Nomad.OnlineServices.Steam.Private.Stats
 {
@@ -36,7 +38,6 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		public bool SupportsLeaderboards => true;
 
 		private readonly SteamStatsRepository _statsRepository;
-
 		private readonly ILoggerCategory _category;
 
 		private bool _isDisposed = false;
@@ -53,9 +54,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="logger"></param>
 		public SteamStatsService( SteamStatsRepository statsRepository, ILoggerService logger )
 		{
-			_category = logger.CreateCategory( nameof( SteamStatsService ), LogLevel.Info, true );
+			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
 
-			_statsRepository = statsRepository;
+			_category = logger.CreateCategory( nameof( SteamStatsService ), LogLevel.Info, true );
+			_statsRepository = statsRepository ?? throw new ArgumentNullException( nameof( statsRepository ) );
 		}
 
 		/*
@@ -85,8 +87,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="statName"></param>
 		/// <returns></returns>
-		public async ValueTask<float> GetStatFloat( string statName )
-			=> _statsRepository.GetStatFloat( statName );
+		public async ValueTask<float> GetStatFloat( InternString statName )
+		{
+			return _statsRepository.GetStatFloat( statName );
+		}
 
 		/*
 		===============
@@ -98,8 +102,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="statName"></param>
 		/// <returns></returns>
-		public async ValueTask<int> GetStatInt( string statName )
-			=> _statsRepository.GetStatInt( statName );
+		public async ValueTask<int> GetStatInt( InternString statName )
+		{
+			return _statsRepository.GetStatInt( statName );
+		}
 
 		/*
 		===============
@@ -112,8 +118,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="statName"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public async ValueTask SetStatFloat( string statName, float value )
-			=> _statsRepository.SetStatFloat( statName, value );
+		public async ValueTask SetStatFloat( InternString statName, float value )
+		{
+			_statsRepository.SetStatFloat( statName, value );
+		}
 
 		/*
 		===============
@@ -126,10 +134,23 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="statName"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public async ValueTask SetStatInt( string statName, int value )
-			=> _statsRepository.SetStatInt( statName, value );
+		public async ValueTask SetStatInt( InternString statName, int value )
+		{
+			_statsRepository.SetStatInt( statName, value );
+		}
 
+		/*
+		===============
+		StoreStats
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
 		public async ValueTask<bool> StoreStats()
-			=> _statsRepository.StoreStats();
+		{
+			return _statsRepository.StoreStats();
+		}
 	};
 };

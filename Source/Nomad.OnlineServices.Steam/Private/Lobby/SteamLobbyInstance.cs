@@ -15,6 +15,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Nomad.Core.CVars;
 using Nomad.Core.Events;
@@ -39,8 +40,8 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 
 	internal sealed class SteamLobbyInstance : IDisposable
 	{
-		public Dictionary<PeerId, SteamSessionPeer> Members => _members;
-		private readonly Dictionary<PeerId, SteamSessionPeer> _members = new();
+		public SortedDictionary<PeerId, SteamSessionPeer> Members => _members;
+		private readonly SortedDictionary<PeerId, SteamSessionPeer> _members = new();
 
 		private readonly Dictionary<CSteamID, PeerId> _steam64ToPeer = new();
 
@@ -106,6 +107,23 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 			}
 			GC.SuppressFinalize( this );
 			_isDisposed = true;
+		}
+
+		/*
+		===============
+		TryGetMember
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="steamId"></param>
+		/// <param name="peerId"></param>
+		/// <returns></returns>
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		public bool TryGetMember( CSteamID steamId, out PeerId peerId )
+		{
+			return _steam64ToPeer.TryGetValue( steamId, out peerId );
 		}
 
 		/*

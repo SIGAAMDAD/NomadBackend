@@ -16,7 +16,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 namespace Nomad.Core.OnlineServices
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public enum NetworkConnectionState : byte
     {
@@ -27,6 +27,7 @@ namespace Nomad.Core.OnlineServices
         Connected,
         Stopping,
         Faulted,
+        Kicked,
 
         Count
     }

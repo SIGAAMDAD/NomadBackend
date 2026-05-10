@@ -15,6 +15,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using System.Threading.Tasks;
+using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
@@ -40,16 +41,15 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		public int NumAchievements => _statsRepository.NumAchievements;
 
 		private readonly SteamStatsRepository _statsRepository;
-		private readonly ILoggerService _logger;
 		private readonly ILoggerCategory _category;
 
 		private bool _isDisposed = false;
 
 		public IGameEvent<AchievementUnlockedEventArgs> Unlocked => _unlocked;
-		private readonly IGameEvent<AchievementUnlockedEventArgs> _unlocked;
+		private readonly IGameEvent<AchievementUnlockedEventArgs> _unlocked = default;
 
 		public IGameEvent<AchievementProgressChangedEventArgs> ProgressChanged => _progressChanged;
-		private readonly IGameEvent<AchievementProgressChangedEventArgs> _progressChanged;
+		private readonly IGameEvent<AchievementProgressChangedEventArgs> _progressChanged = default;
 
 		/*
 		===============
@@ -64,12 +64,21 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="eventFactory"></param>
 		public SteamAchievementService( SteamStatsRepository statsRepository, ILoggerService logger, IGameEventRegistryService eventFactory )
 		{
-			_statsRepository = statsRepository;
-			_logger = logger;
-			_category = _logger.CreateCategory( nameof( SteamAchievementService ), LogLevel.Info, true );
+			ArgumentGuard.ThrowIfNull( eventFactory, nameof( eventFactory ) );
+			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
 
-			_unlocked = eventFactory.GetEvent<AchievementUnlockedEventArgs>( AchievementUnlockedEventArgs.Name, AchievementUnlockedEventArgs.NameSpace );
-			_progressChanged = eventFactory.GetEvent<AchievementProgressChangedEventArgs>( AchievementProgressChangedEventArgs.Name, AchievementProgressChangedEventArgs.NameSpace );
+			_statsRepository = statsRepository ?? throw new ArgumentNullException( nameof( statsRepository ) );
+			_category = logger.CreateCategory( nameof( SteamAchievementService ), LogLevel.Info, true );
+
+			_unlocked = eventFactory.GetEvent<AchievementUnlockedEventArgs>(
+				AchievementUnlockedEventArgs.Name,
+				AchievementUnlockedEventArgs.NameSpace
+			);
+
+			_progressChanged = eventFactory.GetEvent<AchievementProgressChangedEventArgs>(
+				AchievementProgressChangedEventArgs.Name,
+				AchievementProgressChangedEventArgs.NameSpace
+			);
 
 			_statsRepository.AchievementProgressChanged += OnAchievementProgressChanged;
 			_statsRepository.AchievementUnlocked += OnAchievementUnlocked;
@@ -90,9 +99,13 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 				_progressChanged?.Dispose();
 
 				_category?.Dispose();
+
+				_statsRepository.AchievementProgressChanged -= OnAchievementProgressChanged;
+				_statsRepository.AchievementUnlocked -= OnAchievementUnlocked;
+
+				_isDisposed = true;
 			}
 			GC.SuppressFinalize( this );
-			_isDisposed = true;
 		}
 
 		/*
@@ -104,8 +117,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		///
 		/// </summary>
 		/// <param name="achievementId"></param>
-		public async Task LockAchievement( string achievementId )
-			=> _statsRepository.LockAchievement( achievementId );
+		public async Task LockAchievement( InternString achievementId )
+		{
+			_statsRepository.LockAchievement( achievementId );
+		}
 
 		/*
 		===============
@@ -117,8 +132,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="achievementId"></param>
 		/// <param name="current"></param>
-		public async Task SetAchievementProgress( string achievementId, float current )
-			=> _statsRepository.SetAchievementProgress( achievementId, current );
+		public async Task SetAchievementProgress( InternString achievementId, float current )
+		{
+			_statsRepository.SetAchievementProgress( achievementId, current );
+		}
 
 		/*
 		===============
@@ -129,8 +146,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		///
 		/// </summary>
 		/// <param name="achievementId"></param>
-		public async Task UnlockAchievement( string achievementId )
-			=> _statsRepository.UnlockAchievement( achievementId );
+		public async Task UnlockAchievement( InternString achievementId )
+		{
+			_statsRepository.UnlockAchievement( achievementId );
+		}
 
 		/*
 		===============
@@ -142,8 +161,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="achievementId"></param>
 		/// <returns></returns>
-		public IAchievementInfo? GetAchievementInfo( string achievementId )
-			=> _statsRepository.GetAchievementInfo( achievementId );
+		public IAchievementInfo? GetAchievementInfo( InternString achievementId )
+		{
+			return _statsRepository.GetAchievementInfo( achievementId );
+		}
 
 		/*
 		===============
@@ -156,7 +177,7 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="achievementId"></param>
 		/// <param name="current"></param>
 		/// <param name="max"></param>
-		private void OnAchievementProgressChanged( string achievementId, float current, float max )
+		private void OnAchievementProgressChanged( InternString achievementId, float current, float max )
 		{
 			_progressChanged.Publish( new AchievementProgressChangedEventArgs( new InternString( achievementId ), current ) );
 		}
@@ -170,7 +191,7 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		///
 		/// </summary>
 		/// <param name="achievementId"></param>
-		private void OnAchievementUnlocked( string achievementId )
+		private void OnAchievementUnlocked( InternString achievementId )
 		{
 			_unlocked.Publish( new AchievementUnlockedEventArgs( new InternString( achievementId ) ) );
 		}

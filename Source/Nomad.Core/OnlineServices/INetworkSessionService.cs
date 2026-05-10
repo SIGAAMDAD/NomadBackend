@@ -45,7 +45,16 @@ namespace Nomad.Core.OnlineServices
         /// </summary>
         NetworkSessionInfo? CurrentSession { get; }
 
-        IGameEvent<EmptyEventArgs> SessionChanged { get; }
+        /// <summary>
+        /// Event that triggers whenever a network session is created, joined, or left.
+        /// </summary>
+        [Event(nameSpace: "Nomad.Core.OnlineServices", PayloadName = "NetworkSessionChangedEventArgs")]
+        [EventPayload("SessionId", typeof(Guid), Order = 1)]
+        [EventPayload("LobbyId", typeof(LobbyId), Order = 2)]
+        [EventPayload("Mode", typeof(NetworkSessionMode), Order = 3)]
+        [EventPayload("LocalPeerId", typeof(PeerId), Order = 4)]
+        [EventPayload("HostPeerId", typeof(PeerId), Order = 5)]
+        IGameEvent<NetworkSessionChangedEventArgs> SessionChanged { get; }
 
         [Event(nameSpace: "Nomad.Core.OnlineServices")]
         [EventPayload("PeerId", typeof(PeerId), Order = 1)]

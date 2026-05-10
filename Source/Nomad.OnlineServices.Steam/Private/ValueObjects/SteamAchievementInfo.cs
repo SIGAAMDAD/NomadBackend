@@ -14,6 +14,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Buffers;
 using Nomad.Core.Engine.Services;
 using Nomad.Core.OnlineServices;
 using Nomad.Core.Util;
@@ -34,12 +35,12 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 
 	internal sealed class SteamAchievementInfo : IAchievementInfo
 	{
-		private record AchievementProgress
+		private sealed record AchievementProgress
 		{
-			public InternString StatId;
-			public float Progress;
-			public float MinProgress;
-			public float MaxProgress;
+			public InternString StatId { get; init; }
+			public float Progress { get; set; }
+			public float MinProgress { get; set; }
+			public float MaxProgress { get; set; }
 		};
 
 		public bool Achieved => _achieved;
@@ -48,14 +49,17 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 		public string Id => _name;
 		private readonly InternString _name;
 
+		public DateTime UnlockedTime => _unlockedTime;
+		private readonly DateTime _unlockedTime;
+
 		public bool HasProgress => _progress != null;
-		public string StatId => _progress != null ? _progress.StatId : string.Empty;
+		public string StatId => _progress != null ? _progress.StatId : InternString.Empty;
 		public float Progress => _progress != null ? _progress.Progress : 0.0f;
 		public float MinProgress => _progress != null ? _progress.MinProgress : 0.0f;
 		public float MaxProgress => _progress != null ? _progress.MaxProgress : 0.0f;
-		private AchievementProgress? _progress;
+		private AchievementProgress? _progress = null;
 
-		private IDisposable? _icon;
+		private IDisposable? _icon = null;
 
 		/*
 		===============
@@ -69,7 +73,11 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 		public SteamAchievementInfo( string name )
 		{
 			_name = new InternString( name );
-			SteamUserStats.GetAchievementAndUnlockTime( _name, out _achieved, out uint unlockedTime );
+			if ( !SteamUserStats.GetAchievementAndUnlockTime( _name, out _achieved, out uint unlockedTime ) ) {
+				return;
+			} else {
+				_unlockedTime = DateTimeOffset.FromUnixTimeSeconds( unlockedTime ).UtcDateTime;
+			}
 
 			if ( SteamUserStats.GetAchievementProgressLimits( _name, out float minProgress, out float maxProgress ) ) {
 				SteamUserStats.GetAchievementAchievedPercent( _name, out float progress );
@@ -100,10 +108,12 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 		{
 			SteamUtils.GetImageSize( hIconHandle, out uint width, out uint height );
 
-			byte[] imageBuffer = new byte[width * height * 4];
+			byte[] imageBuffer = ArrayPool<byte>.Shared.Rent( (int)( width * height * 4 ) );
 			SteamUtils.GetImageRGBA( hIconHandle, imageBuffer, imageBuffer.Length );
 
 			_icon = service.CreateImageRGBA( imageBuffer, (int)width, (int)height );
+
+			ArrayPool<byte>.Shared.Return( imageBuffer );
 		}
 
 		/*
@@ -116,8 +126,10 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 		/// </summary>
 		/// <param name="achieved"></param>
 		/// <returns></returns>
-		public bool SetAchieved( bool achieved )
-			=> _achieved = achieved;
+		public void SetAchieved( bool achieved )
+		{
+			_achieved = achieved;
+		}
 
 		/*
 		===============
@@ -129,6 +141,9 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 		/// </summary>
 		/// <param name="progress"></param>
 		public void UpdateProgress( float progress )
-			=> _progress = _progress! with { Progress = progress };
+		{
+			_progress ??= new();
+			_progress.Progress = progress;
+		}
 	};
 };

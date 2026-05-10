@@ -13,10 +13,13 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
+using Nomad.Core.Util;
+using System;
+
 namespace Nomad.Core.OnlineServices
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public interface IAchievementInfo
     {
@@ -44,5 +47,10 @@ namespace Nomad.Core.OnlineServices
         /// The maximum allowed progress for this achievement.
         /// </summary>
         float MaxProgress { get; }
+
+        /// <summary>
+        /// The time at which this achievement was unlocked.
+        /// </summary>
+        DateTime UnlockedTime { get; }
     }
 }

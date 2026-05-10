@@ -43,6 +43,7 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		public HSteamNetConnection Connection => _connection;
 		private readonly HSteamNetConnection _connection = HSteamNetConnection.Invalid;
 
+		public SteamNetworkingIdentity Identity => _identity;
 		private readonly SteamNetworkingIdentity _identity;
 
 		/*

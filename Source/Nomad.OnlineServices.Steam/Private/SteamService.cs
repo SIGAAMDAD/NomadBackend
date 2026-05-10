@@ -63,6 +63,14 @@ namespace Nomad.OnlineServices.Steam.Private
 		}
 		private SteamAchievementService _achievementsService;
 
+		public IMatchMakingService Matchmaking {
+			get {
+				_matchMakingService ??= new SteamMatchMakingService( _lobbyService.Repository, _cvarSystem );
+				return _matchMakingService;
+			}
+		}
+		private SteamMatchMakingService _matchMakingService;
+
 		public ICloudStorageService CloudStorage {
 			get {
 				_cloudStorageService ??= new SteamCloudStorageService( _logger, _fileSystem );
@@ -73,7 +81,7 @@ namespace Nomad.OnlineServices.Steam.Private
 
 		public ILobbyService LobbyService {
 			get {
-				_lobbyService ??= new SteamLobbyService( _userData, _appData, _logger, _cvarSystem, _eventFactory );
+				_lobbyService ??= new SteamLobbyService( _userData, _logger, _cvarSystem, _eventFactory );
 				return _lobbyService;
 			}
 		}
@@ -86,8 +94,8 @@ namespace Nomad.OnlineServices.Steam.Private
 		private readonly ICVarSystemService _cvarSystem;
 		private readonly IGameEventRegistryService _eventFactory;
 
-		private readonly SteamUserData _userData;
-		private readonly SteamAppData _appData;
+		private readonly SteamUserData _userData = null;
+		private readonly SteamDataCache _steamData = null;
 
 		private readonly SteamStatsRepository _statsRepository;
 
@@ -120,13 +128,24 @@ namespace Nomad.OnlineServices.Steam.Private
 				return;
 			}
 
+			_steamData = new SteamDataCache {
+				LocalUserId = SteamUser.GetSteamID(),
+
+				AppBuildId = SteamApps.GetAppBuildId(),
+				AppId = SteamUtils.GetAppID(),
+				AppOwnerId = SteamApps.GetAppOwner(),
+
+				InitialPersonaName = SteamFriends.GetPersonaName(),
+				AvailableGameLanguages = SteamApps.GetAvailableGameLanguages(),
+				CurrentGameLanguage = SteamApps.GetCurrentGameLanguage(),
+
+				Universe = SteamUtils.GetConnectedUniverse(),
+				IsSteamDeck = SteamUtils.IsSteamRunningOnSteamDeck()
+			};
+
 			_userData = new SteamUserData {
 				UserID = SteamUser.GetSteamID(),
 				UserName = SteamFriends.GetPersonaName()
-			};
-
-			_appData = new SteamAppData {
-				AppId = SteamUtils.GetAppID()
 			};
 
 			SteamCVarRegistry.RegisterCVars( cvarSystem );

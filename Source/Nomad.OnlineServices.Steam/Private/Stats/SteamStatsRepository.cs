@@ -17,6 +17,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Engine.Services;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
@@ -59,9 +60,15 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 
 		private bool _isDisposed = false;
 
-		public event Action<string>? AchievementUnlocked;
-		public event Action<string, float, float>? AchievementProgressChanged;
-		public event Action? StatsUpdated;
+		private bool _storeInFlight = false;
+		private bool _storeAgainAfterCurrent = false;
+
+		public bool IsReady => _isReady;
+		private volatile bool _isReady = false;
+
+		public event Action<InternString> AchievementUnlocked;
+		public event Action<InternString, float, float> AchievementProgressChanged;
+		public event Action StatsUpdated;
 
 		/*
 		===============
@@ -76,6 +83,9 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="engineService"></param>
 		public SteamStatsRepository( SteamUserData userData, ILoggerService logger, IEngineService engineService )
 		{
+			ArgumentGuard.ThrowIfNull( engineService, nameof( engineService ) );
+			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
+
 			_userStatsReceived = Callback<UserStatsReceived_t>.Create( OnUserStatsReceived );
 			_userStatsStored = Callback<UserStatsStored_t>.Create( OnUserStatsStored );
 			_userStatsUnloaded = Callback<UserStatsUnloaded_t>.Create( OnUserStatsUnloaded );
@@ -89,9 +99,9 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			_dirtyStats = new HashSet<string>();
 
 			_category = logger.CreateCategory( nameof( SteamStatsRepository ), LogLevel.Info, true );
-			_userData = userData;
+			_userData = userData ?? throw new ArgumentNullException( nameof( userData ) );
 
-			SteamAPICall_t hCallback = SteamUserStats.RequestUserStats( userData.UserID );
+			RequestStats();
 		}
 
 		/*
@@ -119,6 +129,29 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 
 		/*
 		===============
+		RequestStats
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
+		public bool RequestStats()
+		{
+			_category.PrintDebug( $"RequestStats: requesting stats for user '{_userData.UserName}'." );
+
+			SteamAPICall_t hCallback = SteamUserStats.RequestUserStats( _userData.UserID );
+			if ( hCallback == SteamAPICall_t.Invalid ) {
+				_category.PrintError( "RequestStats: Steam returned inavlid API call handle." );
+				return false;
+			}
+
+			_category.PrintDebug( $"RequestStats: request submitted. Call={hCallback.m_SteamAPICall}" );
+			return true;
+		}
+
+		/*
+		===============
 		GetAchievementInfo
 		===============
 		*/
@@ -127,11 +160,14 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="achievementId"></param>
 		/// <returns></returns>
-		public IAchievementInfo? GetAchievementInfo( string achievementId )
+		public IAchievementInfo? GetAchievementInfo( InternString achievementId )
 		{
+			CheckAchievementReady( nameof( GetAchievementInfo ), achievementId );
+
 			if ( !_achievements.TryGetValue( achievementId, out var achievementInfo ) ) {
 				return null;
 			}
+
 			return achievementInfo;
 		}
 
@@ -145,8 +181,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="achievementId"></param>
 		/// <param name="progress"></param>
-		public void SetAchievementProgress( string achievementId, float progress )
+		public void SetAchievementProgress( InternString achievementId, float progress )
 		{
+			CheckAchievementReady( nameof( GetAchievementInfo ), achievementId );
+
 			if ( !_achievements.TryGetValue( achievementId, out var info ) ) {
 				return;
 			}
@@ -157,12 +195,14 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			}
 
 			info.UpdateProgress( progress );
-			SteamUserStats.IndicateAchievementProgress( achievementId, (uint)progress, (uint)info.MaxProgress );
-			SetStatFloat( info.StatId, progress );
+			bool success = SteamUserStats.IndicateAchievementProgress( achievementId, (uint)progress, (uint)info.MaxProgress );
+			if ( !success ) {
+				_category.PrintWarning( $"SetAchievementProgress: SteamUserStats.IndicateAchievementProgress failed for '{(string)achievementId}'." );
+			}
+			SetStatFloat( new InternString( info.StatId ), progress );
 
 			if ( progress >= info.MaxProgress ) {
-				SteamUserStats.SetAchievement( achievementId );
-				AchievementUnlocked?.Invoke( achievementId );
+				UnlockAchievement( achievementId );
 			}
 
 			StoreStats();
@@ -178,14 +218,18 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		///
 		/// </summary>
 		/// <param name="achievementId"></param>
-		public void UnlockAchievement( string achievementId )
+		public void UnlockAchievement( InternString achievementId )
 		{
+			CheckAchievementReady( nameof( GetAchievementInfo ), achievementId );
+
 			if ( !_achievements.ContainsKey( achievementId ) ) {
-				_category.PrintError( $"Achievement '{achievementId}' does not exist!" );
+				_category.PrintError( $"UnlockAchievement: Achievement '{achievementId}' does not exist!" );
 				return;
 			}
 			if ( SteamUserStats.SetAchievement( achievementId ) ) {
 				StoreStats();
+			} else {
+				_category.PrintWarning( $"UnlockAchievement: SteamUserStats.SetAchievement(true) failed for '{(string)achievementId}'." );
 			}
 		}
 
@@ -198,15 +242,20 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		///
 		/// </summary>
 		/// <param name="achievementId"></param>
-		public void LockAchievement( string achievementId )
+		public void LockAchievement( InternString achievementId )
 		{
-			if ( !_achievements.TryGetValue( achievementId, out var info ) ) {
-				_category.PrintError( $"Achievement '{achievementId}' does not exist!" );
+			CheckAchievementReady( nameof( GetAchievementInfo ), achievementId );
+
+			if ( !_achievements.TryGetValue( achievementId, out SteamAchievementInfo info ) ) {
+				_category.PrintError( $"LockAchievement: Achievement '{achievementId}' does not exist!" );
 				return;
 			}
+
 			if ( SteamUserStats.ClearAchievement( achievementId ) ) {
 				info.SetAchieved( false );
 				StoreStats();
+			} else {
+				_category.PrintWarning( $"LockAchievement: SteamUserStats.ClearAchievement failed for '{(string)achievementId}'." );
 			}
 		}
 
@@ -220,18 +269,30 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="statId"></param>
 		/// <returns></returns>
-		public float GetStatFloat( string statId )
+		public float GetStatFloat( InternString statId )
 		{
-			if ( _stats.TryGetValue( statId, out var stat ) && stat.IsFloat ) {
+			CheckStatReady( nameof( GetStatFloat ), statId );
+
+			if ( _stats.TryGetValue( statId, out SteamStatData stat ) && stat.IsFloat ) {
+				if ( !stat.IsFloat ) {
+					_category.PrintWarning( $"GetStatFloat: stat '{(string)statId}' was cached as an int." );
+					return 0.0f;
+				}
 				return stat.Value.FloatValue;
 			}
-			SteamUserStats.GetStat( statId, out float value );
+
+			bool success = SteamUserStats.GetStat( statId, out float value );
+			if ( !success ) {
+				_category.PrintWarning( $"GetStatFloat: SteamUserStats.GetStat failed for '{(string)statId}'" );
+			}
+
 			_stats[statId] = new SteamStatData {
 				Name = new InternString( statId ),
 				Value = new SteamStatData.Data { FloatValue = value },
 				IsDirty = false,
 				IsFloat = true
 			};
+
 			return value;
 		}
 
@@ -245,18 +306,30 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="statId"></param>
 		/// <returns></returns>
-		public int GetStatInt( string statId )
+		public int GetStatInt( InternString statId )
 		{
-			if ( _stats.TryGetValue( statId, out var stat ) && !stat.IsFloat ) {
+			CheckStatReady( nameof( GetStatInt ), statId );
+
+			if ( _stats.TryGetValue( statId, out SteamStatData stat ) && !stat.IsFloat ) {
+				if ( !stat.IsFloat ) {
+					_category.PrintWarning( $"GetStatInt: stat '{(string)statId}' was cached as a float." );
+					return 0;
+				}
 				return stat.Value.IntValue;
 			}
-			SteamUserStats.GetStat( statId, out int value );
+
+			bool success = SteamUserStats.GetStat( statId, out int value );
+			if ( !success ) {
+				_category.PrintWarning( $"GetStatInt: SteamUserStats.GetStat failed for '{(string)statId}'" );
+			}
+
 			_stats[statId] = new SteamStatData {
 				Name = new InternString( statId ),
 				Value = new SteamStatData.Data { IntValue = value },
 				IsDirty = false,
 				IsFloat = false
 			};
+
 			return value;
 		}
 
@@ -270,14 +343,17 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="statId"></param>
 		/// <param name="value"></param>
-		public void SetStatFloat( string statId, float value )
+		public void SetStatFloat( InternString statId, float value )
 		{
+			CheckStatReady( nameof( SetStatFloat ), statId );
+
 			_stats[statId] = new SteamStatData {
 				Name = new InternString( statId ),
 				Value = new SteamStatData.Data { FloatValue = value },
 				IsDirty = true,
 				IsFloat = true
 			};
+
 			lock ( _dirtyStats ) {
 				_dirtyStats.Add( statId );
 			}
@@ -293,14 +369,17 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="statId"></param>
 		/// <param name="value"></param>
-		public void SetStatInt( string statId, int value )
+		public void SetStatInt( InternString statId, int value )
 		{
+			CheckStatReady( nameof( SetStatInt ), statId );
+
 			_stats[statId] = new SteamStatData {
 				Name = new InternString( statId ),
 				Value = new SteamStatData.Data { IntValue = value },
 				IsDirty = true,
 				IsFloat = false
 			};
+
 			lock ( _dirtyStats ) {
 				_dirtyStats.Add( statId );
 			}
@@ -321,8 +400,17 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 
 			// Write dirty stats
 			lock ( _dirtyStats ) {
-				foreach ( var name in _dirtyStats.ToList() ) { // copy to avoid modification during iteration
-					if ( !_stats.TryGetValue( name, out var stat ) ) {
+				if ( _storeInFlight ) {
+					_storeAgainAfterCurrent = true;
+					_category.PrintDebug( "StoreStats: store already in flight; scheduling another store." );
+					return true;
+				}
+
+				_storeInFlight = true;
+
+				// copy to avoid modification during iteration
+				foreach ( var name in _dirtyStats.ToList() ) {
+					if ( !_stats.TryGetValue( name, out SteamStatData stat ) ) {
 						continue;
 					}
 
@@ -345,7 +433,13 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			}
 
 			// Upload all stats (Steam expects this after SetStat calls)
-			return !anyFailed && SteamUserStats.StoreStats();
+			bool submitted = SteamUserStats.StoreStats();
+			if ( !submitted ) {
+				lock ( _dirtyStats ) {
+					_storeInFlight = false;
+				}
+			}
+			return !anyFailed && submitted;
 		}
 
 		/*
@@ -372,8 +466,26 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="pCallback"></param>
 		private void OnUserStatsStored( UserStatsStored_t pCallback )
 		{
+			lock ( _dirtyStats ) {
+				_storeInFlight = false;
+			}
+
 			if ( pCallback.m_eResult != EResult.k_EResultOK ) {
+				_category.PrintError( $"OnUserStatsStored: Steam failed to store stats - {pCallback.m_eResult}." );
 				return;
+			}
+
+			_category.PrintLine( "OnUserStatsStored: Steam confirmed stats were stored." );
+
+			bool shouldStoreAgain = false;
+			lock ( _dirtyStats ) {
+				shouldStoreAgain = _storeAgainAfterCurrent;
+				_storeAgainAfterCurrent = false;
+			}
+
+			if ( shouldStoreAgain ) {
+				_category.PrintDebug( "OnUserStatsStored: submitting queued store request." );
+				StoreStats();
 			}
 		}
 
@@ -391,6 +503,8 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			if ( pCallback.m_eResult != EResult.k_EResultOK ) {
 				return;
 			}
+
+			_isReady = true;
 
 			int numAchievements = (int)SteamUserStats.GetNumAchievements();
 			for ( uint i = 0; i < numAchievements; i++ ) {
@@ -412,16 +526,16 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="pCallback"></param>
 		private void OnUserAchievementStored( UserAchievementStored_t pCallback )
 		{
-			if ( !_achievements.TryGetValue( pCallback.m_rgchAchievementName, out var info ) ) {
+			if ( !_achievements.TryGetValue( pCallback.m_rgchAchievementName, out SteamAchievementInfo info ) ) {
 				return;
 			}
 
 			if ( pCallback.m_nCurProgress == pCallback.m_nMaxProgress ) {
 				info.SetAchieved( true );
-				AchievementUnlocked?.Invoke( pCallback.m_rgchAchievementName );
+				AchievementUnlocked?.Invoke( new InternString( pCallback.m_rgchAchievementName ) );
 			} else {
 				AchievementProgressChanged?.Invoke(
-					pCallback.m_rgchAchievementName,
+					new InternString( pCallback.m_rgchAchievementName ),
 					pCallback.m_nCurProgress,
 					pCallback.m_nMaxProgress
 				);
@@ -443,6 +557,40 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 				return;
 			}
 			info.SetIcon( pCallback.m_nIconHandle, _engineService );
+		}
+
+		/*
+		===============
+		CheckAchievementReady
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="methodName"></param>
+		/// <param name="achievementId"></param>
+		private void CheckAchievementReady( string methodName, string achievementId )
+		{
+			if ( !_isReady ) {
+				_category.PrintWarning( $"{methodName}: stats are not ready yet. Achievement='{achievementId}'." );
+			}
+		}
+
+		/*
+		===============
+		CheckStatReady
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="methodName"></param>
+		/// <param name="statId"></param>
+		private void CheckStatReady( string methodName, string statId )
+		{
+			if ( !_isReady ) {
+				_category.PrintWarning( $"{methodName}: stats are not ready yet. Stat='{statId}'." );
+			}
 		}
 	};
 };
