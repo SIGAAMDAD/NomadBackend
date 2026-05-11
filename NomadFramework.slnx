@@ -1,3 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Solution>
   <Project Path="Source/Nomad.Audio/Nomad.Audio.csproj" />
   <Project Path="Source/Nomad.Audio.FMOD/Nomad.Audio.FMOD.csproj" />
@@ -15,4 +16,5 @@
   <Project Path="Source/Nomad.ResourceCache/Nomad.ResourceCache.csproj" />
   <Project Path="Source/Nomad.Save/Nomad.Save.csproj" />
   <Project Path="Source/Nomad.SourceGenerators/Nomad.SourceGenerators.csproj" />
+  <Project Path="Source/Nomad.Networking/Nomad.Networking.csproj" />
 </Solution>

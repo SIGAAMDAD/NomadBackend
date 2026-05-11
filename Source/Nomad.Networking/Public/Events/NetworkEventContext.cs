@@ -13,17 +13,24 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Core.OnlineServices
+using Nomad.Core.OnlineServices;
+
+namespace Nomad.Networking.Events
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
-    public enum NetworkSessionMode : byte
+    public readonly struct NetworkEventContext
     {
-        Offline = 0,
-        Host,
-        Client,
+        public readonly PeerId Sender;
+        public readonly uint Tick;
+        public readonly bool FromHost;
 
-        Count
+        public NetworkEventContext(PeerId sender, uint tick, bool fromHost)
+        {
+            Sender = sender;
+            Tick = tick;
+            FromHost = fromHost;
+        }
     }
 }

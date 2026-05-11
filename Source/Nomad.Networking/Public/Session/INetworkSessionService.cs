@@ -17,8 +17,11 @@ using System;
 using System.Threading.Tasks;
 using System.Threading;
 using Nomad.Core.Events;
+using Nomad.Core.OnlineServices;
+using Nomad.Networking.Messaging;
+using Nomad.Networking.Transport;
 
-namespace Nomad.Core.OnlineServices
+namespace Nomad.Networking.Session
 {
     /// <summary>
     ///
@@ -48,7 +51,7 @@ namespace Nomad.Core.OnlineServices
         /// <summary>
         /// Event that triggers whenever a network session is created, joined, or left.
         /// </summary>
-        [Event(nameSpace: "Nomad.Core.OnlineServices", PayloadName = "NetworkSessionChangedEventArgs")]
+        [Event(nameSpace: "Nomad.Networking.Session", PayloadName = "NetworkSessionChangedEventArgs")]
         [EventPayload("SessionId", typeof(Guid), Order = 1)]
         [EventPayload("LobbyId", typeof(LobbyId), Order = 2)]
         [EventPayload("Mode", typeof(NetworkSessionMode), Order = 3)]
@@ -56,11 +59,11 @@ namespace Nomad.Core.OnlineServices
         [EventPayload("HostPeerId", typeof(PeerId), Order = 5)]
         IGameEvent<NetworkSessionChangedEventArgs> SessionChanged { get; }
 
-        [Event(nameSpace: "Nomad.Core.OnlineServices")]
+        [Event(nameSpace: "Nomad.Networking.Session")]
         [EventPayload("PeerId", typeof(PeerId), Order = 1)]
         IGameEvent<PeerConnectedEventArgs> PeerConnected { get; }
 
-        [Event(nameSpace: "Nomad.Core.OnlineServices")]
+        [Event(nameSpace: "Nomad.Networking.Session")]
         [EventPayload("PeerId", typeof(PeerId), Order = 1)]
         [EventPayload("LeaveReason", typeof(LobbyLeaveReason), Order = 2)]
         IGameEvent<PeerDisconnectedEventArgs> PeerDisconnected { get; }

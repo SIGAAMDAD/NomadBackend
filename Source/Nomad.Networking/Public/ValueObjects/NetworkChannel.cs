@@ -13,22 +13,15 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Core.OnlineServices
+namespace Nomad.Networking.ValueObjects
 {
-	public sealed record NetworkSessionJoinResult
-	{
-		public bool Success { get; init; }
-		public NetworkSessionInfo? Session { get; init; }
-		public NetworkSessionFailureReason Reason { get; init; }
-
-		public static NetworkSessionJoinResult Failed( NetworkSessionFailureReason reason )
-		{
-			return new NetworkSessionJoinResult { Success = false, Reason = reason };
-		}
-
-		public static NetworkSessionJoinResult Joined( NetworkSessionInfo session )
-		{
-			return new NetworkSessionJoinResult { Success = true, Session = session };
-		}
-	}
+    public enum NetworkChannel
+    {
+        Control = 0,
+        Rpc = 1,
+        Event = 2,
+        Input = 3,
+        Snapshot = 4,
+        Debug = 5
+    }
 }

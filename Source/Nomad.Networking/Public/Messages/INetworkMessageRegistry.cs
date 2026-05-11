@@ -1,0 +1,49 @@
+/*
+===========================================================================
+The Nomad Framework
+Copyright (C) 2025-2026 Noah Van Til
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v2. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+This software is provided "as is", without warranty of any kind,
+express or implied, including but not limited to the warranties
+of merchantability, fitness for a particular purpose and noninfringement.
+===========================================================================
+*/
+
+namespace Nomad.Networking.Messaging
+{
+    /// <summary>
+    ///
+    /// </summary>
+    public interface INetworkMessageRegistry
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="id"></param>
+        /// <param name="kind"></param>
+        void Register<TMessage>(ushort id, NetworkMessageKind kind)
+            where TMessage : struct;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="TMessage"></typeparam>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        bool TryGetId<TMessage>(out ushort id)
+            where TMessage : struct;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        bool TryGetInfo(ushort id, out NetworkMessageInfo info);
+    }
+}

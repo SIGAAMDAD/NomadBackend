@@ -17,8 +17,8 @@ using System;
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
-using Nomad.Core.OnlineServices;
 using Nomad.Core.Logger;
+using Nomad.Networking.Messaging;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
@@ -205,12 +205,13 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 				return false;
 			}
 
-			if ( queued.Payload.Length > destination.Length ) {
-				_category.PrintError( $"Dropped Steam network packet: payload size {queued.Payload.Length} exceeds destination size {destination.Length}." );
+			if ( queued.BytesWritten > destination.Length ) {
+				_category.PrintError( $"Dropped Steam network packet: payload size {queued.BytesWritten} exceeds destination size {destination.Length}." );
+				queued.ReleasePayload();
 				return false;
 			}
 
-			queued.Payload.CopyTo( destination );
+			queued.Payload.AsSpan( 0, queued.BytesWritten ).CopyTo( destination );
 			queued.ReleasePayload();
 			packet = queued;
 
@@ -262,6 +263,7 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 				new ReceivedNetworkPacket(
 					peerId,
 					payload,
+					header.PayloadLength,
 					(NetworkSendMode)(byte)header.Flags
 				)
 			);

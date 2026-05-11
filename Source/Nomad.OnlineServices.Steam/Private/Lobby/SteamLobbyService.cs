@@ -22,6 +22,7 @@ using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
 using Nomad.CVars;
+using Nomad.Networking.Session;
 using Nomad.OnlineServices.Steam.Private.Network;
 using Nomad.OnlineServices.Steam.Private.Util;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
@@ -189,7 +190,7 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 			SteamLobbyData? lobby = await CreateLobbyInternal( lobbyInfo, ct );
 			if ( lobby == null ) {
 				_lobbyStarted.Publish( new LobbyStartResultEventArgs( false, Guid.Empty ) );
-				return LobbyCreateResult.Failure( NetworkSessionFailureReason.Unknown );
+				return LobbyCreateResult.Failure( LobbyFailureReason.Unknown );
 			}
 
 			lock ( _operationsLock ) {
@@ -214,7 +215,7 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 		public async Task<LobbyJoinResult> JoinLobby( LobbyId lobbyId, CancellationToken ct = default )
 		{
 			if ( !_repository.TryGetLobby( lobbyId.Value, out SteamLobbyData? lobby ) ) {
-				return LobbyJoinResult.Failure( NetworkSessionFailureReason.SessionNotFound );
+				return LobbyJoinResult.Failure( LobbyFailureReason.SessionNotFound );
 			}
 			return await _lobbyEnter.Invoke(
 				result => {
@@ -229,7 +230,7 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 						case EChatRoomEnterResponse.k_EChatRoomEnterResponseMemberBlockedYou:
 						case EChatRoomEnterResponse.k_EChatRoomEnterResponseRatelimitExceeded:
 						case EChatRoomEnterResponse.k_EChatRoomEnterResponseYouBlockedMember:
-							return LobbyJoinResult.Failure( NetworkSessionFailureReason.SessionFull );
+							return LobbyJoinResult.Failure( LobbyFailureReason.SessionFull );
 						case EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess:
 							break;
 						default:

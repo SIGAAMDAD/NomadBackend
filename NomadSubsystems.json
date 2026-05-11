@@ -156,6 +156,19 @@
       ],
       "UnityCompatible": false,
       "DefaultEnabled": false
+    },
+    {
+      "Name": "Nomad.Networking",
+      "Define": "NOMAD_ENABLE_NETWORKING",
+      "Category": "Uncategorized",
+      "Description": "Nomad.Networking module for NomadFramework.",
+      "DependsOn": [
+        "Nomad.Core"
+      ],
+      "UnityCompatible": true,
+      "GodotCompatible": true,
+      "HeadlessCompatible": true,
+      "DefaultEnabled": false
     }
   ]
 }

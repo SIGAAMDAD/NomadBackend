@@ -13,22 +13,10 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Core.OnlineServices
+namespace Nomad.Networking.Rpc
 {
-    /// <summary>
-    ///
-    /// </summary>
-    public enum NetworkConnectionState : byte
-    {
-        Disconnected = 0,
-        StartingHost,
-        Hosting,
-        Connecting,
-        Connected,
-        Stopping,
-        Faulted,
-        Kicked,
-
-        Count
-    }
+	public delegate void NetworkRpcHandler<TRpc>(
+		in NetworkRpcContext context,
+		in TRpc rpc
+	) where TRpc : struct;
 }

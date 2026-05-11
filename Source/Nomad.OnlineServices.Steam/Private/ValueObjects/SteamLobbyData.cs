@@ -73,7 +73,6 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 				Map = info.Map,
 				GameMode = info.GameMode,
 				MaxPlayers = info.MaxPlayers,
-				PlayerCount = info.PlayerCount,
 				Visibility = info.Visibility,
 				Metadata = info.Metadata
 			};

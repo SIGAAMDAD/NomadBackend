@@ -13,23 +13,18 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-using Nomad.Core.OnlineServices;
-using Nomad.Networking.Session;
-using Steamworks;
-
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+namespace Nomad.Networking.Diagnostics
 {
-	/// <summary>
-	///
-	/// </summary>
-	internal sealed record SteamSessionPeer
+	public interface INetworkDiagnostics
 	{
-		public LobbyMemberInfo Info;
-		public CSteamID SteamId;
-		public HSteamNetConnection Connection;
-		public NetworkConnectionState State;
-		public bool IsHost;
-		public bool IsLocal;
-		public byte Slot;
-	};
-};
+		NetworkStats Stats { get; }
+
+		void Reset();
+		void RecordPacketSent( int bytes );
+		void RecordPacketReceived( int bytes );
+		void RecordPacketDropped();
+		void RecordDeserializeFailure();
+		void RecordUnknownMessageId();
+		void RecordAuthorityReject();
+	}
+}

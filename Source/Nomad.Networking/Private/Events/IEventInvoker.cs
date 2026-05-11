@@ -13,23 +13,14 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-using Nomad.Core.OnlineServices;
-using Nomad.Networking.Session;
-using Steamworks;
+using System;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+namespace Nomad.Networking.Private.Events
 {
-	/// <summary>
-	///
-	/// </summary>
-	internal sealed record SteamSessionPeer
+	internal interface IEventInvoker
 	{
-		public LobbyMemberInfo Info;
-		public CSteamID SteamId;
-		public HSteamNetConnection Connection;
-		public NetworkConnectionState State;
-		public bool IsHost;
-		public bool IsLocal;
-		public byte Slot;
+		Type MessageType { get; }
+
+		void Dispatch( in InboundEvent inbound );
 	};
 };

@@ -74,7 +74,7 @@ namespace Nomad.Core.OnlineServices
         [ResultObject("LobbyCreateResult", isRecord: true, Namespace = "Nomad.Core.OnlineServices")]
         [ResultObjectPayload("Id", typeof(LobbyId), order: 1)]
         [ResultObjectPayload("Lobby", typeof(LobbyInfo), order: 2, IsOptional = true)]
-        [ResultObjectPayload("Reason", typeof(NetworkSessionFailureReason), order: 3)]
+        [ResultObjectPayload("Reason", typeof(LobbyFailureReason), order: 3)]
         [ResultObjectFailure("Reason", MethodName = "Failure")]
         [ResultObjectSuccess("Id", MethodName = "Created")]
         Task<LobbyCreateResult> CreateLobby(LobbyCreateInfo lobbyInfo, CancellationToken ct = default);
@@ -87,7 +87,7 @@ namespace Nomad.Core.OnlineServices
         /// <returns>True if the lobby was joined successfully, false otherwise.</returns>
         [ResultObject("LobbyJoinResult", isRecord: true, Namespace = "Nomad.Core.OnlineServices")]
         [ResultObjectPayload("LobbyData", typeof(LobbyInfo), order: 2, IsOptional = true)]
-        [ResultObjectPayload("Reason", typeof(NetworkSessionFailureReason), order: 3, IsOptional = true)]
+        [ResultObjectPayload("Reason", typeof(LobbyFailureReason), order: 3, IsOptional = true)]
         [ResultObjectFailure("Reason", MethodName = "Failure")]
         [ResultObjectSuccess("LobbyData", MethodName = "Joined")]
         Task<LobbyJoinResult> JoinLobby(LobbyId lobbyId, CancellationToken ct = default);

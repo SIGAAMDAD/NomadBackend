@@ -21,6 +21,7 @@ using Nomad.Core.CVars;
 using Nomad.Core.Events;
 using Nomad.Core.OnlineServices;
 using Nomad.CVars;
+using Nomad.Networking.Session;
 using Nomad.OnlineServices.Steam.Private.Network;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
@@ -174,6 +175,7 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 					IsLocal = _info.OwnerId == SteamUser.GetSteamID().m_SteamID,
 					Slot = (byte)_members.Count
 				};
+				_netDriver.BindPeer( peerId, userId );
 			}
 		}
 
@@ -215,6 +217,7 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 						IsLocal = _info.OwnerId == SteamUser.GetSteamID().m_SteamID,
 						Slot = (byte)_members.Count
 					};
+					_netDriver.BindPeer( peerId, userChangedId );
 					break;
 			}
 		}

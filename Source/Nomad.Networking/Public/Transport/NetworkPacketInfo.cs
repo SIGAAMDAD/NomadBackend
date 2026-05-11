@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-The Nomad MPLv2 Source Code
+The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
 
 This Source Code Form is subject to the terms of the Mozilla Public
@@ -13,30 +13,22 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-using System.Buffers;
+using Nomad.Core.OnlineServices;
 using Nomad.Networking.Messaging;
-using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+namespace Nomad.Networking.Transport
 {
-	internal readonly struct ReceivedNetworkPacket
+	public readonly struct NetworkPacketInfo
 	{
-		public readonly CSteamID SteamId;
-		public readonly byte[] Payload;
+		public readonly PeerId From;
 		public readonly int BytesWritten;
 		public readonly NetworkSendMode Mode;
 
-		public ReceivedNetworkPacket( CSteamID steamId, byte[] payload, int bytesWritten, NetworkSendMode mode )
+		public NetworkPacketInfo( PeerId from, int bytesWritten, NetworkSendMode mode )
 		{
-			SteamId = steamId;
-			Payload = payload;
+			From = from;
 			BytesWritten = bytesWritten;
 			Mode = mode;
 		}
-
-		public void ReleasePayload()
-		{
-			ArrayPool<byte>.Shared.Return( Payload );
-		}
-	};
-};
+	}
+}

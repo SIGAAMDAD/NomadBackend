@@ -13,26 +13,22 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Core.OnlineServices
+namespace Nomad.Networking.Session
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    public enum NetworkSessionFailureReason : byte
-    {
-        Unknown = 0,
-        InvalidRequest,
-        SessionAlreadyActive,
-        SessionFull,
-        SessionNotFound,
-        ConnectionFailed,
-        HandshakeFailed,
-        TransportFault,
-        HostRejected,
-        VersionMismatch,
-        Disconnected,
-        Timeout,
+	public sealed record NetworkSessionStartResult
+	{
+		public bool Success { get; init; }
+		public NetworkSessionInfo? Session { get; init; }
+		public NetworkSessionFailureReason Reason { get; init; }
 
-        Count
-    }
+		public static NetworkSessionStartResult Failed( NetworkSessionFailureReason reason )
+		{
+			return new NetworkSessionStartResult { Success = false, Reason = reason };
+		}
+
+		public static NetworkSessionStartResult Started( NetworkSessionInfo session )
+		{
+			return new NetworkSessionStartResult { Success = true, Session = session };
+		}
+	}
 }

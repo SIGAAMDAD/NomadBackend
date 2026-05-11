@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-The Nomad MPLv2 Source Code
+The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
 
 This Source Code Form is subject to the terms of the Mozilla Public
@@ -13,30 +13,39 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
+using System;
 using System.Buffers;
-using Nomad.Networking.Messaging;
-using Steamworks;
+using Nomad.Core.OnlineServices;
 
-namespace Nomad.OnlineServices.Steam.Private.ValueObjects
+namespace Nomad.Networking.Private.Rpc
 {
-	internal readonly struct ReceivedNetworkPacket
+	internal struct InboundRpc : IDisposable
 	{
-		public readonly CSteamID SteamId;
-		public readonly byte[] Payload;
-		public readonly int BytesWritten;
-		public readonly NetworkSendMode Mode;
+		public PeerId Sender;
+		public ushort MessageId;
+		public byte[] Payload;
+		public int PayloadLength;
 
-		public ReceivedNetworkPacket( CSteamID steamId, byte[] payload, int bytesWritten, NetworkSendMode mode )
+		public InboundRpc(
+			PeerId sender,
+			ushort messageId,
+			byte[] payload,
+			int payloadLength
+		)
 		{
-			SteamId = steamId;
+			Sender = sender;
+			MessageId = messageId;
 			Payload = payload;
-			BytesWritten = bytesWritten;
-			Mode = mode;
+			PayloadLength = payloadLength;
 		}
 
-		public void ReleasePayload()
+		public void Dispose()
 		{
-			ArrayPool<byte>.Shared.Return( Payload );
+			if ( Payload != null && Payload.Length != 0 ) {
+				ArrayPool<byte>.Shared.Return( Payload );
+				Payload = Array.Empty<byte>();
+				PayloadLength = 0;
+			}
 		}
 	};
 };

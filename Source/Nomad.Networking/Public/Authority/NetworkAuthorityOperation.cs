@@ -13,22 +13,13 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Core.OnlineServices
+namespace Nomad.Networking.Authority
 {
-	public sealed record NetworkSessionStartResult
-	{
-		public bool Success { get; init; }
-		public NetworkSessionInfo? Session { get; init; }
-		public NetworkSessionFailureReason Reason { get; init; }
-
-		public static NetworkSessionStartResult Failed( NetworkSessionFailureReason reason )
-		{
-			return new NetworkSessionStartResult { Success = false, Reason = reason };
-		}
-
-		public static NetworkSessionStartResult Started( NetworkSessionInfo session )
-		{
-			return new NetworkSessionStartResult { Success = true, Session = session };
-		}
-	}
+    public enum NetworkAuthorityOperation : byte
+    {
+        Send,
+        Receive,
+        ExecuteRpc,
+        PublishEvent
+    }
 }

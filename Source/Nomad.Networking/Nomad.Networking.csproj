@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>NomadFramework.Networking</PackageId>
+    <Version>0.1.0-alpha1</Version>
+    <Description>Nomad.Networking module for NomadFramework.</Description>
+    <NomadValidateAsModule>true</NomadValidateAsModule>
+    <UseNomadSourceGenerators>true</UseNomadSourceGenerators>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Nomad.Core\Nomad.Core.csproj" />
+    <ProjectReference Include="..\Nomad.Events\Nomad.Events.csproj" />
+    <ProjectReference Include="..\Nomad.CVars\Nomad.CVars.csproj" />
+  </ItemGroup>
+</Project>

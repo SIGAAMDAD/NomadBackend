@@ -19,6 +19,10 @@ using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
+using Nomad.Networking.Driver;
+using Nomad.Networking.Messaging;
+using Nomad.Networking.Session;
+using Nomad.Networking.Transport;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
@@ -41,7 +45,7 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 	/// <para>This class does not own lobby state or gameplay peer/session state.</para>
 	/// </summary>
 
-	internal sealed class SteamNetDriver : IDisposable
+	internal sealed class SteamNetDriver : INetDriver
 	{
 		private const int DEFAULT_SEND_BUFFER_SIZE = 64 * 1024;
 		private const int DEFAULT_RECV_BUFFER_SIZE = 64 * 1024;
@@ -53,13 +57,15 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		public bool IsListening => _listenSocket != HSteamListenSocket.Invalid;
 		public bool IsInitialized => _receiver.IsOpen;
 
-		public event Action<SteamNetConnection> ConnectionRequested;
-		public event Action<SteamNetConnection> ConnectionEstablished;
-		public event Action<SteamNetConnection> ConnectionClosed;
+		public event Action<NetConnection> ConnectionRequested;
+		public event Action<NetConnection> ConnectionEstablished;
+		public event Action<NetConnection> ConnectionClosed;
 
 		private readonly Callback<SteamNetConnectionStatusChangedCallback_t> _netConnectionStatusChanged;
 
 		private readonly SteamConnectionRepository _repository = new SteamConnectionRepository();
+		private readonly Dictionary<PeerId, CSteamID> _peerToSteam = new();
+		private readonly Dictionary<CSteamID, PeerId> _steamToPeer = new();
 		private readonly ILoggerCategory _category;
 		private readonly SteamNetworkPacketReceiver _receiver;
 
@@ -145,6 +151,21 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			);
 
 			return _listenSocket != HSteamListenSocket.Invalid;
+		}
+
+		public void BindPeer( PeerId peerId, CSteamID steamId )
+		{
+			_peerToSteam[peerId] = steamId;
+			_steamToPeer[steamId] = peerId;
+		}
+
+		public bool Connect( PeerId peerId, int virtualPort = 0 )
+		{
+			if ( !_peerToSteam.TryGetValue( peerId, out CSteamID steamId ) ) {
+				return false;
+			}
+
+			return ConnectP2P( steamId, virtualPort ) != HSteamNetConnection.Invalid;
 		}
 
 		/*
@@ -237,6 +258,17 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			return true;
 		}
 
+		public bool Accept( PeerId peerId )
+		{
+			if ( !_peerToSteam.TryGetValue( peerId, out CSteamID steamId ) ) {
+				return false;
+			}
+			if ( !_repository.TryGet( steamId, out SteamNetConnection connection ) ) {
+				return false;
+			}
+			return Accept( connection.Connection );
+		}
+
 		/*
 		===============
 		Close
@@ -278,7 +310,7 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			if ( hadConnection ) {
 				connection.SetStatus( NetworkConnectionState.Disconnected );
 				_repository.Remove( handle );
-				ConnectionClosed( connection );
+				ConnectionClosed?.Invoke( ToNetConnection( connection ) );
 			}
 
 			SteamNetworkingSockets.CloseConnection(
@@ -289,6 +321,17 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			);
 
 			return hadConnection;
+		}
+
+		public bool Close( PeerId peerId, string reason )
+		{
+			if ( !_peerToSteam.TryGetValue( peerId, out CSteamID steamId ) ) {
+				return false;
+			}
+			if ( !_repository.TryGet( steamId, out SteamNetConnection connection ) ) {
+				return false;
+			}
+			return Close( connection, reason );
 		}
 
 		/*
@@ -346,6 +389,19 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			}
 		}
 
+		public bool Send( PeerId peerId, ReadOnlySpan<byte> payload, NetworkSendMode mode )
+		{
+			if ( !_peerToSteam.TryGetValue( peerId, out CSteamID steamId ) ) {
+				return false;
+			}
+			if ( !_repository.TryGet( steamId, out SteamNetConnection connection ) ) {
+				return false;
+			}
+
+			Send( connection, payload, NetworkPacketType.Payload, mode );
+			return true;
+		}
+
 		/*
 		===============
 		TryReceive
@@ -361,6 +417,20 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		{
 			packet = default;
 			return _receiver != null && _receiver.TryReceive( destination, out packet );
+		}
+
+		public bool TryReceive( Span<byte> destination, out NetworkPacketInfo packet )
+		{
+			packet = default;
+			if ( !TryReceive( destination, out ReceivedNetworkPacket received ) ) {
+				return false;
+			}
+			if ( !_steamToPeer.TryGetValue( received.SteamId, out PeerId peerId ) ) {
+				return false;
+			}
+
+			packet = new NetworkPacketInfo( peerId, received.BytesWritten, received.Mode );
+			return true;
 		}
 
 		/*
@@ -393,6 +463,20 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		public bool TryGetConnection( CSteamID steamId, out SteamNetConnection connection )
 		{
 			return _repository.TryGet( steamId, out connection );
+		}
+
+		public bool TryGetConnection( PeerId peerId, out NetConnection connection )
+		{
+			connection = default;
+			if ( !_peerToSteam.TryGetValue( peerId, out CSteamID steamId ) ) {
+				return false;
+			}
+			if ( !_repository.TryGet( steamId, out SteamNetConnection steamConnection ) ) {
+				return false;
+			}
+
+			connection = ToNetConnection( steamConnection );
+			return true;
 		}
 
 		/*
@@ -445,7 +529,7 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 
 				if ( state == ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connecting ) {
 					connection.SetStatus( NetworkConnectionState.Connecting );
-					ConnectionRequested?.Invoke( connection );
+					ConnectionRequested?.Invoke( ToNetConnection( connection ) );
 					return;
 				}
 			}
@@ -462,7 +546,7 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 
 				case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Connected:
 					connection.SetStatus( NetworkConnectionState.Connected );
-					ConnectionEstablished?.Invoke( connection );
+					ConnectionEstablished?.Invoke( ToNetConnection( connection ) );
 					break;
 
 				case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_ClosedByPeer:
@@ -470,7 +554,7 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 				case ESteamNetworkingConnectionState.k_ESteamNetworkingConnectionState_Dead:
 					connection.SetStatus( NetworkConnectionState.Disconnected );
 					_repository.Remove( handle );
-					ConnectionClosed?.Invoke( connection );
+					ConnectionClosed?.Invoke( ToNetConnection( connection ) );
 
 					SteamNetworkingSockets.CloseConnection(
 						handle,
@@ -552,6 +636,16 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 				default:
 					throw new ArgumentOutOfRangeException( nameof( mode ) );
 			}
+		}
+
+		private NetConnection ToNetConnection( SteamNetConnection connection )
+		{
+			PeerId peerId = default;
+			if ( connection.RemoteSteamId.HasValue ) {
+				_steamToPeer.TryGetValue( connection.RemoteSteamId.Value, out peerId );
+			}
+
+			return new NetConnection( peerId, connection.Status );
 		}
 
 		/*

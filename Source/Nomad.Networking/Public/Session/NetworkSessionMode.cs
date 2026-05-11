@@ -13,15 +13,13 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Core.OnlineServices
+namespace Nomad.Networking.Session
 {
-    public enum NetworkSendMode : byte
-    {
-        Unreliable,
-        UnreliableNoDelay,
-        Reliable,
-
-        Min = Unreliable,
-        Max = Reliable
-    }
+	public enum NetworkSessionMode : byte
+	{
+		Offline = 0,
+		Host = 1,
+		Client = 2,
+		DedicatedServer = 3
+	}
 }
