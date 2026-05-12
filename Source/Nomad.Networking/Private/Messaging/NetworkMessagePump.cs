@@ -18,6 +18,7 @@ using Nomad.Networking.Diagnostics;
 using Nomad.Networking.Private.Events;
 using Nomad.Networking.Private.Rpc;
 using Nomad.Networking.Transport;
+using Nomad.Core.OnlineServices;
 using System;
 
 namespace Nomad.Networking.Private.Messaging

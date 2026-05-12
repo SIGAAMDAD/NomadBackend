@@ -24,8 +24,9 @@ namespace Nomad.Core.OnlineServices
 
         public readonly Guid Value;
 
-        public bool IsEmpty { get { return Value == Guid.Empty; } }
+        public bool IsEmpty => Value == Guid.Empty;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SessionId(Guid value)
         {
             Value = value;
@@ -37,19 +38,34 @@ namespace Nomad.Core.OnlineServices
             return Value.Equals(other.Value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object? obj)
         {
             return obj is SessionId other && Equals(other);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
             return Value.GetHashCode();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
             return Value.ToString("N");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(SessionId left, SessionId right)
+        {
+            return left.Equals(right);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(SessionId left, SessionId right)
+        {
+            return !left.Equals(right);
         }
     }
 }

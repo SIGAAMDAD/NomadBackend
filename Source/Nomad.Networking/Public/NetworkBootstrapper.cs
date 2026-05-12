@@ -21,7 +21,6 @@ using Nomad.Core.OnlineServices;
 using Nomad.Core.ServiceRegistry.Interfaces;
 using Nomad.Core.Util.Attributes;
 using Nomad.Networking.Authority;
-using Nomad.Networking.Driver;
 using Nomad.Networking.Events;
 using Nomad.Networking.Messaging;
 using Nomad.Networking.Private.Authority;
@@ -57,12 +56,13 @@ namespace Nomad.Networking
         public void Initialize(IServiceRegistry registry, IServiceLocator locator)
         {
             var logger = locator.GetService<ILoggerService>();
+            var onlinePlatformService = locator.GetService<IOnlinePlatformService>();
 
             _messageRegistry = new NetworkMessageRegistry();
             _serializer = new NetworkSerializer();
             _sessionService = new NetworkSessionService(
-                locator.GetService<ILobbyService>(),
-                locator.GetService<INetDriver>(),
+                onlinePlatformService.Lobbies,
+                onlinePlatformService.NetDriver,
                 locator.GetService<IGameEventRegistryService>()
             );
             _transport = new NetworkTransport( _sessionService );

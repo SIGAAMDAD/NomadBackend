@@ -17,6 +17,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Engine.Services;
 using Nomad.Core.Logger;
@@ -45,8 +47,11 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 
 		private readonly ConcurrentDictionary<string, SteamAchievementInfo> _achievements;
 		private readonly ConcurrentDictionary<string, SteamStatData> _stats;
+		private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, SteamStatData>> _remoteStats;
 
 		private readonly HashSet<string> _dirtyStats;
+		private readonly HashSet<ulong> _statsReadyByUser;
+		private readonly Dictionary<ulong, TaskCompletionSource<bool>> _pendingUserStatRequests;
 
 		private readonly IEngineService _engineService;
 		private readonly ILoggerCategory _category;
@@ -92,11 +97,14 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			_userAchievementIconFetched = Callback<UserAchievementIconFetched_t>.Create( OnUserAchievementIconFetched );
 			_userAchievementStored = Callback<UserAchievementStored_t>.Create( OnUserAchievementStored );
 
-			_engineService = engineService;
+			_engineService = engineService ?? throw new ArgumentNullException( nameof( engineService ) );
 
 			_achievements = new ConcurrentDictionary<string, SteamAchievementInfo>();
 			_stats = new ConcurrentDictionary<string, SteamStatData>();
+			_remoteStats = new ConcurrentDictionary<ulong, ConcurrentDictionary<string, SteamStatData>>();
 			_dirtyStats = new HashSet<string>();
+			_statsReadyByUser = new HashSet<ulong>();
+			_pendingUserStatRequests = new Dictionary<ulong, TaskCompletionSource<bool>>();
 
 			_category = logger.CreateCategory( nameof( SteamStatsRepository ), LogLevel.Info, true );
 			_userData = userData ?? throw new ArgumentNullException( nameof( userData ) );
@@ -120,6 +128,13 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 				_userStatsUnloaded?.Dispose();
 				_userAchievementIconFetched?.Dispose();
 				_userAchievementStored?.Dispose();
+
+				lock ( _pendingUserStatRequests ) {
+					foreach ( TaskCompletionSource<bool> request in _pendingUserStatRequests.Values ) {
+						request.TrySetCanceled();
+					}
+					_pendingUserStatRequests.Clear();
+				}
 
 				_category?.Dispose();
 			}
@@ -273,7 +288,7 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		{
 			CheckStatReady( nameof( GetStatFloat ), statId );
 
-			if ( _stats.TryGetValue( statId, out SteamStatData stat ) && stat.IsFloat ) {
+			if ( _stats.TryGetValue( statId, out SteamStatData stat ) ) {
 				if ( !stat.IsFloat ) {
 					_category.PrintWarning( $"GetStatFloat: stat '{(string)statId}' was cached as an int." );
 					return 0.0f;
@@ -310,8 +325,8 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		{
 			CheckStatReady( nameof( GetStatInt ), statId );
 
-			if ( _stats.TryGetValue( statId, out SteamStatData stat ) && !stat.IsFloat ) {
-				if ( !stat.IsFloat ) {
+			if ( _stats.TryGetValue( statId, out SteamStatData stat ) ) {
+				if ( stat.IsFloat ) {
 					_category.PrintWarning( $"GetStatInt: stat '{(string)statId}' was cached as a float." );
 					return 0;
 				}
@@ -328,6 +343,62 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 				Value = new SteamStatData.Data { IntValue = value },
 				IsDirty = false,
 				IsFloat = false
+			};
+
+			return value;
+		}
+
+		public async ValueTask<int> GetUserStatInt( CSteamID userId, InternString statId, CancellationToken ct = default )
+		{
+			if ( IsLocalUser( userId ) ) {
+				return GetStatInt( statId );
+			}
+
+			await EnsureUserStatsReadyAsync( userId, ct );
+
+			ConcurrentDictionary<string, SteamStatData> userStats = _remoteStats.GetOrAdd( userId.m_SteamID, _ => new ConcurrentDictionary<string, SteamStatData>() );
+			if ( userStats.TryGetValue( statId, out SteamStatData cached ) && !cached.IsFloat ) {
+				return cached.Value.IntValue;
+			}
+
+			bool success = SteamUserStats.GetUserStat( userId, statId, out int value );
+			if ( !success ) {
+				_category.PrintWarning( $"GetUserStatInt: SteamUserStats.GetUserStat failed for user '{userId.m_SteamID}', stat '{(string)statId}'." );
+			}
+
+			userStats[statId] = new SteamStatData {
+				Name = new InternString( statId ),
+				Value = new SteamStatData.Data { IntValue = value },
+				IsDirty = false,
+				IsFloat = false
+			};
+
+			return value;
+		}
+
+		public async ValueTask<float> GetUserStatFloat( CSteamID userId, InternString statId, CancellationToken ct = default )
+		{
+			if ( IsLocalUser( userId ) ) {
+				return GetStatFloat( statId );
+			}
+
+			await EnsureUserStatsReadyAsync( userId, ct );
+
+			ConcurrentDictionary<string, SteamStatData> userStats = _remoteStats.GetOrAdd( userId.m_SteamID, _ => new ConcurrentDictionary<string, SteamStatData>() );
+			if ( userStats.TryGetValue( statId, out SteamStatData cached ) && cached.IsFloat ) {
+				return cached.Value.FloatValue;
+			}
+
+			bool success = SteamUserStats.GetUserStat( userId, statId, out float value );
+			if ( !success ) {
+				_category.PrintWarning( $"GetUserStatFloat: SteamUserStats.GetUserStat failed for user '{userId.m_SteamID}', stat '{(string)statId}'." );
+			}
+
+			userStats[statId] = new SteamStatData {
+				Name = new InternString( statId ),
+				Value = new SteamStatData.Data { FloatValue = value },
+				IsDirty = false,
+				IsFloat = true
 			};
 
 			return value;
@@ -359,6 +430,17 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			}
 		}
 
+		public bool SetUserStatFloat( CSteamID userId, InternString statId, float value )
+		{
+			if ( !IsLocalUser( userId ) ) {
+				_category.PrintWarning( $"SetUserStatFloat: Steam only allows writing stats for the local user. User='{userId.m_SteamID}', Stat='{(string)statId}'." );
+				return false;
+			}
+
+			SetStatFloat( statId, value );
+			return true;
+		}
+
 		/*
 		===============
 		SetStatInt
@@ -383,6 +465,17 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			lock ( _dirtyStats ) {
 				_dirtyStats.Add( statId );
 			}
+		}
+
+		public bool SetUserStatInt( CSteamID userId, InternString statId, int value )
+		{
+			if ( !IsLocalUser( userId ) ) {
+				_category.PrintWarning( $"SetUserStatInt: Steam only allows writing stats for the local user. User='{userId.m_SteamID}', Stat='{(string)statId}'." );
+				return false;
+			}
+
+			SetStatInt( statId, value );
+			return true;
 		}
 
 		/*
@@ -442,6 +535,55 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			return !anyFailed && submitted;
 		}
 
+		private async ValueTask EnsureUserStatsReadyAsync( CSteamID userId, CancellationToken ct )
+		{
+			ulong steamId = userId.m_SteamID;
+			lock ( _pendingUserStatRequests ) {
+				if ( _statsReadyByUser.Contains( steamId ) ) {
+					return;
+				}
+			}
+
+			TaskCompletionSource<bool> request;
+			lock ( _pendingUserStatRequests ) {
+				if ( _pendingUserStatRequests.TryGetValue( steamId, out request ) ) {
+					// Reuse the in-flight Steam request for the same user.
+				} else {
+					request = new TaskCompletionSource<bool>( TaskCreationOptions.RunContinuationsAsynchronously );
+					_pendingUserStatRequests[steamId] = request;
+
+					SteamAPICall_t hCallback = SteamUserStats.RequestUserStats( userId );
+					if ( hCallback == SteamAPICall_t.Invalid ) {
+						_pendingUserStatRequests.Remove( steamId );
+						request.TrySetResult( false );
+					} else {
+						_category.PrintDebug( $"EnsureUserStatsReadyAsync: requested stats for Steam user '{steamId}'. Call={hCallback.m_SteamAPICall}" );
+					}
+				}
+			}
+
+			using ( ct.Register( () => CancelPendingUserStatsRequest( steamId, ct ) ) ) {
+				bool success = await request.Task.ConfigureAwait( false );
+				if ( !success ) {
+					_category.PrintWarning( $"EnsureUserStatsReadyAsync: stats request failed for Steam user '{steamId}'." );
+				}
+			}
+		}
+
+		private void CancelPendingUserStatsRequest( ulong steamId, CancellationToken ct )
+		{
+			lock ( _pendingUserStatRequests ) {
+				if ( _pendingUserStatRequests.Remove( steamId, out TaskCompletionSource<bool>? request ) ) {
+					request.TrySetCanceled( ct );
+				}
+			}
+		}
+
+		private bool IsLocalUser( CSteamID userId )
+		{
+			return userId == _userData.UserID;
+		}
+
 		/*
 		===============
 		OnUserStatsUnloaded
@@ -453,6 +595,11 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="pCallback"></param>
 		private void OnUserStatsUnloaded( UserStatsUnloaded_t pCallback )
 		{
+			ulong steamId = pCallback.m_steamIDUser.m_SteamID;
+			lock ( _pendingUserStatRequests ) {
+				_statsReadyByUser.Remove( steamId );
+			}
+			_remoteStats.TryRemove( steamId, out _ );
 		}
 
 		/*
@@ -500,19 +647,40 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="pCallback"></param>
 		private void OnUserStatsReceived( UserStatsReceived_t pCallback )
 		{
+			ulong steamId = pCallback.m_steamIDUser.m_SteamID;
+			CompletePendingUserStatsRequest( steamId, pCallback.m_eResult == EResult.k_EResultOK );
+
 			if ( pCallback.m_eResult != EResult.k_EResultOK ) {
 				return;
 			}
 
-			_isReady = true;
-
-			int numAchievements = (int)SteamUserStats.GetNumAchievements();
-			for ( uint i = 0; i < numAchievements; i++ ) {
-				string name = SteamUserStats.GetAchievementName( i );
-				_achievements[name] = new SteamAchievementInfo( name );
+			lock ( _pendingUserStatRequests ) {
+				_statsReadyByUser.Add( steamId );
 			}
 
-			StatsUpdated?.Invoke();
+			if ( IsLocalUser( pCallback.m_steamIDUser ) ) {
+				_isReady = true;
+
+				int numAchievements = (int)SteamUserStats.GetNumAchievements();
+				for ( uint i = 0; i < numAchievements; i++ ) {
+					string name = SteamUserStats.GetAchievementName( i );
+					_achievements[name] = new SteamAchievementInfo( name );
+				}
+
+				StatsUpdated?.Invoke();
+			}
+		}
+
+		private void CompletePendingUserStatsRequest( ulong steamId, bool success )
+		{
+			TaskCompletionSource<bool>? request = null;
+			lock ( _pendingUserStatRequests ) {
+				if ( _pendingUserStatRequests.Remove( steamId, out TaskCompletionSource<bool>? pending ) ) {
+					request = pending;
+				}
+			}
+
+			request?.TrySetResult( success );
 		}
 
 		/*

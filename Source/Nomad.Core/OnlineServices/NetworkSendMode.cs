@@ -13,22 +13,15 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-using Nomad.Core.OnlineServices;
-using Nomad.Networking.Messaging;
-
-namespace Nomad.Networking.Transport
+namespace Nomad.Core.OnlineServices
 {
-	public readonly struct NetworkPacketInfo
-	{
-		public readonly PeerId From;
-		public readonly int BytesWritten;
-		public readonly NetworkSendMode Mode;
+    public enum NetworkSendMode : byte
+    {
+        Unreliable,
+        UnreliableNoDelay,
+        Reliable,
 
-		public NetworkPacketInfo( PeerId from, int bytesWritten, NetworkSendMode mode )
-		{
-			From = from;
-			BytesWritten = bytesWritten;
-			Mode = mode;
-		}
-	}
+        Min = Unreliable,
+        Max = Reliable
+    }
 }

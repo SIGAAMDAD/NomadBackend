@@ -19,7 +19,6 @@ using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
-using Nomad.Networking.Driver;
 using Nomad.Networking.Messaging;
 using Nomad.Networking.Session;
 using Nomad.Networking.Transport;

@@ -19,7 +19,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.Events;
 using Nomad.Core.OnlineServices;
-using Nomad.Networking.Driver;
 using Nomad.Networking.Messaging;
 using Nomad.Networking.Session;
 using Nomad.Networking.Transport;

@@ -54,7 +54,7 @@ namespace Nomad.CVars.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="eventFactory"></param>
 		/// <param name="logger"></param>

@@ -13,15 +13,15 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-namespace Nomad.Networking.Session
+namespace Nomad.Core.OnlineServices
 {
-	public enum NetworkConnectionState : byte
-	{
-		Disconnected = 0,
-		Connecting = 1,
-		StartingHost = 2,
-		Connected = 3,
-		Faulted = 4,
-		Kicked = 5
-	}
+    public enum NetworkConnectionState : byte
+    {
+        Disconnected = 0,
+        Connecting,
+        StartingHost,
+        Connected,
+        Faulted,
+        Kicked
+    }
 }

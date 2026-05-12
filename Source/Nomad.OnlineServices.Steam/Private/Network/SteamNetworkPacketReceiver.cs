@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-The Nomad MPLv2 Source Code
+The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
 
 This Source Code Form is subject to the terms of the Mozilla Public
@@ -20,6 +20,7 @@ using System.Runtime.InteropServices;
 using Nomad.Core.Logger;
 using Nomad.Networking.Messaging;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
+using Nomad.Core.OnlineServices;
 using Steamworks;
 
 namespace Nomad.OnlineServices.Steam.Private.Network

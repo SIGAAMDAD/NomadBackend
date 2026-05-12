@@ -22,6 +22,7 @@ using Nomad.Core.FileSystem;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
 using Nomad.OnlineServices.Steam.Private.Lobby;
+using Nomad.OnlineServices.Steam.Private.Network;
 using Nomad.OnlineServices.Steam.Private.Registries;
 using Nomad.OnlineServices.Steam.Private.Services;
 using Nomad.OnlineServices.Steam.Private.Stats;
@@ -49,11 +50,13 @@ namespace Nomad.OnlineServices.Steam.Private
 
 		public IStatsService Stats {
 			get {
-				_statsService ??= new SteamStatsService( _statsRepository, _logger );
+				_statsRepository = new SteamStatsRepository( _userData, _logger, _engineService );
+				_statsService ??= new SteamStatsService( _statsRepository, _logger, TryResolvePeerSteamId );
 				return _statsService;
 			}
 		}
-		private SteamStatsService _statsService;
+		private SteamStatsService? _statsService;
+		private SteamStatsRepository? _statsRepository;
 
 		public IAchievementService Achievements {
 			get {
@@ -61,7 +64,7 @@ namespace Nomad.OnlineServices.Steam.Private
 				return _achievementsService;
 			}
 		}
-		private SteamAchievementService _achievementsService;
+		private SteamAchievementService? _achievementsService;
 
 		public IMatchMakingService Matchmaking {
 			get {
@@ -77,27 +80,34 @@ namespace Nomad.OnlineServices.Steam.Private
 				return _cloudStorageService;
 			}
 		}
-		private SteamCloudStorageService _cloudStorageService;
+		private SteamCloudStorageService? _cloudStorageService;
 
-		public ILobbyService LobbyService {
+		public ILobbyService Lobbies {
 			get {
 				_lobbyService ??= new SteamLobbyService( _userData, _logger, _cvarSystem, _eventFactory );
 				return _lobbyService;
 			}
 		}
-		private SteamLobbyService _lobbyService;
+		private SteamLobbyService? _lobbyService;
 
-		private readonly ILoggerService _logger;
+		public INetDriver NetDriver {
+			get {
+				_netDriver ??= new SteamNetDriver( _eventFactory, _category );
+				return _netDriver;
+			}
+		}
+		private SteamNetDriver? _netDriver;
+
 		private readonly ILoggerCategory _category;
 
+		private readonly ILoggerService _logger;
+		private readonly IEngineService _engineService;
 		private readonly IFileSystem _fileSystem;
 		private readonly ICVarSystemService _cvarSystem;
 		private readonly IGameEventRegistryService _eventFactory;
 
 		private readonly SteamUserData _userData = null;
 		private readonly SteamDataCache _steamData = null;
-
-		private readonly SteamStatsRepository _statsRepository;
 
 		private bool _isDisposed = false;
 
@@ -116,15 +126,19 @@ namespace Nomad.OnlineServices.Steam.Private
 		/// <param name="cvarSystem"></param>
 		public SteamService( ILoggerService logger, IFileSystem fileSystem, IEngineService engineService, IGameEventRegistryService eventFactory, ICVarSystemService cvarSystem )
 		{
-			ArgumentGuard.ThrowIfNull( logger );
-			ArgumentGuard.ThrowIfNull( fileSystem );
-			ArgumentGuard.ThrowIfNull( engineService );
-			ArgumentGuard.ThrowIfNull( eventFactory );
-			ArgumentGuard.ThrowIfNull( cvarSystem );
+			_eventFactory = eventFactory ?? throw new ArgumentNullException( nameof( eventFactory ) );
+			_cvarSystem = cvarSystem ?? throw new ArgumentNullException( nameof( cvarSystem ) );
+			_fileSystem = fileSystem ?? throw new ArgumentNullException( nameof( fileSystem ) );
+			_logger = logger ?? throw new ArgumentNullException( nameof( logger ) );
+			_engineService = engineService ?? throw new ArgumentNullException( nameof( engineService ) );
+
+			SteamCVarRegistry.RegisterCVars( cvarSystem );
+
+			_category = logger.CreateCategory( "Nomad.OnlineServices.Steam", LogLevel.Info, true );
 
 			ESteamAPIInitResult result = SteamAPI.InitEx( out string errorMessage );
 			if ( result != ESteamAPIInitResult.k_ESteamAPIInitResult_OK ) {
-				logger.PrintError( $"SteamService: failed to initialize SteamAPI - {result}, {errorMessage}" );
+				_category.PrintError( $"SteamService: failed to initialize SteamAPI - {result}, {errorMessage}" );
 				return;
 			}
 
@@ -148,16 +162,7 @@ namespace Nomad.OnlineServices.Steam.Private
 				UserName = SteamFriends.GetPersonaName()
 			};
 
-			SteamCVarRegistry.RegisterCVars( cvarSystem );
-
-			_logger = logger;
-			_category = logger.CreateCategory( "Nomad.OnlineServices.Steam", LogLevel.Info, true );
-
-			_eventFactory = eventFactory;
-			_cvarSystem = cvarSystem;
-			_fileSystem = fileSystem;
-
-			_statsRepository = new SteamStatsRepository( _userData, logger, engineService );
+			_category.PrintLine( "Initialized Steamworks SDK API Service." );
 		}
 
 		/*
@@ -173,9 +178,9 @@ namespace Nomad.OnlineServices.Steam.Private
 			if ( !_isDisposed ) {
 				_lobbyService?.Dispose();
 				_statsService?.Dispose();
+				_netDriver?.Dispose();
 				_achievementsService?.Dispose();
 				_cloudStorageService?.Dispose();
-				_statsRepository?.Dispose();
 
 				_category?.Dispose();
 			}
@@ -194,6 +199,15 @@ namespace Nomad.OnlineServices.Steam.Private
 		public void RunCallbacks()
 		{
 			SteamAPI.RunCallbacks();
+		}
+
+		private CSteamID? TryResolvePeerSteamId( PeerId peerId )
+		{
+			if ( _lobbyService != null && _lobbyService.TryGetSteamId( peerId, out CSteamID steamId ) ) {
+				return steamId;
+			}
+
+			return null;
 		}
 	};
 };

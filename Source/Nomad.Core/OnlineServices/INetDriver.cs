@@ -14,14 +14,10 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
-using Nomad.Core.OnlineServices;
-using Nomad.Networking.Messaging;
-using Nomad.Networking.Session;
-using Nomad.Networking.Transport;
 
-namespace Nomad.Networking.Driver
+namespace Nomad.Core.OnlineServices
 {
-	public interface INetDriver : IDisposable
+    public interface INetDriver : IDisposable
 	{
 		bool IsListening { get; }
 		bool IsInitialized { get; }
@@ -39,17 +35,5 @@ namespace Nomad.Networking.Driver
 		bool Send( PeerId peerId, ReadOnlySpan<byte> payload, NetworkSendMode mode );
 		bool TryReceive( Span<byte> destination, out NetworkPacketInfo packet );
 		bool TryGetConnection( PeerId peerId, out NetConnection connection );
-	}
-
-	public readonly struct NetConnection
-	{
-		public PeerId PeerId { get; }
-		public NetworkConnectionState State { get; }
-
-		public NetConnection( PeerId peerId, NetworkConnectionState state )
-		{
-			PeerId = peerId;
-			State = state;
-		}
 	}
 }

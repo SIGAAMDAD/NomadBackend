@@ -23,37 +23,47 @@ namespace Nomad.Core.OnlineServices
     public interface IOnlinePlatformService : IDisposable
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         OnlinePlatform Platform { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         string PlatformName { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         bool IsAvailable { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         IStatsService Stats { get; }
 
         /// <summary>
-        /// 
+        ///
+        /// </summary>
+        ILobbyService Lobbies { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        INetDriver NetDriver { get; }
+
+        /// <summary>
+        ///
         /// </summary>
         IAchievementService Achievements { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         ICloudStorageService CloudStorage { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         void RunCallbacks();
     }

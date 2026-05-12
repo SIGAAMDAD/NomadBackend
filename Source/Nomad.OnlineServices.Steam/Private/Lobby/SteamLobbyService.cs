@@ -123,6 +123,12 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 					LobbyLeaveResultEventArgs.Name,
 					LobbyLeaveResultEventArgs.NameSpace
 				);
+
+			_lobbyStarted = eventFactory
+				.GetEvent<LobbyStartResultEventArgs>(
+					LobbyStartResultEventArgs.Name,
+					LobbyStartResultEventArgs.NameSpace
+				);
 		}
 
 		/*
@@ -294,6 +300,9 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 				result => {
 					if ( result.m_eResult != EResult.k_EResultOK ) {
 						_category.PrintError( $"SteamLobbyFactory.OnLobbyCreated: error creating lobby - {result.m_eResult}" );
+						_lobbyStarted.Publish(
+							new LobbyStartResultEventArgs( success: false, id: Guid.Empty )
+						);
 						return null;
 					}
 					_category.PrintLine( $"SteamLobbyFactory.OnLobbyFactory: created new lobby with CSteamID '{result.m_ulSteamIDLobby}'" );
@@ -313,7 +322,14 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 					foreach ( var metadata in info.Metadata ) {
 						SteamMatchmaking.SetLobbyData( id, metadata.Key, metadata.Value );
 					}
-					return new SteamLobbyData( id, info, Guid.NewGuid() );
+
+					var lobbyData = new SteamLobbyData( id, info, Guid.NewGuid() );
+					_repository.AddLobby( lobbyData );
+
+					_lobbyStarted.Publish(
+						new LobbyStartResultEventArgs( success: true, id: lobbyData.Guid )
+					);
+					return lobbyData;
 				},
 				() => SteamMatchmaking.CreateLobby( type, info.MaxPlayers ),
 				ct
@@ -341,6 +357,16 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 				member = sessionPeer.Info;
 				return true;
 			}
+			return false;
+		}
+
+		public bool TryGetSteamId( PeerId peerId, out CSteamID steamId )
+		{
+			if ( _current != null ) {
+				return _current.TryGetSteamId( peerId, out steamId );
+			}
+
+			steamId = CSteamID.Nil;
 			return false;
 		}
 

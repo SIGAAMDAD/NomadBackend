@@ -13,7 +13,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
-using Nomad.Networking.Messaging;
+using Nomad.Core.OnlineServices;
 
 namespace Nomad.Networking.ValueObjects
 {

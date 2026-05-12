@@ -34,6 +34,7 @@ namespace Nomad.Core.OnlineServices
         ///
         /// </summary>
         /// <param name="id"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public PeerId(Guid id)
         {
             Id = id;
@@ -45,26 +46,31 @@ namespace Nomad.Core.OnlineServices
             return Id == other.Id;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override bool Equals([NotNullWhen(true)] object? obj)
         {
             return obj is PeerId other && Equals(other);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int GetHashCode()
         {
             return Id.GetHashCode();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override string ToString()
         {
             return Id.ToString();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(PeerId left, PeerId right)
         {
             return left.Equals(right);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(PeerId left, PeerId right)
         {
             return !left.Equals(right);

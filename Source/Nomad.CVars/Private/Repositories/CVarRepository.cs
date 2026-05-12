@@ -28,13 +28,13 @@ namespace Nomad.CVars.Private.Repositories
 {
 	/*
 	===================================================================================
-	
+
 	CVarRepository
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal sealed class CVarRepository
@@ -51,7 +51,7 @@ namespace Nomad.CVars.Private.Repositories
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="logger"></param>
 		/// <param name="eventFactory"></param>
@@ -67,7 +67,7 @@ namespace Nomad.CVars.Private.Repositories
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <typeparam name="T"></typeparam>
 		/// <param name="createInfo"></param>
@@ -219,7 +219,10 @@ namespace Nomad.CVars.Private.Repositories
 				_logger.PrintError( $"CVarSystem.GetCVar: no cvar found for name '{name}'!" );
 				return null;
 			}
-			return cvar.Type == typeof( T ).GetCVarType() ? cvar as ICVar<T> : throw new CVarTypeMismatchException( typeof( T ), cvar.Type.GetSystemType() );
+			if ( cvar is ICVar<T> typedVar ) {
+				return typedVar;
+			}
+			throw new CVarTypeMismatchException( typeof( T ), cvar.Type.GetSystemType() );
 		}
 
 		/*

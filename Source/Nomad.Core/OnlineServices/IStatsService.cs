@@ -14,6 +14,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.Util;
 
@@ -48,9 +49,47 @@ namespace Nomad.Core.OnlineServices
         /// <summary>
         ///
         /// </summary>
+        /// <param name="peerId"></param>
+        /// <param name="statName"></param>
+        /// <param name="value"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        ValueTask<bool> SetUserStatInt(PeerId peerId, InternString statName, int value, CancellationToken ct = default);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="peerId"></param>
+        /// <param name="statName"></param>
+        /// <param name="value"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        ValueTask<bool> SetUserStatFloat(PeerId peerId, InternString statName, float value, CancellationToken ct = default);
+
+        /// <summary>
+        ///
+        /// </summary>
         /// <param name="statName"></param>
         /// <returns></returns>
         ValueTask<int> GetStatInt(InternString statName);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="peerId"></param>
+        /// <param name="statName"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        ValueTask<int> GetUserStatInt(PeerId peerId, InternString statName, CancellationToken ct = default);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="peerId"></param>
+        /// <param name="statName"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        ValueTask<float> GetUserStatFloat(PeerId peerId, InternString statName, CancellationToken ct = default);
 
         /// <summary>
         ///
