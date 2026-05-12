@@ -14,18 +14,24 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Nomad.Core.OnlineServices
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public readonly struct PeerId : IEquatable<PeerId>
     {
-        public Guid Id { get; }
+        public static readonly PeerId Invalid = new PeerId(Guid.Empty);
+
+        public readonly Guid Id;
+
+        public bool IsValid => Id != Guid.Empty;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="id"></param>
         public PeerId(Guid id)
@@ -33,9 +39,35 @@ namespace Nomad.Core.OnlineServices
             Id = id;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(PeerId other)
         {
             return Id == other.Id;
+        }
+
+		public override bool Equals([NotNullWhen(true)] object? obj)
+        {
+            return obj is PeerId other && Equals(other);
+        }
+
+		public override int GetHashCode()
+        {
+            return Id.GetHashCode();
+        }
+
+		public override string ToString()
+        {
+            return Id.ToString();
+        }
+
+        public static bool operator ==(PeerId left, PeerId right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(PeerId left, PeerId right)
+        {
+            return !left.Equals(right);
         }
     }
 }
