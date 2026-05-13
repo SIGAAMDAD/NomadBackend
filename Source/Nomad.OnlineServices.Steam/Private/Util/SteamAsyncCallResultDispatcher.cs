@@ -1,344 +1,312 @@
+/*
+===========================================================================
+The Nomad Framework
+Copyright (C) 2025-2026 Noah Van Til
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v2. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+This software is provided "as is", without warranty of any kind,
+express or implied, including but not limited to the warranties
+of merchantability, fitness for a particular purpose and noninfringement.
+===========================================================================
+*/
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Nomad.Core.Compatibility.Guards;
+using Nomad.Core.Logger;
 using Steamworks;
 
 namespace Nomad.OnlineServices.Steam.Private.Util
 {
-	internal sealed class SteamAsyncCallResultDispatcher<TSteamCallback, TResult> : IDisposable
-		where TSteamCallback : struct
+	/*
+	===================================================================================
+
+	SteamAsyncCallResultDispatcher
+
+	===================================================================================
+	*/
+	/// <summary>
+	/// Handles asynchronous Steamworks CallResult operations.
+	///
+	/// This dispatcher is single-flight: one active Steam async call at a time.
+	/// Cache one dispatcher per Steam operation, such as:
+	/// SteamAsyncCallResultDispatcher&lt;LobbyCreated_t, LobbyData&gt;.
+	/// </summary>
+
+	internal sealed class SteamAsyncCallResultDispatcher<TCallbackArgs, TResult> : IDisposable
+		where TCallbackArgs : struct
 	{
-		private sealed class PendingOperation
+		private readonly CallResult<TCallbackArgs> _callback;
+		private readonly CallResult<TCallbackArgs>.APIDispatchDelegate _callbackDelegate;
+
+		private readonly object _requestLock = new object();
+
+		private readonly SynchronizationContext _mainContext;
+
+		private readonly ILoggerCategory _category;
+
+		private TaskCompletionSource<TCallbackArgs>? _currentTcs = null;
+		private Task<TResult>? _currentRequest = null;
+
+		private bool _isDisposed = false;
+
+		/*
+		===============
+		SteamAsyncCallResultDispatcher
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="category"></param>
+		/// <exception cref="ArgumentNullException"></exception>
+		public SteamAsyncCallResultDispatcher( ILoggerCategory category )
+			: this( SynchronizationContext.Current, category )
 		{
-			public readonly ulong Generation;
-			public readonly TaskCompletionSource<TResult> Completion;
-			public readonly CancellationTokenRegistration CancellationRegistration;
-
-			private int _completed;
-
-			public PendingOperation(
-				ulong generation,
-				TaskCompletionSource<TResult> completion,
-				CancellationTokenRegistration cancellationRegistration )
-			{
-				Generation = generation;
-				Completion = completion;
-				CancellationRegistration = cancellationRegistration;
-			}
-
-			public bool TryMarkCompleted()
-			{
-				return Interlocked.Exchange( ref _completed, 1 ) == 0;
-			}
-		};
-
-		private readonly string _operationName;
-		private readonly ISteamApiThreadDispatcher _steamThread;
-		private readonly Func<TSteamCallback, TResult> _resultFactory;
-
-		private readonly CallResult<TSteamCallback> _callResult;
-		private readonly CallResult<TSteamCallback>.APIDispatchDelegate _steamCallbackDelegate;
-
-		private readonly SemaphoreSlim _singleFlight = new SemaphoreSlim( 1, 1 );
-		private readonly AutoResetEvent _callbackSignal = new AutoResetEvent( false );
-		private readonly Thread _waiterThread;
-
-		private readonly object _syncRoot = new object();
-
-		private PendingOperation? _pending;
-		private TSteamCallback _receivedCallback;
-		private bool _receivedIoFailure;
-		private bool _hasReceivedCallback;
-
-		private bool _disposed;
-		private ulong _generation;
-
-		public SteamAsyncCallResultDispatcher(
-			string operationName,
-			ISteamApiThreadDispatcher steamThread,
-			Func<TSteamCallback, TResult> resultFactory )
-		{
-			_operationName = operationName ?? throw new ArgumentNullException( nameof( operationName ) );
-			_steamThread = steamThread ?? throw new ArgumentNullException( nameof( steamThread ) );
-			_resultFactory = resultFactory ?? throw new ArgumentNullException( nameof( resultFactory ) );
-
-			_steamCallbackDelegate = OnSteamCallResult;
-			_callResult = CallResult<TSteamCallback>.Create( _steamCallbackDelegate );
-
-			_waiterThread = new Thread( WaiterLoop ) {
-				IsBackground = true,
-				Name = $"SteamAsyncCallResultDispatcher<{typeof( TSteamCallback ).Name}>"
-			};
-
-			_waiterThread.Start();
+			_category = category ?? throw new ArgumentNullException( nameof( category ) );
 		}
 
-		public async Task<TResult> ExecuteAsync(
-			Func<SteamAPICall_t> beginSteamCall,
-			CancellationToken ct = default )
+		/*
+		===============
+		SteamAsyncCallResultDispatcher
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="mainContext"></param>
+		/// <param name="category"></param>
+		/// <exception cref="InvalidOperationException"></exception>
+		public SteamAsyncCallResultDispatcher( SynchronizationContext? mainContext, ILoggerCategory category )
 		{
-			return await ExecuteAsync(
-				beginSteamCall,
-				timeout: null,
-				ct: ct
-			).ConfigureAwait( false );
+			_mainContext = mainContext
+				?? throw new InvalidOperationException(
+					"SteamAsyncCallResultDispatcher must be created with a valid main/Steam SynchronizationContext."
+				);
+
+			_callbackDelegate = OnCallback;
+			_callback = CallResult<TCallbackArgs>.Create( _callbackDelegate );
 		}
 
-		public async Task<TResult> ExecuteAsync(
-			Func<SteamAPICall_t> beginSteamCall,
-			TimeSpan? timeout,
-			CancellationToken ct = default )
+		/*
+		===============
+		Dispose
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		public void Dispose()
 		{
-			if ( beginSteamCall == null ) {
-				throw new ArgumentNullException( nameof( beginSteamCall ) );
+			if ( _isDisposed ) {
+				return;
 			}
 
-			ThrowIfDisposed();
+			TaskCompletionSource<TCallbackArgs>? tcs = null;
 
-			await _singleFlight.WaitAsync( ct ).ConfigureAwait( false );
+			lock ( _requestLock ) {
+				if ( _isDisposed ) {
+					return;
+				}
 
-			bool operationStarted = false;
+				_isDisposed = true;
+
+				tcs = _currentTcs;
+				_currentTcs = null;
+			}
+
+			tcs?.TrySetCanceled();
 
 			try {
+				_callback.Cancel();
+			} catch ( Exception ex ) {
+				_category.PrintWarning( $"Failed to cancel Steam CallResult during dispose: {ex}" );
+			}
+
+			_callback.Dispose();
+
+			GC.SuppressFinalize( this );
+		}
+
+		/*
+		===============
+		Invoke
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="steamCall"></param>
+		/// <param name="resultFactory"></param>
+		/// <param name="ct"></param>
+		/// <returns></returns>
+		public Task<TResult> Invoke(
+			Func<SteamAPICall_t> steamCall,
+			Func<TCallbackArgs, TResult> resultFactory,
+			CancellationToken ct = default )
+		{
+			ArgumentGuard.ThrowIfNull( steamCall, nameof( steamCall ) );
+			ArgumentGuard.ThrowIfNull( resultFactory, nameof( resultFactory ) );
+
+			lock ( _requestLock ) {
 				ThrowIfDisposed();
 
-				using ( CancellationTokenSource? timeoutSource = timeout.HasValue ? new( timeout.Value ) : null )
-				using ( CancellationTokenSource linkedSource = timeoutSource == null
-					? CancellationTokenSource.CreateLinkedTokenSource( ct )
-					: CancellationTokenSource.CreateLinkedTokenSource( ct, timeoutSource.Token
-				) )
-				{
-					CancellationToken linkedToken = linkedSource.Token;
-
-					TaskCompletionSource<TResult> completion = new TaskCompletionSource<TResult>(
-						TaskCreationOptions.RunContinuationsAsynchronously
-					);
-
-					ulong generation;
-
-					lock ( _syncRoot ) {
-						generation = ++_generation;
-
-						_hasReceivedCallback = false;
-						_receivedCallback = default;
-						_receivedIoFailure = false;
-					}
-
-					CancellationTokenRegistration cancellationRegistration = linkedToken.Register(
-						static state => {
-							var tuple = (Tuple<SteamAsyncCallResultDispatcher<TSteamCallback, TResult>, ulong>)state!;
-
-							tuple.Item1.CancelPendingOperation( tuple.Item2 );
-						},
-						Tuple.Create( this, generation )
-					);
-
-					var pending = new PendingOperation(
-						generation,
-						completion,
-						cancellationRegistration
-					);
-
-					lock ( _syncRoot ) {
-						_pending = pending;
-					}
-
-					try {
-						await _steamThread.InvokeAsync(
-							() => {
-								SteamAPICall_t callHandle = beginSteamCall();
-
-								if ( callHandle == SteamAPICall_t.Invalid ) {
-									throw new SteamAsyncCallFailedException(
-										$"Steam async call returned an invalid handle. Operation: {_operationName}."
-									);
-								}
-
-								_callResult.Set( callHandle );
-							},
-							linkedToken
-						).ConfigureAwait( false );
-
-						operationStarted = true;
-					} catch {
-						CompletePendingWithException(
-							generation,
-							new SteamAsyncCallFailedException(
-								$"Failed to start Steam async call. Operation: {_operationName}."
-							)
-						);
-
-						throw;
-					}
-
-					return await completion.Task.ConfigureAwait( false );
+				if ( _currentRequest != null && !_currentRequest.IsCompleted ) {
+					return _currentRequest;
 				}
-			} finally {
-				if ( !operationStarted ) {
-					_singleFlight.Release();
-				}
+
+				_currentRequest = InvokeInternal( steamCall, resultFactory, ct );
+				return _currentRequest;
 			}
 		}
 
-		private void OnSteamCallResult( TSteamCallback callback, bool ioFailure )
+		/*
+		===============
+		InvokeInternal
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="steamCall"></param>
+		/// <param name="resultFactory"></param>
+		/// <param name="ct"></param>
+		/// <returns></returns>
+		private async Task<TResult> InvokeInternal(
+			Func<SteamAPICall_t> steamCall,
+			Func<TCallbackArgs, TResult> resultFactory,
+			CancellationToken ct )
 		{
-			lock ( _syncRoot ) {
-				if ( _pending == null ) {
-					return;
-				}
+			TaskCompletionSource<TCallbackArgs> tcs = new TaskCompletionSource<TCallbackArgs>(
+				TaskCreationOptions.RunContinuationsAsynchronously
+			);
 
-				_receivedCallback = callback;
-				_receivedIoFailure = ioFailure;
-				_hasReceivedCallback = true;
+			lock ( _requestLock ) {
+				_currentTcs = tcs;
 			}
 
-			_callbackSignal.Set();
-		}
+			using CancellationTokenRegistration cancellationRegistration = ct.Register( () => {
+				TaskCompletionSource<TCallbackArgs>? localTcs = null;
 
-		private void WaiterLoop()
-		{
-			while ( true ) {
-				_callbackSignal.WaitOne();
-
-				if ( _disposed ) {
-					return;
-				}
-
-				PendingOperation? pending;
-				TSteamCallback callback;
-				bool ioFailure;
-
-				lock ( _syncRoot ) {
-					if ( !_hasReceivedCallback || _pending == null ) {
-						continue;
-					}
-
-					pending = _pending;
-					callback = _receivedCallback;
-					ioFailure = _receivedIoFailure;
-
-					_hasReceivedCallback = false;
-					_pending = null;
-				}
-
-				if ( !pending.TryMarkCompleted() ) {
-					continue;
+				lock ( _requestLock ) {
+					localTcs = _currentTcs;
+					_currentTcs = null;
 				}
 
 				try {
-					pending.CancellationRegistration.Dispose();
+					_mainContext.Post( _ => {
+						try {
+							_callback.Cancel();
+						} catch ( Exception ex ) {
+							_category.PrintWarning( $"Failed to cancel Steam CallResult: {ex}" );
+						}
+					}, null );
+				} catch {
+					// If the context is already gone, cancellation should still complete the task.
+				}
 
-					if ( ioFailure ) {
-						pending.Completion.TrySetException(
-							new SteamAsyncCallIoFailureException( _operationName )
+				localTcs?.TrySetCanceled( ct );
+			} );
+
+			PostSteamCallToMainThread( steamCall, tcs );
+
+			try {
+				TCallbackArgs callbackArgs = await tcs.Task.ConfigureAwait( false );
+				return resultFactory( callbackArgs );
+			} finally {
+				lock ( _requestLock ) {
+					if ( ReferenceEquals( _currentTcs, tcs ) ) {
+						_currentTcs = null;
+					}
+				}
+			}
+		}
+
+		/*
+		===============
+		PostSteamCallToMainThread
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="steamCall"></param>
+		/// <param name="tcs"></param>
+		private void PostSteamCallToMainThread(
+			Func<SteamAPICall_t> steamCall,
+			TaskCompletionSource<TCallbackArgs> tcs )
+		{
+			_mainContext.Post( _ => {
+				try {
+					SteamAPICall_t call = steamCall();
+
+					if ( call == SteamAPICall_t.Invalid ) {
+						tcs.TrySetException(
+							new InvalidOperationException( "Steam async call returned SteamAPICall_t.Invalid." )
 						);
-
-						continue;
+						return;
 					}
 
-					TResult result = _resultFactory( callback );
-					pending.Completion.TrySetResult( result );
-				} catch ( Exception exception ) {
-					pending.Completion.TrySetException(
-						new SteamAsyncCallFailedException(
-							$"Failed to convert Steam callback result. Operation: {_operationName}.",
-							exception
-						)
-					);
-				} finally {
-					_singleFlight.Release();
+					_callback.Set( call );
+				} catch ( Exception ex ) {
+					tcs.TrySetException( ex );
 				}
-			}
+			}, null );
 		}
 
-		private void CancelPendingOperation( ulong generation )
+		/*
+		===============
+		OnCallback
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="pCallback"></param>
+		/// <param name="bIOFailure"></param>
+		private void OnCallback( TCallbackArgs pCallback, bool bIOFailure )
 		{
-			PendingOperation? pending = null;
+			TaskCompletionSource<TCallbackArgs>? tcs;
 
-			lock ( _syncRoot ) {
-				if ( _pending == null || _pending.Generation != generation ) {
-					return;
-				}
-
-				pending = _pending;
-				_pending = null;
-				_hasReceivedCallback = false;
+			lock ( _requestLock ) {
+				tcs = _currentTcs;
+				_currentTcs = null;
 			}
 
-			if ( !pending.TryMarkCompleted() ) {
+			if ( tcs == null ) {
 				return;
 			}
 
-			_ = _steamThread.InvokeAsync(
-				() => _callResult.Cancel(),
-				CancellationToken.None
-			);
-
-			pending.CancellationRegistration.Dispose();
-			pending.Completion.TrySetCanceled();
-
-			_singleFlight.Release();
-		}
-
-		private void CompletePendingWithException( ulong generation, Exception exception )
-		{
-			PendingOperation? pending = null;
-
-			lock ( _syncRoot ) {
-				if ( _pending == null || _pending.Generation != generation ) {
-					return;
-				}
-
-				pending = _pending;
-				_pending = null;
-				_hasReceivedCallback = false;
-			}
-
-			if ( !pending.TryMarkCompleted() ) {
+			if ( bIOFailure ) {
+				tcs.TrySetException(
+					new InvalidOperationException(
+						$"Steam async call failed with bIOFailure=true for {typeof( TCallbackArgs ).Name}."
+					)
+				);
 				return;
 			}
 
-			pending.CancellationRegistration.Dispose();
-			pending.Completion.TrySetException( exception );
-
-			_singleFlight.Release();
+			tcs.TrySetResult( pCallback );
 		}
 
+		/*
+		===============
+		ThrowIfDisposed
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <exception cref="ObjectDisposedException"></exception>
 		private void ThrowIfDisposed()
 		{
-			if ( _disposed ) {
-				throw new ObjectDisposedException( GetType().Name );
+			if ( _isDisposed ) {
+				throw new ObjectDisposedException( nameof( SteamAsyncCallResultDispatcher<TCallbackArgs, TResult> ) );
 			}
-		}
-
-		public void Dispose()
-		{
-			if ( _disposed ) {
-				return;
-			}
-
-			_disposed = true;
-
-			lock ( _syncRoot ) {
-				if ( _pending != null && _pending.TryMarkCompleted() ) {
-					_pending.Completion.TrySetCanceled();
-					_pending.CancellationRegistration.Dispose();
-					_pending = null;
-
-					_singleFlight.Release();
-				}
-			}
-
-			_callbackSignal.Set();
-
-			_ = _steamThread.InvokeAsync(
-				() => _callResult.Cancel(),
-				CancellationToken.None
-			);
-
-			_callResult.Dispose();
-			_callbackSignal.Dispose();
-			_singleFlight.Dispose();
 		}
 	};
 };

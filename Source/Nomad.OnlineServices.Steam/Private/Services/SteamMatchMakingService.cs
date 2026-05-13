@@ -14,13 +14,13 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.CVars;
 using Nomad.Core.Events;
+using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
 using Nomad.CVars;
 using Nomad.OnlineServices.Steam.Private.Lobby;
@@ -28,7 +28,11 @@ using Nomad.OnlineServices.Steam.Private.Util;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private
+#if !NET10_0_OR_GREATER
+using System.Buffers;
+#endif
+
+namespace Nomad.OnlineServices.Steam.Private.Services
 {
 	/*
 	===================================================================================
@@ -48,12 +52,13 @@ namespace Nomad.OnlineServices.Steam.Private
 		private readonly SteamAsyncCallResultDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>> _lobbyMatchList;
 		private CancellationTokenSource? _cancellationToken = null;
 
+		private readonly ILoggerCategory _category;
 		private readonly SteamLobbyRepository _repository;
 
 		private DateTime _lastFetchTime = DateTime.UtcNow;
 		private readonly int _lobbyUpdateInterval = 0;
 
-		private ServerRange _lastRange;
+		private ServerRange _lastRange = ServerRange.LAN;
 
 		public bool IsSearching => _activeRequest != null;
 
@@ -81,15 +86,19 @@ namespace Nomad.OnlineServices.Steam.Private
 		/// </summary>
 		/// <param name="repository"></param>
 		/// <param name="cvarSystem"></param>
+		/// <param name="logger"></param>
 		/// <exception cref="ArgumentNullException"></exception>
-		public SteamMatchMakingService( SteamLobbyRepository repository, ICVarSystemService cvarSystem )
+		public SteamMatchMakingService( SteamLobbyRepository repository, ICVarSystemService cvarSystem, ILoggerService logger )
 		{
-			ArgumentGuard.ThrowIfNull( cvarSystem );
+			ArgumentGuard.ThrowIfNull( cvarSystem, nameof( cvarSystem ) );
+			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
 
-//			_lobbyMatchList = new SteamAsyncCallbackDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>>();
+			_repository = repository ?? throw new ArgumentNullException( nameof( repository ) );
+
+			_lobbyMatchList = new SteamAsyncCallResultDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>>( _category );
+			_category = logger.CreateCategory( nameof( SteamMatchMakingService ), LogLevel.Info, true );
 
 			_lastRange = ServerRange.Count;
-			_repository = repository ?? throw new ArgumentNullException( nameof( repository ) );
 
 			ICVar<int> lobbyUpdateInterval = cvarSystem.GetCVarOrThrow<int>( Constants.CVars.LOBBY_UDDATE_INTERVAL );
 			_lobbyUpdateInterval = lobbyUpdateInterval.Value;
@@ -106,6 +115,9 @@ namespace Nomad.OnlineServices.Steam.Private
 		public void Dispose()
 		{
 			if ( !_isDisposed ) {
+				_category?.Dispose();
+				_cancellationToken?.Dispose();
+
 				_lobbyMatchList?.Dispose();
 			}
 			GC.SuppressFinalize( this );
@@ -168,16 +180,16 @@ namespace Nomad.OnlineServices.Steam.Private
 
 #if NET10_0_OR_GREATER
 			Span<int> scores = stackalloc int[lobbies.Count];
-			scores.Clear();
 #else
-			int[] scores = ArrayPool<int>.Shared.Rent( lobbies.Count );
-			Array.Fill( scores, 0 );
+			int[] arr = ArrayPool<int>.Shared.Rent( lobbies.Count );
+			Span<int> scores = arr;
 #endif
+			scores.Clear();
 
 			for ( int i = 0; i < lobbies.Count; i++ ) {
 				ct.ThrowIfCancellationRequested();
 
-				var lobby = lobbies[i];
+				LobbyInfo lobby = lobbies[i];
 
 				foreach ( var gameMode in info.GameModes ) {
 					if ( lobby.GameMode.Equals( gameMode, StringComparison.InvariantCulture ) ) {
@@ -193,13 +205,24 @@ namespace Nomad.OnlineServices.Steam.Private
 				}
 			}
 
-#if !NET6_0_OR_GREATER
-			ArrayPool<int>.Shared.Return( scores );
+#if !NET10_0_OR_GREATER
+			ArrayPool<int>.Shared.Return( arr );
 #endif
 
 			return null;
 		}
 
+		/*
+		===============
+		StartQuickPlay
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="info"></param>
+		/// <param name="ct"></param>
+		/// <returns></returns>
 		public async Task<bool> StartQuickPlay( MatchMakingInfo info, CancellationToken ct = default )
 		{
 			LobbyInfo? lobby = await FindBestLobby( info, ct );
@@ -210,6 +233,16 @@ namespace Nomad.OnlineServices.Steam.Private
 			return true;
 		}
 
+		/*
+		===============
+		Cancel
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="ct"></param>
+		/// <returns></returns>
 		public async Task Cancel( CancellationToken ct = default )
 		{
 			_cancellationToken.Cancel();
@@ -229,9 +262,19 @@ namespace Nomad.OnlineServices.Steam.Private
 		/// <returns></returns>
 		private async Task<ICollection<SteamLobbyData>> RequestLobbyListAsync( ServerRange range, CancellationToken ct = default )
 		{
-			/*
 			return await _lobbyMatchList.Invoke(
-				callback: result => {
+				steamCall: () => {
+					ELobbyDistanceFilter distanceFilter = range switch {
+						ServerRange.LAN => ELobbyDistanceFilter.k_ELobbyDistanceFilterClose,
+						ServerRange.Region => ELobbyDistanceFilter.k_ELobbyDistanceFilterDefault,
+						ServerRange.Continental => ELobbyDistanceFilter.k_ELobbyDistanceFilterFar,
+						ServerRange.NoLimit => ELobbyDistanceFilter.k_ELobbyDistanceFilterWorldwide,
+						_ => throw new ArgumentOutOfRangeException( nameof( range ) )
+					};
+					SteamMatchmaking.AddRequestLobbyListDistanceFilter( distanceFilter );
+					return SteamMatchmaking.RequestLobbyList();
+				},
+				resultFactory: result => {
 					for ( int i = 0; i < result.m_nLobbiesMatching; i++ ) {
 						CSteamID lobbyId = SteamMatchmaking.GetLobbyByIndex( i );
 						_repository.AddLobby( new SteamLobbyKey( lobbyId, Guid.NewGuid() ) );
@@ -242,22 +285,8 @@ namespace Nomad.OnlineServices.Steam.Private
 					_lastFetchTime = DateTime.UtcNow;
 					return _repository.Lobbies;
 				},
-				steamCallback: () => {
-					ELobbyDistanceFilter distanceFilter = range switch {
-						ServerRange.LAN => ELobbyDistanceFilter.k_ELobbyDistanceFilterClose,
-						ServerRange.Region => ELobbyDistanceFilter.k_ELobbyDistanceFilterDefault,
-						ServerRange.Continental => ELobbyDistanceFilter.k_ELobbyDistanceFilterFar,
-						ServerRange.NoLimit => ELobbyDistanceFilter.k_ELobbyDistanceFilterWorldwide,
-						_ => throw new ArgumentOutOfRangeException( nameof( range ) )
-					};
-					SteamMatchmaking.AddRequestLobbyListDistanceFilter( distanceFilter );
-					SteamMatchmaking.RequestLobbyList();
-				},
 				ct
 			);
-			*/
-			_ = this;
-			return null;
 		}
 	};
 };

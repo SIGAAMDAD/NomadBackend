@@ -63,7 +63,8 @@ namespace Nomad.Networking
             _sessionService = new NetworkSessionService(
                 onlinePlatformService.Lobbies,
                 onlinePlatformService.NetDriver,
-                locator.GetService<IGameEventRegistryService>()
+                locator.GetService<IGameEventRegistryService>(),
+                logger
             );
             _transport = new NetworkTransport( _sessionService );
             _authority = new NetworkAuthority();

@@ -72,7 +72,9 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 				Name = info.Name,
 				Map = info.Map,
 				GameMode = info.GameMode,
+				OwnerId = (ulong)SteamMatchmaking.GetLobbyOwner( id ),
 				MaxPlayers = info.MaxPlayers,
+				PlayerCount = SteamMatchmaking.GetNumLobbyMembers( id ),
 				Visibility = info.Visibility,
 				Metadata = info.Metadata
 			};
@@ -111,7 +113,8 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 				Name = SteamMatchmaking.GetLobbyData( _id, nameof( LobbyInfo.Name ) ),
 				Map = SteamMatchmaking.GetLobbyData( _id, nameof( LobbyInfo.Map ) ),
 				GameMode = SteamMatchmaking.GetLobbyData( _id, nameof( LobbyInfo.GameMode ) ),
-				OwnerId = (ulong)SteamMatchmaking.GetLobbyOwner( _id )
+				OwnerId = (ulong)SteamMatchmaking.GetLobbyOwner( _id ),
+				PlayerCount = SteamMatchmaking.GetNumLobbyMembers( _id )
 			};
 			_lastSeenTime = DateTime.UtcNow;
 		}

@@ -20,6 +20,7 @@ using System.Threading;
 using Nomad.Core.CVars;
 using Nomad.Core.Events;
 using Nomad.Core.OnlineServices;
+using Nomad.Core.Logger;
 using Nomad.CVars;
 using Nomad.Networking.Session;
 using Nomad.OnlineServices.Steam.Private.Network;
@@ -49,6 +50,8 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 		public SteamLobbyData Info => _info;
 		private readonly SteamLobbyData _info;
 
+		private readonly ILoggerCategory _category;
+
 		private readonly SteamNetDriver _netDriver;
 		private readonly Timer _updateTimer;
 		private readonly Callback<LobbyChatUpdate_t> _lobbyMemberStatusChanged;
@@ -73,9 +76,11 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 			SteamLobbyData info,
 			SteamNetDriver netDriver,
 			ICVarSystemService cvarSystem,
-			IGameEventRegistryService eventFactory
+			IGameEventRegistryService eventFactory,
+			ILoggerCategory category
 		)
 		{
+			_category = category ?? throw new ArgumentNullException( nameof( category ) );
 			_info = info ?? throw new ArgumentNullException( nameof( info ) );
 			_netDriver = netDriver ?? throw new ArgumentNullException( nameof( netDriver ) );
 
@@ -164,31 +169,62 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 		/// </summary>
 		private void UpdateMembers()
 		{
+			_category.PrintLine( $"Updating lobby member indexing for lobby {_info.Id}..." );
+
 			int memberCount = SteamMatchmaking.GetNumLobbyMembers( _info.Id );
 			_members.Clear();
 			_steam64ToPeer.Clear();
+			_category.PrintLine( $"Got {memberCount} members." );
+
 			for ( int i = 0; i < memberCount; i++ ) {
 				CSteamID userId = SteamMatchmaking.GetLobbyMemberByIndex( _info.Id, i );
-				PeerId peerId = new PeerId( Guid.NewGuid() );
-				bool isLocal = userId == SteamUser.GetSteamID();
-				_steam64ToPeer[userId] = peerId;
-				_members[peerId] = new SteamSessionPeer {
-					Info = new LobbyMemberInfo {
-						Id = peerId,
-						DisplayName = SteamFriends.GetFriendPersonaName( userId ),
-						Status = LobbyMemberState.Connected,
-						IsOwner = _info.OwnerId == userId.m_SteamID,
-						IsLocal = isLocal,
-					},
-					SteamId = userId,
-					Connection = _netDriver.ConnectP2P( userId, 0 ),
-					State = NetworkConnectionState.Connected,
-					IsHost = _info.OwnerId == userId.m_SteamID,
-					IsLocal = isLocal,
-					Slot = (byte)_members.Count
-				};
-				_netDriver.BindPeer( peerId, userId );
+				_category.PrintLine( $"...Found user {userId}" );
+
+				AddMember( userId );
 			}
+
+			CSteamID ownerUserId = (CSteamID)_info.OwnerId;
+			if ( ownerUserId.IsValid() && !_steam64ToPeer.ContainsKey( ownerUserId ) ) {
+				_category.PrintLine( $"...Adding lobby owner fallback for user {ownerUserId}" );
+				AddMember( ownerUserId );
+			}
+
+			CSteamID localUserId = SteamUser.GetSteamID();
+			if ( localUserId.IsValid() && !_steam64ToPeer.ContainsKey( localUserId ) ) {
+				_category.PrintLine( $"...Adding local lobby member fallback for user {localUserId}" );
+				AddMember( localUserId );
+			}
+		}
+
+		private PeerId AddMember( CSteamID userId )
+		{
+			if ( _steam64ToPeer.TryGetValue( userId, out PeerId existingPeerId ) ) {
+				return existingPeerId;
+			}
+
+			PeerId peerId = new PeerId( Guid.NewGuid() );
+			bool isLocal = userId == SteamUser.GetSteamID();
+			bool isOwner = _info.OwnerId == userId.m_SteamID;
+
+			_steam64ToPeer[userId] = peerId;
+			_members[peerId] = new SteamSessionPeer {
+				Info = new LobbyMemberInfo {
+					Id = peerId,
+					DisplayName = SteamFriends.GetFriendPersonaName( userId ),
+					Status = LobbyMemberState.Connected,
+					IsOwner = isOwner,
+					IsLocal = isLocal,
+				},
+				SteamId = userId,
+				Connection = _netDriver.ConnectP2P( userId, 0 ),
+				State = NetworkConnectionState.Connected,
+				IsHost = isOwner,
+				IsLocal = isLocal,
+				Slot = (byte)_members.Count
+			};
+			_netDriver.BindPeer( peerId, userId );
+
+			return peerId;
 		}
 
 		/*
@@ -203,34 +239,20 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 		private void OnLobbyMemberStatusChanged( LobbyChatUpdate_t pCallback )
 		{
 			CSteamID userChangedId = (CSteamID)pCallback.m_ulSteamIDUserChanged;
+			_category.PrintLine( $"Updating user status for steamuser {userChangedId}..." );
+
 			switch ( (EChatMemberStateChange)pCallback.m_rgfChatMemberStateChange ) {
 				case EChatMemberStateChange.k_EChatMemberStateChangeBanned:
 				case EChatMemberStateChange.k_EChatMemberStateChangeDisconnected:
 				case EChatMemberStateChange.k_EChatMemberStateChangeLeft:
 				case EChatMemberStateChange.k_EChatMemberStateChangeKicked:
-					_members.Remove( _steam64ToPeer[userChangedId] );
+					if ( _steam64ToPeer.TryGetValue( userChangedId, out PeerId peerId ) ) {
+						_members.Remove( peerId );
+						_steam64ToPeer.Remove( userChangedId );
+					}
 					break;
 				case EChatMemberStateChange.k_EChatMemberStateChangeEntered:
-					PeerId peerId = new PeerId( Guid.NewGuid() );
-					bool isLocal = userChangedId == SteamUser.GetSteamID();
-					_steam64ToPeer[userChangedId] = peerId;
-
-					_members[peerId] = new SteamSessionPeer {
-						Info = new LobbyMemberInfo {
-							Id = peerId,
-							DisplayName = SteamFriends.GetFriendPersonaName( userChangedId ),
-							Status = LobbyMemberState.Connected,
-							IsOwner = _info.OwnerId == userChangedId.m_SteamID,
-							IsLocal = isLocal,
-						},
-						SteamId = userChangedId,
-						Connection = _netDriver.ConnectP2P( userChangedId, 0 ),
-						State = NetworkConnectionState.Connected,
-						IsHost = _info.OwnerId == userChangedId.m_SteamID,
-						IsLocal = isLocal,
-						Slot = (byte)_members.Count
-					};
-					_netDriver.BindPeer( peerId, userChangedId );
+					AddMember( userChangedId );
 					break;
 			}
 		}

@@ -1,0 +1,165 @@
+/*
+===========================================================================
+The Nomad Framework
+Copyright (C) 2025-2026 Noah Van Til
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v2. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+This software is provided "as is", without warranty of any kind,
+express or implied, including but not limited to the warranties
+of merchantability, fitness for a particular purpose and noninfringement.
+===========================================================================
+*/
+
+using Steamworks;
+
+namespace Nomad.OnlineServices.Steam.Private.Util
+{
+	internal static class SteamResultExtensions
+	{
+		public static bool IsSuccess( this EResult result )
+		{
+			return result == EResult.k_EResultOK;
+		}
+
+		public static string ToDiagnosticString( this EResult result )
+		{
+			return result switch {
+				EResult.k_EResultNone => "No result.",
+				EResult.k_EResultOK => "Success.",
+				EResult.k_EResultFail => "Generic failure.",
+				EResult.k_EResultNoConnection => "Steam is not connected.",
+				EResult.k_EResultInvalidPassword => "The password is invalid.",
+				EResult.k_EResultLoggedInElsewhere => "The account is logged in elsewhere.",
+				EResult.k_EResultInvalidProtocolVer => "The protocol version is invalid.",
+				EResult.k_EResultInvalidParam => "A parameter is invalid.",
+				EResult.k_EResultFileNotFound => "The requested file was not found.",
+				EResult.k_EResultBusy => "The requested Steam service is busy.",
+				EResult.k_EResultInvalidState => "The request is invalid for the current state.",
+				EResult.k_EResultInvalidName => "The name is invalid.",
+				EResult.k_EResultInvalidEmail => "The email address is invalid.",
+				EResult.k_EResultDuplicateName => "The name is already in use.",
+				EResult.k_EResultAccessDenied => "Access was denied.",
+				EResult.k_EResultTimeout => "The request timed out.",
+				EResult.k_EResultBanned => "The account is banned.",
+				EResult.k_EResultAccountNotFound => "The account was not found.",
+				EResult.k_EResultInvalidSteamID => "The Steam ID is invalid.",
+				EResult.k_EResultServiceUnavailable => "The Steam service is unavailable.",
+				EResult.k_EResultNotLoggedOn => "The user is not logged on.",
+				EResult.k_EResultPending => "The operation is pending.",
+				EResult.k_EResultEncryptionFailure => "Encryption failed.",
+				EResult.k_EResultInsufficientPrivilege => "The account has insufficient privileges.",
+				EResult.k_EResultLimitExceeded => "A Steam limit was exceeded.",
+				EResult.k_EResultRevoked => "Access has been revoked.",
+				EResult.k_EResultExpired => "The request or credential has expired.",
+				EResult.k_EResultAlreadyRedeemed => "The item has already been redeemed.",
+				EResult.k_EResultDuplicateRequest => "The request is a duplicate.",
+				EResult.k_EResultAlreadyOwned => "The account already owns this item.",
+				EResult.k_EResultIPNotFound => "The IP address was not found.",
+				EResult.k_EResultPersistFailed => "Steam failed to persist the data.",
+				EResult.k_EResultLockingFailed => "Steam failed to acquire the required lock.",
+				EResult.k_EResultLogonSessionReplaced => "The logon session was replaced.",
+				EResult.k_EResultConnectFailed => "Steam failed to connect.",
+				EResult.k_EResultHandshakeFailed => "The Steam handshake failed.",
+				EResult.k_EResultIOFailure => "An IO operation failed.",
+				EResult.k_EResultRemoteDisconnect => "The remote host disconnected.",
+				EResult.k_EResultShoppingCartNotFound => "The shopping cart was not found.",
+				EResult.k_EResultBlocked => "The request was blocked.",
+				EResult.k_EResultIgnored => "The request was ignored.",
+				EResult.k_EResultNoMatch => "No match was found.",
+				EResult.k_EResultAccountDisabled => "The account is disabled.",
+				EResult.k_EResultServiceReadOnly => "The Steam service is read-only.",
+				EResult.k_EResultAccountNotFeatured => "The account is not featured.",
+				EResult.k_EResultAdministratorOK => "Administrator confirmation is required.",
+				EResult.k_EResultContentVersion => "The content version is invalid or outdated.",
+				EResult.k_EResultTryAnotherCM => "Steam requested another connection manager.",
+				EResult.k_EResultPasswordRequiredToKickSession => "A password is required to kick the session.",
+				EResult.k_EResultAlreadyLoggedInElsewhere => "The account is already logged in elsewhere.",
+				EResult.k_EResultSuspended => "The operation is suspended.",
+				EResult.k_EResultCancelled => "The operation was cancelled.",
+				EResult.k_EResultDataCorruption => "Steam detected data corruption.",
+				EResult.k_EResultDiskFull => "The disk is full.",
+				EResult.k_EResultRemoteCallFailed => "The remote Steam call failed.",
+				EResult.k_EResultPasswordUnset => "The account password is not set.",
+				EResult.k_EResultExternalAccountUnlinked => "The external account is unlinked.",
+				EResult.k_EResultPSNTicketInvalid => "The PlayStation Network ticket is invalid.",
+				EResult.k_EResultExternalAccountAlreadyLinked => "The external account is already linked.",
+				EResult.k_EResultRemoteFileConflict => "The remote file has a conflict.",
+				EResult.k_EResultIllegalPassword => "The password is not allowed.",
+				EResult.k_EResultSameAsPreviousValue => "The value is the same as the previous value.",
+				EResult.k_EResultAccountLogonDenied => "Account logon was denied.",
+				EResult.k_EResultCannotUseOldPassword => "The old password cannot be reused.",
+				EResult.k_EResultInvalidLoginAuthCode => "The login authentication code is invalid.",
+				EResult.k_EResultAccountLogonDeniedNoMail => "Account logon was denied because no email is configured.",
+				EResult.k_EResultHardwareNotCapableOfIPT => "The hardware is not capable of IPT.",
+				EResult.k_EResultIPTInitError => "IPT initialization failed.",
+				EResult.k_EResultParentalControlRestricted => "The request is restricted by parental controls.",
+				EResult.k_EResultFacebookQueryError => "The Facebook query failed.",
+				EResult.k_EResultExpiredLoginAuthCode => "The login authentication code has expired.",
+				EResult.k_EResultIPLoginRestrictionFailed => "IP login restriction validation failed.",
+				EResult.k_EResultAccountLockedDown => "The account is locked down.",
+				EResult.k_EResultAccountLogonDeniedVerifiedEmailRequired => "Account logon was denied because a verified email is required.",
+				EResult.k_EResultNoMatchingURL => "No matching URL was found.",
+				EResult.k_EResultBadResponse => "Steam returned a bad response.",
+				EResult.k_EResultRequirePasswordReEntry => "Password re-entry is required.",
+				EResult.k_EResultValueOutOfRange => "A value is out of range.",
+				EResult.k_EResultUnexpectedError => "Steam returned an unexpected error.",
+				EResult.k_EResultDisabled => "The requested feature is disabled.",
+				EResult.k_EResultInvalidCEGSubmission => "The CEG submission is invalid.",
+				EResult.k_EResultRestrictedDevice => "The device is restricted.",
+				EResult.k_EResultRegionLocked => "The request is region locked.",
+				EResult.k_EResultRateLimitExceeded => "The Steam rate limit was exceeded.",
+				EResult.k_EResultAccountLoginDeniedNeedTwoFactor => "Account login was denied because two-factor authentication is required.",
+				EResult.k_EResultItemDeleted => "The item has been deleted.",
+				EResult.k_EResultAccountLoginDeniedThrottle => "Account login was throttled.",
+				EResult.k_EResultTwoFactorCodeMismatch => "The two-factor authentication code does not match.",
+				EResult.k_EResultTwoFactorActivationCodeMismatch => "The two-factor activation code does not match.",
+				EResult.k_EResultAccountAssociatedToMultiplePartners => "The account is associated with multiple partners.",
+				EResult.k_EResultNotModified => "The resource was not modified.",
+				EResult.k_EResultNoMobileDevice => "No mobile device is associated with the account.",
+				EResult.k_EResultTimeNotSynced => "The client time is not synchronized.",
+				EResult.k_EResultSmsCodeFailed => "The SMS code validation failed.",
+				EResult.k_EResultAccountLimitExceeded => "The account limit was exceeded.",
+				EResult.k_EResultAccountActivityLimitExceeded => "The account activity limit was exceeded.",
+				EResult.k_EResultPhoneActivityLimitExceeded => "The phone activity limit was exceeded.",
+				EResult.k_EResultRefundToWallet => "The refund was sent to the Steam wallet.",
+				EResult.k_EResultEmailSendFailure => "Steam failed to send the email.",
+				EResult.k_EResultNotSettled => "The transaction is not settled.",
+				EResult.k_EResultNeedCaptcha => "Captcha verification is required.",
+				EResult.k_EResultGSLTDenied => "The game server login token was denied.",
+				EResult.k_EResultGSOwnerDenied => "The game server owner was denied.",
+				EResult.k_EResultInvalidItemType => "The item type is invalid.",
+				EResult.k_EResultIPBanned => "The IP address is banned.",
+				EResult.k_EResultGSLTExpired => "The game server login token has expired.",
+				EResult.k_EResultInsufficientFunds => "The account has insufficient funds.",
+				EResult.k_EResultTooManyPending => "Too many operations are pending.",
+				EResult.k_EResultNoSiteLicensesFound => "No site licenses were found.",
+				EResult.k_EResultWGNetworkSendExceeded => "Steam exceeded the network send limit.",
+				EResult.k_EResultAccountNotFriends => "The target account is not a friend.",
+				EResult.k_EResultLimitedUserAccount => "The account is a limited user account.",
+				EResult.k_EResultCantRemoveItem => "The item cannot be removed.",
+				EResult.k_EResultAccountDeleted => "The account has been deleted.",
+				EResult.k_EResultExistingUserCancelledLicense => "The existing user cancelled the license.",
+				EResult.k_EResultCommunityCooldown => "The account is on community cooldown.",
+				EResult.k_EResultNoLauncherSpecified => "No launcher was specified.",
+				EResult.k_EResultMustAgreeToSSA => "The user must agree to the Steam Subscriber Agreement.",
+				EResult.k_EResultLauncherMigrated => "The launcher has migrated.",
+				EResult.k_EResultSteamRealmMismatch => "The Steam realm does not match.",
+				EResult.k_EResultInvalidSignature => "The signature is invalid.",
+				EResult.k_EResultParseFailure => "Steam failed to parse the data.",
+				EResult.k_EResultNoVerifiedPhone => "The account does not have a verified phone.",
+				EResult.k_EResultInsufficientBattery => "The device has insufficient battery.",
+				EResult.k_EResultChargerRequired => "A charger is required.",
+				EResult.k_EResultCachedCredentialInvalid => "The cached credential is invalid.",
+				EResult.K_EResultPhoneNumberIsVOIP => "The phone number is a VOIP number.",
+				EResult.k_EResultNotSupported => "The operation is not supported.",
+				EResult.k_EResultFamilySizeLimitExceeded => "The Steam family size limit was exceeded.",
+				EResult.k_EResultOfflineAppCacheInvalid => "The offline app cache is invalid.",
+				EResult.k_EResultTryLater => "Steam requested that the operation be tried later.",
+				_ => $"Unknown Steam result ({(int)result}).",
+			};
+		}
+	};
+};

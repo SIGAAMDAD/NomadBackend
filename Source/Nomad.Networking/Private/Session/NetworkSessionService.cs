@@ -19,9 +19,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.Events;
 using Nomad.Core.OnlineServices;
+using Nomad.Core.Logger;
 using Nomad.Networking.Messaging;
 using Nomad.Networking.Session;
 using Nomad.Networking.Transport;
+using Nomad.Core.Compatibility.Guards;
 
 namespace Nomad.Networking.Private.Session
 {
@@ -29,30 +31,34 @@ namespace Nomad.Networking.Private.Session
 	{
 		private readonly ILobbyService _lobbyService;
 		private readonly INetDriver _netDriver;
-
-		private readonly IGameEvent<NetworkSessionChangedEventArgs> _sessionChanged;
-		private readonly IGameEvent<PeerConnectedEventArgs> _peerConnected;
-		private readonly IGameEvent<PeerDisconnectedEventArgs> _peerDisconnected;
+		private readonly ILoggerCategory _category;
 
 		private NetworkSessionInfo? _currentSession;
-		private bool _isDisposed;
 
 		public bool IsSessionActive => _currentSession != null;
 		public bool IsHost => _currentSession?.Mode == NetworkSessionMode.Host;
 		public bool IsClient => _currentSession?.Mode == NetworkSessionMode.Client;
 		public NetworkSessionInfo? CurrentSession => _currentSession;
 
-		public IGameEvent<NetworkSessionChangedEventArgs> SessionChanged => _sessionChanged;
-		public IGameEvent<PeerConnectedEventArgs> PeerConnected => _peerConnected;
-		public IGameEvent<PeerDisconnectedEventArgs> PeerDisconnected => _peerDisconnected;
+		private bool _isDisposed = false;
 
-		public NetworkSessionService( ILobbyService lobbyService, INetDriver netDriver, IGameEventRegistryService eventFactory )
+		public IGameEvent<NetworkSessionChangedEventArgs> SessionChanged => _sessionChanged;
+		private readonly IGameEvent<NetworkSessionChangedEventArgs> _sessionChanged = default;
+
+		public IGameEvent<PeerConnectedEventArgs> PeerConnected => _peerConnected;
+		private readonly IGameEvent<PeerConnectedEventArgs> _peerConnected = default;
+
+		public IGameEvent<PeerDisconnectedEventArgs> PeerDisconnected => _peerDisconnected;
+		private readonly IGameEvent<PeerDisconnectedEventArgs> _peerDisconnected = default;
+
+		public NetworkSessionService( ILobbyService lobbyService, INetDriver netDriver, IGameEventRegistryService eventFactory, ILoggerService logger )
 		{
+			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
+			ArgumentGuard.ThrowIfNull( eventFactory, nameof( eventFactory ) );
+
 			_lobbyService = lobbyService ?? throw new ArgumentNullException( nameof( lobbyService ) );
 			_netDriver = netDriver ?? throw new ArgumentNullException( nameof( netDriver ) );
-			if ( eventFactory == null ) {
-				throw new ArgumentNullException( nameof( eventFactory ) );
-			}
+			_category = logger.CreateCategory( nameof( NetworkSessionService ), LogLevel.Info, true );
 
 			_sessionChanged = eventFactory.GetEvent<NetworkSessionChangedEventArgs>(
 				NetworkSessionChangedEventArgs.Name,
@@ -198,12 +204,8 @@ namespace Nomad.Networking.Private.Session
 				}
 
 				peers.Add(
-					new NetworkPeerInfo(
-						member.Id,
-						member.DisplayName ?? string.Empty,
-						member.IsOwner,
-						member.IsLocal,
-						true,
+					CreatePeerInfo(
+						member,
 						i,
 						NetworkConnectionState.Connected
 					)
@@ -261,6 +263,7 @@ namespace Nomad.Networking.Private.Session
 		/// <param name="connection"></param>
 		private void OnConnectionEstablished( NetConnection connection )
 		{
+			AddOrUpdatePeer( connection.PeerId, NetworkConnectionState.Connected );
 			_peerConnected.Publish( new PeerConnectedEventArgs( connection.PeerId ) );
 		}
 
@@ -275,7 +278,116 @@ namespace Nomad.Networking.Private.Session
 		/// <param name="connection"></param>
 		private void OnConnectionClosed( NetConnection connection )
 		{
+			RemovePeer( connection.PeerId );
 			_peerDisconnected.Publish( new PeerDisconnectedEventArgs( connection.PeerId, LobbyLeaveReason.Disconnected ) );
+		}
+
+		private bool AddOrUpdatePeer( PeerId peerId, NetworkConnectionState state )
+		{
+			if ( _currentSession == null || !peerId.IsValid ) {
+				return false;
+			}
+
+			var peers = new List<NetworkPeerInfo>( _currentSession.Peers.Count + 1 );
+			bool found = false;
+			for ( int i = 0; i < _currentSession.Peers.Count; i++ ) {
+				NetworkPeerInfo peer = _currentSession.Peers[i];
+				if ( peer.PeerId == peerId ) {
+					peers.Add(
+						new NetworkPeerInfo(
+							peer.PeerId,
+							peer.DisplayName,
+							peer.IsHost,
+							peer.IsLocal,
+							peer.IsReady,
+							peer.PlayerSlot,
+							state
+						)
+					);
+					found = true;
+					continue;
+				}
+
+				peers.Add( peer );
+			}
+
+			if ( !found ) {
+				if ( !TryGetLobbyMember( peerId, out LobbyMemberInfo member ) ) {
+					return false;
+				}
+
+				peers.Add(
+					CreatePeerInfo(
+						member,
+						peers.Count,
+						state
+					)
+				);
+			}
+
+			_currentSession = _currentSession with {
+				PeerCount = peers.Count,
+				Peers = peers,
+				LastUpdatedUtc = DateTime.UtcNow
+			};
+			return true;
+		}
+
+		private bool RemovePeer( PeerId peerId )
+		{
+			if ( _currentSession == null || !peerId.IsValid ) {
+				return false;
+			}
+
+			var peers = new List<NetworkPeerInfo>( _currentSession.Peers.Count );
+			bool removed = false;
+			for ( int i = 0; i < _currentSession.Peers.Count; i++ ) {
+				NetworkPeerInfo peer = _currentSession.Peers[i];
+				if ( peer.PeerId == peerId ) {
+					removed = true;
+					continue;
+				}
+
+				peers.Add( peer );
+			}
+
+			if ( !removed ) {
+				return false;
+			}
+
+			_currentSession = _currentSession with {
+				PeerCount = peers.Count,
+				Peers = peers,
+				LastUpdatedUtc = DateTime.UtcNow
+			};
+			return true;
+		}
+
+		private bool TryGetLobbyMember( PeerId peerId, out LobbyMemberInfo member )
+		{
+			IReadOnlyList<LobbyMemberInfo> members = _lobbyService.GetMembers();
+			for ( int i = 0; i < members.Count; i++ ) {
+				if ( members[i].Id == peerId ) {
+					member = members[i];
+					return true;
+				}
+			}
+
+			member = null;
+			return false;
+		}
+
+		private static NetworkPeerInfo CreatePeerInfo( LobbyMemberInfo member, int slot, NetworkConnectionState state )
+		{
+			return new NetworkPeerInfo(
+				member.Id,
+				member.DisplayName ?? string.Empty,
+				member.IsOwner,
+				member.IsLocal,
+				true,
+				slot,
+				state
+			);
 		}
 
 		/*
