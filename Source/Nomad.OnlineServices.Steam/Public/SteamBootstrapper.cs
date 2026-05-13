@@ -21,10 +21,10 @@ using Nomad.Core.FileSystem;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
 using Nomad.Core.ServiceRegistry.Interfaces;
-using Nomad.OnlineServices.Steam.Private;
 using System.Reflection;
 using Nomad.Core.Util.Attributes;
 using Steamworks;
+using Nomad.OnlineServices.Steam.Private.Services;
 
 #if NET5_0_OR_GREATER
 using Nomad.Core.Util;

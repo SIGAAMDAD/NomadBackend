@@ -69,7 +69,6 @@ namespace Nomad.Core.OnlineServices
         /// Creates a new lobby with the provided parameters
         /// </summary>
         /// <param name="lobbyInfo">The information to create the lobby with.</param>
-        /// <param name="ct"></param>
         /// <returns></returns>
         [ResultObject("LobbyCreateResult", isRecord: true, Namespace = "Nomad.Core.OnlineServices")]
         [ResultObjectPayload("Id", typeof(LobbyId), order: 1)]
@@ -83,7 +82,6 @@ namespace Nomad.Core.OnlineServices
         ///
         /// </summary>
         /// <param name="lobbyId">The lobby's unique 64-bit id.</param>
-        /// <param name="ct"></param>
         /// <returns>True if the lobby was joined successfully, false otherwise.</returns>
         [ResultObject("LobbyJoinResult", isRecord: true, Namespace = "Nomad.Core.OnlineServices")]
         [ResultObjectPayload("LobbyData", typeof(LobbyInfo), order: 2, IsOptional = true)]
@@ -95,7 +93,6 @@ namespace Nomad.Core.OnlineServices
         /// <summary>
         /// Leaves the current lobby.
         /// </summary>
-        /// <param name="ct"></param>
         /// <returns><c>True</c> if the lobby was left successfully, <c>false</c> otherwise.</returns>
         Task<bool> LeaveLobby(CancellationToken ct = default);
 

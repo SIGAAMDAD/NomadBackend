@@ -91,7 +91,7 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 			}
 
 			// query the api for the achievement's icon
-			SteamUserStats.GetAchievementIcon( _name );
+//			SteamUserStats.GetAchievementIcon( _name );
 		}
 
 		/*

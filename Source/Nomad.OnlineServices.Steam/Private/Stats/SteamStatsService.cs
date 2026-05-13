@@ -91,7 +91,7 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="statName"></param>
 		/// <returns></returns>
-		public async ValueTask<float> GetStatFloat( InternString statName )
+		public async Task<float> GetStatFloat( InternString statName )
 		{
 			return _statsRepository.GetStatFloat( statName );
 		}
@@ -106,12 +106,24 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// </summary>
 		/// <param name="statName"></param>
 		/// <returns></returns>
-		public async ValueTask<int> GetStatInt( InternString statName )
+		public async Task<int> GetStatInt( InternString statName )
 		{
 			return _statsRepository.GetStatInt( statName );
 		}
 
-		public async ValueTask<int> GetUserStatInt( PeerId peerId, InternString statName, CancellationToken ct = default )
+		/*
+		===============
+		GetUserStatInt
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="peerId"></param>
+		/// <param name="statName"></param>
+		/// <param name="ct"></param>
+		/// <returns></returns>
+		public async Task<int> GetUserStatInt( PeerId peerId, InternString statName, CancellationToken ct = default )
 		{
 			if ( !TryResolveSteamId( peerId, nameof( GetUserStatInt ), out CSteamID steamId ) ) {
 				return 0;
@@ -120,7 +132,19 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			return await _statsRepository.GetUserStatInt( steamId, statName, ct );
 		}
 
-		public async ValueTask<float> GetUserStatFloat( PeerId peerId, InternString statName, CancellationToken ct = default )
+		/*
+		===============
+		GetUserStatFloat
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="peerId"></param>
+		/// <param name="statName"></param>
+		/// <param name="ct"></param>
+		/// <returns></returns>
+		public async Task<float> GetUserStatFloat( PeerId peerId, InternString statName, CancellationToken ct = default )
 		{
 			if ( !TryResolveSteamId( peerId, nameof( GetUserStatFloat ), out CSteamID steamId ) ) {
 				return 0.0f;
@@ -140,7 +164,7 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="statName"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public async ValueTask SetStatFloat( InternString statName, float value )
+		public async Task SetStatFloat( InternString statName, float value )
 		{
 			_statsRepository.SetStatFloat( statName, value );
 		}
@@ -156,12 +180,25 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		/// <param name="statName"></param>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public async ValueTask SetStatInt( InternString statName, int value )
+		public async Task SetStatInt( InternString statName, int value )
 		{
 			_statsRepository.SetStatInt( statName, value );
 		}
 
-		public async ValueTask<bool> SetUserStatInt( PeerId peerId, InternString statName, int value, CancellationToken ct = default )
+		/*
+		===============
+		SetUserStatInt
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="peerId"></param>
+		/// <param name="statName"></param>
+		/// <param name="value"></param>
+		/// <param name="ct"></param>
+		/// <returns></returns>
+		public async Task<bool> SetUserStatInt( PeerId peerId, InternString statName, int value, CancellationToken ct = default )
 		{
 			if ( !TryResolveSteamId( peerId, nameof( SetUserStatInt ), out CSteamID steamId ) ) {
 				return false;
@@ -170,7 +207,20 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			return _statsRepository.SetUserStatInt( steamId, statName, value );
 		}
 
-		public async ValueTask<bool> SetUserStatFloat( PeerId peerId, InternString statName, float value, CancellationToken ct = default )
+		/*
+		===============
+		SetUserStatFloat
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="peerId"></param>
+		/// <param name="statName"></param>
+		/// <param name="value"></param>
+		/// <param name="ct"></param>
+		/// <returns></returns>
+		public async Task<bool> SetUserStatFloat( PeerId peerId, InternString statName, float value, CancellationToken ct = default )
 		{
 			if ( !TryResolveSteamId( peerId, nameof( SetUserStatFloat ), out CSteamID steamId ) ) {
 				return false;
@@ -188,15 +238,27 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		///
 		/// </summary>
 		/// <returns></returns>
-		public async ValueTask<bool> StoreStats()
+		public bool StoreStats()
 		{
 			return _statsRepository.StoreStats();
 		}
 
+		/*
+		===============
+		TryResolveSteamId
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="peerId"></param>
+		/// <param name="methodName"></param>
+		/// <param name="steamId"></param>
+		/// <returns></returns>
 		private bool TryResolveSteamId( PeerId peerId, string methodName, out CSteamID steamId )
 		{
 			if ( _peerSteamIdResolver != null ) {
-				CSteamID? resolved = _peerSteamIdResolver( peerId );
+				CSteamID? resolved = _peerSteamIdResolver.Invoke( peerId );
 				if ( resolved.HasValue && resolved.Value.IsValid() ) {
 					steamId = resolved.Value;
 					return true;

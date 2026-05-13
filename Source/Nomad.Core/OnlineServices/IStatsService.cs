@@ -36,7 +36,7 @@ namespace Nomad.Core.OnlineServices
         /// <param name="statName"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        ValueTask SetStatInt(InternString statName, int value);
+        Task SetStatInt(InternString statName, int value);
 
         /// <summary>
         ///
@@ -44,17 +44,7 @@ namespace Nomad.Core.OnlineServices
         /// <param name="statName"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        ValueTask SetStatFloat(InternString statName, float value);
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="peerId"></param>
-        /// <param name="statName"></param>
-        /// <param name="value"></param>
-        /// <param name="ct"></param>
-        /// <returns></returns>
-        ValueTask<bool> SetUserStatInt(PeerId peerId, InternString statName, int value, CancellationToken ct = default);
+        Task SetStatFloat(InternString statName, float value);
 
         /// <summary>
         ///
@@ -64,14 +54,24 @@ namespace Nomad.Core.OnlineServices
         /// <param name="value"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        ValueTask<bool> SetUserStatFloat(PeerId peerId, InternString statName, float value, CancellationToken ct = default);
+        Task<bool> SetUserStatInt(PeerId peerId, InternString statName, int value, CancellationToken ct = default);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="peerId"></param>
+        /// <param name="statName"></param>
+        /// <param name="value"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        Task<bool> SetUserStatFloat(PeerId peerId, InternString statName, float value, CancellationToken ct = default);
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="statName"></param>
         /// <returns></returns>
-        ValueTask<int> GetStatInt(InternString statName);
+        Task<int> GetStatInt(InternString statName);
 
         /// <summary>
         ///
@@ -80,7 +80,7 @@ namespace Nomad.Core.OnlineServices
         /// <param name="statName"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        ValueTask<int> GetUserStatInt(PeerId peerId, InternString statName, CancellationToken ct = default);
+        Task<int> GetUserStatInt(PeerId peerId, InternString statName, CancellationToken ct = default);
 
         /// <summary>
         ///
@@ -89,19 +89,19 @@ namespace Nomad.Core.OnlineServices
         /// <param name="statName"></param>
         /// <param name="ct"></param>
         /// <returns></returns>
-        ValueTask<float> GetUserStatFloat(PeerId peerId, InternString statName, CancellationToken ct = default);
+        Task<float> GetUserStatFloat(PeerId peerId, InternString statName, CancellationToken ct = default);
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="statName"></param>
         /// <returns></returns>
-        ValueTask<float> GetStatFloat(InternString statName);
+        Task<float> GetStatFloat(InternString statName);
 
         /// <summary>
         ///
         /// </summary>
         /// <returns></returns>
-        ValueTask<bool> StoreStats();
+        bool StoreStats();
     }
 }

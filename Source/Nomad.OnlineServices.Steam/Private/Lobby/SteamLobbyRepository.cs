@@ -40,6 +40,7 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 		public ICollection<SteamLobbyData> Lobbies => _lobbyList.Values;
 		private readonly ConcurrentDictionary<SteamLobbyKey, SteamLobbyData> _lobbyList = new();
 		private readonly ConcurrentDictionary<Guid, CSteamID> _idToSteam = new();
+		private readonly ConcurrentDictionary<CSteamID, Guid> _steamId64ToId = new();
 
 		private readonly int _lobbyPurgeTimeout = 0;
 		private readonly Timer _purgeTimer;
@@ -139,6 +140,7 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 			var key = new SteamLobbyKey( lobby.Id, lobby.Guid );
 			if ( !_lobbyList.TryGetValue( key, out SteamLobbyData? value ) ) {
 				_idToSteam[lobby.Guid] = lobby.Id;
+				_steamId64ToId[lobby.Id] = lobby.Guid;
 				_lobbyList.TryAdd( key, lobby );
 			} else {
 				lock ( value ) {
@@ -165,6 +167,26 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 				return false;
 			}
 			return _lobbyList.TryGetValue( new SteamLobbyKey( steamID, lobbyId ), out info );
+		}
+
+		/*
+		===============
+		TryGetLobby
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="lobbyId"></param>
+		/// <param name="info"></param>
+		/// <returns></returns>
+		public bool TryGetLobby( CSteamID lobbyId, out SteamLobbyData? info )
+		{
+			if ( !_steamId64ToId.TryGetValue( lobbyId, out var guid ) ) {
+				info = null;
+				return false;
+			}
+			return TryGetLobby( guid, out info );
 		}
 
 		/*

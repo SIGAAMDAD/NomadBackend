@@ -21,8 +21,8 @@ using Nomad.Core.CVars;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
+using Nomad.Core.Util;
 using Nomad.CVars;
-using Nomad.Networking.Session;
 using Nomad.OnlineServices.Steam.Private.Network;
 using Nomad.OnlineServices.Steam.Private.Util;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
@@ -62,14 +62,16 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 		private readonly Callback<LobbyInvite_t> _lobbyInvite;
 		private readonly Callback<LobbyChatMsg_t> _lobbyChatMsg;
 
-		private readonly SteamAsyncCallbackDispatcher<LobbyEnter_t, LobbyJoinResult> _lobbyEnter;
-		private readonly SteamAsyncCallbackDispatcher<LobbyCreated_t, SteamLobbyData> _lobbyCreated;
+		private readonly SteamAsyncCallResultDispatcher<LobbyEnter_t, LobbyJoinResult> _lobbyEnter;
+		private readonly SteamAsyncCallResultDispatcher<LobbyCreated_t, SteamLobbyData> _lobbyCreated;
 
 		private readonly ICVarSystemService _cvarSystem = null;
 		private readonly ILoggerCategory _category = null;
 		private readonly IGameEventRegistryService _eventFactory = null;
 
 		private readonly SteamNetDriver _netDriver = null;
+
+		private volatile LobbyCreateInfo? _requestInfo = null;
 
 		private bool _isDisposed = false;
 
@@ -94,19 +96,95 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 		/// <param name="logger"></param>
 		/// <param name="cvarSystem"></param>
 		/// <param name="eventFactory"></param>
-		public SteamLobbyService( SteamUserData userData, ILoggerService logger, ICVarSystemService cvarSystem, IGameEventRegistryService eventFactory )
+		public SteamLobbyService(
+			SteamUserData userData,
+			ILoggerService logger,
+			ICVarSystemService cvarSystem,
+			IGameEventRegistryService eventFactory,
+			ISteamApiThreadDispatcher steamThread
+		)
 		{
 			_cvarSystem = cvarSystem ?? throw new ArgumentNullException( nameof( cvarSystem ) );
 			_eventFactory = eventFactory ?? throw new ArgumentNullException( nameof( eventFactory ) );
-			_userData = userData;
+			_userData = userData ?? throw new ArgumentNullException( nameof( userData ) );
 
 			_category = logger.CreateCategory( nameof( SteamLobbyService ), LogLevel.Info, true );
 			_netDriver = new SteamNetDriver( eventFactory, _category );
 
 			_lobbyInvite = Callback<LobbyInvite_t>.Create( OnLobbyInvite );
 			_lobbyChatMsg = Callback<LobbyChatMsg_t>.Create( OnLobbyChatMsg );
-			_lobbyEnter = new SteamAsyncCallbackDispatcher<LobbyEnter_t, LobbyJoinResult>();
-			_lobbyCreated = new SteamAsyncCallbackDispatcher<LobbyCreated_t, SteamLobbyData>();
+			_lobbyEnter = new SteamAsyncCallResultDispatcher<LobbyEnter_t, LobbyJoinResult>(
+				operationName: "SteamMatchmaking.JoinLobby",
+				steamThread: steamThread,
+				resultFactory: result => {
+					var lobbyId = new CSteamID( result.m_ulSteamIDLobby );
+					if ( !_repository.TryGetLobby( lobbyId, out var lobby ) ) {
+						return null;
+					}
+					switch ( (EChatRoomEnterResponse)result.m_EChatRoomEnterResponse ) {
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseBanned:
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseFull:
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseNotAllowed:
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseClanDisabled:
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseDoesntExist:
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseError:
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseLimited:
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseMemberBlockedYou:
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseRatelimitExceeded:
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseYouBlockedMember:
+							return LobbyJoinResult.Failure( LobbyFailureReason.SessionFull );
+						case EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess:
+							break;
+						default:
+							throw new ArgumentOutOfRangeException( nameof( result ) );
+					}
+					lock ( _operationsLock ) {
+						_current = new SteamLobbyInstance( lobby, _netDriver, _cvarSystem, _eventFactory );
+						_lobbyJoined.Publish( new LobbyJoinedResultEventArgs( lobby.Guid ) );
+					}
+					return LobbyJoinResult.Joined( _current.Info.Info );
+				}
+			);
+			_lobbyCreated = new SteamAsyncCallResultDispatcher<LobbyCreated_t, SteamLobbyData>(
+				operationName: "SteamMatchmaking.CreateLobby",
+				steamThread: steamThread,
+				resultFactory: result => {
+					if ( result.m_eResult != EResult.k_EResultOK ) {
+						_category.PrintError( $"SteamLobbyFactory.OnLobbyCreated: error creating lobby - {result.m_eResult}" );
+						_lobbyStarted.Publish(
+							new LobbyStartResultEventArgs( success: false, id: Guid.Empty )
+						);
+						return null;
+					}
+					_category.PrintLine( $"SteamLobbyFactory.OnLobbyFactory: created new lobby with CSteamID '{result.m_ulSteamIDLobby}'" );
+
+					CSteamID id = (CSteamID)result.m_ulSteamIDLobby;
+
+					// setup default metadata
+					SteamMatchmaking.SetLobbyOwner( id, _userData.UserID );
+					SteamMatchmaking.SetLobbyMemberLimit( id, _requestInfo.MaxPlayers );
+					SteamMatchmaking.SetLobbyJoinable( id, true );
+
+					SteamMatchmaking.SetLobbyData( id, nameof( LobbyInfo.Name ), _requestInfo.Name );
+					SteamMatchmaking.SetLobbyData( id, nameof( LobbyInfo.Map ), _requestInfo.Map );
+					SteamMatchmaking.SetLobbyData( id, nameof( LobbyInfo.GameMode ), _requestInfo.GameMode );
+					SteamMatchmaking.SetLobbyData( id, nameof( LobbyInfo.Visibility ), _requestInfo.Visibility.ToString() );
+
+					if ( _requestInfo.Metadata != null ) {
+						foreach ( var metadata in _requestInfo.Metadata ) {
+							SteamMatchmaking.SetLobbyData( id, metadata.Key, metadata.Value );
+						}
+					}
+
+					var lobbyData = new SteamLobbyData( id, _requestInfo, Guid.NewGuid() );
+					_repository.AddLobby( lobbyData );
+
+					_lobbyStarted.Publish(
+						new LobbyStartResultEventArgs( success: true, id: lobbyData.Guid )
+					);
+					return lobbyData;
+				}
+			);
 
 			_repository = new SteamLobbyRepository( cvarSystem );
 
@@ -223,32 +301,8 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 			if ( !_repository.TryGetLobby( lobbyId.Value, out SteamLobbyData? lobby ) ) {
 				return LobbyJoinResult.Failure( LobbyFailureReason.SessionNotFound );
 			}
-			return await _lobbyEnter.Invoke(
-				result => {
-					switch ( (EChatRoomEnterResponse)result.m_EChatRoomEnterResponse ) {
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseBanned:
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseFull:
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseNotAllowed:
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseClanDisabled:
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseDoesntExist:
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseError:
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseLimited:
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseMemberBlockedYou:
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseRatelimitExceeded:
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseYouBlockedMember:
-							return LobbyJoinResult.Failure( LobbyFailureReason.SessionFull );
-						case EChatRoomEnterResponse.k_EChatRoomEnterResponseSuccess:
-							break;
-						default:
-							throw new ArgumentOutOfRangeException( nameof( result ) );
-					}
-					lock ( _operationsLock ) {
-						_current = new SteamLobbyInstance( lobby, _netDriver, _cvarSystem, _eventFactory );
-						_lobbyJoined.Publish( new LobbyJoinedResultEventArgs( lobby.Guid ) );
-					}
-					return LobbyJoinResult.Joined( _current.Info.Info );
-				},
-				() => SteamMatchmaking.JoinLobby( lobby.Id ),
+			return await _lobbyEnter.ExecuteAsync(
+				beginSteamCall: () => SteamMatchmaking.JoinLobby( lobby.Id ),
 				ct
 			);
 		}
@@ -296,43 +350,11 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 				_ => throw new ArgumentOutOfRangeException( nameof( info ) )
 			};
 
-			return await _lobbyCreated.Invoke(
-				result => {
-					if ( result.m_eResult != EResult.k_EResultOK ) {
-						_category.PrintError( $"SteamLobbyFactory.OnLobbyCreated: error creating lobby - {result.m_eResult}" );
-						_lobbyStarted.Publish(
-							new LobbyStartResultEventArgs( success: false, id: Guid.Empty )
-						);
-						return null;
-					}
-					_category.PrintLine( $"SteamLobbyFactory.OnLobbyFactory: created new lobby with CSteamID '{result.m_ulSteamIDLobby}'" );
+			_requestInfo = info;
 
-					CSteamID id = (CSteamID)result.m_ulSteamIDLobby;
-
-					// setup default metadata
-					SteamMatchmaking.SetLobbyOwner( id, _userData.UserID );
-					SteamMatchmaking.SetLobbyMemberLimit( id, info.MaxPlayers );
-					SteamMatchmaking.SetLobbyJoinable( id, true );
-
-					SteamMatchmaking.SetLobbyData( id, nameof( LobbyInfo.Name ), info.Name );
-					SteamMatchmaking.SetLobbyData( id, nameof( LobbyInfo.Map ), info.Map );
-					SteamMatchmaking.SetLobbyData( id, nameof( LobbyInfo.GameMode ), info.GameMode );
-					SteamMatchmaking.SetLobbyData( id, nameof( LobbyInfo.Visibility ), info.Visibility.ToString() );
-
-					foreach ( var metadata in info.Metadata ) {
-						SteamMatchmaking.SetLobbyData( id, metadata.Key, metadata.Value );
-					}
-
-					var lobbyData = new SteamLobbyData( id, info, Guid.NewGuid() );
-					_repository.AddLobby( lobbyData );
-
-					_lobbyStarted.Publish(
-						new LobbyStartResultEventArgs( success: true, id: lobbyData.Guid )
-					);
-					return lobbyData;
-				},
-				() => SteamMatchmaking.CreateLobby( type, info.MaxPlayers ),
-				ct
+			return await _lobbyCreated.ExecuteAsync(
+				beginSteamCall: () => SteamMatchmaking.CreateLobby( type, info.MaxPlayers ),
+				ct: ct
 			);
 		}
 

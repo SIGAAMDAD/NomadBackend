@@ -45,7 +45,7 @@ namespace Nomad.OnlineServices.Steam.Private
 	{
 		private readonly List<LobbyInfo> _lobbies = new();
 
-		private readonly SteamAsyncCallbackDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>> _lobbyMatchList;
+		private readonly SteamAsyncCallResultDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>> _lobbyMatchList;
 		private CancellationTokenSource? _cancellationToken = null;
 
 		private readonly SteamLobbyRepository _repository;
@@ -86,7 +86,7 @@ namespace Nomad.OnlineServices.Steam.Private
 		{
 			ArgumentGuard.ThrowIfNull( cvarSystem );
 
-			_lobbyMatchList = new SteamAsyncCallbackDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>>();
+//			_lobbyMatchList = new SteamAsyncCallbackDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>>();
 
 			_lastRange = ServerRange.Count;
 			_repository = repository ?? throw new ArgumentNullException( nameof( repository ) );
@@ -229,6 +229,7 @@ namespace Nomad.OnlineServices.Steam.Private
 		/// <returns></returns>
 		private async Task<ICollection<SteamLobbyData>> RequestLobbyListAsync( ServerRange range, CancellationToken ct = default )
 		{
+			/*
 			return await _lobbyMatchList.Invoke(
 				callback: result => {
 					for ( int i = 0; i < result.m_nLobbiesMatching; i++ ) {
@@ -254,6 +255,9 @@ namespace Nomad.OnlineServices.Steam.Private
 				},
 				ct
 			);
+			*/
+			_ = this;
+			return null;
 		}
 	};
 };

@@ -16,14 +16,15 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Nomad.Core.Logger;
 using Steamworks;
 
-namespace Nomad.OnlineServices.Steam.Private.Util
+namespace Nomad.OnlineServices.Steam.Private.Services
 {
 	/*
 	===================================================================================
 
-	SteamAsyncCallbackDispatcher
+	SteamAsyncCallResultDispatcher
 
 	===================================================================================
 	*/
@@ -31,10 +32,10 @@ namespace Nomad.OnlineServices.Steam.Private.Util
 	/// Handles asynchronous calls into the Steamworks API
 	/// </summary>
 
-	internal sealed class SteamAsyncCallbackDispatcher<TCallbackArgs, TResult> : IDisposable
+	internal sealed class SteamAsyncCallResultDispatcher<TCallbackArgs, TResult> : IDisposable
 		where TCallbackArgs : struct
 	{
-		private readonly Callback<TCallbackArgs> _callback;
+		private readonly CallResult<TCallbackArgs> _callback;
 
 		private readonly object _requestLock = new object();
 		private TaskCompletionSource<TCallbackArgs>? _currentTcs;
@@ -46,18 +47,16 @@ namespace Nomad.OnlineServices.Steam.Private.Util
 
 		/*
 		===============
-		SteamAsyncCallbackDispatcher
+		SteamAsyncCallResultDispatcher
 		===============
 		*/
 		/// <summary>
 		///
 		/// </summary>
-		/// <exception cref="InvalidOperationException"></exception>
-		public SteamAsyncCallbackDispatcher()
+		public SteamAsyncCallResultDispatcher()
 		{
 			_mainContext = SynchronizationContext.Current ?? new SynchronizationContext();
-
-			_callback = Callback<TCallbackArgs>.Create( OnCallback );
+			_callback = CallResult<TCallbackArgs>.Create( OnCallback );
 		}
 
 		/*
@@ -117,7 +116,7 @@ namespace Nomad.OnlineServices.Steam.Private.Util
 		/// <param name="steamCallback"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		private async Task<TResult?> InvokeInternal( Func<TCallbackArgs, TResult> callback, Action? steamCallback, CancellationToken ct )
+		private async Task<TResult> InvokeInternal( Func<TCallbackArgs, TResult> callback, Action? steamCallback, CancellationToken ct )
 		{
 			_currentTcs = new TaskCompletionSource<TCallbackArgs>();
 
@@ -134,6 +133,7 @@ namespace Nomad.OnlineServices.Steam.Private.Util
 				using ( ct.Register( () => {
 					lock ( _requestLock ) {
 						_currentTcs?.TrySetCanceled( ct );
+						_currentTcs = null;
 					}
 				} ) ) {
 					var result = await _currentTcs.Task.ConfigureAwait( false );
@@ -155,7 +155,8 @@ namespace Nomad.OnlineServices.Steam.Private.Util
 		///
 		/// </summary>
 		/// <param name="pCallback"></param>
-		private void OnCallback( TCallbackArgs pCallback )
+		/// <param name="bIOFailure"></param>
+		private void OnCallback( TCallbackArgs pCallback, bool bIOFailure )
 		{
 			TaskCompletionSource<TCallbackArgs>? tcs = null;
 			lock ( _requestLock ) {
@@ -164,5 +165,5 @@ namespace Nomad.OnlineServices.Steam.Private.Util
 			}
 			tcs?.TrySetResult( pCallback );
 		}
-	}
-}
+	};
+};

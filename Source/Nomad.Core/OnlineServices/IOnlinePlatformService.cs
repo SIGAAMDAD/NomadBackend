@@ -65,6 +65,6 @@ namespace Nomad.Core.OnlineServices
         /// <summary>
         ///
         /// </summary>
-        void RunCallbacks();
+        void Frame();
     }
 }

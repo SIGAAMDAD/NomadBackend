@@ -71,6 +71,8 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		public bool IsReady => _isReady;
 		private volatile bool _isReady = false;
 
+		private volatile bool _isDirty = false;
+
 		public event Action<InternString> AchievementUnlocked;
 		public event Action<InternString, float, float> AchievementProgressChanged;
 		public event Action StatsUpdated;
@@ -427,6 +429,7 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 
 			lock ( _dirtyStats ) {
 				_dirtyStats.Add( statId );
+				_isDirty = true;
 			}
 		}
 
@@ -435,6 +438,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			if ( !IsLocalUser( userId ) ) {
 				_category.PrintWarning( $"SetUserStatFloat: Steam only allows writing stats for the local user. User='{userId.m_SteamID}', Stat='{(string)statId}'." );
 				return false;
+			}
+
+			lock ( _dirtyStats ) {
+				_isDirty = true;
 			}
 
 			SetStatFloat( statId, value );
@@ -464,6 +471,7 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 
 			lock ( _dirtyStats ) {
 				_dirtyStats.Add( statId );
+				_isDirty = true;
 			}
 		}
 
@@ -472,6 +480,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 			if ( !IsLocalUser( userId ) ) {
 				_category.PrintWarning( $"SetUserStatInt: Steam only allows writing stats for the local user. User='{userId.m_SteamID}', Stat='{(string)statId}'." );
 				return false;
+			}
+
+			lock ( _dirtyStats ) {
+				_isDirty = true;
 			}
 
 			SetStatInt( statId, value );
@@ -491,6 +503,10 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		{
 			bool anyFailed = false;
 
+			if ( !_isDirty ) {
+				return true;
+			}
+
 			// Write dirty stats
 			lock ( _dirtyStats ) {
 				if ( _storeInFlight ) {
@@ -500,6 +516,7 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 				}
 
 				_storeInFlight = true;
+				_isDirty = false;
 
 				// copy to avoid modification during iteration
 				foreach ( var name in _dirtyStats.ToList() ) {
@@ -524,6 +541,7 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 					}
 				}
 			}
+
 
 			// Upload all stats (Steam expects this after SetStat calls)
 			bool submitted = SteamUserStats.StoreStats();

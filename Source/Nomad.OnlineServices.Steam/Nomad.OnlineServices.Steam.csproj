@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>NomadFramework.OnlineServices.Steam</PackageId>
+    <NoWarn>$(NoWarn);CA1506</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
