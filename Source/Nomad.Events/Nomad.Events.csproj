@@ -28,7 +28,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.8" />
     <PackageReference Include="System.Collections.Immutable" Version="10.0.3" />
 
     <ProjectReference Include="..\Nomad.Core\Nomad.Core.csproj" />
