@@ -42,8 +42,8 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 
 	internal sealed class SteamLobbyInstance : IDisposable
 	{
-		public SortedDictionary<PeerId, SteamSessionPeer> Members => _members;
-		private readonly SortedDictionary<PeerId, SteamSessionPeer> _members = new();
+		public Dictionary<PeerId, SteamSessionPeer> Members => _members;
+		private readonly Dictionary<PeerId, SteamSessionPeer> _members = new();
 
 		private readonly Dictionary<CSteamID, PeerId> _steam64ToPeer = new();
 

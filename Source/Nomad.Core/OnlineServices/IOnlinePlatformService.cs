@@ -65,6 +65,11 @@ namespace Nomad.Core.OnlineServices
         /// <summary>
         ///
         /// </summary>
+        IUserAvatarService AvatarService { get; }
+
+        /// <summary>
+        ///
+        /// </summary>
         void Frame();
     }
 }

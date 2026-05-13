@@ -180,11 +180,11 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 
 #if NET10_0_OR_GREATER
 			Span<int> scores = stackalloc int[lobbies.Count];
-#else
-			int[] arr = ArrayPool<int>.Shared.Rent( lobbies.Count );
-			Span<int> scores = arr;
-#endif
 			scores.Clear();
+#else
+			int[] scores = ArrayPool<int>.Shared.Rent( lobbies.Count );
+			Array.Fill( scores, 0 );
+#endif
 
 			for ( int i = 0; i < lobbies.Count; i++ ) {
 				ct.ThrowIfCancellationRequested();
@@ -206,7 +206,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 			}
 
 #if !NET10_0_OR_GREATER
-			ArrayPool<int>.Shared.Return( arr );
+			ArrayPool<int>.Shared.Return( scores );
 #endif
 
 			return null;

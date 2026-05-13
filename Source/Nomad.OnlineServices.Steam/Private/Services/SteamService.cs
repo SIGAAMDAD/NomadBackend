@@ -54,8 +54,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 				return _statsService;
 			}
 		}
-		private SteamStatsService? _statsService;
-		private SteamStatsRepository? _statsRepository;
+		private SteamStatsService? _statsService = null;
+		private SteamStatsRepository? _statsRepository = null;
 
 		public IAchievementService Achievements {
 			get {
@@ -63,7 +63,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 				return _achievementsService;
 			}
 		}
-		private SteamAchievementService? _achievementsService;
+		private SteamAchievementService? _achievementsService = null;
 
 		public IMatchMakingService Matchmaking {
 			get {
@@ -71,7 +71,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 				return _matchMakingService;
 			}
 		}
-		private SteamMatchMakingService _matchMakingService;
+		private SteamMatchMakingService? _matchMakingService = null;
 
 		public ICloudStorageService CloudStorage {
 			get {
@@ -79,7 +79,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 				return _cloudStorageService;
 			}
 		}
-		private SteamCloudStorageService? _cloudStorageService;
+		private SteamCloudStorageService? _cloudStorageService = null;
 
 		public ILobbyService Lobbies {
 			get {
@@ -87,7 +87,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 				return _lobbyService;
 			}
 		}
-		private SteamLobbyService? _lobbyService;
+		private SteamLobbyService? _lobbyService = null;
 
 		public INetDriver NetDriver {
 			get {
@@ -95,7 +95,15 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 				return _netDriver;
 			}
 		}
-		private SteamNetDriver? _netDriver;
+		private SteamNetDriver? _netDriver = null;
+
+		public IUserAvatarService AvatarService {
+			get {
+				_avatarService ??= new SteamUserAvatarService( _engineService, _category, TryResolvePeerSteamId );
+				return _avatarService;
+			}
+		}
+		private SteamUserAvatarService? _avatarService = null;
 
 		private readonly ILoggerCategory _category;
 
