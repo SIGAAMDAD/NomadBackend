@@ -18,7 +18,7 @@
   <!-- Common package references (both frameworks) -->
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
-    <PackageReference Include="System.Collections.Immutable" Version="10.0.3" />
+    <PackageReference Include="System.Collections.Immutable" Version="10.0.8" />
     <PackageReference Include="System.IO.Hashing" Version="10.0.4" />
   </ItemGroup>
 
