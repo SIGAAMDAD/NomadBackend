@@ -16,15 +16,14 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using NUnit.Framework;
 using Steamworks;
-using Nomad.OnlineServices.Steam.Private.Services;
 using Nomad.Core.OnlineServices;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Nomad.Events;
 using System.Collections.Generic;
 using System.Threading;
-using Nomad.OnlineServices.Steam.Private.Repositories;
+using Nomad.OnlineServices.Steam.Private.Stats;
 using NUnit.Framework.Internal;
-using System.Runtime.InteropServices;
+using Nomad.Core.Util;
 
 namespace Nomad.OnlineServices.Steam.Tests
 {
@@ -131,7 +130,7 @@ namespace Nomad.OnlineServices.Steam.Tests
             });
 
             // Act
-            _service.UnlockAchievement(testAchievement).Wait();
+            _service.UnlockAchievement(new InternString(testAchievement)).Wait();
 
             int maxWait = 5000;
             int waited = 0;
@@ -148,7 +147,7 @@ namespace Nomad.OnlineServices.Steam.Tests
                 // Assert
                 Assert.That(eventFired, Is.True);
                 Assert.That(unlockedId, Is.EqualTo(testAchievement));
-                Assert.That(_service.GetAchievementInfo(testAchievement).Achieved, Is.True);
+                Assert.That(_service.GetAchievementInfo(new InternString(testAchievement)).Achieved, Is.True);
             }
         }
 
@@ -160,10 +159,10 @@ namespace Nomad.OnlineServices.Steam.Tests
             CreateService();
 
             // ACt
-            _service.LockAchievement(testAchievement);
+            _service.LockAchievement(new InternString(testAchievement));
 
             // Assert
-            Assert.That(_service.GetAchievementInfo(testAchievement).Achieved, Is.False);
+            Assert.That(_service.GetAchievementInfo(new InternString(testAchievement)).Achieved, Is.False);
         }
 
         [Test]
@@ -186,7 +185,7 @@ namespace Nomad.OnlineServices.Steam.Tests
             });
 
             // Act
-            _service.SetAchievementProgress(testAchievement, newProgress).Wait();
+            _service.SetAchievementProgress(new InternString(testAchievement), newProgress).Wait();
 
             int maxWait = 5000;
             int waited = 0;
@@ -202,8 +201,8 @@ namespace Nomad.OnlineServices.Steam.Tests
             {
                 // Assert
                 Assert.That(eventFired, Is.True);
-                Assert.That(_service.GetAchievementInfo(testAchievement).Achieved, Is.False);
-                Assert.That(_service.GetAchievementInfo(testAchievement).Progress, Is.EqualTo(newProgress));
+                Assert.That(_service.GetAchievementInfo(new InternString(testAchievement)).Achieved, Is.False);
+                Assert.That(_service.GetAchievementInfo(new InternString(testAchievement)).Progress, Is.EqualTo(newProgress));
                 Assert.That(progress, Is.EqualTo(newProgress));
                 Assert.That(unlockedId, Is.EqualTo(testAchievement));
             }

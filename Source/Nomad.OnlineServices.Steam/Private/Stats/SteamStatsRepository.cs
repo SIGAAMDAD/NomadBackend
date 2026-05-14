@@ -239,11 +239,13 @@ namespace Nomad.OnlineServices.Steam.Private.Stats
 		{
 			CheckAchievementReady( nameof( GetAchievementInfo ), achievementId );
 
-			if ( !_achievements.ContainsKey( achievementId ) ) {
+			if ( !_achievements.TryGetValue( achievementId, out var info ) ) {
 				_category.PrintError( $"UnlockAchievement: Achievement '{achievementId}' does not exist!" );
 				return;
 			}
 			if ( SteamUserStats.SetAchievement( achievementId ) ) {
+				AchievementUnlocked?.Invoke( achievementId );
+				info.SetAchieved( true );
 				StoreStats();
 			} else {
 				_category.PrintWarning( $"UnlockAchievement: SteamUserStats.SetAchievement(true) failed for '{(string)achievementId}'." );
