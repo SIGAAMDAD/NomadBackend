@@ -1,0 +1,77 @@
+/* --- Metadata Panel Container --- */
+.meta-panel {
+    margin: 1rem 0;
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    color: #fff;
+    overflow: hidden;
+}
+
+/* --- Header (Clickable) --- */
+.meta-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    background: #333;
+    border-bottom: 1px solid #3a3a3a;
+    user-select: none;
+}
+
+.meta-header-title {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.meta-header-icon {
+    transition: transform 0.25s ease;
+}
+
+/* Rotate arrow when open */
+.meta-panel.open .meta-header-icon {
+    transform: rotate(90deg);
+}
+
+/* --- Collapsible Content --- */
+.meta-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+    padding: 0 1rem;
+}
+
+.meta-panel.open .meta-content {
+    padding: 0 1rem 1rem 1rem;
+}
+
+/* --- Rows --- */
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.meta-row:last-child {
+    border-bottom: none;
+}
+
+/* --- Keys & Values --- */
+.meta-key {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.meta-value {
+    opacity: 0.9;
+}
+
+/* --- Icons --- */
+.meta-icon {
+    width: 1rem;
+    opacity: 0.85;
+}

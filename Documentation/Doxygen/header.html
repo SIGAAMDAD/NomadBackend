@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    $relpath^
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>$title</title>
+
+    <!-- Doxygen core styles -->
+    <link href="$relpath^doxygen.css" rel="stylesheet" type="text/css"/>
+    <link href="$relpath^tabs.css" rel="stylesheet" type="text/css"/>
+
+    <!-- Awesome theme -->
+    <link href="$relpath^doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+    <link href="$relpath^doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+
+    <!-- UE5 overrides -->
+    <link href="$relpath^ue5.css" rel="stylesheet" type="text/css"/>
+
+    <!-- Core scripts -->
+    <script type="text/javascript" src="$relpath^assets/js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="$relpath^dynsections.js"></script>
+
+    <!-- Search scripts (required!) -->
+    <script type="text/javascript" src="$relpath^search.js"></script>
+    <script type="text/javascript" src="$relpath^searchdata.js"></script>
+
+    <!-- Awesome dark mode -->
+    <script type="text/javascript" src="$relpath^doxygen-awesome-darkmode-toggle.js"></script>
+
+    <!-- UE5 behavior -->
+    <script type="text/javascript" src="$relpath^ue5-overrides.js"></script>
+</head>
+
+<body>
+
+<!-- UE5 top bar -->
+<div id="top">
+    <div id="ue-brand" style="display:flex;align-items:center;gap:10px;">
+        <img src="$relpath^NomadFramework.png" alt="NomadFramework" style="height:28px;">
+        <span class="name" style="font-weight:700;color:white;opacity:0.95;">
+            NomadFramework API
+        </span>
+    </div>
+
+    <!-- Search box -->
+    <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+            <input type="text" id="MSearchField" value="Search" placeholder="Search..." />
+        </span>
+        <span class="right">
+            <a id="MSearchClose" href="javascript:void(0)">
+                <img id="MSearchCloseImg" border="0" src="$relpath^search/close.svg" alt=""/>
+            </a>
+        </span>
+    </div>
+</div>
+
+<!-- Breadcrumbs -->
+<div class="navpath">
+    <ul>
+        $navpath
+    </ul>
+</div>
+
+<!-- REMOVE NAVTREE -->
+<div id="side-nav"></div>
+
+<!-- Main content -->
+<div id="doc-content">
+
+<!-- Required hidden search windows -->
+<iframe src="javascript:void(0)" id="MSearchResultsWindow" name="MSearchResultsWindow"></iframe>
+<div id="MSearchSelectWindow"></div>
+<div id="MSearchResults"></div>

@@ -1,0 +1,78 @@
+
+/* Top */
+#top {
+  z-index: 2000;
+  background: #000;
+  border-bottom: 1px solid #222;
+}
+
+/* Left sidebar */
+#side-nav {
+  background: #000;
+  border-right: 1px solid #222;
+}
+
+/* Right sidebar */
+.contents,
+#nav-tree,
+#nav-tree-contents,
+#nav-path {
+  background: #000;
+  border-right: 1px solid #222;
+}
+
+#doc-content {
+  position: relative;
+  background: #000;
+  border-right: 1px solid #222;
+}
+
+/* Right sidebar */
+#nav-path {
+  position: sticky;
+  background: #000;
+}
+
+html, body {
+  background: #000 !important;
+  color: #fff m !important;
+}
+
+body, .contents, .textblock, .memitem, .memproto, .memdoc {
+  color: #fff !important;
+}
+
+a, a:visited {
+  color: #00e5ff !important;
+}
+
+a:hover {
+  color: #66f5ff !important;
+}
+
+table, th, td {
+  background: #000 !important;
+  color: #fff !important;
+  border-color: #333 !important;
+}
+
+pre, code {
+  background: #111 !important;
+  color: #fff !important;
+  border: 1px solid #333 !important;
+}
+
+#doc-content, .header, .headertitle, .title, .navpath ul {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+#MSearchField {
+  background: #111 !important;
+  color: #fff !important;
+  border: 1px solid #333 !important;
+}
+
+#MSearchCloseImg {
+  filter: invert(1); /* make the close icon white */
+}
