@@ -33,6 +33,11 @@ namespace Nomad.EngineUtils.Settings.Interfaces
         /// <summary>
         ///
         /// </summary>
+        int SpeakerMode { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
         int MaxChannels { get; set; }
 
         /// <summary>

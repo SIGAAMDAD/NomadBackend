@@ -35,6 +35,11 @@ namespace Nomad.EngineUtils.Settings.ValueObjects
         /// <summary>
         ///
         /// </summary>
+        public int SpeakerMode { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
         public int MaxChannels { get; set; }
 
         /// <summary>
