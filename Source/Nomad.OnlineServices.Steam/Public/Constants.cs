@@ -52,65 +52,9 @@ namespace Nomad.OnlineServices.Steam
         }
 
         /// <summary>
-        ///
+        /// The maximum number of SteamInput handles that can be processed at once.
         /// </summary>
-        public static partial class Events
-        {
-            /// <summary>
-            ///
-            /// </summary>
-            public const string NAMESPACE = "Nomad.OnlineServices";
-
-            /// <summary>
-            ///
-            /// </summary>
-            public const string ACHIEVEMENT_UNLOCKED = NAMESPACE + ":AchievementUnlocked";
-
-            /// <summary>
-            ///
-            /// </summary>
-            public const string ACHIEVEMENT_PROGRESS_CHANGED = NAMESPACE + ":AchievementProgressChanged";
-
-            /// <summary>
-            ///
-            /// </summary>
-            public const string USER_JOINED_LOBBY = NAMESPACE + ":UserJoinedLobby";
-
-            /// <summary>
-            ///
-            /// </summary>
-			public const string USER_LEFT_LOBBY = NAMESPACE + ":UserLeftLobby";
-
-            /// <summary>
-            ///
-            /// </summary>
-			public const string USER_DISCONNECTED = NAMESPACE + ":UserDisconnected";
-
-            /// <summary>
-            ///
-            /// </summary>
-			public const string USER_KICKED = NAMESPACE + ":UserKicked";
-
-            /// <summary>
-            ///
-            /// </summary>
-			public const string USER_BANNED = NAMESPACE + ":UserBanned";
-
-            /// <summary>
-            ///
-            /// </summary>
-			public const string LOBBY_INSTANCE_CREATED = NAMESPACE + ":LobbyInstanceCreated";
-
-            /// <summary>
-            ///
-            /// </summary>
-            public const string CLIENT_CONNECTED = NAMESPACE + ":ClientConnected";
-
-            /// <summary>
-            ///
-            /// </summary>
-            public const string CLIENT_DISCONNECTED = NAMESPACE + ":ClientDisconnected";
-        }
+        public const int INPUT_HANDLES_MAX = 4;
 
         /// <summary>
         /// The default maximum number of lobby clients.

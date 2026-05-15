@@ -9,6 +9,7 @@
     <ProjectReference Include="..\Nomad.Events\Nomad.Events.csproj" />
     <ProjectReference Include="..\Nomad.Logger\Nomad.Logger.csproj" />
     <ProjectReference Include="..\Nomad.CVars\Nomad.CVars.csproj" />
+    <ProjectReference Include="..\Nomad.Input\Nomad.Input.csproj" />
     <ProjectReference Include="..\Nomad.Networking\Nomad.Networking.csproj" />
   </ItemGroup>
 

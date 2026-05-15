@@ -20,11 +20,11 @@ using Nomad.Core.Events;
 using Nomad.Core.FileSystem;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
+using Nomad.OnlineServices.Steam.Private.Input;
 using Nomad.OnlineServices.Steam.Private.Lobby;
 using Nomad.OnlineServices.Steam.Private.Network;
 using Nomad.OnlineServices.Steam.Private.Registries;
  using Nomad.OnlineServices.Steam.Private.Stats;
-using Nomad.OnlineServices.Steam.Private.Util;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
@@ -105,6 +105,9 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		}
 		private SteamUserAvatarService? _avatarService = null;
 
+		public ISteamInputService Input => _inputService;
+		private readonly SteamInputService _inputService;
+
 		private readonly ILoggerCategory _category;
 
 		private readonly ILoggerService _logger;
@@ -168,6 +171,8 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 				UserID = SteamUser.GetSteamID(),
 				UserName = SteamFriends.GetPersonaName()
 			};
+
+			_inputService = new SteamInputService( logger, eventFactory, SteamInputConfigurationFactory.CreateDefault() );
 
 			_category.PrintLine( "Initialized Steamworks SDK API Service." );
 		}
