@@ -1,6 +1,0 @@
-Constants.cs: public static partial class CVars
-Constants.cs: public static partial class Constants
-Constants.cs: public static partial class Events
-SteamBootstrapper.cs: public sealed class SteamBootstrapper : IBootstrapper
-SteamBootstrapper.cs: public void Initialize(IServiceRegistry registry, IServiceLocator locator)
-SteamBootstrapper.cs: public void Shutdown()

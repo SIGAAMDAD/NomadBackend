@@ -25,6 +25,9 @@ UnityIntegration/UserSettings
 *.tar.gz
 
 Secrets/
+Artifacts/
+Documentation/Doxygen/docs
+doxygen-output/
 
 *.svg
 *.log

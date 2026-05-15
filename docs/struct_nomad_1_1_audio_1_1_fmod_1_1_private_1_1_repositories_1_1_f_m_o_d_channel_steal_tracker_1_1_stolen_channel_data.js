@@ -1,6 +1,0 @@
-var struct_nomad_1_1_audio_1_1_fmod_1_1_private_1_1_repositories_1_1_f_m_o_d_channel_steal_tracker_1_1_stolen_channel_data =
-[
-    [ "Id", "struct_nomad_1_1_audio_1_1_fmod_1_1_private_1_1_repositories_1_1_f_m_o_d_channel_steal_tracker_1_1_stolen_channel_data.html#a1d79c0ca93d336944539e454f642efac", null ],
-    [ "LastStealTime", "struct_nomad_1_1_audio_1_1_fmod_1_1_private_1_1_repositories_1_1_f_m_o_d_channel_steal_tracker_1_1_stolen_channel_data.html#ae51fd64d9b27a8c6aebf4892b724aca9", null ],
-    [ "StealCount", "struct_nomad_1_1_audio_1_1_fmod_1_1_private_1_1_repositories_1_1_f_m_o_d_channel_steal_tracker_1_1_stolen_channel_data.html#a5b2dbb5902c7538689a12a10a7b32cd0", null ]
-];

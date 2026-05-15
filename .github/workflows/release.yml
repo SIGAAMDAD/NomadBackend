@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -23,7 +25,11 @@ jobs:
   release:
     name: Build and Publish Release
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
     - name: Checkout
@@ -49,6 +55,12 @@ jobs:
       shell: pwsh
       run: ./Build/Scripts/validate-repo.ps1
 
+    - name: Prepare artifacts directory
+      shell: pwsh
+      run: |
+        if (Test-Path Artifacts) { Remove-Item Artifacts -Recurse -Force }
+        New-Item -ItemType Directory -Path Artifacts | Out-Null
+
     - name: Build
       shell: pwsh
       run: ./Build/Scripts/build.ps1
@@ -61,6 +73,10 @@ jobs:
       shell: pwsh
       run: ./Build/Scripts/generate-release-notes.ps1
 
+    - name: Generate dependency graph
+      shell: pwsh
+      run: ./Build/Scripts/generate-dependency-graph.ps1
+
     - name: Generate compatibility matrix
       shell: pwsh
       run: ./Build/Scripts/generate-compatibility-matrix.ps1
@@ -68,13 +84,34 @@ jobs:
     - name: Generate public API
       shell: pwsh
       run: ./Build/Scripts/generate-public-api.ps1
-    
+
     - name: Generate architecture docs
       shell: pwsh
       run: ./Build/Scripts/generate-architecture-docs.ps1
-    
+
     - name: Verify generated architecture docs are up to date
       run: git diff --exit-code Documentation/Architecture/Generated
+
+    - name: Install Doxygen
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz zip
+
+    - name: Generate Doxygen documentation
+      run: doxygen Doxyfile
+
+    - name: Add .nojekyll
+      run: touch doxygen-output/html/.nojekyll
+
+    - name: Archive Doxygen documentation
+      run: |
+        cd doxygen-output/html
+        zip -r ../../Artifacts/NomadFramework.Docs.${{ github.ref_name }}.zip .
+
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: doxygen-output/html
 
     - name: Pack
       shell: pwsh
@@ -91,7 +128,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: release-reports
-        path: Artifacts
+        path: Artifacts/**
         if-no-files-found: ignore
 
     - name: Create GitHub Release
@@ -100,9 +137,13 @@ jobs:
         files: |
           NuGet/*.nupkg
           NuGet/*.snupkg
-          Artifacts/*
+          Artifacts/**
         body_path: Artifacts/ReleaseNotes.md
         generate_release_notes: true
+
+    - name: Deploy documentation to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
 
     - name: Publish to NuGet
       if: env.NUGET_API_KEY != ''

@@ -46,6 +46,12 @@ jobs:
     - name: Validate repo hygiene
       shell: pwsh
       run: ./Build/Scripts/validate-repo.ps1
+    
+    - name: Prepare artifacts directory
+      shell: pwsh
+      run: |
+        if (Test-Path Artifacts) { Remove-Item Artifacts -Recurse -Force }
+        New-Item -ItemType Directory -Path Artifacts | Out-Null
 
     - name: Generate dependency graph
       shell: pwsh
@@ -64,7 +70,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: develop-repo-reports
-        path: Artifacts
+        path: Artifacts/**
         if-no-files-found: ignore
 
   build:
@@ -158,10 +164,38 @@ jobs:
         name: develop-coverage-report
         path: Tests/CoverageResults
         if-no-files-found: ignore
+  
+  docs:
+    name: Build Documentation
+    needs: hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Doxygen
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz
+
+    - name: Generate Doxygen documentation
+      run: doxygen Doxyfile
+
+    - name: Add .nojekyll
+      run: touch doxygen-output/html/.nojekyll
+
+    - name: Upload Doxygen documentation
+      uses: actions/upload-artifact@v4
+      with:
+        name: develop-doxygen-docs
+        path: doxygen-output/html
+        if-no-files-found: error
 
   pack:
     name: Package Dry Run
-    needs: coverage
+    needs: [ coverage, docs ]
     runs-on: ubuntu-latest
     timeout-minutes: 20
 

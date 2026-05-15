@@ -20,11 +20,13 @@ jobs:
   validate:
     name: Validate PR
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -44,6 +46,20 @@ jobs:
       shell: pwsh
       run: ./Build/Scripts/validate-repo.ps1
 
+    - name: Prepare artifacts directory
+      shell: pwsh
+      run: |
+        if (Test-Path Artifacts) { Remove-Item Artifacts -Recurse -Force }
+        New-Item -ItemType Directory -Path Artifacts | Out-Null
+
+    - name: Generate compatibility matrix
+      shell: pwsh
+      run: ./Build/Scripts/generate-compatibility-matrix.ps1
+
+    - name: Generate public API
+      shell: pwsh
+      run: ./Build/Scripts/generate-public-api.ps1
+
     - name: Build
       shell: pwsh
       run: ./Build/Scripts/build.ps1
@@ -52,10 +68,26 @@ jobs:
       shell: pwsh
       run: ./Build/Scripts/test-unit.ps1
 
+    - name: Install Doxygen
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz
+
+    - name: Generate Doxygen documentation
+      run: doxygen Doxyfile
+
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: pr-test-results
         path: Tests/TestResults
+        if-no-files-found: ignore
+
+    - name: Upload generated reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pr-generated-reports
+        path: Artifacts/**
         if-no-files-found: ignore

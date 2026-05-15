@@ -1,4 +1,0 @@
-var _achievement_progress_changed_event_args_8cs =
-[
-    [ "Nomad.Core.OnlineServices.AchievementProgressChangedEventArgs", "struct_nomad_1_1_core_1_1_online_services_1_1_achievement_progress_changed_event_args.html", "struct_nomad_1_1_core_1_1_online_services_1_1_achievement_progress_changed_event_args" ]
-];

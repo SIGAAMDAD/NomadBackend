@@ -1,6 +1,0 @@
-FMODBootstrapper.cs: public class FMODBootstrapper : IBootstrapper
-FMODBootstrapper.cs: public void Initialize(IServiceRegistry registry, IServiceLocator locator)
-FMODBootstrapper.cs: public void Shutdown()
-ValueObjects/FMODBankLoadingStrategy.cs: public enum FMODBankLoadingStrategy : byte
-ValueObjects/FMODError.cs: public ErrorType Type => type
-ValueObjects/FMODError.cs: public string Message => message

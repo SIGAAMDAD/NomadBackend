@@ -1,21 +1,25 @@
 # ---------------------------------------------------------
-# UE5‑STYLE DOXYGEN CONFIGURATION (C# + DOXYGEN-AWESOME)
+# UE5-STYLE DOXYGEN CONFIGURATION (C# + DOXYGEN-AWESOME)
 # ---------------------------------------------------------
 
 PROJECT_NAME           = "NomadFramework"
-PROJECT_LOGO           = "NomadFramework.png"
-OUTPUT_DIRECTORY       = docs
+PROJECT_LOGO           = NomadFramework.png
+
+OUTPUT_DIRECTORY       = doxygen-output
+HTML_OUTPUT            = html
+
 GENERATE_HTML          = YES
 GENERATE_LATEX         = NO
-STRIP_FROM_PATH        = Source/
-EXCLUDE_PATTERNS      += */obj/* */bin/* */intermediate/*
-EXAMPLE_PATH           = docs/Examples
 
-LOOKUP_CACHE_SIZE      = 1
+INPUT                  = Source Documentation/Modules.dox
+EXAMPLE_PATH           = Documentation/Examples
 
-INPUT                  = Source docs/Modules.dox
 FILE_PATTERNS          = *.cs *.dox
 RECURSIVE              = YES
+
+STRIP_FROM_PATH        = Source/
+EXCLUDE_PATTERNS      += */obj/* */bin/* */intermediate/*
+
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = YES
 EXTRACT_STATIC         = YES
@@ -36,23 +40,23 @@ SORT_BY_SCOPE_NAME     = YES
 GENERATE_FILELIST      = NO
 FULL_PATH_NAMES        = NO
 GENERATE_TREEVIEW      = YES
-OPTIMIZE_OUTPUT_FOR_CSHARP = YES
 FULL_SIDEBAR           = YES
 GROUP_NESTED_COMPOUNDS = YES
 
-HTML_EXTRA_STYLESHEET  = doxygen-awesome.css
-HTML_EXTRA_STYLESHEET += ue5-overrides.css
+HTML_EXTRA_STYLESHEET  = Documentation/Doxygen/doxygen-awesome.css
+HTML_EXTRA_STYLESHEET += Documentation/Doxygen/ue5-overrides.css
+HTML_EXTRA_STYLESHEET += Documentation/Doxygen/metadata.css
 
-HTML_EXTRA_FILES       = doxygen-awesome-darkmode-toggle.js
-#HTML_EXTRA_FILES      += ue5-overrides.js
+HTML_EXTRA_FILES       = Documentation/Doxygen/doxygen-awesome-darkmode-toggle.js
+HTML_EXTRA_FILES      += Documentation/Doxygen/metadata.js
+
+LOOKUP_CACHE_SIZE      = 1
+
+HTML_FOOTER            = Documentation/Doxygen/footer.html
 
 HTML_COLORSTYLE        = DARK
 HTML_DYNAMIC_MENUS     = YES
-HTML_OUTPUT            = .
-
 SEARCHENGINE           = YES
-
-#LAYOUT_FILE            = layout.xml
 
 HAVE_DOT               = NO
 DOT_GRAPH_MAX_NODES    = 80
@@ -67,13 +71,7 @@ WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = NO
 WARN_IF_DOC_ERROR      = YES
 
-HTML_FOOTER            = footer.html
-#HTML_HEADER            = header.html
-
 ALIASES += access="<p class='meta-access'>Access Level: "
 ALIASES += stability="<p class='meta-stability'>Stability: "
 ALIASES += category="<p class='meta-category'>Category: "
 ALIASES += module="<p class='meta-module'>Module: "
-
-HTML_EXTRA_FILES      += metadata.js
-HTML_EXTRA_STYLESHEET += metadata.css

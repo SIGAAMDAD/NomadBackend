@@ -1,6 +1,0 @@
-var struct_nomad_1_1_online_services_1_1_steam_1_1_private_1_1_services_1_1_steam_cloud_storage_service_1_1_cloud_file =
-[
-    [ "CloudAccessTime", "struct_nomad_1_1_online_services_1_1_steam_1_1_private_1_1_services_1_1_steam_cloud_storage_service_1_1_cloud_file.html#a50b3edb2608bc3929a491d236d94f43d", null ],
-    [ "LocalAccessTime", "struct_nomad_1_1_online_services_1_1_steam_1_1_private_1_1_services_1_1_steam_cloud_storage_service_1_1_cloud_file.html#a48817e38a13dbed200301beeb8d30535", null ],
-    [ "Size", "struct_nomad_1_1_online_services_1_1_steam_1_1_private_1_1_services_1_1_steam_cloud_storage_service_1_1_cloud_file.html#a49ddc9cb492aaa4ce6e2094c397e4da3", null ]
-];

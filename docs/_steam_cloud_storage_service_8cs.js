@@ -1,4 +1,0 @@
-var _steam_cloud_storage_service_8cs =
-[
-    [ "Nomad.OnlineServices.Steam.Private.Services.SteamCloudStorageService.CloudFile", "struct_nomad_1_1_online_services_1_1_steam_1_1_private_1_1_services_1_1_steam_cloud_storage_service_1_1_cloud_file.html", "struct_nomad_1_1_online_services_1_1_steam_1_1_private_1_1_services_1_1_steam_cloud_storage_service_1_1_cloud_file" ]
-];
