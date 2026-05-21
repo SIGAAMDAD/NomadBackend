@@ -14,6 +14,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Diagnostics;
 using Nomad.Core.CVars;
 using Nomad.Core.Engine.Services;
 using Nomad.Core.Events;
@@ -215,7 +216,9 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 			}
 			SteamAPI.RunCallbacks();
 
-			_inputService?.Frame( Environment.TickCount64 );
+			_inputService?.Frame(
+				Stopwatch.GetTimestamp() * 1000.0f / Stopwatch.Frequency
+			);
 			_statsService.StoreStats();
 		}
 

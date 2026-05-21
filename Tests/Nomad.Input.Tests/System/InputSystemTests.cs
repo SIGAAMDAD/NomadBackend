@@ -69,7 +69,7 @@ namespace Nomad.Input.Tests {
 			);
 			var cvarSystem = InputTestHelpers.CreateCVarSystem( _eventRegistry, defaultsPath );
 			ButtonActionEventArgs? published = null;
-			_eventRegistry.GetEvent<ButtonActionEventArgs>( $"Jump:{Constants.Events.BUTTON_ACTION}", Constants.Events.NAMESPACE )
+			_eventRegistry.GetEvent<ButtonActionEventArgs>( $"Jump:{ButtonActionEventArgs.Name}", ButtonActionEventArgs.NameSpace )
 				.Subscribe( ( in ButtonActionEventArgs args ) => published = args );
 
 			using var inputSystem = new InputSystem( fileSystem.Object, cvarSystem, _logger, _eventRegistry, _registry );
@@ -102,7 +102,7 @@ namespace Nomad.Input.Tests {
 			);
 			var cvarSystem = InputTestHelpers.CreateCVarSystem( _eventRegistry, defaultsPath );
 			int publishCount = 0;
-			_eventRegistry.GetEvent<ButtonActionEventArgs>( $"Jump:{Constants.Events.BUTTON_ACTION}", Constants.Events.NAMESPACE )
+			_eventRegistry.GetEvent<ButtonActionEventArgs>( $"Jump:{ButtonActionEventArgs.Name}", ButtonActionEventArgs.NameSpace )
 				.Subscribe( ( in ButtonActionEventArgs args ) => publishCount++ );
 
 			using var inputSystem = new InputSystem( fileSystem.Object, cvarSystem, _logger, _eventRegistry, _registry );
@@ -134,7 +134,7 @@ namespace Nomad.Input.Tests {
 			);
 			var cvarSystem = InputTestHelpers.CreateCVarSystem( _eventRegistry, defaultsPath );
 			ButtonActionEventArgs? published = null;
-			_eventRegistry.GetEvent<ButtonActionEventArgs>( $"Jump:{Constants.Events.BUTTON_ACTION}", Constants.Events.NAMESPACE )
+			_eventRegistry.GetEvent<ButtonActionEventArgs>( $"Jump:{ButtonActionEventArgs.Name}", ButtonActionEventArgs.NameSpace )
 				.Subscribe( ( in ButtonActionEventArgs args ) => published = args );
 
 			using var inputSystem = new InputSystem( fileSystem.Object, cvarSystem, _logger, _eventRegistry, _registry );
@@ -174,7 +174,7 @@ namespace Nomad.Input.Tests {
 			);
 			var cvarSystem = InputTestHelpers.CreateCVarSystem( _eventRegistry, defaultsPath );
 			AxisActionEventArgs? published = null;
-			_eventRegistry.GetEvent<AxisActionEventArgs>( $"Look:{Constants.Events.AXIS_ACTION}", Constants.Events.NAMESPACE )
+			_eventRegistry.GetEvent<AxisActionEventArgs>( $"Look:{AxisActionEventArgs.Name}", AxisActionEventArgs.NameSpace )
 				.Subscribe( ( in AxisActionEventArgs args ) => published = args );
 
 			using var inputSystem = new InputSystem( fileSystem.Object, cvarSystem, _logger, _eventRegistry, _registry );
@@ -234,7 +234,7 @@ namespace Nomad.Input.Tests {
 			);
 			var cvarSystem = InputTestHelpers.CreateCVarSystem( _eventRegistry, defaultsPath );
 			AxisActionEventArgs? published = null;
-			_eventRegistry.GetEvent<AxisActionEventArgs>( $"Aim:{Constants.Events.AXIS_ACTION}", Constants.Events.NAMESPACE )
+			_eventRegistry.GetEvent<AxisActionEventArgs>( $"Aim:{AxisActionEventArgs.Name}", Constants.Events.NAMESPACE )
 				.Subscribe( ( in AxisActionEventArgs args ) => published = args );
 
 			using var inputSystem = new InputSystem( fileSystem.Object, cvarSystem, _logger, _eventRegistry, _registry );
@@ -267,7 +267,7 @@ namespace Nomad.Input.Tests {
 			);
 			var cvarSystem = InputTestHelpers.CreateCVarSystem( _eventRegistry, defaultsPath );
 			ButtonActionEventArgs? published = null;
-			_eventRegistry.GetEvent<ButtonActionEventArgs>( $"Confirm:{Constants.Events.BUTTON_ACTION}", Constants.Events.NAMESPACE )
+			_eventRegistry.GetEvent<ButtonActionEventArgs>( $"Confirm:{ButtonActionEventArgs.Name}", Constants.Events.NAMESPACE )
 				.Subscribe( ( in ButtonActionEventArgs args ) => published = args );
 
 			using var inputSystem = new InputSystem( fileSystem.Object, cvarSystem, _logger, _eventRegistry, _registry );
@@ -306,7 +306,7 @@ namespace Nomad.Input.Tests {
 			);
 			var cvarSystem = InputTestHelpers.CreateCVarSystem( _eventRegistry, defaultsPath );
 			AxisActionEventArgs? published = null;
-			_eventRegistry.GetEvent<AxisActionEventArgs>( $"Move:{Constants.Events.AXIS_ACTION}", Constants.Events.NAMESPACE )
+			_eventRegistry.GetEvent<AxisActionEventArgs>( $"Move:{AxisActionEventArgs.Name}", AxisActionEventArgs.NameSpace )
 				.Subscribe( ( in AxisActionEventArgs args ) => published = args );
 
 			using var inputSystem = new InputSystem( fileSystem.Object, cvarSystem, _logger, _eventRegistry, _registry );

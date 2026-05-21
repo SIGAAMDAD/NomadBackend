@@ -63,7 +63,7 @@ namespace Nomad.Input.Tests {
 		public void Dispatch_PublishesButtonActionsToTheButtonEvent() {
 			var dispatcher = new InputDispatchService( _eventRegistry );
 			ButtonActionEventArgs? published = null;
-			var gameEvent = _eventRegistry.GetEvent<ButtonActionEventArgs>( $"player.jump:{Constants.Events.BUTTON_ACTION}", Constants.Events.NAMESPACE );
+			var gameEvent = _eventRegistry.GetEvent<ButtonActionEventArgs>( $"player.jump:{ButtonActionEventArgs.Name}", ButtonActionEventArgs.NameSpace );
 			gameEvent.Subscribe( ( in ButtonActionEventArgs args ) => published = args );
 
 			dispatcher.Dispatch( _graph, new ResolvedAction( new InternString( "player.jump" ), 0, InputValueType.Button, InputActionPhase.Started, 10, buttonValue: true ) );
@@ -79,7 +79,7 @@ namespace Nomad.Input.Tests {
 		public void Dispatch_PublishesFloatActionsToTheFloatEvent() {
 			var dispatcher = new InputDispatchService( _eventRegistry );
 			FloatActionEventArgs? published = null;
-			var gameEvent = _eventRegistry.GetEvent<FloatActionEventArgs>( $"Throttle:{Constants.Events.FLOAT_ACTION}", Constants.Events.NAMESPACE );
+			var gameEvent = _eventRegistry.GetEvent<FloatActionEventArgs>( $"Throttle:{FloatActionEventArgs.Name}", FloatActionEventArgs.NameSpace );
 			gameEvent.Subscribe( ( in FloatActionEventArgs args ) => published = args );
 
 			dispatcher.Dispatch( _graph, new ResolvedAction( new InternString( "Throttle" ), 1, InputValueType.Float, InputActionPhase.Performed, 20, floatValue: 0.75f ) );
@@ -94,7 +94,7 @@ namespace Nomad.Input.Tests {
 		public void Dispatch_PublishesVector2ActionsToTheAxisEvent() {
 			var dispatcher = new InputDispatchService( _eventRegistry );
 			AxisActionEventArgs? published = null;
-			var gameEvent = _eventRegistry.GetEvent<AxisActionEventArgs>( $"Look:{Constants.Events.AXIS_ACTION}", Constants.Events.NAMESPACE );
+			var gameEvent = _eventRegistry.GetEvent<AxisActionEventArgs>( $"Look:{AxisActionEventArgs.Name}", AxisActionEventArgs.NameSpace );
 			gameEvent.Subscribe( ( in AxisActionEventArgs args ) => published = args );
 
 			dispatcher.Dispatch( _graph, new ResolvedAction( new InternString( "Look" ), 2, InputValueType.Vector2, InputActionPhase.Performed, 30, vector2Value: new Vector2( 4.0f, -2.0f ) ) );
