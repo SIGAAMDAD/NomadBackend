@@ -19,6 +19,7 @@ using Nomad.EngineUtils.Settings.ValueObjects;
 using Nomad.EngineUtils.Settings.Interfaces;
 using Nomad.Audio.Interfaces;
 using System;
+using Nomad.Audio.ValueObjects;
 
 namespace Nomad.EngineUtils.Settings.Services
 {
@@ -51,7 +52,7 @@ namespace Nomad.EngineUtils.Settings.Services
             var outputDeviceIndex = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.OUTPUT_DEVICE_INDEX);
             outputDeviceIndex.Value = config.OutputDeviceIndex;
 
-            var speakerMode = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.SPEAKER_MODE);
+            var speakerMode = cvarSystem.GetCVarOrThrow<SpeakerMode>(Core.Constants.CVars.EngineUtils.Audio.SPEAKER_MODE);
             speakerMode.Value = config.SpeakerMode;
 
             var maxChannels = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.MAX_ACTIVE_CHANNELS);
@@ -78,7 +79,7 @@ namespace Nomad.EngineUtils.Settings.Services
         {
             AudioDriver = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.AUDIO_DRIVER).Value,
             OutputDeviceIndex = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.OUTPUT_DEVICE_INDEX).Value,
-            SpeakerMode = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.SPEAKER_MODE).Value,
+            SpeakerMode = cvarSystem.GetCVarOrThrow<SpeakerMode>(Core.Constants.CVars.EngineUtils.Audio.SPEAKER_MODE).Value,
             MaxChannels = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.MAX_ACTIVE_CHANNELS).Value,
             MusicVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.MUSIC_VOLUME).Value,
             SoundEffectsVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.EFFECTS_VOLUME).Value,
@@ -94,7 +95,7 @@ namespace Nomad.EngineUtils.Settings.Services
         {
             AudioDriver = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.AUDIO_DRIVER).DefaultValue,
             OutputDeviceIndex = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.OUTPUT_DEVICE_INDEX).DefaultValue,
-            SpeakerMode = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.SPEAKER_MODE).DefaultValue,
+            SpeakerMode = cvarSystem.GetCVarOrThrow<SpeakerMode>(Core.Constants.CVars.EngineUtils.Audio.SPEAKER_MODE).DefaultValue,
             MaxChannels = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.MAX_ACTIVE_CHANNELS).DefaultValue,
             MusicVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.MUSIC_VOLUME).DefaultValue,
             SoundEffectsVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.EFFECTS_VOLUME).DefaultValue,

@@ -24,7 +24,7 @@ using Nomad.OnlineServices.Steam.Private.Input;
 using Nomad.OnlineServices.Steam.Private.Lobby;
 using Nomad.OnlineServices.Steam.Private.Network;
 using Nomad.OnlineServices.Steam.Private.Registries;
- using Nomad.OnlineServices.Steam.Private.Stats;
+using Nomad.OnlineServices.Steam.Private.Stats;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
@@ -215,6 +215,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 			}
 			SteamAPI.RunCallbacks();
 
+			_inputService?.Frame( Environment.TickCount64 );
 			_statsService.StoreStats();
 		}
 

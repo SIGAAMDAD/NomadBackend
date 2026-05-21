@@ -13,6 +13,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
+using Nomad.Audio.ValueObjects;
 using Nomad.EngineUtils.Settings.Interfaces;
 
 namespace Nomad.EngineUtils.Settings.ValueObjects
@@ -35,7 +36,7 @@ namespace Nomad.EngineUtils.Settings.ValueObjects
         /// <summary>
         ///
         /// </summary>
-        public int SpeakerMode { get; set; }
+        public SpeakerMode SpeakerMode { get; set; }
 
         /// <summary>
         ///

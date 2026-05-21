@@ -23,13 +23,13 @@ namespace Nomad.Input.Private.Services
 {
 	/*
 	===================================================================================
-	
+
 	InputDispatchService
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal sealed class InputDispatchService
@@ -78,7 +78,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="slot"></param>
 		/// <param name="actionId"></param>
@@ -91,8 +91,8 @@ namespace Nomad.Input.Private.Services
 			}
 
 			gameEvent = _eventFactory.GetEvent<ButtonActionEventArgs>(
-				string.Concat( (string)actionId, ":", Input.Constants.Events.BUTTON_ACTION ),
-				Input.Constants.Events.NAMESPACE
+				string.Concat( (string)actionId, ":", ButtonActionEventArgs.Name ),
+				ButtonActionEventArgs.NameSpace
 			);
 
 			_buttonEvents[slot] = gameEvent;
@@ -107,8 +107,8 @@ namespace Nomad.Input.Private.Services
 			}
 
 			gameEvent = _eventFactory.GetEvent<FloatActionEventArgs>(
-				string.Concat( (string)actionId, ":", Input.Constants.Events.FLOAT_ACTION ),
-				Input.Constants.Events.NAMESPACE
+				string.Concat( (string)actionId, ":", FloatActionEventArgs.Name ),
+				FloatActionEventArgs.NameSpace
 			);
 
 			_floatEvents[slot] = gameEvent;
@@ -123,8 +123,8 @@ namespace Nomad.Input.Private.Services
 			}
 
 			gameEvent = _eventFactory.GetEvent<AxisActionEventArgs>(
-				string.Concat( (string)actionId, ":", Input.Constants.Events.AXIS_ACTION ),
-				Input.Constants.Events.NAMESPACE
+				string.Concat( (string)actionId, ":", AxisActionEventArgs.Name ),
+				AxisActionEventArgs.NameSpace
 			);
 
 			_axisEvents[slot] = gameEvent;

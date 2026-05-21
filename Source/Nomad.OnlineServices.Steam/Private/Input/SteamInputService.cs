@@ -117,8 +117,8 @@ namespace Nomad.OnlineServices.Steam.Private.Input
 		private readonly Dictionary<InputHandle_t, InputDeviceSlot> _slotByHandle = new();
 		private readonly Dictionary<InputDeviceSlot, InputHandle_t> _handleBySlot = new();
 
-		private readonly InputHandle_t[] _connectedHandles = new InputHandle_t[Constants.INPUT_HANDLES_MAX];
-		private readonly EInputActionOrigin[] _origins = new EInputActionOrigin[Constants.INPUT_HANDLES_MAX];
+		private readonly InputHandle_t[] _connectedHandles = new InputHandle_t[Steamworks.Constants.STEAM_INPUT_MAX_COUNT];
+		private readonly EInputActionOrigin[] _origins = new EInputActionOrigin[Steamworks.Constants.STEAM_INPUT_MAX_COUNT];
 
 		private string _currentActionSet = string.Empty;
 		private string[] _currentLayers = Array.Empty<string>();
