@@ -15,7 +15,6 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using Nomad.Core.OnlineServices;
-using Nomad.Networking.Session;
 using Steamworks;
 
 namespace Nomad.OnlineServices.Steam.Private.Network
@@ -67,6 +66,15 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			}
 		}
 
+		/*
+		===============
+		SetStatus
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="state"></param>
 		public void SetStatus( NetworkConnectionState state )
 		{
 			if ( _status == state ) {

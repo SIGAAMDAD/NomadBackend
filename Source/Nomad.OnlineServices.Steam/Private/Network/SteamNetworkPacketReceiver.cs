@@ -18,7 +18,6 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using Nomad.Core.Logger;
-using Nomad.Networking.Messaging;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Nomad.Core.OnlineServices;
 using Steamworks;

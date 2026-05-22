@@ -1,6 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+
 <Solution>
   <Project Path="Source/Nomad.Audio/Nomad.Audio.csproj" />
+  <Folder Name="/Source/" />
+  <Folder Name="/Tests/">
+    <Project Path="Tests/Nomad.Tests.csproj" />
+  </Folder>
   <Project Path="Source/Nomad.Audio.FMOD/Nomad.Audio.FMOD.csproj" />
   <Project Path="Source/Nomad.Console/Nomad.Console.csproj" />
   <Project Path="Source/Nomad.Core/Nomad.Core.csproj" />

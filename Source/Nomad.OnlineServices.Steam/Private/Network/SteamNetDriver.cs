@@ -19,9 +19,6 @@ using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.Core.OnlineServices;
-using Nomad.Networking.Messaging;
-using Nomad.Networking.Session;
-using Nomad.Networking.Transport;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
@@ -35,14 +32,20 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 	===================================================================================
 	*/
 	/// <summary>
-	/// <para>Owns the raw SteamNetworkingSockets transport state:</para>
-	/// <para>* listen socket</para>
-	/// <para>* poll group</para>
-	/// <para>* connection handles</para>
-	/// <para>* connection status callback</para>
-	///
-	/// <para>This class does not own lobby state or gameplay peer/session state.</para>
+	/// Provides the Steamworks P2P transport implementation used by Nomad networking.
 	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// This type owns the low-level SteamNetworkingSockets resources required for peer
+	/// communication, including the listen socket, poll group receiver, connection
+	/// repository, peer-to-Steam identity maps, and native connection status callback.
+	/// </para>
+	/// <para>
+	/// The driver is intentionally limited to transport concerns. Lobby membership,
+	/// gameplay session ownership, matchmaking state, and high-level peer lifecycle
+	/// decisions are expected to be handled by higher-level online-service systems.
+	/// </para>
+	/// </remarks>
 
 	internal sealed class SteamNetDriver : INetDriver
 	{
@@ -80,10 +83,20 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Initializes a new Steam networking driver and registers the Steam connection
+		/// status callback.
 		/// </summary>
-		/// <param name="eventFactory"></param>
-		/// <exception cref="ArgumentNullException"></exception>
+		/// <param name="eventFactory">
+		/// Event registry service required by the network-driver abstraction. The current
+		/// implementation validates the dependency even though event publication is handled
+		/// through driver events.
+		/// </param>
+		/// <param name="category">
+		/// Logger category used for transport diagnostics and send/receive errors.
+		/// </param>
+		/// <exception cref="ArgumentNullException">
+		/// Thrown when <paramref name="eventFactory"/> or <paramref name="category"/> is <see langword="null"/>.
+		/// </exception>
 		public SteamNetDriver( IGameEventRegistryService eventFactory, ILoggerCategory category )
 		{
 			ArgumentGuard.ThrowIfNull( eventFactory, nameof( eventFactory ) );
@@ -101,8 +114,13 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Releases all Steam networking resources owned by this driver.
 		/// </summary>
+		/// <remarks>
+		/// Disposal closes all known connections, closes the listen socket when active,
+		/// disposes the packet receiver, unregisters the Steam callback, and suppresses
+		/// finalization. Calling this method more than once is safe.
+		/// </remarks>
 		public void Dispose()
 		{
 			if ( _isDisposed ) {
@@ -129,10 +147,10 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Starts listening for incoming Steam P2P connections on the specified virtual port.
 		/// </summary>
-		/// <param name="virtualPort"></param>
-		/// <returns></returns>
+		/// <param name="virtualPort">Steam virtual port to listen on. The default value uses port <c>0</c>.</param>
+		/// <returns><see langword="true"/> when a listen socket is active; otherwise, <see langword="false"/>.</returns>
 		public bool Listen( int virtualPort = 0 )
 		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
@@ -152,12 +170,37 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			return _listenSocket != HSteamListenSocket.Invalid;
 		}
 
+		/*
+		===============
+		BindPeer
+		===============
+		*/
+		/// <summary>
+		/// Associates a Nomad peer identifier with a Steam account identifier.
+		/// </summary>
+		/// <param name="peerId">Nomad peer identifier used by higher-level network APIs.</param>
+		/// <param name="steamId">Steam account identifier that owns the underlying P2P connection.</param>
+		/// <remarks>
+		/// Existing bindings for either identifier are overwritten. The mapping is used for
+		/// peer-based connect, accept, close, send, receive, and lookup operations.
+		/// </remarks>
 		public void BindPeer( PeerId peerId, CSteamID steamId )
 		{
 			_peerToSteam[peerId] = steamId;
 			_steamToPeer[steamId] = peerId;
 		}
 
+		/*
+		===============
+		Connect
+		===============
+		*/
+		/// <summary>
+		/// Opens an outgoing P2P connection to a previously bound peer.
+		/// </summary>
+		/// <param name="peerId">Peer identifier that must already be bound to a Steam ID.</param>
+		/// <param name="virtualPort">Steam virtual port to connect to. The default value uses port <c>0</c>.</param>
+		/// <returns><see langword="true"/> when Steam returns a valid connection handle; otherwise, <see langword="false"/>.</returns>
 		public bool Connect( PeerId peerId, int virtualPort = 0 )
 		{
 			if ( !_peerToSteam.TryGetValue( peerId, out CSteamID steamId ) ) {
@@ -173,11 +216,14 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Opens an outgoing Steam P2P connection to the specified remote Steam account.
 		/// </summary>
-		/// <param name="remoteSteamId"></param>
-		/// <param name="virtualPort"></param>
-		/// <returns></returns>
+		/// <param name="remoteSteamId">Remote Steam account to connect to.</param>
+		/// <param name="virtualPort">Steam virtual port to connect to. The default value uses port <c>0</c>.</param>
+		/// <returns>
+		/// A valid Steam networking connection handle when the connection was created and
+		/// assigned to the receiver poll group; otherwise, <see cref="HSteamNetConnection.Invalid"/>.
+		/// </returns>
 		public HSteamNetConnection ConnectP2P( CSteamID remoteSteamId, int virtualPort = 0 )
 		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
@@ -226,10 +272,10 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Accepts a pending inbound Steam networking connection.
 		/// </summary>
-		/// <param name="handle"></param>
-		/// <returns></returns>
+		/// <param name="handle">Steam networking connection handle to accept.</param>
+		/// <returns><see langword="true"/> when the connection was accepted and assigned to the receiver; otherwise, <see langword="false"/>.</returns>
 		public bool Accept( HSteamNetConnection handle )
 		{
 			StateGuard.ThrowIfDisposed( _isDisposed, this );
@@ -257,6 +303,11 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			return true;
 		}
 
+		/// <summary>
+		/// Accepts a pending inbound connection for a previously bound peer.
+		/// </summary>
+		/// <param name="peerId">Peer identifier whose bound Steam ID is used to find the pending connection.</param>
+		/// <returns><see langword="true"/> when the peer is bound, the connection exists, and the Steam connection is accepted.</returns>
 		public bool Accept( PeerId peerId )
 		{
 			if ( !_peerToSteam.TryGetValue( peerId, out CSteamID steamId ) ) {
@@ -274,11 +325,11 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Closes a known Steam network connection.
 		/// </summary>
-		/// <param name="connection"></param>
-		/// <param name="reason"></param>
-		/// <returns></returns>
+		/// <param name="connection">Connection wrapper to close.</param>
+		/// <param name="reason">Human-readable close reason passed to Steam.</param>
+		/// <returns><see langword="true"/> when the repository contained and removed the connection; otherwise, <see langword="false"/>.</returns>
 		public bool Close( SteamNetConnection connection, string reason )
 		{
 			if ( connection == null ) {
@@ -293,11 +344,11 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Closes a Steam networking connection by native handle.
 		/// </summary>
-		/// <param name="handle"></param>
-		/// <param name="reason"></param>
-		/// <returns></returns>
+		/// <param name="handle">Steam networking connection handle to close.</param>
+		/// <param name="reason">Human-readable close reason passed to Steam. Empty values are replaced with <c>Closed</c>.</param>
+		/// <returns><see langword="true"/> when the handle was tracked and removed; otherwise, <see langword="false"/>.</returns>
 		public bool Close( HSteamNetConnection handle, string reason )
 		{
 			if ( handle == HSteamNetConnection.Invalid ) {
@@ -322,6 +373,12 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			return hadConnection;
 		}
 
+		/// <summary>
+		/// Closes the tracked connection associated with a previously bound peer.
+		/// </summary>
+		/// <param name="peerId">Peer identifier whose bound Steam ID is used to find the connection.</param>
+		/// <param name="reason">Human-readable close reason passed to Steam.</param>
+		/// <returns><see langword="true"/> when a tracked connection was found and closed; otherwise, <see langword="false"/>.</returns>
 		public bool Close( PeerId peerId, string reason )
 		{
 			if ( !_peerToSteam.TryGetValue( peerId, out CSteamID steamId ) ) {
@@ -339,9 +396,9 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Closes every connection currently tracked by the repository.
 		/// </summary>
-		/// <param name="reason"></param>
+		/// <param name="reason">Human-readable close reason passed to Steam for each connection.</param>
 		public void CloseAll( string reason )
 		{
 			SteamNetConnection[] snapshot = _repository.Snapshot();
@@ -359,12 +416,15 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Sends a typed Nomad network packet over a Steam networking connection.
 		/// </summary>
-		/// <param name="connection"></param>
-		/// <param name="payload"></param>
-		/// <param name="type"></param>
-		/// <param name="mode"></param>
+		/// <param name="connection">Steam connection that owns the native connection handle.</param>
+		/// <param name="payload">Packet payload bytes to send. Payloads larger than <see cref="ushort.MaxValue"/> are rejected.</param>
+		/// <param name="type">Nomad packet type written into the packet header.</param>
+		/// <param name="mode">Requested reliability and latency behavior.</param>
+		/// <exception cref="ArgumentOutOfRangeException">
+		/// Thrown when <paramref name="payload"/> exceeds the maximum packet payload size.
+		/// </exception>
 		public void Send( SteamNetConnection connection, ReadOnlySpan<byte> payload, NetworkPacketType type, NetworkSendMode mode )
 		{
 			if ( payload.Length > ushort.MaxValue ) {
@@ -388,6 +448,13 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			}
 		}
 
+		/// <summary>
+		/// Sends a payload packet to a previously bound peer.
+		/// </summary>
+		/// <param name="peerId">Peer identifier whose bound Steam ID is used to find the connection.</param>
+		/// <param name="payload">Payload bytes to send.</param>
+		/// <param name="mode">Requested reliability and latency behavior.</param>
+		/// <returns><see langword="true"/> when the peer is bound and a tracked connection exists; otherwise, <see langword="false"/>.</returns>
 		public bool Send( PeerId peerId, ReadOnlySpan<byte> payload, NetworkSendMode mode )
 		{
 			if ( !_peerToSteam.TryGetValue( peerId, out CSteamID steamId ) ) {
@@ -407,17 +474,23 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Attempts to receive the next Steam packet into the provided destination buffer.
 		/// </summary>
-		/// <param name="destination"></param>
-		/// <param name="packet"></param>
-		/// <returns></returns>
+		/// <param name="destination">Buffer that receives packet payload bytes.</param>
+		/// <param name="packet">Receives metadata for the packet when one is available.</param>
+		/// <returns><see langword="true"/> when a packet was read; otherwise, <see langword="false"/>.</returns>
 		public bool TryReceive( Span<byte> destination, out ReceivedNetworkPacket packet )
 		{
 			packet = default;
 			return _receiver != null && _receiver.TryReceive( destination, out packet );
 		}
 
+		/// <summary>
+		/// Attempts to receive the next packet and translate its Steam sender into a Nomad peer ID.
+		/// </summary>
+		/// <param name="destination">Buffer that receives packet payload bytes.</param>
+		/// <param name="packet">Receives peer-facing packet metadata when a packet is available from a bound Steam ID.</param>
+		/// <returns><see langword="true"/> when a packet was read and its sender is bound to a peer; otherwise, <see langword="false"/>.</returns>
 		public bool TryReceive( Span<byte> destination, out NetworkPacketInfo packet )
 		{
 			packet = default;
@@ -438,11 +511,11 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Attempts to retrieve a tracked Steam connection by native handle.
 		/// </summary>
-		/// <param name="handle"></param>
-		/// <param name="connection"></param>
-		/// <returns></returns>
+		/// <param name="handle">Steam networking connection handle to look up.</param>
+		/// <param name="connection">Receives the matching connection when one is tracked.</param>
+		/// <returns><see langword="true"/> when a matching connection exists; otherwise, <see langword="false"/>.</returns>
 		public bool TryGetConnection( HSteamNetConnection handle, out SteamNetConnection connection )
 		{
 			return _repository.TryGet( handle, out connection );
@@ -454,16 +527,22 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Attempts to retrieve a tracked Steam connection by remote Steam account ID.
 		/// </summary>
-		/// <param name="steamId"></param>
-		/// <param name="connection"></param>
-		/// <returns></returns>
+		/// <param name="steamId">Remote Steam account identifier.</param>
+		/// <param name="connection">Receives the matching connection when one is tracked.</param>
+		/// <returns><see langword="true"/> when a matching connection exists; otherwise, <see langword="false"/>.</returns>
 		public bool TryGetConnection( CSteamID steamId, out SteamNetConnection connection )
 		{
 			return _repository.TryGet( steamId, out connection );
 		}
 
+		/// <summary>
+		/// Attempts to retrieve peer-facing connection information for a bound peer.
+		/// </summary>
+		/// <param name="peerId">Peer identifier to look up.</param>
+		/// <param name="connection">Receives the peer-facing connection when found.</param>
+		/// <returns><see langword="true"/> when the peer is bound and a connection is tracked; otherwise, <see langword="false"/>.</returns>
 		public bool TryGetConnection( PeerId peerId, out NetConnection connection )
 		{
 			connection = default;
@@ -484,9 +563,9 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Creates a defensive snapshot of the currently tracked Steam connections.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>An array containing the connections known to the driver at the time of the call.</returns>
 		public SteamNetConnection[] Snapshot()
 		{
 			return _repository.Snapshot();
@@ -498,9 +577,10 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Handles Steamworks connection-state notifications and translates them into
+		/// Nomad connection state changes and lifecycle events.
 		/// </summary>
-		/// <param name="pCallback"></param>
+		/// <param name="pCallback">Steamworks callback payload containing the connection handle and state information.</param>
 		private void OnNetConnectionStatusChanged( SteamNetConnectionStatusChangedCallback_t pCallback )
 		{
 			HSteamNetConnection handle = pCallback.m_hConn;
@@ -574,10 +654,10 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Determines whether an unknown Steam connection state should create a repository entry.
 		/// </summary>
-		/// <param name="state"></param>
-		/// <returns></returns>
+		/// <param name="state">Steam networking connection state reported by Steamworks.</param>
+		/// <returns><see langword="true"/> for active or potentially active states; otherwise, <see langword="false"/>.</returns>
 		private static bool ShouldCreateConnectionForState( ESteamNetworkingConnectionState state )
 		{
 			switch ( state ) {
@@ -596,10 +676,10 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Determines whether a Steam connection state represents a terminal state.
 		/// </summary>
-		/// <param name="state"></param>
-		/// <returns></returns>
+		/// <param name="state">Steam networking connection state reported by Steamworks.</param>
+		/// <returns><see langword="true"/> when Steam considers the connection closed or dead; otherwise, <see langword="false"/>.</returns>
 		private static bool IsTerminalState( ESteamNetworkingConnectionState state )
 		{
 			switch ( state ) {
@@ -618,11 +698,11 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Converts a Nomad send mode into the corresponding SteamNetworkingSockets send flag.
 		/// </summary>
-		/// <param name="mode"></param>
-		/// <returns></returns>
-		/// <exception cref="ArgumentOutOfRangeException"></exception>
+		/// <param name="mode">Nomad send mode to convert.</param>
+		/// <returns>The Steamworks send flag matching <paramref name="mode"/>.</returns>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="mode"/> is not supported.</exception>
 		private static int ConvertSendMode( NetworkSendMode mode )
 		{
 			switch ( mode ) {
@@ -637,6 +717,11 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			}
 		}
 
+		/// <summary>
+		/// Converts an internal Steam connection wrapper into the public peer-facing connection value.
+		/// </summary>
+		/// <param name="connection">Internal Steam connection to convert.</param>
+		/// <returns>A peer-facing connection containing the bound peer ID, when known, and current status.</returns>
 		private NetConnection ToNetConnection( SteamNetConnection connection )
 		{
 			PeerId peerId = default;
@@ -653,9 +738,9 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 		===============
 		*/
 		/// <summary>
-		///
+		/// Builds the SteamNetworkingSockets configuration used for listen and outgoing P2P sockets.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>An array of Steam networking configuration values for buffering, send rate, Nagle behavior, and timeouts.</returns>
 		private static SteamNetworkingConfigValue_t[] CreateSocketOptions()
 		{
 			return new SteamNetworkingConfigValue_t[] {

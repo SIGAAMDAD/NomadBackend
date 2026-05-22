@@ -18,11 +18,33 @@ using Steamworks;
 
 namespace Nomad.OnlineServices.Steam.Private.Network
 {
+	/*
+	===================================================================================
+
+	SteamConnectionRepository
+
+	===================================================================================
+	*/
+	/// <summary>
+	/// A simple repository for converting raw <see cref="HSteamNetConnection"/> handles to <see cref="CSteamID"/> value objects and
+	/// <see cref="SteamNetConnection"/> entities.
+	/// </summary>
+
 	internal sealed class SteamConnectionRepository
 	{
 		private readonly Dictionary<HSteamNetConnection, SteamNetConnection> _byHandle = new();
 		private readonly Dictionary<ulong, HSteamNetConnection> _bySteamId64 = new();
 
+		/*
+		===============
+		Add
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="connection"></param>
+		/// <returns></returns>
 		public bool Add( SteamNetConnection connection )
 		{
 			if ( connection == null ) {
@@ -46,11 +68,33 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			return true;
 		}
 
+		/*
+		===============
+		TryGet
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="handle"></param>
+		/// <param name="connection"></param>
+		/// <returns></returns>
 		public bool TryGet( HSteamNetConnection handle, out SteamNetConnection connection )
 		{
 			return _byHandle.TryGetValue( handle, out connection );
 		}
 
+		/*
+		===============
+		TryGet
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="steamId"></param>
+		/// <param name="connection"></param>
+		/// <returns></returns>
 		public bool TryGet( CSteamID steamId, out SteamNetConnection connection )
 		{
 			connection = null;
@@ -62,6 +106,16 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			return _byHandle.TryGetValue( handle, out connection );
 		}
 
+		/*
+		===============
+		Remove
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="handle"></param>
+		/// <returns></returns>
 		public bool Remove( HSteamNetConnection handle )
 		{
 			if ( !_byHandle.TryGetValue( handle, out SteamNetConnection connection ) ) {
@@ -77,6 +131,15 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			return true;
 		}
 
+		/*
+		===============
+		Snapshot
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
 		public SteamNetConnection[] Snapshot()
 		{
 			SteamNetConnection[] snapshot = new SteamNetConnection[_byHandle.Count];
@@ -84,10 +147,18 @@ namespace Nomad.OnlineServices.Steam.Private.Network
 			return snapshot;
 		}
 
+		/*
+		===============
+		Clear
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
 		public void Clear()
 		{
 			_byHandle.Clear();
 			_bySteamId64.Clear();
 		}
-	}
-}
+	};
+};

@@ -15,13 +15,12 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using Nomad.Core.Events;
-using Nomad.Events.Private;
 using Nomad.Events.Private.EventTypes;
 
 namespace Nomad.Events.Extensions
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public static class GameEventExtensions
     {
@@ -42,7 +41,7 @@ namespace Nomad.Events.Extensions
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TArgs"></typeparam>
         /// <param name="gameEvent"></param>
@@ -57,7 +56,7 @@ namespace Nomad.Events.Extensions
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TArgs"></typeparam>
         /// <param name="gameEvent"></param>
@@ -74,7 +73,7 @@ namespace Nomad.Events.Extensions
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TArgs"></typeparam>
         /// <param name="source"></param>
@@ -87,7 +86,7 @@ namespace Nomad.Events.Extensions
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TArgs"></typeparam>
         /// <param name="source"></param>
@@ -101,7 +100,7 @@ namespace Nomad.Events.Extensions
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TArgs"></typeparam>
         /// <param name="source"></param>
@@ -115,7 +114,7 @@ namespace Nomad.Events.Extensions
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <typeparam name="TArgs"></typeparam>
         /// <param name="source"></param>
