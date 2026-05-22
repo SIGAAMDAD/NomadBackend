@@ -217,7 +217,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 			SteamAPI.RunCallbacks();
 
 			_inputService?.Frame(
-				Stopwatch.GetTimestamp() * 1000.0f / Stopwatch.Frequency
+				(long)( Stopwatch.GetTimestamp() * 1000.0f / Stopwatch.Frequency )
 			);
 			_statsService.StoreStats();
 		}

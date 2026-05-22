@@ -1,27 +1,25 @@
 # NomadFramework Tests
 
-The test suite is organized first by framework module, then by the feature area
-under test. Test files keep their original namespaces and fixture names so NUnit
-discovery remains stable while the filesystem layout is easier to scan.
+The test suite is organized first by framework module, then by test kind, then
+by the feature area under test. Test files keep their original namespaces and
+fixture names so NUnit discovery remains stable while the filesystem layout is
+easier to scan.
 
 ## Layout
 
-- `Mocks/`: shared test doubles.
-- `Nomad.Core.Tests/`: guards, collections, memory, rendering, services,
-  serialization, value objects, windowing, and bootstrap coverage.
-- `Nomad.CVars.Tests/`: CVar conversion, loading, metadata, validation, value
-  objects, system, and bootstrap coverage.
-- `Nomad.Events.Tests/`: event types, flags, queueing, registry, subscriptions,
-  identity, stress, and bootstrap coverage.
-- `Nomad.FileSystem.Tests/`: file streams, memory streams, services, search,
-  and bootstrap coverage.
-- `Nomad.Input.Tests/`: bindings, dispatch, loading, rebinding, state, system,
-  fixtures, support helpers, and performance coverage.
-- `Nomad.OnlineServices.Steam.Tests/`: Steam achievements, cloud, and lobby
+- `Mocks/`, `Util/`, and module-local `Support/`: shared test doubles and
+  fixtures.
+- `Nomad.*.Tests/Unit/`: fast, isolated coverage for feature areas.
+- `Nomad.*.Tests/Integration/`: bootstrap, wrapper, fixture, and cross-service
   coverage.
-- `Nomad.ResourceCache.Tests/`: cache coverage.
-- `Nomad.Save.Tests/`: save sections, corruption, metadata, data providers,
-  error handling, regression, versioning, and bootstrap coverage.
+- `Nomad.*.Tests/Benchmark/`: performance, stress, and measurement-oriented
+  coverage.
+
+For example:
+
+- `Nomad.Core.Tests/Unit/Guards/ArgumentGuardTests.cs`
+- `Nomad.Events.Tests/Benchmark/SubscriptionSetPerformanceAndMemoryTests.cs`
+- `Nomad.Save.Tests/Integration/Public/SaveBootstrapperTests.cs`
 
 ## Categories
 

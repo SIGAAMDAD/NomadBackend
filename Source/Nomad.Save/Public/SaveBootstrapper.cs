@@ -25,6 +25,8 @@ using Nomad.Save.Private.Services;
 using Nomad.Save.Services;
 using System.Reflection;
 using Nomad.Core.Util.Attributes;
+using Nomad.Save.Interfaces;
+using Nomad.Save.Private.Mapping;
 
 namespace Nomad.Save
 {
@@ -34,6 +36,7 @@ namespace Nomad.Save
     public sealed class SaveBootstrapper : IBootstrapper
     {
         private ISaveDataProvider? _saveProvider;
+        private ISaveMappingService? _mappingService;
 
         /// <summary>
         ///
@@ -42,8 +45,8 @@ namespace Nomad.Save
         /// <param name="locator"></param>
         public void Initialize(IServiceRegistry registry, IServiceLocator locator)
         {
-            ArgumentGuard.ThrowIfNull(registry);
-            ArgumentGuard.ThrowIfNull(locator);
+            ArgumentGuard.ThrowIfNull(registry, nameof(registry));
+            ArgumentGuard.ThrowIfNull(locator, nameof(locator));
 
             var logger = locator.GetService<ILoggerService>();
             var fileSystem = locator.GetService<IFileSystem>();
@@ -53,6 +56,9 @@ namespace Nomad.Save
 
             _saveProvider = new SaveDataProvider(engineService, eventFactory, cvarSystem, fileSystem, logger);
             registry.AddSingleton(_saveProvider);
+
+            _mappingService = new SaveMappingService();
+            registry.AddSingleton(_mappingService);
 
             var attribute = Assembly.GetAssembly(typeof(SaveBootstrapper)).GetCustomAttribute<NomadModule>();
             logger.PrintLine($"Initialized {attribute.Name}\n\tBuildId = {attribute.BuildId}\n\tCompileTime = {attribute.CompileTime}\n\tVersion = {attribute.VersionMajor}.{attribute.VersionMinor}.{attribute.VersionPatch}");
