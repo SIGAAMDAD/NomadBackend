@@ -19,18 +19,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.Events;
+using Nomad.Events.Extensions;
 
 namespace Nomad.Events.Private.EventTypes
 {
 	/*
 	===================================================================================
-	
+
 	FilteredGameEvent
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal sealed class FilteredGameEvent<TArgs> : IGameEvent<TArgs>
@@ -57,7 +58,7 @@ namespace Nomad.Events.Private.EventTypes
 		}
 
 		private readonly GameEvent<TArgs> _source;
-		private readonly Func<TArgs, bool> _predicate;
+		private readonly FilteredEventPredicate<TArgs> _predicate;
 		private readonly Dictionary<Delegate, Delegate> _handlerMap = new();
 
 		private bool _isDisposed = false;
@@ -68,14 +69,14 @@ namespace Nomad.Events.Private.EventTypes
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="source"></param>
 		/// <param name="predicate"></param>
-		public FilteredGameEvent( IGameEvent<TArgs> source, Func<TArgs, bool> predicate )
+		public FilteredGameEvent( IGameEvent<TArgs> source, FilteredEventPredicate<TArgs> predicate )
 		{
-			ArgumentGuard.ThrowIfNull( source );
-			ArgumentGuard.ThrowIfNull( predicate );
+			ArgumentGuard.ThrowIfNull( source, nameof( source ) );
+			ArgumentGuard.ThrowIfNull( predicate, nameof( predicate ) );
 
 			_source = source as GameEvent<TArgs> ?? throw new InvalidCastException();
 			_predicate = predicate;
@@ -87,7 +88,7 @@ namespace Nomad.Events.Private.EventTypes
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Dispose()
 		{
@@ -104,7 +105,7 @@ namespace Nomad.Events.Private.EventTypes
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="eventArgs"></param>
 		public void Publish( in TArgs eventArgs )
@@ -118,7 +119,7 @@ namespace Nomad.Events.Private.EventTypes
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="eventArgs"></param>
 		/// <param name="ct"></param>
@@ -135,14 +136,14 @@ namespace Nomad.Events.Private.EventTypes
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <returns></returns>
 		public ISubscriptionHandle Subscribe( EventCallback<TArgs> callback )
 		{
 			EventCallback<TArgs> wrapped = ( in TArgs args ) => {
-				if ( _predicate.Invoke( args ) ) {
+				if ( _predicate.Invoke( in args ) ) {
 					callback.Invoke( in args );
 				}
 			};
@@ -156,7 +157,7 @@ namespace Nomad.Events.Private.EventTypes
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="asyncCallback"></param>
 		/// <returns></returns>
@@ -172,7 +173,7 @@ namespace Nomad.Events.Private.EventTypes
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback"></param>
 		public void Unsubscribe( EventCallback<TArgs> callback )
@@ -189,7 +190,7 @@ namespace Nomad.Events.Private.EventTypes
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="asyncCallback"></param>
 		/// <exception cref="NotSupportedException"></exception>
