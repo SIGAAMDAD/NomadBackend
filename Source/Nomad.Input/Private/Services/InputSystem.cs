@@ -14,6 +14,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Collections.Immutable;
 using System.Numerics;
 using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.CVars;
@@ -23,6 +24,7 @@ using Nomad.Core.FileSystem;
 using Nomad.Core.Input;
 using Nomad.Core.Logger;
 using Nomad.Core.ServiceRegistry.Interfaces;
+using Nomad.Core.Util;
 using Nomad.Input.Interfaces;
 using Nomad.Input.Private.Extensions;
 using Nomad.Input.Private.Registries;
@@ -34,13 +36,13 @@ namespace Nomad.Input.Private.Services
 {
 	/*
 	===================================================================================
-	
+
 	InputSystem
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal sealed class InputSystem : IInputSystem
@@ -78,7 +80,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="fileSystem"></param>
 		/// <param name="cvarSystem"></param>
@@ -168,7 +170,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="keyEvent"></param>
 		public void PushKeyboardEvent( in KeyboardEventArgs keyEvent )
@@ -188,7 +190,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="mouseButtonEvent"></param>
 		public void PushMouseButtonEvent( in MouseButtonEventArgs mouseButtonEvent )
@@ -207,7 +209,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="mouseMotionEvent"></param>
 		public void PushMouseMotionEvent( in MouseMotionEventArgs mouseMotionEvent )
@@ -226,7 +228,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="mousePositionChangedEvent"></param>
 		public void PushMousePositionChangedEvent( in MousePositionChangedEventArgs mousePositionChangedEvent )
@@ -245,7 +247,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="gamepadButtonEvent"></param>
 		public void PushGamepadButtonEvent( in GamepadButtonEventArgs gamepadButtonEvent )
@@ -265,7 +267,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="gamepadAxisEvent"></param>
 		public void PushGamepadAxisEvent( in GamepadAxisEventArgs gamepadAxisEvent )
@@ -287,7 +289,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="graph"></param>
 		/// <param name="actions"></param>
@@ -304,7 +306,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		private void RecompileBindings()
 		{
@@ -317,7 +319,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="deviceId"></param>
 		/// <returns></returns>
@@ -339,7 +341,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnKeyboardEventTriggered( in KeyboardEventArgs args )
@@ -355,7 +357,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnMouseButtonEventTriggered( in MouseButtonEventArgs args )
@@ -371,7 +373,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnMouseMotionEventTriggered( in MouseMotionEventArgs args )
@@ -387,7 +389,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnMousePositionChangedEventTriggered( in MousePositionChangedEventArgs args )
@@ -403,7 +405,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnGamepadAxisEventTriggered( in GamepadAxisEventArgs args )
@@ -419,7 +421,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnGamepadButtonEventTriggered( in GamepadButtonEventArgs args )
@@ -435,7 +437,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnPauseStateChanged( in PauseStateChangedEventArgs args )

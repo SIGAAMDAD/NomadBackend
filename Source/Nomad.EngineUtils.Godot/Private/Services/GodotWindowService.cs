@@ -29,13 +29,13 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 {
 	/*
 	===================================================================================
-	
+
 	GodotWindowService
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal sealed class GodotWindowService : IWindowService
@@ -90,7 +90,7 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 		}
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public VSyncMode VSyncMode {
 			get => _vsyncMode;
@@ -114,7 +114,7 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 		private VSyncMode _vsyncMode;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public int MaximumFramerate {
 			get => _maximumFramerate;
@@ -193,7 +193,7 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="sceneTree"></param>
 		/// <param name="cvarSystem"></param>
@@ -225,7 +225,7 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 			// always ensure we stay in the top-left hand corner to reduce the chance of creating a window that's half off screen.
 			_window.Position = Vector2I.Zero;
 			_window.ContentScaleAspect = Window.ContentScaleAspectEnum.KeepHeight;
-			_window.ContentScaleMode = Window.ContentScaleModeEnum.Viewport;
+			_window.ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
 			_window.ContentScaleSize = new Vector2I( 800, 600 );
 
 			var maximumFramerate = cvarSystem.GetCVarOrThrow<int>( Core.Constants.CVars.EngineUtils.Display.MAX_FPS );
@@ -463,7 +463,7 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnWindowModeValueChanged( in CVarValueChangedEventArgs<WindowMode> args )
@@ -477,7 +477,7 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnMaximumFramerateValueChanged( in CVarValueChangedEventArgs<int> args )
@@ -491,7 +491,7 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnWindowResolutionValueChanged( in CVarValueChangedEventArgs<WindowResolution> args )
@@ -506,7 +506,7 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnMonitorValueChanged( in CVarValueChangedEventArgs<int> args )
@@ -531,6 +531,8 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 				var subviewport = _window.GetNode<SubViewport>( "ApplicationBootstrapper/PostProcessingContainer/PostProcessing" );
 				subviewport.Size2DOverride = new Vector2I( size.Width, size.Height );
 			}
+
+			_window.ContentScaleSize = new Vector2I( size.Width, size.Height );
 		}
 	};
 };

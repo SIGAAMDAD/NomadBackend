@@ -150,11 +150,33 @@ namespace Nomad.FileSystem.Private.MemoryStream
 				case AllocationStrategy.Standard: {
 						var fileBuffer = base.AllocateBuffer( length );
 						using var stream = new BinaryReader( new FileStream( _filepath, FileMode.Open, FileAccess.Read ) );
-						stream.Read( fileBuffer.Span );
+						ReadExactly( stream.BaseStream, fileBuffer.Span );
 						return fileBuffer;
 					}
 				default:
 					throw new IndexOutOfRangeException( nameof( strategy ) );
+			}
+		}
+
+		/*
+		===============
+		ReadExactly
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="buffer"></param>
+		private static void ReadExactly( Stream stream, Span<byte> buffer )
+		{
+			int totalRead = 0;
+			while ( totalRead < buffer.Length ) {
+				int bytesRead = stream.Read( buffer.Slice( totalRead ) );
+				if ( bytesRead == 0 ) {
+					throw new EndOfStreamException( "Unexpected end of file while loading file into buffer." );
+				}
+				totalRead += bytesRead;
 			}
 		}
 	};

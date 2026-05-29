@@ -240,9 +240,9 @@ namespace Nomad.FileSystem.Private.FileStreams
 			if ( remaining > int.MaxValue ) {
 				throw new InvalidOperationException( "File is too large to read into a single array." );
 			}
-			byte[] buffer = new byte[remaining];
-			int bytesRead = await fileStream.ReadAsync( buffer.AsMemory( 0, (int)remaining ), ct );
-			if ( bytesRead < remaining ) {
+			byte[] buffer = new byte[(int)remaining];
+			int bytesRead = await ReadToBufferAsync( fileStream, buffer.AsMemory( 0, (int)remaining ), ct );
+			if ( bytesRead < buffer.Length ) {
 				Array.Resize( ref buffer, bytesRead );
 			}
 			return buffer;
@@ -266,9 +266,12 @@ namespace Nomad.FileSystem.Private.FileStreams
 
 			int length = (int)Length;
 			byte[] buffer = ArrayPool<byte>.Shared.Rent( length );
-			Read( buffer, 0, length );
-			stream.Write( buffer, 0, length );
-			ArrayPool<byte>.Shared.Return( buffer );
+			try {
+				int bytesRead = ReadToBuffer( fileStream, buffer.AsSpan( 0, length ) );
+				stream.Write( buffer, 0, bytesRead );
+			} finally {
+				ArrayPool<byte>.Shared.Return( buffer );
+			}
 			_streamReader.Position = position;
 		}
 
@@ -291,8 +294,8 @@ namespace Nomad.FileSystem.Private.FileStreams
 
 			int length = (int)Length;
 			byte[] buffer = new byte[length];
-			await ReadAsync( buffer, 0, length, ct );
-			await stream.WriteAsync( buffer, ct );
+			int bytesRead = await ReadToBufferAsync( fileStream, buffer.AsMemory( 0, length ), ct );
+			await stream.WriteAsync( buffer.AsMemory( 0, bytesRead ), ct );
 
 			_streamReader.Position = position;
 		}
@@ -313,19 +316,69 @@ namespace Nomad.FileSystem.Private.FileStreams
 			long originalPosition = fileStream.Position;
 			fileStream.Position = 0;
 			try {
-				int length = (int)fileStream.Length;
-				if ( length > int.MaxValue ) {
+				long streamLength = fileStream.Length;
+				if ( streamLength > int.MaxValue ) {
 					throw new InvalidOperationException( "File is too large to read into a single array." );
 				}
+				int length = (int)streamLength;
 				byte[] buffer = new byte[length];
-				int bytesRead = fileStream.Read( buffer, 0, length );
-				if ( bytesRead < length ) {
-
+				int bytesRead = ReadToBuffer( fileStream, buffer );
+				if ( bytesRead < buffer.Length ) {
+					Array.Resize( ref buffer, bytesRead );
 				}
 				return buffer;
 			} finally {
 				fileStream.Position = originalPosition;
 			}
+		}
+
+		/*
+		===============
+		ReadToBuffer
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="buffer"></param>
+		/// <returns></returns>
+		private static int ReadToBuffer( Stream stream, Span<byte> buffer )
+		{
+			int totalRead = 0;
+			while ( totalRead < buffer.Length ) {
+				int bytesRead = stream.Read( buffer.Slice( totalRead ) );
+				if ( bytesRead == 0 ) {
+					break;
+				}
+				totalRead += bytesRead;
+			}
+			return totalRead;
+		}
+
+		/*
+		===============
+		ReadToBufferAsync
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="buffer"></param>
+		/// <param name="ct"></param>
+		/// <returns></returns>
+		private static async ValueTask<int> ReadToBufferAsync( Stream stream, Memory<byte> buffer, CancellationToken ct )
+		{
+			int totalRead = 0;
+			while ( totalRead < buffer.Length ) {
+				int bytesRead = await stream.ReadAsync( buffer.Slice( totalRead ), ct );
+				if ( bytesRead == 0 ) {
+					break;
+				}
+				totalRead += bytesRead;
+			}
+			return totalRead;
 		}
 
 		/*

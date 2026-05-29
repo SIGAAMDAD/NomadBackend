@@ -9,8 +9,4 @@
     <ProjectReference Include="..\Nomad.Logger\Nomad.Logger.csproj" />
     <ProjectReference Include="..\Nomad.CVars\Nomad.CVars.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.IO.Compression" />
-  </ItemGroup>
 </Project>

@@ -10,7 +10,6 @@
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.IO.Hashing" />
-    <PackageReference Include="System.Runtime.InteropServices" />
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 </Project>

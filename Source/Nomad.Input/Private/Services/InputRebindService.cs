@@ -28,13 +28,13 @@ namespace Nomad.Input.Private.Services
 {
 	/*
 	===================================================================================
-	
+
 	InputRebindService
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal sealed class InputRebindService : IInputRebindService, IDisposable
@@ -59,7 +59,7 @@ namespace Nomad.Input.Private.Services
 		private readonly IGameEvent<GamepadAxisEventArgs> _gamepadAxisEvent;
 
 		private InputRebindRequest? _currentRequest;
-		private bool _isDisposed;
+		private bool _isDisposed = false;
 
 		public InputRebindService(
 			BindRepository repository,
@@ -341,7 +341,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="actions"></param>
 		/// <param name="actionId"></param>
@@ -362,7 +362,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="kind"></param>
 		/// <param name="part"></param>
@@ -388,7 +388,7 @@ namespace Nomad.Input.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="deviceId"></param>
 		/// <returns></returns>

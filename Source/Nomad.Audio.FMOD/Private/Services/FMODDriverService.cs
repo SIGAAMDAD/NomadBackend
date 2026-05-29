@@ -15,6 +15,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using Nomad.Audio.Fmod.Private.Repositories;
+using Nomad.Audio.Fmod.Private.ValueObjects;
 using Nomad.Core;
 using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.CVars;
@@ -26,13 +27,13 @@ namespace Nomad.Audio.Fmod.Private.Services
 {
 	/*
 	===================================================================================
-	
+
 	FMODDriverService
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal sealed class FMODDriverService : IDisposable
@@ -56,7 +57,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="category"></param>
 		/// <param name="system"></param>
@@ -103,7 +104,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Dispose()
 		{
@@ -139,7 +140,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		private void OnAudioDeviceValueChanged( in CVarValueChangedEventArgs<int> args )
@@ -154,13 +155,13 @@ namespace Nomad.Audio.Fmod.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="system"></param>
 		private void OnAudioOutputDeviceListChanged( FMOD.System system )
 		{
 			_category.PrintLine( "FMODDriverService.OnAudioOutputDeviceListChanged: refreshing audio output device list..." );
-			RefreshOutputDevices( system );
+			RefreshOutputDevices();
 			ApplyOutputDevice( _requestedOutputDeviceIndex );
 		}
 
@@ -170,13 +171,13 @@ namespace Nomad.Audio.Fmod.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="system"></param>
 		private void OnAudioOutputDeviceLost( FMOD.System system )
 		{
 			_category.PrintWarning( "FMODDriverService.OnAudioOutputDeviceLost: FMOD reported that the active output device was lost." );
-			RefreshOutputDevices( system );
+			RefreshOutputDevices();
 		}
 
 		/*
@@ -185,13 +186,13 @@ namespace Nomad.Audio.Fmod.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="system"></param>
 		private void OnAudioOutputDeviceReinitialized( FMOD.System system )
 		{
 			_category.PrintLine( "FMODDriverService.OnAudioOutputDeviceReinitialized: FMOD reinitialized the output device, refreshing cached devices..." );
-			RefreshOutputDevices( system );
+			RefreshOutputDevices();
 			ApplyOutputDevice( _requestedOutputDeviceIndex );
 		}
 
@@ -201,16 +202,14 @@ namespace Nomad.Audio.Fmod.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="audioDriver"></param>
 		private void ApplyAudioDriver( FMOD.OUTPUTTYPE audioDriver )
 		{
 			_category.PrintLine( $"FMODDriverService.ApplyAudioDriver: setting audio driver API to '{_repository.GetDriverName( audioDriver )}'..." );
 			FMODValidator.ValidateCall( _category, _system.setOutput( audioDriver ) );
-			_repository.SetCurrentDriver( audioDriver );
-			RefreshDriverState();
-			RefreshOutputDevices( _system );
+			RefreshOutputDevices();
 		}
 
 		/*
@@ -219,7 +218,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="outputDeviceIndex"></param>
 		private void ApplyOutputDevice( int outputDeviceIndex )
@@ -243,7 +242,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		private void RefreshDriverState()
 		{
@@ -257,18 +256,17 @@ namespace Nomad.Audio.Fmod.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
-		/// <param name="system"></param>
-		private void RefreshOutputDevices( FMOD.System system )
+		private void RefreshOutputDevices()
 		{
-			FMODValidator.ValidateCall( _category, system.getNumDrivers( out int numDrivers ) );
+			FMODValidator.ValidateCall( _category, _system.getNumDrivers( out int numDrivers ) );
 
-			var devices = new Private.ValueObjects.FMODDeviceInfo[numDrivers];
+			var devices = new FMODDeviceInfo[numDrivers];
 			for ( int i = 0; i < numDrivers; i++ ) {
 				FMODValidator.ValidateCall(
 					_category,
-					system.getDriverInfo(
+					_system.getDriverInfo(
 						i,
 						out string name,
 						256,
@@ -278,10 +276,10 @@ namespace Nomad.Audio.Fmod.Private.Services
 						out int speakerChannels
 					)
 				);
-				devices[i] = new Private.ValueObjects.FMODDeviceInfo( name, guid, systemRate, speakerMode, speakerChannels );
+				devices[i] = new FMODDeviceInfo( name, guid, systemRate, speakerMode, speakerChannels );
 			}
 
-			FMODValidator.ValidateCall( _category, system.getDriver( out int currentDriverIndex ) );
+			FMODValidator.ValidateCall( _category, _system.getDriver( out int currentDriverIndex ) );
 			_outputDeviceRepository.Refresh( devices, currentDriverIndex );
 		}
 	};

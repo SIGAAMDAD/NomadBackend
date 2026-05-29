@@ -568,8 +568,9 @@ namespace Nomad.FileSystem.Private.Services
 			}
 			using var stream = OpenRead( new FileReadConfig { FilePath = fullPath } ) ?? throw new IOException();
 
-			var handle = new PooledBufferHandle( (int)stream.Length );
-			stream.Read( handle.Span, 0, handle.Length );
+			int length = GetBufferedFileLength( stream.Length );
+			var handle = new PooledBufferHandle( length );
+			ReadExactly( stream, handle.Span );
 
 			return handle;
 		}
@@ -595,10 +596,74 @@ namespace Nomad.FileSystem.Private.Services
 
 			using var stream = OpenRead( new FileReadConfig { FilePath = fullPath } ) ?? throw new IOException();
 
-			var handle = new PooledBufferHandle( (int)stream.Length );
-			await stream.ReadAsync( handle.Memory, ct );
+			int length = GetBufferedFileLength( stream.Length );
+			var handle = new PooledBufferHandle( length );
+			await ReadExactlyAsync( stream, handle.Memory, ct );
 
 			return handle;
+		}
+
+		/*
+		===============
+		GetBufferedFileLength
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="length"></param>
+		/// <returns></returns>
+		private static int GetBufferedFileLength( long length )
+		{
+			if ( length > int.MaxValue ) {
+				throw new InvalidOperationException( "File is too large to read into a single buffer." );
+			}
+			return (int)length;
+		}
+
+		/*
+		===============
+		ReadExactly
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="buffer"></param>
+		private static void ReadExactly( IReadStream stream, Span<byte> buffer )
+		{
+			int totalRead = 0;
+			while ( totalRead < buffer.Length ) {
+				int bytesRead = stream.Read( buffer, totalRead, buffer.Length - totalRead );
+				if ( bytesRead == 0 ) {
+					throw new EndOfStreamException( "Unexpected end of file while loading file into buffer." );
+				}
+				totalRead += bytesRead;
+			}
+		}
+
+		/*
+		===============
+		ReadExactlyAsync
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="stream"></param>
+		/// <param name="buffer"></param>
+		/// <param name="ct"></param>
+		private static async ValueTask ReadExactlyAsync( IReadStream stream, Memory<byte> buffer, CancellationToken ct )
+		{
+			int totalRead = 0;
+			while ( totalRead < buffer.Length ) {
+				int bytesRead = await stream.ReadAsync( buffer.Slice( totalRead ), ct );
+				if ( bytesRead == 0 ) {
+					throw new EndOfStreamException( "Unexpected end of file while loading file into buffer." );
+				}
+				totalRead += bytesRead;
+			}
 		}
 
 		/*

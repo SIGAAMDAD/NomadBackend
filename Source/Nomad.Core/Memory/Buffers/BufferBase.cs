@@ -36,12 +36,12 @@ namespace Nomad.Core.Memory.Buffers
         /// <summary>
         /// The owned chunk of memory represented as <see cref="Span{byte}"/>.
         /// </summary>
-        public Span<byte> Span => buffer;
+        public Span<byte> Span => buffer.AsSpan(0, _length);
 
         /// <summary>
         /// The owned chunk of memory represented as <see cref="Memory{byte}"/>.
         /// </summary>
-        public Memory<byte> Memory => buffer;
+        public Memory<byte> Memory => buffer.AsMemory(0, _length);
 
         protected readonly byte[] buffer;
 
@@ -143,7 +143,7 @@ namespace Nomad.Core.Memory.Buffers
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Stream AsStream()
-            => new MemoryStream(buffer, false);
+            => new MemoryStream(buffer, 0, _length, writable: false, publiclyVisible: false);
 
         /// <summary>
         /// 
@@ -152,7 +152,7 @@ namespace Nomad.Core.Memory.Buffers
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Stream AsStream(bool writable)
-            => new MemoryStream(buffer, writable);
+            => new MemoryStream(buffer, 0, _length, writable, publiclyVisible: false);
 
         /// <summary>
         /// 
@@ -162,7 +162,10 @@ namespace Nomad.Core.Memory.Buffers
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Stream AsStream(int offset, int length)
-            => new MemoryStream(buffer, offset, length);
+        {
+            ValidateRange(offset, length);
+            return new MemoryStream(buffer, offset, length, writable: false, publiclyVisible: false);
+        }
 
         /// <summary>
         /// 
@@ -182,7 +185,10 @@ namespace Nomad.Core.Memory.Buffers
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Span<byte> AsSpan(int start)
-            => buffer.AsSpan(start);
+        {
+            ValidateRange(start, _length - start);
+            return buffer.AsSpan(start, _length - start);
+        }
 
         /// <summary>
         /// 
@@ -192,7 +198,10 @@ namespace Nomad.Core.Memory.Buffers
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Span<byte> AsSpan(int start, int length)
-            => buffer.AsSpan(start, length);
+        {
+            ValidateRange(start, length);
+            return buffer.AsSpan(start, length);
+        }
 
         /// <summary>
         /// 
@@ -201,7 +210,10 @@ namespace Nomad.Core.Memory.Buffers
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Memory<byte> AsMemory(int start)
-            => buffer.AsMemory(start);
+        {
+            ValidateRange(start, _length - start);
+            return buffer.AsMemory(start, _length - start);
+        }
 
         /// <summary>
         /// 
@@ -211,7 +223,10 @@ namespace Nomad.Core.Memory.Buffers
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Memory<byte> AsMemory(int start, int length)
-            => buffer.AsMemory(start, length);
+        {
+            ValidateRange(start, length);
+            return buffer.AsMemory(start, length);
+        }
 
         /// <summary>
         /// 
@@ -219,7 +234,7 @@ namespace Nomad.Core.Memory.Buffers
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual MemoryHandle Pin()
-            => buffer.AsMemory().Pin();
+            => Memory.Pin();
 
         /// <summary>
         /// 
@@ -235,7 +250,10 @@ namespace Nomad.Core.Memory.Buffers
         /// <param name="length"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void Clear(int start, int length)
-            => Array.Clear(buffer, start, length);
+        {
+            ValidateRange(start, length);
+            Array.Clear(buffer, start, length);
+        }
 
         /// <summary>
         /// 
@@ -243,7 +261,7 @@ namespace Nomad.Core.Memory.Buffers
         /// <param name="f"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void Fill(byte f)
-            => Array.Fill(buffer, f);
+            => Array.Fill(buffer, f, 0, _length);
 
         /// <summary>
         /// 
@@ -253,7 +271,23 @@ namespace Nomad.Core.Memory.Buffers
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Span<byte> GetSlice(int start, int length)
-            => buffer.AsSpan().Slice(start, length);
+        {
+            ValidateRange(start, length);
+            return buffer.AsSpan(start, length);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="length"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ValidateRange(int start, int length)
+        {
+            RangeGuard.ThrowIfLessThan(start, 0, nameof(start));
+            RangeGuard.ThrowIfLessThan(length, 0, nameof(length));
+            RangeGuard.ThrowIfGreaterThan(start + length, _length, nameof(length));
+        }
 
         /// <summary>
         /// 
@@ -264,7 +298,7 @@ namespace Nomad.Core.Memory.Buffers
         /// <param name="dstOffset"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void CopyFrom(ReadOnlySpan<byte> source, int offset, int length, int dstOffset = 0)
-            => MemCpy(source, offset, buffer, dstOffset, length);
+            => MemCpy(source, offset, Span, dstOffset, length);
 
         /// <summary>
         /// 
@@ -275,7 +309,7 @@ namespace Nomad.Core.Memory.Buffers
         /// <param name="srcOffset"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void CopyTo(Span<byte> dest, int offset, int length, int srcOffset = 0)
-            => MemCpy(buffer, srcOffset, dest, offset, length);
+            => MemCpy(Span, srcOffset, dest, offset, length);
 
         /// <summary>
         /// 
