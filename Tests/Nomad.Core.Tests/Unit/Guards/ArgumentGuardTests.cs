@@ -19,99 +19,99 @@ using NUnit.Framework;
 
 namespace Nomad.Core.Tests
 {
-	[TestFixture]
-	[Category("Nomad.Core")]
-	[Category("Guards")]
-	[Category("Unit")]
-	[Category("UnitTests")]
-	public class ArgumentGuardTests
-	{
-		private static void EnsureThrowsNull(Action callback)
-		{
-			Assert.Throws<ArgumentNullException>(() => callback());
-		}
+    [TestFixture]
+    [Category("Nomad.Core")]
+    [Category("Guards")]
+    [Category("Unit")]
+    [Category("UnitTests")]
+    public class ArgumentGuardTests
+    {
+        private static void EnsureThrowsNull(Action callback)
+        {
+            Assert.Throws<ArgumentNullException>(() => callback());
+        }
 
-		private static void EnsureThrows(Action callback)
-		{
-			Assert.Throws<ArgumentException>(() => callback());
-		}
+        private static void EnsureThrows(Action callback)
+        {
+            Assert.Throws<ArgumentException>(() => callback());
+        }
 
-		private static void EnsureDoesNotThrow(Action callback)
-		{
-			Assert.DoesNotThrow(() => callback());
-		}
+        private static void EnsureDoesNotThrow(Action callback)
+        {
+            Assert.DoesNotThrow(() => callback());
+        }
 
-#region ThrowIfNull
-		[Test]
-		public void ArgumentGuard_ThrowIfNull_ThrowsWhenNull()
-		{
-			EnsureThrowsNull(() => ArgumentGuard.ThrowIfNull(null));
-		}
+        #region ThrowIfNull
+        [Test]
+        public void ArgumentGuard_ThrowIfNull_ThrowsWhenNull()
+        {
+            EnsureThrowsNull(() => ArgumentGuard.ThrowIfNull(null));
+        }
 
-		[Test]
-		public void ArgumentGuard_ThrowIfNull_DoesNotThrowWhenNotNull()
-		{
-			object obj = new object();
-			EnsureDoesNotThrow(() => ArgumentGuard.ThrowIfNull(obj));
-		}
-#endregion
+        [Test]
+        public void ArgumentGuard_ThrowIfNull_DoesNotThrowWhenNotNull()
+        {
+            object obj = new object();
+            EnsureDoesNotThrow(() => ArgumentGuard.ThrowIfNull(obj));
+        }
+        #endregion
 
-#region ThrowIfNullOrEmpty
-		[Test]
-		public void ArgumentGuard_ThrowIfNullOrEmpty_ThrowsWhenNull()
-		{
-			EnsureThrowsNull(() => ArgumentGuard.ThrowIfNullOrEmpty(null));
-		}
+        #region ThrowIfNullOrEmpty
+        [Test]
+        public void ArgumentGuard_ThrowIfNullOrEmpty_ThrowsWhenNull()
+        {
+            EnsureThrowsNull(() => ArgumentGuard.ThrowIfNullOrEmpty(null));
+        }
 
-		[Test]
-		public void ArgumentGuard_ThrowIfNullOrEmpty_ThrowsWhenEmpty()
-		{
-			EnsureThrows(() => ArgumentGuard.ThrowIfNullOrEmpty(string.Empty));
-		}
+        [Test]
+        public void ArgumentGuard_ThrowIfNullOrEmpty_ThrowsWhenEmpty()
+        {
+            EnsureThrows(() => ArgumentGuard.ThrowIfNullOrEmpty(string.Empty));
+        }
 
-		[Test]
-		public void ArgumentGuard_ThrowIfNullOrEmpty_DoesNotThrowWhenNotNullOrEmpty()
-		{
-			string str = "Test";
-			EnsureDoesNotThrow(() => ArgumentGuard.ThrowIfNullOrEmpty(str));
-		}
-#endregion
+        [Test]
+        public void ArgumentGuard_ThrowIfNullOrEmpty_DoesNotThrowWhenNotNullOrEmpty()
+        {
+            string str = "Test";
+            EnsureDoesNotThrow(() => ArgumentGuard.ThrowIfNullOrEmpty(str));
+        }
+        #endregion
 
-#region ThrowIfNullOrWhitespace
-		[Test]
-		public void ArgumentGuard_ThrowIfNullOrWhitespace_ThrowsWhenNull()
-		{
-			EnsureThrowsNull(() => ArgumentGuard.ThrowIfNullOrWhiteSpace(null));
-		}
+        #region ThrowIfNullOrWhitespace
+        [Test]
+        public void ArgumentGuard_ThrowIfNullOrWhitespace_ThrowsWhenNull()
+        {
+            EnsureThrowsNull(() => ArgumentGuard.ThrowIfNullOrWhiteSpace(null));
+        }
 
-		[Test]
-		public void ArgumentGuard_ThrowIfNullOrWhitespace_ThrowsWhenWhitespace()
-		{
-			EnsureThrows(() => ArgumentGuard.ThrowIfNullOrWhiteSpace("   "));
-		}
+        [Test]
+        public void ArgumentGuard_ThrowIfNullOrWhitespace_ThrowsWhenWhitespace()
+        {
+            EnsureThrows(() => ArgumentGuard.ThrowIfNullOrWhiteSpace("   "));
+        }
 
-		[Test]
-		public void ArgumentGuard_ThrowIfNullOrWhitespace_DoesNotThrowWhenNotNullOrWhitespace()
-		{
-			string str = "Test";
-			EnsureDoesNotThrow(() => ArgumentGuard.ThrowIfNullOrWhiteSpace(str));
-		}
-#endregion
+        [Test]
+        public void ArgumentGuard_ThrowIfNullOrWhitespace_DoesNotThrowWhenNotNullOrWhitespace()
+        {
+            string str = "Test";
+            EnsureDoesNotThrow(() => ArgumentGuard.ThrowIfNullOrWhiteSpace(str));
+        }
+        #endregion
 
-#region ThrowIfDefault
-		[Test]
-		public void ArgumentGuard_ThrowIfDefault_ThrowsIfDefault()
-		{
-			int value = default;
-			EnsureThrows(() => ArgumentGuard.ThrowIfDefault(value));
-		}
+        #region ThrowIfDefault
+        [Test]
+        public void ArgumentGuard_ThrowIfDefault_ThrowsIfDefault()
+        {
+            int value = default;
+            EnsureThrows(() => ArgumentGuard.ThrowIfDefault(value));
+        }
 
-		[Test]
-		public void ArgumentGuard_ThrowIfDefault_DoesNotThrowIfNotDefault()
-		{
-			int value = 21;
-			EnsureDoesNotThrow(() => ArgumentGuard.ThrowIfDefault(value));
-		}
-#endregion
-	}
+        [Test]
+        public void ArgumentGuard_ThrowIfDefault_DoesNotThrowIfNotDefault()
+        {
+            int value = 21;
+            EnsureDoesNotThrow(() => ArgumentGuard.ThrowIfDefault(value));
+        }
+        #endregion
+    }
 }

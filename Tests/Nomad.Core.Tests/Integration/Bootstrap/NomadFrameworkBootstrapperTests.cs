@@ -23,104 +23,104 @@ using NUnit.Framework;
 
 namespace Nomad.Core.Tests
 {
-	[TestFixture]
-	[Category("Nomad.Core")]
-	[Category("Bootstrap")]
-	[Category("Integration")]
-	[Category("UnitTests")]
-	public class NomadFrameworkBootstrapperTests
-	{
-		public class MockService
-		{
-		}
+    [TestFixture]
+    [Category("Nomad.Core")]
+    [Category("Bootstrap")]
+    [Category("Integration")]
+    [Category("UnitTests")]
+    public class NomadFrameworkBootstrapperTests
+    {
+        public class MockService
+        {
+        }
 
-		public class MockBootstrapper : IBootstrapper
-		{
-			public MockBootstrapper()
-			{
-			}
+        public class MockBootstrapper : IBootstrapper
+        {
+            public MockBootstrapper()
+            {
+            }
 
-			public void Initialize(IServiceRegistry registry, IServiceLocator locator)
-			{
-				registry.AddSingleton(new MockService());
-			}
+            public void Initialize(IServiceRegistry registry, IServiceLocator locator)
+            {
+                registry.AddSingleton(new MockService());
+            }
 
-			public void Shutdown()
-			{
-			}
-		}
+            public void Shutdown()
+            {
+            }
+        }
 
-		private IServiceLocator _serviceLocator;
-		private ServiceCollection _serviceRegistry;
+        private IServiceLocator _serviceLocator;
+        private ServiceCollection _serviceRegistry;
 
-		[SetUp]
-		public void Setup()
-		{
-			_serviceRegistry = new ServiceCollection();
-			_serviceLocator = new ServiceLocator(_serviceRegistry);
-		}
+        [SetUp]
+        public void Setup()
+        {
+            _serviceRegistry = new ServiceCollection();
+            _serviceLocator = new ServiceLocator(_serviceRegistry);
+        }
 
-		[TearDown]
-		public void TearDown()
-		{
-			_serviceLocator?.Dispose();
-			_serviceRegistry?.Dispose();
-		}
+        [TearDown]
+        public void TearDown()
+        {
+            _serviceLocator?.Dispose();
+            _serviceRegistry?.Dispose();
+        }
 
-		[Test]
-		public void Create_WithValidParameters_DoesNotThrow()
-		{
-			Assert.DoesNotThrow(() => new NomadFrameworkBootstrapper(_serviceRegistry, _serviceLocator));
-		}
+        [Test]
+        public void Create_WithValidParameters_DoesNotThrow()
+        {
+            Assert.DoesNotThrow(() => new NomadFrameworkBootstrapper(_serviceRegistry, _serviceLocator));
+        }
 
-		[Test]
-		public void Create_WithNullRegistry_ThrowsArgumentNullException()
-		{
-			Assert.Throws<ArgumentNullException>(() => new NomadFrameworkBootstrapper(null!, _serviceLocator));
-		}
+        [Test]
+        public void Create_WithNullRegistry_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new NomadFrameworkBootstrapper(null!, _serviceLocator));
+        }
 
-		[Test]
-		public void Create_WithNullLocator_ThrowsArgumentNullException()
-		{
-			Assert.Throws<ArgumentNullException>(() => new NomadFrameworkBootstrapper(_serviceRegistry, null!));
-		}
+        [Test]
+        public void Create_WithNullLocator_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new NomadFrameworkBootstrapper(_serviceRegistry, null!));
+        }
 
-		[Test]
-		public void Dispose_DisposeAgain_DoesNotThrow()
-		{
-			var bootstrapper = new NomadFrameworkBootstrapper(_serviceRegistry, _serviceLocator);
+        [Test]
+        public void Dispose_DisposeAgain_DoesNotThrow()
+        {
+            var bootstrapper = new NomadFrameworkBootstrapper(_serviceRegistry, _serviceLocator);
 
-			bootstrapper.Dispose();
-			Assert.DoesNotThrow(() => bootstrapper.Dispose());
-		}
+            bootstrapper.Dispose();
+            Assert.DoesNotThrow(() => bootstrapper.Dispose());
+        }
 
-		[Test]
-		public void AddBootstrapper_WithInstanceThenBootstrap_InitializesSystem()
-		{
-			// Arrange
-			var system = new Mock<IBootstrapper>();
-			bool initialized = false;
-			system.Setup(s => s.Initialize(It.IsAny<IServiceRegistry>(), It.IsAny<IServiceLocator>())).Callback(() => initialized = true);
+        [Test]
+        public void AddBootstrapper_WithInstanceThenBootstrap_InitializesSystem()
+        {
+            // Arrange
+            var system = new Mock<IBootstrapper>();
+            bool initialized = false;
+            system.Setup(s => s.Initialize(It.IsAny<IServiceRegistry>(), It.IsAny<IServiceLocator>())).Callback(() => initialized = true);
 
-			// Act
-			var bootstrapper = new NomadFrameworkBootstrapper(_serviceRegistry, _serviceLocator)
-				.AddBootstrapper(system.Object);
-			bootstrapper.Bootstrap();
+            // Act
+            var bootstrapper = new NomadFrameworkBootstrapper(_serviceRegistry, _serviceLocator)
+                .AddBootstrapper(system.Object);
+            bootstrapper.Bootstrap();
 
-			// Assert
-			Assert.That(initialized, Is.True);
-		}
+            // Assert
+            Assert.That(initialized, Is.True);
+        }
 
-		[Test]
-		public void AddBootstrapper_ConstructInBootstrapperThenBootstrap_InitializesSystem()
-		{
-			// Act
-			var bootstrapper = new NomadFrameworkBootstrapper(_serviceRegistry, _serviceLocator)
-				.AddBootstrapper<MockBootstrapper>();
-			bootstrapper.Bootstrap();
+        [Test]
+        public void AddBootstrapper_ConstructInBootstrapperThenBootstrap_InitializesSystem()
+        {
+            // Act
+            var bootstrapper = new NomadFrameworkBootstrapper(_serviceRegistry, _serviceLocator)
+                .AddBootstrapper<MockBootstrapper>();
+            bootstrapper.Bootstrap();
 
-			// Assert
-			Assert.That(_serviceRegistry.IsRegistered<MockService>(), Is.True);
-		}
-	}
+            // Assert
+            Assert.That(_serviceRegistry.IsRegistered<MockService>(), Is.True);
+        }
+    }
 }

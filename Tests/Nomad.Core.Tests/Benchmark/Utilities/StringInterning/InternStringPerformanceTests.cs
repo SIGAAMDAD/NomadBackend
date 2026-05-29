@@ -73,11 +73,12 @@ namespace Nomad.Core.Tests
                 _internStringDictionary[_internStrings[i]] = i;
             }
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( _strings, Has.Length.EqualTo( _internStrings.Length ) );
-				Assert.That( _equivalentStrings, Has.Length.EqualTo( _equivalentInternStrings.Length ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(_strings, Has.Length.EqualTo(_internStrings.Length));
+                Assert.That(_equivalentStrings, Has.Length.EqualTo(_equivalentInternStrings.Length));
+            }
+        }
 
         [Test]
         public void Compare_Equality_SameValue()
@@ -340,7 +341,8 @@ namespace Nomad.Core.Tests
             TestContext.Out.WriteLine(internResult);
             TestContext.Out.WriteLine($"Ratio: {speedRatio:0.00}x");
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(stringResult.ElapsedMilliseconds, Is.GreaterThan(0.0));
                 Assert.That(internResult.ElapsedMilliseconds, Is.GreaterThan(0.0));
             }

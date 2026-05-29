@@ -93,7 +93,7 @@ namespace Nomad.Events.Tests
             // Arrange
             var name = "TestEvent";
             var ns = "TestNamespace";
-			var logger = new MockLogger();
+            var logger = new MockLogger();
             var expectedEvent = Mock.Of<IGameEvent<TestEventArgs>>();
 
             _mockService
@@ -103,13 +103,13 @@ namespace Nomad.Events.Tests
             // Act
             var success = Globals.GameEventRegistry.TryGetEvent<TestEventArgs>(name, ns, out var result);
 
-			using (Assert.EnterMultipleScope())
-			{
-				// Assert
-				Assert.That(success, Is.True);
-				Assert.That(result, Is.SameAs(expectedEvent));
-			}
-			_mockService.Verify(s => s.TryGetEvent(name, ns, out expectedEvent), Times.Once);
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(success, Is.True);
+                Assert.That(result, Is.SameAs(expectedEvent));
+            }
+            _mockService.Verify(s => s.TryGetEvent(name, ns, out expectedEvent), Times.Once);
         }
 
         [Test]

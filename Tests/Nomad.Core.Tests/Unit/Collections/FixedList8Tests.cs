@@ -29,7 +29,8 @@ namespace Nomad.Core.Tests
         {
             using FixedList8<int> list = new FixedList8<int>();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(InlineCapacity));
             }
@@ -45,7 +46,8 @@ namespace Nomad.Core.Tests
                 list.Add(i * 10);
             }
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(InlineCapacity));
                 Assert.That(list.Capacity, Is.EqualTo(InlineCapacity));
             }
@@ -63,7 +65,8 @@ namespace Nomad.Core.Tests
                 list.Add(i);
             }
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(InlineCapacity + 1));
                 Assert.That(list.Capacity, Is.GreaterThan(InlineCapacity));
             }
@@ -85,7 +88,8 @@ namespace Nomad.Core.Tests
 
             list.Add(9);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(10));
                 Assert.That(list.Capacity, Is.EqualTo(capacityBefore));
             }
@@ -114,7 +118,8 @@ namespace Nomad.Core.Tests
 
             list.Add(capacityBefore);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(capacityBefore + 1));
                 Assert.That(list.Capacity, Is.GreaterThan(capacityBefore));
             }
@@ -144,7 +149,8 @@ namespace Nomad.Core.Tests
 
             list.Add($"value-{capacityBefore}");
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(capacityBefore + 1));
                 Assert.That(list.Capacity, Is.GreaterThan(capacityBefore));
                 Assert.That(list[0], Is.EqualTo("value-0"));
@@ -277,7 +283,8 @@ namespace Nomad.Core.Tests
 
             list.Clear();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(InlineCapacity));
             }
@@ -293,7 +300,8 @@ namespace Nomad.Core.Tests
 
             list.Clear();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(InlineCapacity));
             }
@@ -317,7 +325,8 @@ namespace Nomad.Core.Tests
 
             list.Clear();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(capacityBefore));
             }
@@ -338,7 +347,8 @@ namespace Nomad.Core.Tests
 
             list.Clear();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(InlineCapacity));
             }
@@ -362,7 +372,8 @@ namespace Nomad.Core.Tests
 
             list.Clear();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(capacityBefore));
             }
@@ -382,7 +393,8 @@ namespace Nomad.Core.Tests
 
             list.Clear();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(InlineCapacity));
             }
@@ -505,7 +517,8 @@ namespace Nomad.Core.Tests
 
             list.RemoveAtSwapBack(2);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(InlineCapacity + 3));
                 Assert.That(list[0], Is.EqualTo(0));
                 Assert.That(list[1], Is.EqualTo(1));
@@ -526,7 +539,8 @@ namespace Nomad.Core.Tests
 
             list.RemoveAtSwapBack(2);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(InlineCapacity + 3));
                 Assert.That(list[0], Is.EqualTo("value-0"));
                 Assert.That(list[1], Is.EqualTo("value-1"));
@@ -547,7 +561,8 @@ namespace Nomad.Core.Tests
 
             list.RemoveAtSwapBack(InlineCapacity + 3);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(InlineCapacity + 3));
                 Assert.That(list[InlineCapacity + 2], Is.EqualTo($"value-{InlineCapacity + 2}"));
             }
@@ -560,7 +575,8 @@ namespace Nomad.Core.Tests
 
             bool removed = list.RemoveSwapBack(123);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(removed, Is.False);
                 Assert.That(list.Count, Is.EqualTo(0));
             }
@@ -576,7 +592,8 @@ namespace Nomad.Core.Tests
 
             bool removed = list.RemoveSwapBack(99);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(removed, Is.False);
                 AssertSequence(list, 1, 2, 3);
             }
@@ -593,7 +610,8 @@ namespace Nomad.Core.Tests
 
             bool removed = list.RemoveSwapBack(20);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(removed, Is.True);
                 AssertSequence(list, 10, 20, 30);
             }
@@ -611,7 +629,8 @@ namespace Nomad.Core.Tests
 
             bool removed = list.RemoveSwapBack(2);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(removed, Is.True);
                 Assert.That(list.Count, Is.EqualTo(InlineCapacity + 3));
                 Assert.That(list[2], Is.EqualTo(InlineCapacity + 3));
@@ -629,7 +648,8 @@ namespace Nomad.Core.Tests
             bool removedWithoutComparer = list.RemoveSwapBack("bravo");
             bool removedWithComparer = list.RemoveSwapBack("bravo", StringComparer.OrdinalIgnoreCase);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(removedWithoutComparer, Is.False);
                 Assert.That(removedWithComparer, Is.True);
                 AssertSequence(list, "Alpha", "Charlie");
@@ -646,7 +666,8 @@ namespace Nomad.Core.Tests
 
             bool removed = list.RemoveSwapBack(null);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(removed, Is.True);
                 AssertSequence<string?>(list, "before", "after");
             }
@@ -663,7 +684,8 @@ namespace Nomad.Core.Tests
 
             bool removed = list.RemoveSwapBack(2);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(removed, Is.True);
                 AssertSequence(list, 1, 3, 2);
             }
@@ -678,7 +700,8 @@ namespace Nomad.Core.Tests
 
             list.Dispose();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(InlineCapacity));
             }
@@ -704,7 +727,8 @@ namespace Nomad.Core.Tests
 
             list.Dispose();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(InlineCapacity));
             }
@@ -731,7 +755,8 @@ namespace Nomad.Core.Tests
 
             list.Dispose();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(InlineCapacity));
             }
@@ -758,7 +783,8 @@ namespace Nomad.Core.Tests
             list.Dispose();
             list.Dispose();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(0));
                 Assert.That(list.Capacity, Is.EqualTo(InlineCapacity));
             }
@@ -781,7 +807,8 @@ namespace Nomad.Core.Tests
             list[1] = 1234;
             list.Add(9999);
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(list.Count, Is.EqualTo(InlineCapacity + 5));
                 Assert.That(list.Capacity, Is.EqualTo(heapCapacity));
                 Assert.That(list[0], Is.EqualTo(InlineCapacity + 5));

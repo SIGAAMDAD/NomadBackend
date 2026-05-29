@@ -515,8 +515,8 @@ namespace Nomad.Core.Tests
         public void BufferBase_Clear_WithInvalidRange_Throws()
         {
             using var buffer = new StandardBufferHandle(DefaultSize);
-            Assert.Throws<IndexOutOfRangeException>(() => buffer.Clear(-1, 10));
-            Assert.Throws<IndexOutOfRangeException>(() => buffer.Clear(DefaultSize, 1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Clear(-1, 10));
+            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Clear(DefaultSize, 1));
         }
 
         #endregion

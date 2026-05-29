@@ -19,8 +19,8 @@ using NUnit.Framework;
 
 namespace Nomad.Core.Tests.Engine.Windowing
 {
-	[TestFixture]
-	[Category("Nomad.Core")]
+    [TestFixture]
+    [Category("Nomad.Core")]
     [Category("Windowing")]
     [Category("Unit")]
     [Category("UnitTests")]
@@ -102,11 +102,12 @@ namespace Nomad.Core.Tests.Engine.Windowing
 
             var value = new AspectRatioValue(nearButDifferent);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( exact, Is.Not.EqualTo( nearButDifferent ) );
-				Assert.That( value.Ratio, Is.EqualTo( AspectRatio.Aspect_Automatic ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(exact, Is.Not.EqualTo(nearButDifferent));
+                Assert.That(value.Ratio, Is.EqualTo(AspectRatio.Aspect_Automatic));
+            }
+        }
 
         [Test]
         public void Constructor_WithFloatNearSixteenByNineButNotExactlyEqual_StoresAutomaticRatio()
@@ -117,11 +118,12 @@ namespace Nomad.Core.Tests.Engine.Windowing
 
             var value = new AspectRatioValue(nearButDifferent);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( exact, Is.Not.EqualTo( nearButDifferent ) );
-				Assert.That( value.Ratio, Is.EqualTo( AspectRatio.Aspect_Automatic ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(exact, Is.Not.EqualTo(nearButDifferent));
+                Assert.That(value.Ratio, Is.EqualTo(AspectRatio.Aspect_Automatic));
+            }
+        }
 
         [Test]
         public void Constructor_WithFloatNearSixteenByTenButNotExactlyEqual_StoresAutomaticRatio()
@@ -132,11 +134,12 @@ namespace Nomad.Core.Tests.Engine.Windowing
 
             var value = new AspectRatioValue(nearButDifferent);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( exact, Is.Not.EqualTo( nearButDifferent ) );
-				Assert.That( value.Ratio, Is.EqualTo( AspectRatio.Aspect_Automatic ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(exact, Is.Not.EqualTo(nearButDifferent));
+                Assert.That(value.Ratio, Is.EqualTo(AspectRatio.Aspect_Automatic));
+            }
+        }
 
         [Test]
         public void Constructor_WithFloatNearTwentyOneByNineButNotExactlyEqual_StoresAutomaticRatio()
@@ -147,11 +150,12 @@ namespace Nomad.Core.Tests.Engine.Windowing
 
             var value = new AspectRatioValue(nearButDifferent);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( exact, Is.Not.EqualTo( nearButDifferent ) );
-				Assert.That( value.Ratio, Is.EqualTo( AspectRatio.Aspect_Automatic ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(exact, Is.Not.EqualTo(nearButDifferent));
+                Assert.That(value.Ratio, Is.EqualTo(AspectRatio.Aspect_Automatic));
+            }
+        }
 
         [Test]
         [TestCase(AspectRatio.Aspect_Automatic)]
@@ -193,7 +197,7 @@ namespace Nomad.Core.Tests.Engine.Windowing
         {
             var value = default(AspectRatioValue);
 
-			Assert.That( value, Is.Default );
+            Assert.That(value, Is.Default);
         }
 
         [Test]

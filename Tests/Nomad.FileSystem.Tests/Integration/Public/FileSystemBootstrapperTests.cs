@@ -24,112 +24,112 @@ using Nomad.Core.ServiceRegistry;
 
 namespace Nomad.FileSystem.Tests
 {
-	[TestFixture]
-	[Category("Nomad.FileSystem")]
-	[Category("Bootstrap")]
-	[Category("Integration")]
-	[Category("UnitTests")]
-	public class FileSystemBootstrapperTests
-	{
-		private FileSystemBootstrapper _bootstrapper;
-		private IServiceLocator _serviceLocator;
-		private ServiceCollection _serviceRegistry;
+    [TestFixture]
+    [Category("Nomad.FileSystem")]
+    [Category("Bootstrap")]
+    [Category("Integration")]
+    [Category("UnitTests")]
+    public class FileSystemBootstrapperTests
+    {
+        private FileSystemBootstrapper _bootstrapper;
+        private IServiceLocator _serviceLocator;
+        private ServiceCollection _serviceRegistry;
 
-		[SetUp]
-		public void Setup()
-		{
-			_serviceRegistry = new ServiceCollection();
-			_serviceLocator = new ServiceLocator(_serviceRegistry);
+        [SetUp]
+        public void Setup()
+        {
+            _serviceRegistry = new ServiceCollection();
+            _serviceLocator = new ServiceLocator(_serviceRegistry);
 
-			_bootstrapper = new FileSystemBootstrapper();
-		}
+            _bootstrapper = new FileSystemBootstrapper();
+        }
 
-		[TearDown]
-		public void TearDown()
-		{
-			_serviceLocator?.Dispose();
-			_serviceRegistry?.Dispose();
-		}
+        [TearDown]
+        public void TearDown()
+        {
+            _serviceLocator?.Dispose();
+            _serviceRegistry?.Dispose();
+        }
 
-		[Test]
-		public void CreateBootstrapper_InitializeWithValidServices_DoesNotThrow()
-		{
-			_serviceRegistry.Register<IEngineService, MockEngineService>(ServiceLifetime.Singleton);
-			_serviceRegistry.Register<ILoggerService, MockLogger>(ServiceLifetime.Singleton);
+        [Test]
+        public void CreateBootstrapper_InitializeWithValidServices_DoesNotThrow()
+        {
+            _serviceRegistry.Register<IEngineService, MockEngineService>(ServiceLifetime.Singleton);
+            _serviceRegistry.Register<ILoggerService, MockLogger>(ServiceLifetime.Singleton);
 
-			Assert.DoesNotThrow(() => _bootstrapper.Initialize(_serviceRegistry, _serviceLocator));
-		}
+            Assert.DoesNotThrow(() => _bootstrapper.Initialize(_serviceRegistry, _serviceLocator));
+        }
 
-		[Test]
-		public void CreateBootstrapper_InitializeWithoutExistingLoggerService_ThrowsInvalidOperationException()
-		{
-			_serviceRegistry.Register<IEngineService, MockEngineService>(ServiceLifetime.Singleton);
+        [Test]
+        public void CreateBootstrapper_InitializeWithoutExistingLoggerService_ThrowsInvalidOperationException()
+        {
+            _serviceRegistry.Register<IEngineService, MockEngineService>(ServiceLifetime.Singleton);
 
-			Assert.Throws<InvalidOperationException>(() => _bootstrapper.Initialize(_serviceRegistry, _serviceLocator));
-		}
+            Assert.Throws<InvalidOperationException>(() => _bootstrapper.Initialize(_serviceRegistry, _serviceLocator));
+        }
 
-		[Test]
-		public void CreateBootstrapper_InitializeWithoutExistingEngineService_ThrowsInvalidOperationException()
-		{
-			_serviceRegistry.Register<ILoggerService, MockLogger>(ServiceLifetime.Singleton);
+        [Test]
+        public void CreateBootstrapper_InitializeWithoutExistingEngineService_ThrowsInvalidOperationException()
+        {
+            _serviceRegistry.Register<ILoggerService, MockLogger>(ServiceLifetime.Singleton);
 
-			Assert.Throws<InvalidOperationException>(() => _bootstrapper.Initialize(_serviceRegistry, _serviceLocator));
-		}
+            Assert.Throws<InvalidOperationException>(() => _bootstrapper.Initialize(_serviceRegistry, _serviceLocator));
+        }
 
-		[Test]
-		public void CreateBootstrapper_WithNullServiceRegistry_ThrowsArgumentNullException()
-		{
-			Assert.Throws<ArgumentNullException>(() => _bootstrapper.Initialize(null!, _serviceLocator));
-		}
+        [Test]
+        public void CreateBootstrapper_WithNullServiceRegistry_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => _bootstrapper.Initialize(null!, _serviceLocator));
+        }
 
-		[Test]
-		public void CreateBootstrapper_WithNullServiceLocator_ThrowsArgumentNullException()
-		{
-			Assert.Throws<ArgumentNullException>(() => _bootstrapper.Initialize(_serviceRegistry, null!));
-		}
+        [Test]
+        public void CreateBootstrapper_WithNullServiceLocator_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => _bootstrapper.Initialize(_serviceRegistry, null!));
+        }
 
-		[Test]
-		public void CreateBootstrapper_GetService_DoesNotThrow()
-		{
-			_serviceRegistry.Register<IEngineService, MockEngineService>(ServiceLifetime.Singleton);
-			_serviceRegistry.Register<ILoggerService, MockLogger>(ServiceLifetime.Singleton);
+        [Test]
+        public void CreateBootstrapper_GetService_DoesNotThrow()
+        {
+            _serviceRegistry.Register<IEngineService, MockEngineService>(ServiceLifetime.Singleton);
+            _serviceRegistry.Register<ILoggerService, MockLogger>(ServiceLifetime.Singleton);
 
-			_bootstrapper.Initialize(_serviceRegistry, _serviceLocator);
+            _bootstrapper.Initialize(_serviceRegistry, _serviceLocator);
 
-			Assert.DoesNotThrow(() => _serviceLocator.GetService<IFileSystem>());
-		}
+            Assert.DoesNotThrow(() => _serviceLocator.GetService<IFileSystem>());
+        }
 
-		[Test]
-		public void CreateBootstrapper_AndShutdownBootstrapper_DoesNotThrow()
-		{
-			// Arrange
-			_serviceRegistry.Register<IEngineService, MockEngineService>(ServiceLifetime.Singleton);
-			_serviceRegistry.Register<ILoggerService, MockLogger>(ServiceLifetime.Singleton);
-			_bootstrapper.Initialize(_serviceRegistry, _serviceLocator);
+        [Test]
+        public void CreateBootstrapper_AndShutdownBootstrapper_DoesNotThrow()
+        {
+            // Arrange
+            _serviceRegistry.Register<IEngineService, MockEngineService>(ServiceLifetime.Singleton);
+            _serviceRegistry.Register<ILoggerService, MockLogger>(ServiceLifetime.Singleton);
+            _bootstrapper.Initialize(_serviceRegistry, _serviceLocator);
 
-			// Assert
-			Assert.DoesNotThrow(() => _bootstrapper.Shutdown());
-		}
+            // Assert
+            Assert.DoesNotThrow(() => _bootstrapper.Shutdown());
+        }
 
-		[Test]
-		public void ShutdownBeforeInitialize_DoesNotThrow()
-		{
-			// Assert
-			Assert.DoesNotThrow(() => _bootstrapper.Shutdown());
-		}
+        [Test]
+        public void ShutdownBeforeInitialize_DoesNotThrow()
+        {
+            // Assert
+            Assert.DoesNotThrow(() => _bootstrapper.Shutdown());
+        }
 
-		[Test]
-		public void CreateBootstrapper_InitializeThenGetService_DoesNotThrow()
-		{
-			// Arrange
-			_serviceRegistry.Register<IEngineService, MockEngineService>(ServiceLifetime.Singleton);
-			_serviceRegistry.Register<ILoggerService, MockLogger>(ServiceLifetime.Singleton);
-			
-			// Act
-			_bootstrapper.Initialize(_serviceRegistry, _serviceLocator);
+        [Test]
+        public void CreateBootstrapper_InitializeThenGetService_DoesNotThrow()
+        {
+            // Arrange
+            _serviceRegistry.Register<IEngineService, MockEngineService>(ServiceLifetime.Singleton);
+            _serviceRegistry.Register<ILoggerService, MockLogger>(ServiceLifetime.Singleton);
 
-			// Assert
-			Assert.DoesNotThrow(() => _serviceLocator.GetService<IFileSystem>());
-		}
-	}
+            // Act
+            _bootstrapper.Initialize(_serviceRegistry, _serviceLocator);
+
+            // Assert
+            Assert.DoesNotThrow(() => _serviceLocator.GetService<IFileSystem>());
+        }
+    }
 }

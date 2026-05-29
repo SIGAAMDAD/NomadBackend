@@ -12,8 +12,8 @@ using Nomad.Events.Private.SubscriptionSets;
 namespace Nomad.Events.PerformanceTests
 {
     [TestFixture]
-	[Category("Nomad.Events")]
-	[Category("Performance")]
+    [Category("Nomad.Events")]
+    [Category("Performance")]
     [Explicit("Performance comparison suite. Run manually; timings are environment-sensitive.")]
     [NonParallelizable]
     public sealed class SubscriptionSetPumpPerformanceComparisonTests

@@ -76,7 +76,7 @@ namespace Nomad.FileSystem.Tests
         [Test]
         public void Create_WithInvalidAllocationStrategy_ThrowsIndexOutOfRangeException()
         {
-            Assert.Throws<IndexOutOfRangeException>(() => _service.OpenRead(new MemoryFileReadConfig{ FilePath = "memread.bin", MaxCapacity = 1024, Strategy = (AllocationStrategy)99 }));
+            Assert.Throws<IndexOutOfRangeException>(() => _service.OpenRead(new MemoryFileReadConfig { FilePath = "memread.bin", MaxCapacity = 1024, Strategy = (AllocationStrategy)99 }));
         }
 
         [Test]

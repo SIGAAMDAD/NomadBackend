@@ -157,13 +157,13 @@ namespace Nomad.Events.Tests
             // Act
             var events = _registry.GetAllEvents();
 
-			using (Assert.EnterMultipleScope())
-			{
-				// Assert
-				Assert.That(events, Does.Contain(event1));
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(events, Does.Contain(event1));
                 Assert.That(events, Does.Contain(event2));
                 Assert.That(events, Does.Contain(event3));
-			}
+            }
         }
 
         #endregion
@@ -227,14 +227,14 @@ namespace Nomad.Events.Tests
             // Act
             _registry.ClearAllEvents();
 
-			using (Assert.EnterMultipleScope())
-			{
-				// Assert
-				Assert.That(_registry.TryGetEvent<EmptyEventArgs>("Event1", nameSpace, out _), Is.False);
-				Assert.That(_registry.TryGetEvent<EmptyEventArgs>("Event2", nameSpace, out _), Is.False);
-				Assert.That(_registry.TryGetEvent<EmptyEventArgs>("Event3", nameSpace, out _), Is.False);
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                // Assert
+                Assert.That(_registry.TryGetEvent<EmptyEventArgs>("Event1", nameSpace, out _), Is.False);
+                Assert.That(_registry.TryGetEvent<EmptyEventArgs>("Event2", nameSpace, out _), Is.False);
+                Assert.That(_registry.TryGetEvent<EmptyEventArgs>("Event3", nameSpace, out _), Is.False);
+            }
+        }
 
         #endregion
 

@@ -17,16 +17,16 @@ using NUnit.Framework;
 
 namespace Nomad.FileSystem.Tests
 {
-	[TestFixture]
-	[Category("Nomad.FileSystem")]
-	[Category("Streams.Memory")]
-	[Category("Unit")]
-	public class MemoryReadStreamTests
-	{
-		[SetUp]
-		public void Setup()
-		{
-			
-		}
-	}
+    [TestFixture]
+    [Category("Nomad.FileSystem")]
+    [Category("Streams.Memory")]
+    [Category("Unit")]
+    public class MemoryReadStreamTests
+    {
+        [SetUp]
+        public void Setup()
+        {
+
+        }
+    }
 }

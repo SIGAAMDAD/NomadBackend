@@ -21,50 +21,51 @@ using NUnit.Framework;
 
 namespace Nomad.Core.Tests
 {
-	[TestFixture]
-	[Category("Nomad.Core")]
-	[Category("Guards")]
-	[Category("Unit")]
-	public class MemoryGuardTests
-	{
-		[Test]
-		public void MemoryGuard_ThrowIfUnaligned_ThrowsWhenUnaligned()
-		{
-			int alignment = 16;
-			IntPtr ptr = Marshal.AllocHGlobal(alignment * 2 + 16);
-			nuint addr = (nuint)ptr;
-			nuint aligned = (addr + (nuint)(alignment - 1)) & ~(nuint)(alignment - 1);
-			IntPtr unaligned = (IntPtr)(aligned + 1);
+    [TestFixture]
+    [Category("Nomad.Core")]
+    [Category("Guards")]
+    [Category("Unit")]
+    public class MemoryGuardTests
+    {
+        [Test]
+        public void MemoryGuard_ThrowIfUnaligned_ThrowsWhenUnaligned()
+        {
+            int alignment = 16;
+            IntPtr ptr = Marshal.AllocHGlobal(alignment * 2 + 16);
+            nuint addr = (nuint)ptr;
+            nuint aligned = (addr + (nuint)(alignment - 1)) & ~(nuint)(alignment - 1);
+            IntPtr unaligned = (IntPtr)(aligned + 1);
 
-			Assert.Throws<ArgumentException>(() => MemoryGuard.ThrowIfUnaligned(unaligned, alignment));
-			Marshal.FreeHGlobal(ptr);
-		}
+            Assert.Throws<ArgumentException>(() => MemoryGuard.ThrowIfUnaligned(unaligned, alignment));
+            Marshal.FreeHGlobal(ptr);
+        }
 
-		[Test]
-		public void MemoryGuard_ThrowIfUnaligned_DoesNotThrowWhenAligned()
-		{
-			unsafe {
-				int size = 64;
-				int alignment = 16;
-				int alignedSize = ( ( size ) + ( alignment ) - 1 ) & ~( ( alignment ) - 1 );
-				IntPtr ptr = Marshal.AllocHGlobal(alignedSize);
-				Assert.DoesNotThrow(() => MemoryGuard.ThrowIfUnaligned(ptr, alignment));
-				Marshal.FreeHGlobal(ptr);
-			}
-		}
+        [Test]
+        public void MemoryGuard_ThrowIfUnaligned_DoesNotThrowWhenAligned()
+        {
+            unsafe
+            {
+                int size = 64;
+                int alignment = 16;
+                int alignedSize = ((size) + (alignment) - 1) & ~((alignment) - 1);
+                IntPtr ptr = Marshal.AllocHGlobal(alignedSize);
+                Assert.DoesNotThrow(() => MemoryGuard.ThrowIfUnaligned(ptr, alignment));
+                Marshal.FreeHGlobal(ptr);
+            }
+        }
 
-		[Test]
-		public void MemoryGuard_ThrowIfNullPtr_ThrowsWhenNull()
-		{
-			Assert.Throws<ArgumentNullException>(() => MemoryGuard.ThrowIfNullPtr(IntPtr.Zero));
-		}
+        [Test]
+        public void MemoryGuard_ThrowIfNullPtr_ThrowsWhenNull()
+        {
+            Assert.Throws<ArgumentNullException>(() => MemoryGuard.ThrowIfNullPtr(IntPtr.Zero));
+        }
 
-		[Test]
-		public void MemoryGuard_ThrowIfNullPtr_DoesNotThrowWhenValidPtr()
-		{
-			IntPtr ptr = Marshal.AllocHGlobal(24);
-			Assert.DoesNotThrow(() => MemoryGuard.ThrowIfNullPtr(ptr));
-			Marshal.FreeHGlobal(ptr);
-		}
-	}
+        [Test]
+        public void MemoryGuard_ThrowIfNullPtr_DoesNotThrowWhenValidPtr()
+        {
+            IntPtr ptr = Marshal.AllocHGlobal(24);
+            Assert.DoesNotThrow(() => MemoryGuard.ThrowIfNullPtr(ptr));
+            Marshal.FreeHGlobal(ptr);
+        }
+    }
 }

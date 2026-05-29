@@ -121,7 +121,7 @@ namespace Nomad.Events.Tests
 
             object boxedValue = key2;
 
-			Assert.That(key1.Equals(boxedValue));
+            Assert.That(key1.Equals(boxedValue));
         }
 
         [Test]

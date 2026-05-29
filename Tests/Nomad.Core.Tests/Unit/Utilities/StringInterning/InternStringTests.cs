@@ -163,9 +163,9 @@ namespace Nomad.Core.Tests
             var right = new InternString(99);
 
             bool nequal = left != right;
-			Assert.That(nequal, Is.True);
+            Assert.That(nequal, Is.True);
         }
-        
+
         [Test]
         public void GetHashCode_ReturnsId()
         {
@@ -332,9 +332,9 @@ namespace Nomad.Core.Tests
             Assert.That(set, Has.Count.EqualTo(2));
             using (Assert.EnterMultipleScope())
             {
-				Assert.That(set, Does.Contain(a));
-				Assert.That(set, Does.Contain(b)); // same instance
-				Assert.That(set, Does.Contain(new InternString("set test")));
+                Assert.That(set, Does.Contain(a));
+                Assert.That(set, Does.Contain(b)); // same instance
+                Assert.That(set, Does.Contain(new InternString("set test")));
             }
         }
 

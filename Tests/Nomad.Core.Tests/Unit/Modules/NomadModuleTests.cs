@@ -19,25 +19,25 @@ using NUnit.Framework;
 
 namespace Nomad.Core.Tests
 {
-	[TestFixture]
-	[Category("Nomad.Core")]
-	[Category("Modules")]
-	[Category("Unit")]
-	public class NomadModuleTests
-	{
-		private NomadModule _module;
+    [TestFixture]
+    [Category("Nomad.Core")]
+    [Category("Modules")]
+    [Category("Unit")]
+    public class NomadModuleTests
+    {
+        private NomadModule _module;
 
-		[SetUp]
-		public void Setup()
-		{
-			var asm = typeof(NomadModule).Assembly;
-			_module = asm.GetCustomAttribute<NomadModule>();
-		}
+        [SetUp]
+        public void Setup()
+        {
+            var asm = typeof(NomadModule).Assembly;
+            _module = asm.GetCustomAttribute<NomadModule>();
+        }
 
-		[Test]
-		public void Module_HasCorrectMetadata()
-		{
-			Assert.That(_module.Name, Is.EqualTo("Nomad.Core"));
-		}
-	}
+        [Test]
+        public void Module_HasCorrectMetadata()
+        {
+            Assert.That(_module.Name, Is.EqualTo("Nomad.Core"));
+        }
+    }
 }

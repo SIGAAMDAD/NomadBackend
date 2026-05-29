@@ -14,6 +14,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Diagnostics;
 using Nomad.Core.Logger;
 
 namespace Nomad.Logger.Extensions
@@ -28,7 +29,7 @@ namespace Nomad.Logger.Extensions
         {
             _category = category;
             _name = name;
-            _startTicks = Environment.TickCount64;
+            _startTicks = (long)( Stopwatch.GetTimestamp() * 1000.0f / Stopwatch.Frequency );
 
             _category.PrintLine($"Begin: {_name}");
         }
@@ -40,7 +41,7 @@ namespace Nomad.Logger.Extensions
                 return;
             }
 
-            long elapsedMS = Environment.TickCount64 - _startTicks;
+            long elapsedMS = (long)( Stopwatch.GetTimestamp() * 1000.0f / Stopwatch.Frequency );
             _category.PrintLine($"End: {_name} ({elapsedMS}ms)");
         }
     }

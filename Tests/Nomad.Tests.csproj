@@ -7,8 +7,9 @@
     <IsPackable>false</IsPackable>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);CA1812</NoWarn>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Benchly" />
     <PackageReference Include="coverlet.collector">

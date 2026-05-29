@@ -10,8 +10,8 @@ using Nomad.Events.Private.SubscriptionSets;
 namespace Nomad.Events.Tests
 {
     [TestFixture]
-	[Category("Nomad.Events")]
-	[Category("Unit")]
+    [Category("Nomad.Events")]
+    [Category("Unit")]
     public sealed class AtomicSubscriptionSetTests
     {
         private MockLogger _logger = null!;
@@ -28,7 +28,7 @@ namespace Nomad.Events.Tests
         public void TearDown()
         {
             _logger.Dispose();
-			_eventData.Dispose();
+            _eventData.Dispose();
         }
 
         private AtomicSubscriptionSet<TestArgs> CreateSet(
@@ -45,11 +45,12 @@ namespace Nomad.Events.Tests
         {
             using var set = CreateSet();
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( set.SubscriberCount, Is.Zero );
-				Assert.That( set.PublishCount, Is.Zero );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(set.SubscriberCount, Is.Zero);
+                Assert.That(set.PublishCount, Is.Zero);
+            }
+        }
 
         [Test]
         public void Constructor_NullEventData_ThrowsArgumentNullException()
@@ -77,13 +78,14 @@ namespace Nomad.Events.Tests
 
             bool added = set.AddSubscription(callback);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( added, Is.True );
-				Assert.That( set.SubscriberCount, Is.EqualTo( 1 ) );
-				Assert.That( set.ContainsCallback( callback, out int index ), Is.True );
-				Assert.That( index, Is.EqualTo( 0 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(added, Is.True);
+                Assert.That(set.SubscriberCount, Is.EqualTo(1));
+                Assert.That(set.ContainsCallback(callback, out int index), Is.True);
+                Assert.That(index, Is.EqualTo(0));
+            }
+        }
 
         [Test]
         public void AddSubscription_NullCallback_ThrowsArgumentNullException()
@@ -102,12 +104,13 @@ namespace Nomad.Events.Tests
             bool first = set.AddSubscription(callback);
             bool second = set.AddSubscription(callback);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( first, Is.True );
-				Assert.That( second, Is.False );
-				Assert.That( set.SubscriberCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(first, Is.True);
+                Assert.That(second, Is.False);
+                Assert.That(set.SubscriberCount, Is.EqualTo(1));
+            }
+        }
 
         [Test]
         public void RemoveSubscription_RemovesExistingCallbackAndDecrementsSubscriberCount()
@@ -119,13 +122,14 @@ namespace Nomad.Events.Tests
 
             bool removed = set.RemoveSubscription(callback);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( removed, Is.True );
-				Assert.That( set.SubscriberCount, Is.Zero );
-				Assert.That( set.ContainsCallback( callback, out int index ), Is.False );
-				Assert.That( index, Is.EqualTo( -1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(removed, Is.True);
+                Assert.That(set.SubscriberCount, Is.Zero);
+                Assert.That(set.ContainsCallback(callback, out int index), Is.False);
+                Assert.That(index, Is.EqualTo(-1));
+            }
+        }
 
         [Test]
         public void RemoveSubscription_NullCallback_ThrowsArgumentNullException()
@@ -143,11 +147,12 @@ namespace Nomad.Events.Tests
 
             bool removed = set.RemoveSubscription(callback);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( removed, Is.False );
-				Assert.That( set.SubscriberCount, Is.Zero );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(removed, Is.False);
+                Assert.That(set.SubscriberCount, Is.Zero);
+            }
+        }
 
         [Test]
         public void RemoveSubscription_RemovesMiddleCallbackAndPreservesRemainingOrder()
@@ -167,21 +172,22 @@ namespace Nomad.Events.Tests
 
             set.Pump(new TestArgs { Value = 1 });
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( removed, Is.True );
-				Assert.That( set.SubscriberCount, Is.EqualTo( 2 ) );
-				Assert.That( order, Is.EqualTo( new[] { 1, 3 } ) );
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(removed, Is.True);
+                Assert.That(set.SubscriberCount, Is.EqualTo(2));
+                Assert.That(order, Is.EqualTo(new[] { 1, 3 }));
 
-				Assert.That( set.ContainsCallback( first, out int firstIndex ), Is.True );
-				Assert.That( firstIndex, Is.EqualTo( 0 ) );
+                Assert.That(set.ContainsCallback(first, out int firstIndex), Is.True);
+                Assert.That(firstIndex, Is.EqualTo(0));
 
-				Assert.That( set.ContainsCallback( third, out int thirdIndex ), Is.True );
-				Assert.That( thirdIndex, Is.EqualTo( 1 ) );
+                Assert.That(set.ContainsCallback(third, out int thirdIndex), Is.True);
+                Assert.That(thirdIndex, Is.EqualTo(1));
 
-				Assert.That( set.ContainsCallback( second, out int removedIndex ), Is.False );
-				Assert.That( removedIndex, Is.EqualTo( -1 ) );
-			}
-		}
+                Assert.That(set.ContainsCallback(second, out int removedIndex), Is.False);
+                Assert.That(removedIndex, Is.EqualTo(-1));
+            }
+        }
 
         [Test]
         public void ContainsCallback_NullCallback_ReturnsFalse()
@@ -190,11 +196,12 @@ namespace Nomad.Events.Tests
 
             bool found = set.ContainsCallback(null!, out int index);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( found, Is.False );
-				Assert.That( index, Is.EqualTo( -1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(found, Is.False);
+                Assert.That(index, Is.EqualTo(-1));
+            }
+        }
 
         [Test]
         public void ContainsCallback_MissingCallback_ReturnsFalseAndMinusOneIndex()
@@ -204,11 +211,12 @@ namespace Nomad.Events.Tests
 
             bool found = set.ContainsCallback(callback, out int index);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( found, Is.False );
-				Assert.That( index, Is.EqualTo( -1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(found, Is.False);
+                Assert.That(index, Is.EqualTo(-1));
+            }
+        }
 
         #endregion
 
@@ -237,11 +245,12 @@ namespace Nomad.Events.Tests
 
             set.Pump(new TestArgs { Value = 10 });
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( order, Is.EqualTo( new[] { 1, 2, 3 } ) );
-				Assert.That( set.PublishCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(order, Is.EqualTo(new[] { 1, 2, 3 }));
+                Assert.That(set.PublishCount, Is.EqualTo(1));
+            }
+        }
 
         [Test]
         public void Pump_PassesPayloadToEverySubscriber()
@@ -271,11 +280,12 @@ namespace Nomad.Events.Tests
 
             set.Pump(new TestArgs { Value = 1 });
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( asyncCalls, Is.Zero );
-				Assert.That( set.PublishCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(asyncCalls, Is.Zero);
+                Assert.That(set.PublishCount, Is.EqualTo(1));
+            }
+        }
 
         [Test]
         public void Pump_AddSubscriptionDuringDispatch_DoesNotInvokeNewSubscriberUntilNextPump()
@@ -345,11 +355,12 @@ namespace Nomad.Events.Tests
 
             Assert.DoesNotThrow(() => set.Pump(new TestArgs { Value = 1 }));
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( afterThrowingSubscriberCalls, Is.EqualTo( 1 ) );
-				Assert.That( set.PublishCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(afterThrowingSubscriberCalls, Is.EqualTo(1));
+                Assert.That(set.PublishCount, Is.EqualTo(1));
+            }
+        }
 
         [Test]
         public void Pump_Propagate_WhenSubscriberThrows_ThrowsEventHandlerExceptionAndStopsDispatch()
@@ -362,11 +373,12 @@ namespace Nomad.Events.Tests
 
             Assert.Throws<EventHandlerException>(() => set.Pump(new TestArgs { Value = 1 }));
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( afterThrowingSubscriberCalls, Is.Zero );
-				Assert.That( set.PublishCount, Is.Zero );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(afterThrowingSubscriberCalls, Is.Zero);
+                Assert.That(set.PublishCount, Is.Zero);
+            }
+        }
 
         [Test]
         public void Pump_AggregateAfterDispatch_WhenSubscriberThrows_InvokesRemainingSubscribersThenThrowsEventPublishException()
@@ -394,13 +406,14 @@ namespace Nomad.Events.Tests
 
             bool added = set.AddSubscriptionAsync(callback);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( added, Is.True );
-				Assert.That( set.SubscriberCount, Is.EqualTo( 1 ) );
-				Assert.That( set.ContainsCallbackAsync( callback, out int index ), Is.True );
-				Assert.That( index, Is.EqualTo( 0 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(added, Is.True);
+                Assert.That(set.SubscriberCount, Is.EqualTo(1));
+                Assert.That(set.ContainsCallbackAsync(callback, out int index), Is.True);
+                Assert.That(index, Is.EqualTo(0));
+            }
+        }
 
         [Test]
         public void AddSubscriptionAsync_NullCallback_ThrowsArgumentNullException()
@@ -419,12 +432,13 @@ namespace Nomad.Events.Tests
             bool first = set.AddSubscriptionAsync(callback);
             bool second = set.AddSubscriptionAsync(callback);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( first, Is.True );
-				Assert.That( second, Is.False );
-				Assert.That( set.SubscriberCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(first, Is.True);
+                Assert.That(second, Is.False);
+                Assert.That(set.SubscriberCount, Is.EqualTo(1));
+            }
+        }
 
         [Test]
         public void RemoveSubscriptionAsync_RemovesExistingCallbackAndDecrementsSubscriberCount()
@@ -436,13 +450,14 @@ namespace Nomad.Events.Tests
 
             bool removed = set.RemoveSubscriptionAsync(callback);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( removed, Is.True );
-				Assert.That( set.SubscriberCount, Is.Zero );
-				Assert.That( set.ContainsCallbackAsync( callback, out int index ), Is.False );
-				Assert.That( index, Is.EqualTo( -1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(removed, Is.True);
+                Assert.That(set.SubscriberCount, Is.Zero);
+                Assert.That(set.ContainsCallbackAsync(callback, out int index), Is.False);
+                Assert.That(index, Is.EqualTo(-1));
+            }
+        }
 
         [Test]
         public void RemoveSubscriptionAsync_NullCallback_ThrowsArgumentNullException()
@@ -460,11 +475,12 @@ namespace Nomad.Events.Tests
 
             bool removed = set.RemoveSubscriptionAsync(callback);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( removed, Is.False );
-				Assert.That( set.SubscriberCount, Is.Zero );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(removed, Is.False);
+                Assert.That(set.SubscriberCount, Is.Zero);
+            }
+        }
 
         [Test]
         public void ContainsCallbackAsync_NullCallback_ReturnsFalse()
@@ -473,11 +489,12 @@ namespace Nomad.Events.Tests
 
             bool found = set.ContainsCallbackAsync(null!, out int index);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( found, Is.False );
-				Assert.That( index, Is.EqualTo( -1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(found, Is.False);
+                Assert.That(index, Is.EqualTo(-1));
+            }
+        }
 
         [Test]
         public void ContainsCallbackAsync_MissingCallback_ReturnsFalseAndMinusOneIndex()
@@ -487,11 +504,12 @@ namespace Nomad.Events.Tests
 
             bool found = set.ContainsCallbackAsync(callback, out int index);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( found, Is.False );
-				Assert.That( index, Is.EqualTo( -1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(found, Is.False);
+                Assert.That(index, Is.EqualTo(-1));
+            }
+        }
 
         #endregion
 
@@ -527,11 +545,12 @@ namespace Nomad.Events.Tests
 
             await set.PumpAsync(new TestArgs { Value = 3 }, CancellationToken.None);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( callCount, Is.EqualTo( 9 ) );
-				Assert.That( set.PublishCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(callCount, Is.EqualTo(9));
+                Assert.That(set.PublishCount, Is.EqualTo(1));
+            }
+        }
 
         [Test]
         public async Task PumpAsync_DoesNotInvokeSynchronousSubscribers()
@@ -543,11 +562,12 @@ namespace Nomad.Events.Tests
 
             await set.PumpAsync(new TestArgs { Value = 1 }, CancellationToken.None);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( syncCalls, Is.Zero );
-				Assert.That( set.PublishCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(syncCalls, Is.Zero);
+                Assert.That(set.PublishCount, Is.EqualTo(1));
+            }
+        }
 
         [Test]
         public void PumpAsync_WhenTokenAlreadyCanceled_ThrowsOperationCanceledExceptionAndDoesNotInvokeSubscribers()
@@ -567,11 +587,12 @@ namespace Nomad.Events.Tests
             Assert.ThrowsAsync<OperationCanceledException>(async () =>
                 await set.PumpAsync(new TestArgs { Value = 1 }, cts.Token));
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( calls, Is.Zero );
-				Assert.That( set.PublishCount, Is.Zero );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(calls, Is.Zero);
+                Assert.That(set.PublishCount, Is.Zero);
+            }
+        }
 
         [Test]
         public async Task PumpAsync_AfterRemovingAsyncSubscriber_DoesNotInvokeRemovedSubscriber()
@@ -599,13 +620,14 @@ namespace Nomad.Events.Tests
 
             await set.PumpAsync(new TestArgs { Value = 1 }, CancellationToken.None);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( removed, Is.True );
-				Assert.That( firstCalls, Is.EqualTo( 1 ) );
-				Assert.That( secondCalls, Is.Zero );
-				Assert.That( set.SubscriberCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(removed, Is.True);
+                Assert.That(firstCalls, Is.EqualTo(1));
+                Assert.That(secondCalls, Is.Zero);
+                Assert.That(set.SubscriberCount, Is.EqualTo(1));
+            }
+        }
 
         [Test]
         public async Task PumpAsync_AddAsyncSubscriptionDuringDispatch_DoesNotInvokeNewSubscriberUntilNextPump()
@@ -653,20 +675,22 @@ namespace Nomad.Events.Tests
 
             Task publishTask = set.PumpAsync(new TestArgs { Value = 1 }, CancellationToken.None);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( publishTask.IsCompleted, Is.False );
-				Assert.That( completedCalls, Is.Zero );
-			}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(publishTask.IsCompleted, Is.False);
+                Assert.That(completedCalls, Is.Zero);
+            }
 
-			tcs.SetResult();
+            tcs.SetResult();
 
             await publishTask;
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( completedCalls, Is.EqualTo( 1 ) );
-				Assert.That( set.PublishCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(completedCalls, Is.EqualTo(1));
+                Assert.That(set.PublishCount, Is.EqualTo(1));
+            }
+        }
 
         #endregion
 
@@ -688,11 +712,12 @@ namespace Nomad.Events.Tests
 
             await set.PumpAsync(new TestArgs { Value = 1 }, CancellationToken.None);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( successfulCalls, Is.EqualTo( 1 ) );
-				Assert.That( set.PublishCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(successfulCalls, Is.EqualTo(1));
+                Assert.That(set.PublishCount, Is.EqualTo(1));
+            }
+        }
 
         [Test]
         public void PumpAsync_AggregateAfterDispatch_WhenSubscriberFaults_ThrowsEventPublishExceptionAfterAwaitingAll()
@@ -770,12 +795,13 @@ namespace Nomad.Events.Tests
 
             await set.PumpAsync(new TestArgs { Value = 1 }, CancellationToken.None);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( removed, Is.True );
-				Assert.That( asyncCalls, Is.EqualTo( 1 ) );
-				Assert.That( set.SubscriberCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(removed, Is.True);
+                Assert.That(asyncCalls, Is.EqualTo(1));
+                Assert.That(set.SubscriberCount, Is.EqualTo(1));
+            }
+        }
 
         [Test]
         public async Task RemovingAsyncSubscriber_DoesNotLeaveNullOrStaleTaskCacheEntries()
@@ -803,13 +829,14 @@ namespace Nomad.Events.Tests
 
             Assert.That(removed, Is.True);
 
-			await set.PumpAsync( new TestArgs { Value = 1 }, CancellationToken.None );
+            await set.PumpAsync(new TestArgs { Value = 1 }, CancellationToken.None);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( calls, Is.EqualTo( 1 ) );
-				Assert.That( set.SubscriberCount, Is.EqualTo( 1 ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(calls, Is.EqualTo(1));
+                Assert.That(set.SubscriberCount, Is.EqualTo(1));
+            }
+        }
 
         #endregion
 
@@ -903,13 +930,14 @@ namespace Nomad.Events.Tests
 
             await Task.WhenAll(tasks);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( results.Count( static result => result ), Is.EqualTo( 1 ) );
-				Assert.That( set.SubscriberCount, Is.EqualTo( 1 ) );
-				Assert.That( set.ContainsCallback( callback, out int index ), Is.True );
-				Assert.That( index, Is.Zero );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(results.Count(static result => result), Is.EqualTo(1));
+                Assert.That(set.SubscriberCount, Is.EqualTo(1));
+                Assert.That(set.ContainsCallback(callback, out int index), Is.True);
+                Assert.That(index, Is.Zero);
+            }
+        }
 
         [Test]
         public async Task ConcurrentAdd_DistinctCallbacks_AllSubscriptionsAreAdded()
@@ -938,11 +966,12 @@ namespace Nomad.Events.Tests
 
             set.Pump(new TestArgs { Value = 1 });
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( set.SubscriberCount, Is.EqualTo( subscriberCount ) );
-				Assert.That( calls, Is.EqualTo( subscriberCount ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(set.SubscriberCount, Is.EqualTo(subscriberCount));
+                Assert.That(calls, Is.EqualTo(subscriberCount));
+            }
+        }
 
         [Test]
         public async Task ConcurrentPump_ReadOnlyDispatch_IsSafeAndInvokesExpectedNumberOfCallbacks()
@@ -975,11 +1004,12 @@ namespace Nomad.Events.Tests
 
             await Task.WhenAll(publishers);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( calls, Is.EqualTo( subscriberCount * publisherCount * publishesPerPublisher ) );
-				Assert.That( set.PublishCount, Is.EqualTo( publisherCount * publishesPerPublisher ) );
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(calls, Is.EqualTo(subscriberCount * publisherCount * publishesPerPublisher));
+                Assert.That(set.PublishCount, Is.EqualTo(publisherCount * publishesPerPublisher));
+            }
+        }
 
         [Test]
         public async Task ConcurrentRemove_DistinctCallbacks_AllSubscriptionsAreRemovedExactlyOnce()
@@ -1014,11 +1044,12 @@ namespace Nomad.Events.Tests
 
             foreach (var callback in callbacks)
             {
-				using ( Assert.EnterMultipleScope() ) {
-					Assert.That( set.ContainsCallback( callback, out int index ), Is.False );
-					Assert.That( index, Is.EqualTo( -1 ) );
-				}
-			}
+                using (Assert.EnterMultipleScope())
+                {
+                    Assert.That(set.ContainsCallback(callback, out int index), Is.False);
+                    Assert.That(index, Is.EqualTo(-1));
+                }
+            }
         }
 
         #endregion
@@ -1047,5 +1078,5 @@ namespace Nomad.Events.Tests
         {
             public int Value { get; init; }
         }
-	}
+    }
 }

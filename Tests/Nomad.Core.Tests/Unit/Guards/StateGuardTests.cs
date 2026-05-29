@@ -19,35 +19,35 @@ using NUnit.Framework;
 
 namespace Nomad.Core.Tests
 {
-	[TestFixture]
-	[Category("Nomad.Core")]
-	[Category("Guards")]
-	[Category("Unit")]
-	[Category("UnitTests")]
-	public class StateGuardTests
-	{
-		[Test]
-		public void StateGuard_ThrowIfTrue_ThrowsWhenTrue()
-		{
-			Assert.Throws<InvalidOperationException>(() => StateGuard.ThrowIfTrue(true));
-		}
+    [TestFixture]
+    [Category("Nomad.Core")]
+    [Category("Guards")]
+    [Category("Unit")]
+    [Category("UnitTests")]
+    public class StateGuardTests
+    {
+        [Test]
+        public void StateGuard_ThrowIfTrue_ThrowsWhenTrue()
+        {
+            Assert.Throws<InvalidOperationException>(() => StateGuard.ThrowIfTrue(true));
+        }
 
-		[Test]
-		public void StateGuard_ThrowIfTrue_DoesNotThrowWhenFalse()
-		{
-			Assert.DoesNotThrow(() => StateGuard.ThrowIfTrue(false));
-		}
+        [Test]
+        public void StateGuard_ThrowIfTrue_DoesNotThrowWhenFalse()
+        {
+            Assert.DoesNotThrow(() => StateGuard.ThrowIfTrue(false));
+        }
 
-		[Test]
-		public void StateGuard_ThrowIfFalse_ThrowsWhenFalse()
-		{
-			Assert.Throws<InvalidOperationException>(() => StateGuard.ThrowIfFalse(false));
-		}
+        [Test]
+        public void StateGuard_ThrowIfFalse_ThrowsWhenFalse()
+        {
+            Assert.Throws<InvalidOperationException>(() => StateGuard.ThrowIfFalse(false));
+        }
 
-		[Test]
-		public void StateGuard_ThrowIfFalse_DoesNotThrowWhenTrue()
-		{
-			Assert.DoesNotThrow(() => StateGuard.ThrowIfFalse(true));
-		}
-	}
+        [Test]
+        public void StateGuard_ThrowIfFalse_DoesNotThrowWhenTrue()
+        {
+            Assert.DoesNotThrow(() => StateGuard.ThrowIfFalse(true));
+        }
+    }
 }

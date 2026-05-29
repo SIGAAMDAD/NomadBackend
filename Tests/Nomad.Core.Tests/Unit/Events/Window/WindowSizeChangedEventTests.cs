@@ -17,21 +17,25 @@ using Nomad.Core.Engine.Services;
 using Nomad.Core.Engine.Windowing;
 using NUnit.Framework;
 
-namespace Nomad.Core.Tests {
-	[TestFixture]
-    [Category( "Nomad.Core" )]
-    [Category( "Events.Window" )]
-    [Category( "Unit" )]
-    [Category( "UnitTests" )]
-	public sealed class WindowSizeChangedEventTests {
-		[Test]
-		public void WindowSizeChangedEvent_Constructor_ExposesAssignedValues() {
-			var sizeChangedEvent = new WindowSizeChangedEventArgs( 640, 480 );
+namespace Nomad.Core.Tests
+{
+    [TestFixture]
+    [Category("Nomad.Core")]
+    [Category("Events.Window")]
+    [Category("Unit")]
+    [Category("UnitTests")]
+    public sealed class WindowSizeChangedEventTests
+    {
+        [Test]
+        public void WindowSizeChangedEvent_Constructor_ExposesAssignedValues()
+        {
+            var sizeChangedEvent = new WindowSizeChangedEventArgs(640, 480);
 
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( sizeChangedEvent.Width, Is.EqualTo( 640 ) );
-				Assert.That( sizeChangedEvent.Height, Is.EqualTo( 480 ) );
-			}
-		}
-	}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(sizeChangedEvent.Width, Is.EqualTo(640));
+                Assert.That(sizeChangedEvent.Height, Is.EqualTo(480));
+            }
+        }
+    }
 }

@@ -18,6 +18,7 @@ using System.Linq;
 using System.Reflection;
 using Nomad.Core.Events;
 using Nomad.Core.Logger;
+using Nomad.Core.Compatibility.Guards;
 
 namespace Nomad.Events.Extensions
 {
@@ -49,7 +50,7 @@ namespace Nomad.Events.Extensions
         /// <exception cref="InvalidOperationException"></exception>
         public SubscriptionScope Bind(object target)
         {
-            ArgumentNullException.ThrowIfNull(target);
+            ArgumentGuard.ThrowIfNull(target);
 
             var bag = new SubscriptionScope();
             Type targetType = target.GetType();

@@ -76,7 +76,7 @@ namespace Nomad.FileSystem.Tests
         [Test]
         public void Create_WithInvalidStreamFormat_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new FileWriteStream(new FileWriteConfig{ FilePath = _filePath, Format = (StreamFormat)128 }));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new FileWriteStream(new FileWriteConfig { FilePath = _filePath, Format = (StreamFormat)128 }));
         }
 
         [Test]

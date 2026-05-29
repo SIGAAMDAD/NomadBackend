@@ -16,39 +16,48 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using Nomad.Core.Logger;
 using System;
 
-public class MockLoggerCategory : ILoggerCategory {
-	public string Name { get; private set; }
-	public LogLevel Level { get; private set; }
-	public bool Enabled { get; set; }
+public class MockLoggerCategory : ILoggerCategory
+{
+    public string Name { get; private set; }
+    public LogLevel Level { get; private set; }
+    public bool Enabled { get; set; }
 
-	public MockLoggerCategory(string name, LogLevel level, bool enabled) {
-		Name = name;
-		Level = level;
-		Enabled = enabled;
-	}
+    public MockLoggerCategory(string name, LogLevel level, bool enabled)
+    {
+        Name = name;
+        Level = level;
+        Enabled = enabled;
+    }
 
-	public void AddSink( ILoggerSink sink ) {
-	}
+    public void AddSink(ILoggerSink sink)
+    {
+    }
 
-	public void Dispose() {
-		GC.SuppressFinalize(this);
-	}
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+    }
 
-	public void PrintDebug( string message ) {
-	}
+    public void PrintDebug(string message)
+    {
+    }
 
-	public void PrintError( string message ) {
-		Console.WriteLine($"ERROR: {message}");
-	}
+    public void PrintError(string message)
+    {
+        Console.WriteLine($"ERROR: {message}");
+    }
 
-	public void PrintLine( string message ) {
-		Console.WriteLine(message);
-	}
+    public void PrintLine(string message)
+    {
+        Console.WriteLine(message);
+    }
 
-	public void PrintWarning( string message ) {
-		Console.WriteLine($"WARNING: {message}");
-	}
+    public void PrintWarning(string message)
+    {
+        Console.WriteLine($"WARNING: {message}");
+    }
 
-	public void RemoveSink( ILoggerSink sink ) {
-	}
+    public void RemoveSink(ILoggerSink sink)
+    {
+    }
 };

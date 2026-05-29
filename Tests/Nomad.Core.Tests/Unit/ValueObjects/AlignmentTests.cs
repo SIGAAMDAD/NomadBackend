@@ -18,48 +18,48 @@ using NUnit.Framework;
 
 namespace Nomad.Core.Tests
 {
-	[TestFixture]
-	[Category("Nomad.Core")]
-	[Category("ValueObjects")]
-	[Category("Unit")]
-	[Category("UnitTests")]
-	public class AlignmentTests
-	{
-		[Test]
-		public void Alignment_Constructor_AssignsHorizontalAndVertical()
-		{
-			var alignment = new Alignment(HorizontalAlignment.End, VerticalAlignment.Start);
+    [TestFixture]
+    [Category("Nomad.Core")]
+    [Category("ValueObjects")]
+    [Category("Unit")]
+    [Category("UnitTests")]
+    public class AlignmentTests
+    {
+        [Test]
+        public void Alignment_Constructor_AssignsHorizontalAndVertical()
+        {
+            var alignment = new Alignment(HorizontalAlignment.End, VerticalAlignment.Start);
 
-			using (Assert.EnterMultipleScope())
-			{
-				Assert.That(alignment.Horizontal, Is.EqualTo(HorizontalAlignment.End));
-				Assert.That(alignment.Vertical, Is.EqualTo(VerticalAlignment.Start));
-			}
-		}
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(alignment.Horizontal, Is.EqualTo(HorizontalAlignment.End));
+                Assert.That(alignment.Vertical, Is.EqualTo(VerticalAlignment.Start));
+            }
+        }
 
-		[Test]
-		public void Alignment_StaticPresets_ReturnExpectedValues()
-		{
-			using (Assert.EnterMultipleScope())
-			{
-				Assert.That(Alignment.Center.Horizontal, Is.EqualTo(HorizontalAlignment.Center));
-				Assert.That(Alignment.Center.Vertical, Is.EqualTo(VerticalAlignment.Center));
+        [Test]
+        public void Alignment_StaticPresets_ReturnExpectedValues()
+        {
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(Alignment.Center.Horizontal, Is.EqualTo(HorizontalAlignment.Center));
+                Assert.That(Alignment.Center.Vertical, Is.EqualTo(VerticalAlignment.Center));
 
-				Assert.That(Alignment.TopLeft.Horizontal, Is.EqualTo(HorizontalAlignment.Start));
-				Assert.That(Alignment.TopLeft.Vertical, Is.EqualTo(VerticalAlignment.Start));
+                Assert.That(Alignment.TopLeft.Horizontal, Is.EqualTo(HorizontalAlignment.Start));
+                Assert.That(Alignment.TopLeft.Vertical, Is.EqualTo(VerticalAlignment.Start));
 
-				Assert.That(Alignment.TopRight.Horizontal, Is.EqualTo(HorizontalAlignment.End));
-				Assert.That(Alignment.TopRight.Vertical, Is.EqualTo(VerticalAlignment.Start));
+                Assert.That(Alignment.TopRight.Horizontal, Is.EqualTo(HorizontalAlignment.End));
+                Assert.That(Alignment.TopRight.Vertical, Is.EqualTo(VerticalAlignment.Start));
 
-				Assert.That(Alignment.BottomLeft.Horizontal, Is.EqualTo(HorizontalAlignment.Start));
-				Assert.That(Alignment.BottomLeft.Vertical, Is.EqualTo(VerticalAlignment.End));
+                Assert.That(Alignment.BottomLeft.Horizontal, Is.EqualTo(HorizontalAlignment.Start));
+                Assert.That(Alignment.BottomLeft.Vertical, Is.EqualTo(VerticalAlignment.End));
 
-				Assert.That(Alignment.BottomRight.Horizontal, Is.EqualTo(HorizontalAlignment.End));
-				Assert.That(Alignment.BottomRight.Vertical, Is.EqualTo(VerticalAlignment.End));
+                Assert.That(Alignment.BottomRight.Horizontal, Is.EqualTo(HorizontalAlignment.End));
+                Assert.That(Alignment.BottomRight.Vertical, Is.EqualTo(VerticalAlignment.End));
 
-				Assert.That(Alignment.Fill.Horizontal, Is.EqualTo(HorizontalAlignment.Stretch));
-				Assert.That(Alignment.Fill.Vertical, Is.EqualTo(VerticalAlignment.Stretch));
-			}
-		}
-	}
+                Assert.That(Alignment.Fill.Horizontal, Is.EqualTo(HorizontalAlignment.Stretch));
+                Assert.That(Alignment.Fill.Vertical, Is.EqualTo(VerticalAlignment.Stretch));
+            }
+        }
+    }
 }

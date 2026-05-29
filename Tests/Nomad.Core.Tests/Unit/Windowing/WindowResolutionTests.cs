@@ -11,17 +11,17 @@ namespace Nomad.Core.Tests
     {
         private static IEnumerable<TestCaseData> FixedResolutionCases()
         {
-            yield return new TestCaseData(WindowResolution.Res_800x600,   "800x600",   800,  600);
-            yield return new TestCaseData(WindowResolution.Res_1024x768,  "1024x768",  1024, 768);
-            yield return new TestCaseData(WindowResolution.Res_1280x720,  "1280x720",  1280, 720);
-            yield return new TestCaseData(WindowResolution.Res_1280x768,  "1280x768",  1280, 768);
-            yield return new TestCaseData(WindowResolution.Res_1280x800,  "1280x800",  1280, 800);
+            yield return new TestCaseData(WindowResolution.Res_800x600, "800x600", 800, 600);
+            yield return new TestCaseData(WindowResolution.Res_1024x768, "1024x768", 1024, 768);
+            yield return new TestCaseData(WindowResolution.Res_1280x720, "1280x720", 1280, 720);
+            yield return new TestCaseData(WindowResolution.Res_1280x768, "1280x768", 1280, 768);
+            yield return new TestCaseData(WindowResolution.Res_1280x800, "1280x800", 1280, 800);
             yield return new TestCaseData(WindowResolution.Res_1280x1024, "1280x1024", 1280, 1024);
-            yield return new TestCaseData(WindowResolution.Res_1360x768,  "1360x768",  1360, 768);
-            yield return new TestCaseData(WindowResolution.Res_1366x768,  "1366x768",  1366, 768);
-            yield return new TestCaseData(WindowResolution.Res_1440x900,  "1440x900",  1440, 900);
-            yield return new TestCaseData(WindowResolution.Res_1536x864,  "1536x864",  1536, 864);
-            yield return new TestCaseData(WindowResolution.Res_1600x900,  "1600x900",  1600, 900);
+            yield return new TestCaseData(WindowResolution.Res_1360x768, "1360x768", 1360, 768);
+            yield return new TestCaseData(WindowResolution.Res_1366x768, "1366x768", 1366, 768);
+            yield return new TestCaseData(WindowResolution.Res_1440x900, "1440x900", 1440, 900);
+            yield return new TestCaseData(WindowResolution.Res_1536x864, "1536x864", 1536, 864);
+            yield return new TestCaseData(WindowResolution.Res_1600x900, "1600x900", 1600, 900);
             yield return new TestCaseData(WindowResolution.Res_1600x1200, "1600x1200", 1600, 1200);
             yield return new TestCaseData(WindowResolution.Res_1680x1050, "1680x1050", 1680, 1050);
             yield return new TestCaseData(WindowResolution.Res_1920x1080, "1920x1080", 1920, 1080);
@@ -59,7 +59,8 @@ namespace Nomad.Core.Tests
         {
             InternString actual = resolution.ToDisplayString();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(actual, Is.EqualTo(new InternString(expectedDisplay)));
                 Assert.That(actual.ToString(), Is.EqualTo(expectedDisplay));
             }
@@ -68,7 +69,8 @@ namespace Nomad.Core.Tests
         [Test]
         public void ToDisplayString_ReturnsExpectedDisplayString_ForEnumAliases()
         {
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(
                     WindowResolution.Min.ToDisplayString(),
                     Is.EqualTo(new InternString("800x600"))
@@ -95,7 +97,8 @@ namespace Nomad.Core.Tests
         {
             WindowSize actual = resolution.GetSize();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(actual.Width, Is.EqualTo(expectedWidth));
                 Assert.That(actual.Height, Is.EqualTo(expectedHeight));
             }
@@ -108,7 +111,8 @@ namespace Nomad.Core.Tests
             WindowSize max = WindowResolution.Max.GetSize();
             WindowSize @default = WindowResolution.Default.GetSize();
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(min.Width, Is.EqualTo(800));
                 Assert.That(min.Height, Is.EqualTo(600));
 
@@ -127,7 +131,8 @@ namespace Nomad.Core.Tests
                 () => WindowResolution.Res_Native.GetSize()
             );
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(ex, Is.Not.Null);
                 Assert.That(ex!.ParamName, Is.EqualTo("resolution"));
                 Assert.That(ex.ActualValue, Is.EqualTo(WindowResolution.Res_Native));
@@ -141,7 +146,8 @@ namespace Nomad.Core.Tests
                 () => WindowResolution.Count.ToDisplayString()
             );
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(ex, Is.Not.Null);
                 Assert.That(ex!.ParamName, Is.EqualTo("resolution"));
                 Assert.That(ex.ActualValue, Is.EqualTo(WindowResolution.Count));
@@ -155,7 +161,8 @@ namespace Nomad.Core.Tests
                 () => WindowResolution.Count.GetSize()
             );
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(ex, Is.Not.Null);
                 Assert.That(ex!.ParamName, Is.EqualTo("resolution"));
                 Assert.That(ex.ActualValue, Is.EqualTo(WindowResolution.Count));
@@ -171,7 +178,8 @@ namespace Nomad.Core.Tests
                 () => invalid.ToDisplayString()
             );
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(ex, Is.Not.Null);
                 Assert.That(ex!.ParamName, Is.EqualTo("resolution"));
                 Assert.That(ex.ActualValue, Is.EqualTo(invalid));
@@ -187,7 +195,8 @@ namespace Nomad.Core.Tests
                 () => invalid.GetSize()
             );
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(ex, Is.Not.Null);
                 Assert.That(ex!.ParamName, Is.EqualTo("resolution"));
                 Assert.That(ex.ActualValue, Is.EqualTo(invalid));
@@ -206,7 +215,8 @@ namespace Nomad.Core.Tests
                 out WindowResolution actualResolution
             );
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(result, Is.True);
                 Assert.That(actualResolution, Is.EqualTo(expectedResolution));
             }
@@ -220,7 +230,8 @@ namespace Nomad.Core.Tests
                 out WindowResolution actualResolution
             );
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(result, Is.False);
                 Assert.That(actualResolution, Is.EqualTo(WindowResolution.Default));
             }
@@ -243,7 +254,8 @@ namespace Nomad.Core.Tests
                 out WindowResolution actualResolution
             );
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(result, Is.False);
                 Assert.That(actualResolution, Is.EqualTo(WindowResolution.Default));
             }
@@ -257,7 +269,8 @@ namespace Nomad.Core.Tests
                 out WindowResolution actualResolution
             );
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(result, Is.False);
                 Assert.That(actualResolution, Is.EqualTo(WindowResolution.Default));
             }
@@ -266,7 +279,8 @@ namespace Nomad.Core.Tests
         [Test]
         public void EnumAliases_AreExpectedValues()
         {
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(WindowResolution.Min, Is.EqualTo(WindowResolution.Res_800x600));
                 Assert.That(WindowResolution.Max, Is.EqualTo(WindowResolution.Res_3840x2160));
                 Assert.That(WindowResolution.Default, Is.EqualTo(WindowResolution.Res_1920x1080));
@@ -295,7 +309,8 @@ namespace Nomad.Core.Tests
                 out WindowResolution parsedResolution
             );
 
-			using ( Assert.EnterMultipleScope() ) {
+            using (Assert.EnterMultipleScope())
+            {
                 Assert.That(display, Is.EqualTo(new InternString("Native Resolution")));
                 Assert.That(parseResult, Is.True);
                 Assert.That(parsedResolution, Is.EqualTo(WindowResolution.Res_Native));

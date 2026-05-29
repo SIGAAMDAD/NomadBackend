@@ -69,33 +69,33 @@ namespace Nomad.FileSystem.Tests
         [Test]
         public void Create_WithInvalidAllocationStrategy_ThrowsIndexOutOfRangeException()
         {
-            Assert.Throws<IndexOutOfRangeException>(() => _service.OpenWrite(new MemoryFileWriteConfig{ FilePath = "memread.bin", MaxCapacity = 1024, Strategy = (AllocationStrategy)99 }));
+            Assert.Throws<IndexOutOfRangeException>(() => _service.OpenWrite(new MemoryFileWriteConfig { FilePath = "memread.bin", MaxCapacity = 1024, Strategy = (AllocationStrategy)99 }));
         }
 
         [Test]
         public void Create_WithAppendMode_ThrowsNotImplementedException()
         {
-            Assert.Throws<NotImplementedException>(() => _service.OpenWrite(new MemoryFileWriteConfig{ FilePath = "memread.bin", MaxCapacity = 1024, Append = true }));
+            Assert.Throws<NotImplementedException>(() => _service.OpenWrite(new MemoryFileWriteConfig { FilePath = "memread.bin", MaxCapacity = 1024, Append = true }));
         }
 
         [Test]
         public void Create_WithPooledBuffer_CreatesPooledBuffer()
         {
-            using var stream = _service.OpenWrite(new MemoryFileWriteConfig{ FilePath = "memread.bin", MaxCapacity = 1024, Strategy = AllocationStrategy.Pooled }) as IMemoryFileWriteStream;
+            using var stream = _service.OpenWrite(new MemoryFileWriteConfig { FilePath = "memread.bin", MaxCapacity = 1024, Strategy = AllocationStrategy.Pooled }) as IMemoryFileWriteStream;
             Assert.That(stream.Buffer, Is.InstanceOf<PooledBufferHandle>());
         }
 
         [Test]
         public void Create_WithStandardBuffer_CreatesStandardBuffer()
         {
-            using var stream = _service.OpenWrite(new MemoryFileWriteConfig{ FilePath = "memread.bin", MaxCapacity = 1024, Strategy = AllocationStrategy.Standard }) as IMemoryFileWriteStream;
+            using var stream = _service.OpenWrite(new MemoryFileWriteConfig { FilePath = "memread.bin", MaxCapacity = 1024, Strategy = AllocationStrategy.Standard }) as IMemoryFileWriteStream;
             Assert.That(stream.Buffer, Is.InstanceOf<StandardBufferHandle>());
         }
 
         [Test]
         public void Create_WithFromFileBuffer_ThrowsNotSupportedException()
         {
-            Assert.Throws<NotSupportedException>(() => _service.OpenWrite(new MemoryFileWriteConfig{ FilePath = "memread.bin", MaxCapacity = 1024, Strategy = AllocationStrategy.FromFile }));
+            Assert.Throws<NotSupportedException>(() => _service.OpenWrite(new MemoryFileWriteConfig { FilePath = "memread.bin", MaxCapacity = 1024, Strategy = AllocationStrategy.FromFile }));
         }
 
         [Test]

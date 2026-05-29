@@ -362,7 +362,7 @@ namespace Nomad.FileSystem.Tests
         {
             var path = "data.bin";
             var expectedHandle = Mock.Of<IBufferHandle>();
-            _mockFileSystem.Setup(fs => fs.LoadFileAsync(path)).Returns(async() => await ValueTask.FromResult(expectedHandle));
+            _mockFileSystem.Setup(fs => fs.LoadFileAsync(path)).Returns(async () => await ValueTask.FromResult(expectedHandle));
 
             var result = await Global.FileSystem.LoadFileAsync(path);
 
@@ -376,7 +376,7 @@ namespace Nomad.FileSystem.Tests
             var buffer = new byte[] { 1, 2, 3 };
             const int offset = 1;
             const int length = 2;
-            
+
             Global.FileSystem.WriteFile(path, buffer, offset, length);
 
             _mockFileSystem.Verify(fs => fs.WriteFile(path, buffer, offset, length), Times.Once);

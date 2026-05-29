@@ -17,54 +17,61 @@ using System.Numerics;
 using Nomad.Core.Input;
 using NUnit.Framework;
 
-namespace Nomad.Core.Tests {
-	[TestFixture]
-	[Category( "Nomad.Core" )]
-	[Category( "Events.Input" )]
-	[Category( "Unit" )]
-	[Category( "UnitTests" )]
-	public class MouseMotionEventTests {
-		[Test]
-		public void MouseMotionEvent_Constructor_ExposesAssignedValues() {
-			// Setup
-			var motionEvent = new MouseMotionEventArgs( 100L, 0, 1 );
+namespace Nomad.Core.Tests
+{
+    [TestFixture]
+    [Category("Nomad.Core")]
+    [Category("Events.Input")]
+    [Category("Unit")]
+    [Category("UnitTests")]
+    public class MouseMotionEventTests
+    {
+        [Test]
+        public void MouseMotionEvent_Constructor_ExposesAssignedValues()
+        {
+            // Setup
+            var motionEvent = new MouseMotionEventArgs(100L, 0, 1);
 
-			// Assert
-			using ( Assert.EnterMultipleScope() ) {
-				Assert.That( motionEvent.TimeStamp, Is.EqualTo( 100L ) );
-				Assert.That( motionEvent.RelativeX, Is.Zero );
-				Assert.That( motionEvent.RelativeY, Is.EqualTo( 1 ) );
-			}
-		}
+            // Assert
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(motionEvent.TimeStamp, Is.EqualTo(100L));
+                Assert.That(motionEvent.RelativeX, Is.Zero);
+                Assert.That(motionEvent.RelativeY, Is.EqualTo(1));
+            }
+        }
 
-		[Test]
-		public void MouseMotionEvent_Equals_SameRelativeValues() {
-			// Setup
-			var a = new MouseMotionEventArgs( 100L, 1, 2 );
-			var b = new MouseMotionEventArgs( 100L, 1, 2 );
+        [Test]
+        public void MouseMotionEvent_Equals_SameRelativeValues()
+        {
+            // Setup
+            var a = new MouseMotionEventArgs(100L, 1, 2);
+            var b = new MouseMotionEventArgs(100L, 1, 2);
 
-			// Assert
-			Assert.That( a, Is.EqualTo( b ) );
-		}
+            // Assert
+            Assert.That(a, Is.EqualTo(b));
+        }
 
-		[Test]
-		public void MouseMotionEvent_NotEquals_DifferentRelativeValues() {
-			// Setup
-			var a = new MouseMotionEventArgs( 100L, 2, 2 );
-			var b = new MouseMotionEventArgs( 100L, 1, 2 );
+        [Test]
+        public void MouseMotionEvent_NotEquals_DifferentRelativeValues()
+        {
+            // Setup
+            var a = new MouseMotionEventArgs(100L, 2, 2);
+            var b = new MouseMotionEventArgs(100L, 1, 2);
 
-			// Assert
-			Assert.That( a, Is.Not.EqualTo( b ) );
-		}
+            // Assert
+            Assert.That(a, Is.Not.EqualTo(b));
+        }
 
-		[Test]
-		public void MouseMotionEvent_Equals_DifferentTimestampSameRelativeValues() {
-			// Setup
-			var a = new MouseMotionEventArgs( 200L, 1, 2 );
-			var b = new MouseMotionEventArgs( 100L, 1, 2 );
+        [Test]
+        public void MouseMotionEvent_Equals_DifferentTimestampSameRelativeValues()
+        {
+            // Setup
+            var a = new MouseMotionEventArgs(200L, 1, 2);
+            var b = new MouseMotionEventArgs(100L, 1, 2);
 
-			// Assert
-			Assert.That( a, Is.EqualTo( b ) );
-		}
-	}
+            // Assert
+            Assert.That(a, Is.EqualTo(b));
+        }
+    }
 }

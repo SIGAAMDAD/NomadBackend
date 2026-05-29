@@ -48,8 +48,8 @@ namespace Nomad.Core.Tests
 
             using (Assert.EnterMultipleScope())
             {
-				Assert.That( pressed, Is.EqualTo( sameMeaning ) );
-				Assert.That( pressed, Is.Not.EqualTo( differentState ) );
+                Assert.That(pressed, Is.EqualTo(sameMeaning));
+                Assert.That(pressed, Is.Not.EqualTo(differentState));
             }
         }
 
@@ -59,7 +59,7 @@ namespace Nomad.Core.Tests
             var pressed = new GamepadButtonEventArgs(GamepadButton.B, 100L, 1, true);
             var sameMeaning = new GamepadButtonEventArgs(GamepadButton.B, 200L, 1, false);
 
-			Assert.That( pressed, Is.Not.EqualTo( sameMeaning ) );
+            Assert.That(pressed, Is.Not.EqualTo(sameMeaning));
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace Nomad.Core.Tests
             var pressed = new GamepadButtonEventArgs(GamepadButton.B, 100L, 1, true);
             var sameMeaning = new GamepadButtonEventArgs(GamepadButton.A, 100L, 1, true);
 
-			Assert.That( pressed, Is.Not.EqualTo( sameMeaning ) );
+            Assert.That(pressed, Is.Not.EqualTo(sameMeaning));
         }
     }
 }

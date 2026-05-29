@@ -21,42 +21,42 @@ using NUnit.Framework;
 
 namespace Nomad.Core.Tests
 {
-	[TestFixture]
-	[Category("Nomad.Core")]
-	[Category("Guards")]
-	[Category("Unit")]
-	public class ThreadGuardTests
-	{
-		[Test]
-		public void ThreadGuard_ThrowIfNotMainThread_ThrowsFromDedicatedThread()
-		{
-			var thread = new Thread(() => Assert.Throws<InvalidOperationException>(() => ThreadGuard.ThrowIfNotMainThread()));
-			thread.Start();
-		}
+    [TestFixture]
+    [Category("Nomad.Core")]
+    [Category("Guards")]
+    [Category("Unit")]
+    public class ThreadGuardTests
+    {
+        [Test]
+        public void ThreadGuard_ThrowIfNotMainThread_ThrowsFromDedicatedThread()
+        {
+            var thread = new Thread(() => Assert.Throws<InvalidOperationException>(() => ThreadGuard.ThrowIfNotMainThread()));
+            thread.Start();
+        }
 
-		[Test]
-		public void ThreadGuard_ThrowIfNotMainThread_ThrowsFromTask()
-		{
-			Task.Run(() => Assert.Throws<InvalidOperationException>(() => ThreadGuard.ThrowIfNotMainThread()));
-		}
+        [Test]
+        public void ThreadGuard_ThrowIfNotMainThread_ThrowsFromTask()
+        {
+            Task.Run(() => Assert.Throws<InvalidOperationException>(() => ThreadGuard.ThrowIfNotMainThread()));
+        }
 
-		[Test]
-		public void ThreadGuard_ThrowIfNotMainThread_DoesNotThrowFromMainThread()
-		{
-			Assert.DoesNotThrow(() => ThreadGuard.ThrowIfNotMainThread());
-		}
+        [Test]
+        public void ThreadGuard_ThrowIfNotMainThread_DoesNotThrowFromMainThread()
+        {
+            Assert.DoesNotThrow(() => ThreadGuard.ThrowIfNotMainThread());
+        }
 
-		[Test]
-		public void ThreadGuard_ThrowIfWrongThread_ThrowsFromSeparateThread()
-		{
-			int threadId = Environment.CurrentManagedThreadId;
-			var thread = new Thread(() => Assert.Throws<InvalidOperationException>(() => ThreadGuard.ThrowIfWrongThread(threadId)));
-		}
+        [Test]
+        public void ThreadGuard_ThrowIfWrongThread_ThrowsFromSeparateThread()
+        {
+            int threadId = Environment.CurrentManagedThreadId;
+            var thread = new Thread(() => Assert.Throws<InvalidOperationException>(() => ThreadGuard.ThrowIfWrongThread(threadId)));
+        }
 
-		[Test]
-		public void ThreadGuard_ThrowIfWrongThread_DoesNotThreadFromCorrectThread()
-		{
-			Assert.DoesNotThrow(() => ThreadGuard.ThrowIfWrongThread(Environment.CurrentManagedThreadId));
-		}
-	}
+        [Test]
+        public void ThreadGuard_ThrowIfWrongThread_DoesNotThreadFromCorrectThread()
+        {
+            Assert.DoesNotThrow(() => ThreadGuard.ThrowIfWrongThread(Environment.CurrentManagedThreadId));
+        }
+    }
 }
