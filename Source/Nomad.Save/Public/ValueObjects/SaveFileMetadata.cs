@@ -13,6 +13,8 @@ of merchantability, fitness for a particular purpose and noninfringement.
 ===========================================================================
 */
 
+using System;
+
 namespace Nomad.Save.ValueObjects
 {
     /// <summary>
@@ -23,21 +25,12 @@ namespace Nomad.Save.ValueObjects
     /// </remarks>
     /// <param name="SaveName">The save file's name. This is not the actual name, just the user-provided identification.</param>
     /// <param name="FileSize">The size of the save file in bytes.</param>
-    /// <param name="LastAccessYear">The year the save file was last accessed.</param>
-    /// <param name="LastAccessMonth">The month the save file was last accessed.</param>
-    /// <param name="LastAccessDay">The day the save file was last accessed.</param>
-    /// <param name="CreationYear"></param>
-    /// <param name="CreationMonth"></param>
-    /// <param name="CreationDay"></param>
+    /// <param name="LastAccessTime">The last time this save file was accessed.</param>
+    /// <param name="CreationTime">The time this file was created at.</param>
     public record SaveFileMetadata(
         string SaveName,
         long FileSize,
-        int LastAccessYear,
-        int LastAccessMonth,
-        int LastAccessDay,
-
-        int CreationYear,
-        int CreationMonth,
-        int CreationDay
+        DateTime LastAccessTime,
+        DateTime CreationTime
     );
 }

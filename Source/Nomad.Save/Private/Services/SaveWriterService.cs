@@ -59,6 +59,8 @@ namespace Nomad.Save.Private.Services
 
 		private readonly AtomicWriterService _atomicWriter;
 
+		private string? _currentSavePath;
+
 		private bool _isDisposed = false;
 
 		/*
@@ -126,6 +128,7 @@ namespace Nomad.Save.Private.Services
 
 			_writer = _fileSystem.OpenWrite( new MemoryFileWriteConfig { FilePath = AtomicWriterService.GetAtomicPathName() } )
 				as IMemoryFileWriteStream ?? throw new CreateSaveFileFailed( filepath );
+			_currentSavePath = filepath;
 
 			_category.PrintLine( $"Writing save data to {name} at {filepath}..." );
 			{
@@ -177,9 +180,10 @@ namespace Nomad.Save.Private.Services
 				_category.PrintLine( $"\tGameVersion: {header.Version.ToInt()}" );
 			}
 
-			// clear the memory buffer
-			string filepath = _slotRepository.AddSaveFile( name, false );
+			string filepath = _currentSavePath ?? _slotRepository.AddSaveFile( name, false );
 			_atomicWriter.FinalizeSaveData( filepath, _writer );
+			_currentSavePath = null;
+			_writer = null;
 		}
 
 		/*

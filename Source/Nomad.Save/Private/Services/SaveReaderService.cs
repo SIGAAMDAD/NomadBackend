@@ -59,7 +59,7 @@ namespace Nomad.Save.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="config"></param>
 		/// <param name="slotRepository"></param>
@@ -81,7 +81,7 @@ namespace Nomad.Save.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Dispose()
 		{
@@ -98,14 +98,20 @@ namespace Nomad.Save.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="name"></param>
 		void ISaveReaderService.Load( string name )
 		{
-			var filepath = _slotRepository.AddSaveFile( name, false );
-
 			_sections.Clear();
+
+			_category.PrintLine( $"Loading save data from {name}..." );
+
+			if ( !_slotRepository.TryGetSaveFile( name, out string filepath ) ) {
+				_category.PrintError( $"SaveReaderService.Load: couldn't open save file '{name}'!" );
+				return;
+			}
+
 			_category.PrintLine( $"Loading save data from {filepath}..." );
 
 			using var reader = _fileSystem.OpenRead( new MemoryFileReadConfig { FilePath = filepath, MaxCapacity = 8 * 1024 * 1024 } ) as IMemoryReadStream;
@@ -141,7 +147,7 @@ namespace Nomad.Save.Private.Services
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="sectionName"></param>
 		/// <returns></returns>

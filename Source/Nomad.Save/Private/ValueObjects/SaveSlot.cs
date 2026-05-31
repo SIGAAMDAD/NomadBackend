@@ -33,15 +33,11 @@ namespace Nomad.Save.Private.ValueObjects
 		{
 			StringBuilder sb = new StringBuilder( 256 );
 
-			sb.AppendFormat( "{0}_{1}_{2}{3}{4}{5}{6}{7}.ngd",
+			sb.AppendFormat( "{0}_{1}_{2}{3}.ngd",
 				autoSave ? "AutoSave" : "Data",
 				metadata.SaveName.HashFileName(),
-				metadata.CreationYear,
-				metadata.CreationMonth,
-				metadata.CreationDay,
-				metadata.LastAccessYear,
-				metadata.LastAccessMonth,
-				metadata.LastAccessDay
+				metadata.CreationTime.ToFileTimeUtc(),
+				metadata.LastAccessTime.ToFileTimeUtc()
 			);
 
 			return sb.ToString();

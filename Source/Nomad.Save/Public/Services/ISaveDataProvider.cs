@@ -28,7 +28,7 @@ namespace Nomad.Save.Services
     /// <remarks>
     /// This is meant to be multithreaded, so make sure you are taking the proper precautions around state management and loading the data from disk.
     ///
-    /// NOTE: this is v1.0.0, expect changes in the future as the framework matures.
+    /// NOTE: this is v0.1.0-alpha, expect changes in the future as the framework matures.
     /// </remarks>
     public interface ISaveDataProvider : IDisposable
     {
@@ -47,9 +47,9 @@ namespace Nomad.Save.Services
         /// Executes on a dedicated worker thread to ensure zero blockage of the UI. However also ensure that when you write the data to the disk
         /// that you are locking your persistent data as to not cause a dirty read.
         /// </remarks>
-        /// <param name="filepath">The file to write the persistent game state to.</param>
+        /// <param name="saveName">The file to write the persistent game state to.</param>
         /// <param name="gameVersion"></param>
-        Task Save(string filepath, GameVersion gameVersion);
+        Task Save(string saveName, GameVersion gameVersion);
 
         /// <summary>
         /// Reads a save file and loads the information into memory to be then read and processed as the new state. This save file is provided through <paramref name="filepath"/>.
@@ -58,8 +58,8 @@ namespace Nomad.Save.Services
         /// Executes on a dedicated worker thread to ensure zero blockage of the UI so that you can put something like a loading screen for the wait down. Ensure that you are
         /// properly locking persistent variables to ensure you aren't getting race conditions or doing unsafe things with threads.
         /// </remarks>
-        /// <param name="filepath">The file to read the persistent game data from.</param>
-        Task Load(string filepath);
+        /// <param name="saveName">The file to read the persistent game data from.</param>
+        Task Load(string saveName);
 
         /// <summary>
         /// Returns a list of all the currently available save data files in the save system.
@@ -69,5 +69,11 @@ namespace Nomad.Save.Services
         /// </remarks>
         /// <returns>The complete list of save files found in the save system's data path.</returns>
         IReadOnlyList<SaveFileMetadata> ListSaveFiles();
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="saveName"></param>
+        void DeleteSaveFile(string saveName);
     }
 }

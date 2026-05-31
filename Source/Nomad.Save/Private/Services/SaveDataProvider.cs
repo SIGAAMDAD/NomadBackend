@@ -143,6 +143,20 @@ namespace Nomad.Save.Private.Services
 
 		/*
 		===============
+		DeleteSaveFile
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="saveName"></param>
+		public void DeleteSaveFile( string saveName )
+		{
+			_slotRepository.RemoveSaveFile( saveName );
+		}
+
+		/*
+		===============
 		ListSaveFiles
 		===============
 		*/
@@ -163,12 +177,12 @@ namespace Nomad.Save.Private.Services
 		/// <summary>
 		///
 		/// </summary>
-		/// <param name="name"></param>
+		/// <param name="saveName"></param>
 		/// <returns></returns>
-		public async Task Load( string name )
+		public async Task Load( string saveName )
 		{
 			try {
-				_readerService.Load( name );
+				_readerService.Load( saveName );
 				_loadBegin.Publish( new LoadBeginEventArgs( _readerService ) );
 			} catch ( FieldCorruptException fieldCorrupt ) {
 				_category.PrintError( $"Field corruption: [FieldIndex] {fieldCorrupt.FieldIndex}, [FileOffset] {fieldCorrupt.FileOffset}, [Section] {fieldCorrupt.SectionName} - {fieldCorrupt.Message}" );
@@ -185,15 +199,15 @@ namespace Nomad.Save.Private.Services
 		/// <summary>
 		///
 		/// </summary>
-		/// <param name="name"></param>
+		/// <param name="saveName"></param>
 		/// <param name="gameVersion"></param>
 		/// <returns></returns>
-		public async Task Save( string name, GameVersion gameVersion )
+		public async Task Save( string saveName, GameVersion gameVersion )
 		{
 			try {
-				_writerService.BeginSave( name, gameVersion );
+				_writerService.BeginSave( saveName, gameVersion );
 				_saveBegin.Publish( new SaveBeginEventArgs( _writerService ) );
-				_writerService.EndSave( name, gameVersion );
+				_writerService.EndSave( saveName, gameVersion );
 			} catch ( Exception e ) {
 				_category.PrintError( $"Exception caught - {e}" );
 			}

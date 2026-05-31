@@ -15,7 +15,6 @@ Invoke-NomadCommand $Script:DotNet @(
 	$Script:TestProjectPath,
 	"--configuration",
 	"Debug",
-	"--no-build",
 	"--filter",
 	$filter,
 	"--logger",

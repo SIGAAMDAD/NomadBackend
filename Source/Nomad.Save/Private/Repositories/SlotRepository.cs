@@ -16,6 +16,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Nomad.Core.Compatibility.Guards;
 using Nomad.Core.FileSystem;
 using Nomad.Core.FileSystem.Configs;
 using Nomad.Core.FileSystem.Streams;
@@ -28,13 +29,13 @@ namespace Nomad.Save.Private.Repositories
 {
 	/*
 	===================================================================================
-	
+
 	SlotRepository
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal sealed class SlotRepository : IDisposable
@@ -42,7 +43,7 @@ namespace Nomad.Save.Private.Repositories
 		private readonly Dictionary<string, SaveSlot> _saveSlots = new Dictionary<string, SaveSlot>();
 
 		private readonly IFileSystem _fileSystem;
-		private readonly ILoggerService _logger;
+		private readonly ILoggerCategory _category;
 
 		private readonly FileSystemWatcher _fileWatcher;
 
@@ -56,19 +57,28 @@ namespace Nomad.Save.Private.Repositories
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="fileSystem"></param>
 		/// <param name="logger"></param>
 		/// <param name="config"></param>
+		/// <exception cref="ArgumentNullException"></exception>
 		public SlotRepository( IFileSystem fileSystem, ILoggerService logger, SaveConfig config )
 		{
-			_fileSystem = fileSystem;
-			_logger = logger;
-			_config = config;
+			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
+
+			_fileSystem = fileSystem ?? throw new ArgumentNullException( nameof( fileSystem ) );
+			_config = config ?? throw new ArgumentNullException( nameof( config ) );
+			_category = logger.CreateCategory(
+				nameof( SlotRepository ),
+				LogLevel.Info,
+				true
+			);
 
 			_fileWatcher = new FileSystemWatcher( _config.DataPath, "*.ngd" );
 			_fileWatcher.Changed += OnSaveFileChanged;
+			_fileWatcher.Deleted += OnSaveFileChanged;
+			_fileWatcher.Renamed += OnSaveFileChanged;
 
 			RefreshSlots();
 		}
@@ -79,15 +89,43 @@ namespace Nomad.Save.Private.Repositories
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Dispose()
 		{
-			if ( !_isDisposed ) {
-				_fileWatcher?.Dispose();
+			if ( _isDisposed ) {
+				return;
 			}
+
+			_category.Dispose();
+
+			_fileWatcher.Changed -= OnSaveFileChanged;
+			_fileWatcher.Deleted -= OnSaveFileChanged;
+			_fileWatcher.Renamed -= OnSaveFileChanged;
+			_fileWatcher.Dispose();
+
 			GC.SuppressFinalize( this );
 			_isDisposed = true;
+		}
+
+		/*
+		===============
+		RemoveSaveFile
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="name"></param>
+		public void RemoveSaveFile( string name )
+		{
+			if ( !_saveSlots.TryGetValue( name, out SaveSlot slot ) ) {
+				return;
+			}
+
+			_category.PrintLine( $"" );
+			_fileSystem.DeleteFile( slot.FileName );
+			_saveSlots.Remove( name );
 		}
 
 		/*
@@ -104,39 +142,71 @@ namespace Nomad.Save.Private.Repositories
 		/// <returns></returns>
 		public string AddSaveFile( string name, bool autoSave = false )
 		{
-			DateTime lastAccessTime = DateTime.Now;
+			DateTime lastAccessTime = DateTime.UtcNow;
 			SaveFileMetadata metadata;
-			string fileName = string.Empty;
 
 			if ( _saveSlots.TryGetValue( name, out var slotData ) ) {
-				// update the metadata
-				metadata = slotData.Metadata;
-				_saveSlots[name] = slotData with {
-					Metadata = slotData.Metadata with {
-						LastAccessYear = lastAccessTime.Year,
-						LastAccessMonth = lastAccessTime.Month,
-						LastAccessDay = lastAccessTime.Day
-					}
+				metadata = slotData.Metadata with {
+					LastAccessTime = lastAccessTime
 				};
 			} else {
 				// ensure we don't have any issues where the lastAccessTime is before the creationTime
-				var creationTime = lastAccessTime;
+				DateTime creationTime = lastAccessTime;
 
 				metadata = new SaveFileMetadata(
 					name,
 					0,
-					lastAccessTime.Year,
-					lastAccessTime.Month,
-					lastAccessTime.Day,
-					creationTime.Year,
-					creationTime.Month,
-					creationTime.Day
+					lastAccessTime,
+					creationTime
 				);
-				_saveSlots.Add( name, new SaveSlot( fileName, metadata ) );
 			}
 
-			fileName = SaveSlot.CalculateFileName( autoSave, metadata );
-			return $"{_config.DataPath}/{fileName}";
+			string filePath = Path.Combine( _config.DataPath, SaveSlot.CalculateFileName( autoSave, metadata ) );
+			_saveSlots[name] = new SaveSlot( filePath, metadata );
+			return filePath;
+		}
+
+		/*
+		===============
+		TryGetSaveFile
+		===============
+		*/
+		/// <summary>
+		/// Finds the existing save file for the logical slot name.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="filePath"></param>
+		/// <returns></returns>
+		public bool TryGetSaveFile( string name, out string filePath )
+		{
+			if ( TryGetCachedSaveFile( name, out filePath ) ) {
+				return true;
+			}
+
+			RefreshSlots();
+			return TryGetCachedSaveFile( name, out filePath );
+		}
+
+		/*
+		===============
+		TryGetCachedSaveFile
+		===============
+		*/
+		/// <summary>
+		/// Finds a save file in the current slot cache without touching the filesystem.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="filePath"></param>
+		/// <returns></returns>
+		private bool TryGetCachedSaveFile( string name, out string filePath )
+		{
+			if ( _saveSlots.TryGetValue( name, out SaveSlot slotData ) && !string.IsNullOrWhiteSpace( slotData.FileName ) ) {
+				filePath = slotData.FileName;
+				return true;
+			}
+
+			filePath = string.Empty;
+			return false;
 		}
 
 		/*
@@ -145,7 +215,7 @@ namespace Nomad.Save.Private.Repositories
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <returns></returns>
 		public IReadOnlyList<SaveFileMetadata> GetMetadataList()
@@ -166,37 +236,43 @@ namespace Nomad.Save.Private.Repositories
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		private void RefreshSlots()
 		{
+			_saveSlots.Clear();
+
 			var slots = _fileSystem.GetFiles( _config.DataPath, "*.ngd", false );
 
 			for ( int i = 0; i < slots.Count; i++ ) {
 				using var reader = _fileSystem.OpenRead( new FileReadConfig { FilePath = slots[i] } );
+
 				if ( reader == null || reader is not IFileReadStream fileReader ) {
-					_logger.PrintError( $"SlotRepository.RefreshSlots: error opening save data file '{slots[i]}'!" );
+					_category.PrintError( $"Error opening save data file '{slots[i]}'!" );
 					continue;
 				}
 
-				_logger.PrintLine( $"SlotRepository.RefreshSlots: adding save file '{slots[i]}' to data cache..." );
+				_category.PrintLine( $"Adding save file '{slots[i]}' to data cache..." );
 
 				var fileInfo = new FileInfo( fileReader.FilePath );
-				DateTime lastAccessTime = fileInfo.LastAccessTime;
-				DateTime creationTime = fileInfo.CreationTime;
 
-				var header = SaveHeader.Deserialize( fileReader, out bool magicMatches );
+				SaveHeader header = SaveHeader.Deserialize(
+					fileReader,
+					out bool magicMatches
+				);
+
+				if ( !magicMatches ) {
+					_category.PrintError( $"Invalid header magic in save data file '{fileReader.FilePath}'!" );
+					continue;
+				}
+
 				_saveSlots[header.Name] = new SaveSlot(
 					slots[i],
 					new SaveFileMetadata(
 						SaveName: header.Name,
 						FileSize: reader.Length,
-						LastAccessYear: lastAccessTime.Year,
-						LastAccessMonth: lastAccessTime.Month,
-						LastAccessDay: lastAccessTime.Day,
-						CreationYear: creationTime.Year,
-						CreationMonth: creationTime.Month,
-						CreationDay: creationTime.Day
+						LastAccessTime: fileInfo.LastAccessTimeUtc,
+						CreationTime: fileInfo.CreationTimeUtc
 					)
 				);
 			}
@@ -208,13 +284,13 @@ namespace Nomad.Save.Private.Repositories
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="sender"></param>
 		/// <param name="e"></param>
 		private void OnSaveFileChanged( object sender, FileSystemEventArgs e )
 		{
-			if ( e.ChangeType.HasFlag( WatcherChangeTypes.Changed ) ) {
+			if ( ( e.ChangeType & ( WatcherChangeTypes.Changed | WatcherChangeTypes.Deleted | WatcherChangeTypes.Renamed ) ) != 0 ) {
 				// something has changed, we don't know what, but refresh either way.
 				RefreshSlots();
 			}
