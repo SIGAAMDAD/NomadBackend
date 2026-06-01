@@ -38,13 +38,13 @@ namespace Nomad.EngineUtils.Godot.Private
 	internal sealed partial class GodotInputPump : Node, IInputAdapter
 	{
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public IGameEvent<KeyboardEventArgs> Keyboard => _keyboardEvent;
 		private readonly IGameEvent<KeyboardEventArgs> _keyboardEvent;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public IGameEvent<MouseButtonEventArgs> MouseButton => _mouseButtonEvent;
 		private readonly IGameEvent<MouseButtonEventArgs> _mouseButtonEvent;
@@ -53,19 +53,19 @@ namespace Nomad.EngineUtils.Godot.Private
 		private readonly IGameEvent<MousePositionChangedEventArgs> _mousePositionChangedEvent;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public IGameEvent<MouseMotionEventArgs> MouseMotion => _mouseMotionEvent;
 		private readonly IGameEvent<MouseMotionEventArgs> _mouseMotionEvent;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public IGameEvent<GamepadAxisEventArgs> GamepadAxis => _gamepadAxisEvent;
 		private readonly IGameEvent<GamepadAxisEventArgs> _gamepadAxisEvent;
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public IGameEvent<GamepadButtonEventArgs> GamepadButton => _gamepadButtonEvent;
 		private readonly IGameEvent<GamepadButtonEventArgs> _gamepadButtonEvent;
@@ -74,7 +74,7 @@ namespace Nomad.EngineUtils.Godot.Private
 		private readonly System.Numerics.Vector2[] _rightStickState = new System.Numerics.Vector2[Core.Constants.Input.MAX_COOP_PLAYERS];
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="eventFactory"></param>
 		public GodotInputPump( IGameEventRegistryService eventFactory )
@@ -185,7 +185,7 @@ namespace Nomad.EngineUtils.Godot.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="motion"></param>
 		/// <returns></returns>
@@ -223,7 +223,7 @@ namespace Nomad.EngineUtils.Godot.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="axis"></param>
 		/// <returns></returns>
@@ -244,7 +244,7 @@ namespace Nomad.EngineUtils.Godot.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="button"></param>
 		/// <returns></returns>
@@ -350,7 +350,7 @@ namespace Nomad.EngineUtils.Godot.Private
 			Key.Key8 => KeyNum.Num8,
 			Key.Key9 => KeyNum.Num9,
 			Key.Escape => KeyNum.Escape,
-			_ => throw new ArgumentOutOfRangeException( nameof( keyCode ) )
+			_ => default
 		};
 	};
 };

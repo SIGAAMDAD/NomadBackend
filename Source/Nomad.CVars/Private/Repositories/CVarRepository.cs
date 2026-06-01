@@ -77,7 +77,6 @@ namespace Nomad.CVars.Private.Repositories
 		public ICVar<T> AddCVar<T>( CVarCreateInfo<T> createInfo, IGameEventRegistryService eventFactory )
 		{
 			ArgumentGuard.ThrowIfNullOrEmpty( createInfo.Name );
-			ArgumentGuard.ThrowIfNullOrEmpty( createInfo.Description );
 
 			var name = new InternString( createInfo.Name );
 			if ( _cvars.TryGetValue( name, out ICVar? var ) ) {

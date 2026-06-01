@@ -120,7 +120,6 @@ namespace Nomad.EngineUtils.Godot.Private.Services
 			};
 			_viewportRoot.SetAnchorsPreset( Control.LayoutPreset.FullRect );
 			rootNode.AddChild( _viewportRoot );
-			rootNode.MoveChild( _viewportRoot, 0 );
 		}
 
 		private void EnsureSlotCount( int playerCount )

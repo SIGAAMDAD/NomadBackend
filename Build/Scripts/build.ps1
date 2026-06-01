@@ -9,7 +9,6 @@ Invoke-NomadCommand $Script:DotNet @(
 	$Script:SolutionPath,
 	"--configuration",
 	"Debug",
-	"--no-restore",
 	"-p:RunAnalyzers=true",
 	"-p:ContinuousIntegrationBuild=true"
 )

@@ -35,5 +35,30 @@ namespace Nomad.CVars
         {
             return cvarSystem.GetCVar<T>(name) ?? throw new CVarMissing(name);
         }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cvarSystem"></param>
+        /// <param name="definition"></param>
+        /// <returns></returns>
+        public static ICVar<T>? GetCVar<T>(this ICVarSystemService cvarSystem, CVarDefinition<T> definition)
+        {
+            return cvarSystem.GetCVar<T>(definition.Name);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cvarSystem"></param>
+        /// <param name="definition"></param>
+        /// <returns></returns>
+        /// <exception cref="CVarMissing"></exception>
+        public static ICVar<T> GetCVarOrThrow<T>(this ICVarSystemService cvarSystem, CVarDefinition<T> definition)
+        {
+            return cvarSystem.GetCVar<T>(definition.Name) ?? throw new CVarMissing(definition.Name);
+        }
     }
 }
