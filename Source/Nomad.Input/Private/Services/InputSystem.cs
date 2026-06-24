@@ -58,6 +58,7 @@ namespace Nomad.Input.Private.Services
 		private readonly ActionResolverService _actionResolverService;
 		private readonly InputStateService _stateService;
 		private readonly InputDispatchService _dispatchService;
+		private readonly InputDeviceSlotService _deviceSlotService;
 		private readonly BindingCompilerService _compilerService;
 		private readonly CompiledBindingRepository _compiledBindings;
 		private readonly IBindResolver _bindResolver;
@@ -100,6 +101,7 @@ namespace Nomad.Input.Private.Services
 			_compilerService = new BindingCompilerService( _compiledBindings );
 
 			_stateService = new InputStateService();
+			_deviceSlotService = new InputDeviceSlotService();
 			_dispatchService = new InputDispatchService( eventFactory );
 			_matcherService = new BindingMatcherService( _compiledBindings, _stateService );
 			_actionResolverService = new ActionResolverService( _compiledBindings, _stateService );
@@ -111,6 +113,7 @@ namespace Nomad.Input.Private.Services
 
 			registry.AddSingleton( _bindResolver );
 			registry.AddSingleton( _rebindService );
+			registry.AddSingleton<IInputDeviceSlotService>( _deviceSlotService );
 			registry.AddSingleton<IInputSnapshotService>( _stateService );
 
 			_pauseStateChanged = eventFactory
@@ -140,6 +143,8 @@ namespace Nomad.Input.Private.Services
 			_gamepadButtonEvent = eventFactory
 				.GetEvent<GamepadButtonEventArgs>( GamepadButtonEventArgs.Name, GamepadButtonEventArgs.NameSpace )
 				.Subscribe( OnGamepadButtonEventTriggered );
+
+			_deviceSlotService.DeviceSlotChanged += OnDeviceSlotChanged;
 		}
 
 		public void Dispose()
@@ -155,6 +160,7 @@ namespace Nomad.Input.Private.Services
 			_gamepadAxisEvent.Dispose();
 			_gamepadButtonEvent.Dispose();
 			_keyboardEvent.Dispose();
+			_deviceSlotService.DeviceSlotChanged -= OnDeviceSlotChanged;
 
 			(_rebindService as IDisposable).Dispose();
 			_bindRepository.Dispose();
@@ -175,13 +181,17 @@ namespace Nomad.Input.Private.Services
 		/// <param name="keyEvent"></param>
 		public void PushKeyboardEvent( in KeyboardEventArgs keyEvent )
 		{
+			if ( !TryGetLocalSlot( InputDeviceSlot.Keyboard, out int localSlot ) ) {
+				return;
+			}
+
 			_stateService.SetPressed( InputDeviceSlot.Keyboard, keyEvent.KeyNum.ToControlId(), keyEvent.Pressed );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
 			BindingMatchSet matches = _matcherService.MatchKeyboard( graph, in keyEvent, _contextMask, _mode );
 
-			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, keyEvent.TimeStamp ) );
-			DispatchResolved( graph, _actionResolverService.ResolveKeyboardCompositesNonAlloc( graph, _contextMask, _mode, keyEvent.TimeStamp ) );
+			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, keyEvent.TimeStamp, InputDeviceSlot.Keyboard, localSlot ) );
+			DispatchResolved( graph, _actionResolverService.ResolveKeyboardCompositesNonAlloc( graph, _contextMask, _mode, keyEvent.TimeStamp, InputDeviceSlot.Keyboard, localSlot ) );
 		}
 
 		/*
@@ -195,12 +205,16 @@ namespace Nomad.Input.Private.Services
 		/// <param name="mouseButtonEvent"></param>
 		public void PushMouseButtonEvent( in MouseButtonEventArgs mouseButtonEvent )
 		{
+			if ( !TryGetLocalSlot( InputDeviceSlot.Mouse, out int localSlot ) ) {
+				return;
+			}
+
 			_stateService.SetPressed( InputDeviceSlot.Mouse, mouseButtonEvent.Button.ToControlId(), mouseButtonEvent.Pressed );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
 			BindingMatchSet matches = _matcherService.MatchMouseButton( graph, in mouseButtonEvent, _contextMask, _mode );
 
-			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, mouseButtonEvent.TimeStamp ) );
+			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, mouseButtonEvent.TimeStamp, InputDeviceSlot.Mouse, localSlot ) );
 		}
 
 		/*
@@ -214,12 +228,16 @@ namespace Nomad.Input.Private.Services
 		/// <param name="mouseMotionEvent"></param>
 		public void PushMouseMotionEvent( in MouseMotionEventArgs mouseMotionEvent )
 		{
+			if ( !TryGetLocalSlot( InputDeviceSlot.Mouse, out int localSlot ) ) {
+				return;
+			}
+
 			_stateService.AddMouseDelta( new Vector2( mouseMotionEvent.RelativeX, mouseMotionEvent.RelativeY ) );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
 			BindingMatchSet matches = _matcherService.MatchMouseDelta( graph, _contextMask, _mode );
 
-			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, mouseMotionEvent.TimeStamp ) );
+			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, mouseMotionEvent.TimeStamp, InputDeviceSlot.Mouse, localSlot ) );
 		}
 
 		/*
@@ -233,12 +251,16 @@ namespace Nomad.Input.Private.Services
 		/// <param name="mousePositionChangedEvent"></param>
 		public void PushMousePositionChangedEvent( in MousePositionChangedEventArgs mousePositionChangedEvent )
 		{
+			if ( !TryGetLocalSlot( InputDeviceSlot.Mouse, out int localSlot ) ) {
+				return;
+			}
+
 			_stateService.SetMousePosition( new Vector2( mousePositionChangedEvent.PositionX, mousePositionChangedEvent.PositionY ) );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
 			BindingMatchSet matches = _matcherService.MatchMouseDelta( graph, _contextMask, _mode );
 
-			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, mousePositionChangedEvent.TimeStamp ) );
+			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, mousePositionChangedEvent.TimeStamp, InputDeviceSlot.Mouse, localSlot ) );
 		}
 
 		/*
@@ -253,12 +275,16 @@ namespace Nomad.Input.Private.Services
 		public void PushGamepadButtonEvent( in GamepadButtonEventArgs gamepadButtonEvent )
 		{
 			InputDeviceSlot deviceSlot = GetGamepadDeviceSlot( gamepadButtonEvent.DeviceId );
+			if ( !TryGetLocalSlot( deviceSlot, out int localSlot ) ) {
+				return;
+			}
+
 			_stateService.SetPressed( deviceSlot, gamepadButtonEvent.Button.ToControlId(), gamepadButtonEvent.Pressed );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
 			BindingMatchSet matches = _matcherService.MatchGamepadButton( graph, in gamepadButtonEvent, _contextMask, _mode );
 
-			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, gamepadButtonEvent.TimeStamp ) );
+			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, gamepadButtonEvent.TimeStamp, deviceSlot, localSlot ) );
 		}
 
 		/*
@@ -273,6 +299,10 @@ namespace Nomad.Input.Private.Services
 		public void PushGamepadAxisEvent( in GamepadAxisEventArgs gamepadAxisEvent )
 		{
 			InputDeviceSlot deviceSlot = GetGamepadDeviceSlot( gamepadAxisEvent.DeviceId );
+			if ( !TryGetLocalSlot( deviceSlot, out int localSlot ) ) {
+				return;
+			}
+
 			InputControlId controlId = gamepadAxisEvent.Stick.ToControlId();
 
 			_stateService.SetAxis2D( deviceSlot, controlId, gamepadAxisEvent.Value );
@@ -280,7 +310,7 @@ namespace Nomad.Input.Private.Services
 			CompiledBindingGraph graph = _compiledBindings.Current;
 			BindingMatchSet matches = _matcherService.MatchGamepadAxis( graph, deviceSlot, controlId, _contextMask, _mode );
 
-			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, gamepadAxisEvent.TimeStamp ) );
+			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, gamepadAxisEvent.TimeStamp, deviceSlot, localSlot ) );
 		}
 
 		/*
@@ -311,6 +341,17 @@ namespace Nomad.Input.Private.Services
 		private void RecompileBindings()
 		{
 			_compilerService.CompileIntoRepository( _bindRepository.GetAllBindings() );
+		}
+
+		private bool TryGetLocalSlot( InputDeviceSlot deviceSlot, out int localSlot )
+		{
+			return _deviceSlotService.TryGetLocalSlot( deviceSlot, out localSlot );
+		}
+
+		private void OnDeviceSlotChanged( InputDeviceSlot deviceSlot, int localSlot )
+		{
+			_stateService.Clear();
+			_actionResolverService.ResetPhases();
 		}
 
 		/*

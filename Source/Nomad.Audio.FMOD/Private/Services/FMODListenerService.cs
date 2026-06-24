@@ -41,7 +41,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		private int _listenerCount = 0;
 
 		// TODO: special exception for this.
-		public Vector2 ActiveListener => _currentListener != null ? _currentListener.Position : throw new Exception();
+		public Vector3 ActiveListener => _currentListener != null ? _currentListener.Position : throw new Exception();
 		private FMODListener? _currentListener;
 
 		private readonly FMODListener[] _listeners = new FMODListener[MAX_LISTENERS];
@@ -89,14 +89,15 @@ namespace Nomad.Audio.Fmod.Private.Services
 		/// </summary>
 		/// <param name="listenerIndex"></param>
 		/// <param name="position"></param>
-		public void SetListenerPosition( int listenerIndex, Vector2 position )
+		public void SetListenerPosition( int listenerIndex, Vector3 position )
 		{
 			RangeGuard.ThrowIfLessThan( listenerIndex, 0, nameof( listenerIndex ) );
 			RangeGuard.ThrowIfGreaterThanOrEqual( listenerIndex, MAX_LISTENERS, nameof( listenerIndex ) );
 
 			if ( listenerIndex >= _listenerCount ) {
-				FMODValidator.ValidateCall( _system.StudioSystem.setNumListeners( listenerIndex ) );
+				FMODValidator.ValidateCall( _system.StudioSystem.setNumListeners( listenerIndex + 1 ) );
 				_listeners[listenerIndex] = new FMODListener( _system.StudioSystem, listenerIndex ) { Position = position };
+				_listenerCount = listenerIndex + 1;
 			}
 			_listeners[listenerIndex].Position = position;
 		}
@@ -132,7 +133,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		/// </summary>
 		private void CreateDefaultListener()
 		{
-			_currentListener = new FMODListener( _system.StudioSystem, 0 ) { Position = Vector2.Zero };
+			_currentListener = new FMODListener( _system.StudioSystem, 0 ) { Position = Vector3.Zero };
 			_listeners[0] = _currentListener;
 			_listenerCount++;
 

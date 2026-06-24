@@ -51,10 +51,10 @@ namespace Nomad.Audio.Fmod.Private.Entities
 				FMODValidator.ValidateCall( _instance.setListenerMask( value ) );
 			}
 		}
-		public Vector2 Position {
+		public Vector3 Position {
 			get {
 				FMODValidator.ValidateCall( _instance.get3DAttributes( out FMOD.ATTRIBUTES_3D attributes ) );
-				return new Vector2() { X = attributes.position.x, Y = attributes.position.z };
+				return new Vector3( attributes.position.x, attributes.position.y, attributes.position.z );
 			}
 			set {
 				if ( !_instance.isValid() ) {

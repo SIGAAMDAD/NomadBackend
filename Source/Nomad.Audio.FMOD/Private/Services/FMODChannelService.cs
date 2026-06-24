@@ -33,13 +33,13 @@ namespace Nomad.Audio.Fmod.Private.Services
 {
 	/*
 	===================================================================================
-	
+
 	FMODChannelService
-	
+
 	===================================================================================
 	*/
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 
 	internal unsafe sealed class FMODChannelService : IChannelRepository
@@ -68,6 +68,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		private readonly nint[] _instancePtr;
 		private readonly float[] _arena.PosX;
 		private readonly float[] _arena.PosY;
+		private readonly float[] _arena.PosZ;
 		private readonly float[] _arena.BasePriority;
 		private readonly float[] _arena.CurrentPriority;
 		private readonly float[] _arena.StartTime;
@@ -118,7 +119,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		private float _elapsedSeconds;
 		private float _effectsVolume;
 		private float _minTimeBetweenChannelSteals;
-		private bool _disposed;
+		private bool _isDisposed;
 
 		public FMODBusRepository BusRepository { get; }
 		public int ActiveCount => _denseCount;
@@ -130,7 +131,6 @@ namespace Nomad.Audio.Fmod.Private.Services
 			IListenerService listenerService,
 			FMODDevice fmodSystem )
 		{
-
 			_listenerService = listenerService;
 			_eventRepository = fmodSystem.EventRepository;
 			_priorityCalculator = new FMODPriorityCalculator( cvarSystem, listenerService );
@@ -168,6 +168,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			_instancePtr = new nint[_capacity];
 			_arena.PosX = new float[_capacity];
 			_arena.PosY = new float[_capacity];
+			_arena.PosZ = new float[_capacity];
 			_arena.BasePriority = new float[_capacity];
 			_arena.CurrentPriority = new float[_capacity];
 			_arena.StartTime = new float[_capacity];
@@ -201,7 +202,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 			_instanceToSlot = new InstanceToSlotMap( _capacity * 2 );
 			_finishedCallback = SoundFinishedCallback;
-			_log = logger.CreateCategory( "FMODChannelService.SoA", LogLevel.Debug, true );
+			_log = logger.CreateCategory( "FMODChannelService", LogLevel.Debug, true );
 
 			InitConfig( cvarSystem );
 			_maxActiveChannels.ValueChanged.Subscribe( OnMaxActiveChannelsValueChanged );
@@ -209,7 +210,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 		public void Dispose()
 		{
-			if ( _disposed ) {
+			if ( _isDisposed ) {
 				return;
 			}
 
@@ -219,13 +220,13 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 			_arena?.Dispose();
 
-			_disposed = true;
+			_isDisposed = true;
 			GC.SuppressFinalize( this );
 		}
 
 		public FMODChannelHandle? AllocateChannel(
 			string eventName,
-			Vector2 position,
+			Vector3 position,
 			SoundCategory category,
 			float basePriority = 0.5f,
 			bool isEssential = false )
@@ -248,6 +249,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 				categoryNumericId,
 				position.X,
 				position.Y,
+				position.Z,
 				basePriority );
 
 			int slot = AcquireSlotOrSteal( now, actualPriority, categoryNumericId, isEssential );
@@ -272,6 +274,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			_arena.InstancePtr[dense] = instanceHandle;
 			_arena.PosX[dense] = position.X;
 			_arena.PosY[dense] = position.Y;
+			_arena.PosZ[dense] = position.Z;
 			_arena.BasePriority[dense] = basePriority;
 			_arena.CurrentPriority[dense] = actualPriority;
 			_arena.StartTime[dense] = now;
@@ -341,7 +344,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 				_eventNames[ev],
 				ev,
 				cat,
-				new Vector2( _arena.PosX[dense], _arena.PosY[dense] ),
+				new Vector3( _arena.PosX[dense], _arena.PosY[dense], _arena.PosZ[dense] ),
 				_arena.BasePriority[dense],
 				_arena.CurrentPriority[dense],
 				_arena.StartTime[dense],
@@ -368,7 +371,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			return dense != INVALID_INDEX;
 		}
 
-		public bool TrySetPosition( FMODChannelHandle handle, Vector2 position )
+		public bool TrySetPosition( FMODChannelHandle handle, Vector3 position )
 		{
 			if ( !TryResolveDense( handle, out int dense ) ) {
 				return false;
@@ -376,6 +379,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 			_arena.PosX[dense] = position.X;
 			_arena.PosY[dense] = position.Y;
+			_arena.PosZ[dense] = position.Z;
 
 			var instance = new FMOD.Studio.EventInstance( _arena.InstancePtr[dense] );
 			if ( instance.isValid() ) {
@@ -512,9 +516,10 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 		private void UpdatePrioritiesAndVolumes()
 		{
-			Vector2 listener = _listenerService.ActiveListener;
+			Vector3 listener = _listenerService.ActiveListener;
 			float lx = listener.X;
 			float ly = listener.Y;
+			float lz = listener.Z;
 			float globalFxVolume = _effectsVolume * 0.1f;
 
 			for ( int dense = 0; dense < _denseCount; dense++ ) {
@@ -525,7 +530,8 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 				float dx = _arena.PosX[dense] - lx;
 				float dy = _arena.PosY[dense] - ly;
-				float distance = MathF.Sqrt( dx * dx + dy * dy );
+				float dz = _arena.PosZ[dense] - lz;
+				float distance = MathF.Sqrt( dx * dx + dy * dy + dz * dz );
 				float distanceFactor = _priorityCalculator.CalculateDistanceFactor( distance );
 
 				_arena.Attenuation[dense] = distanceFactor;
@@ -621,6 +627,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			_arena.InstancePtr[lastDense] = 0;
 			_arena.PosX[lastDense] = 0.0f;
 			_arena.PosY[lastDense] = 0.0f;
+			_arena.PosZ[lastDense] = 0.0f;
 			_arena.BasePriority[lastDense] = 0.0f;
 			_arena.CurrentPriority[lastDense] = 0.0f;
 			_arena.StartTime[lastDense] = 0.0f;
@@ -647,6 +654,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			_arena.InstancePtr[dstDense] = _arena.InstancePtr[srcDense];
 			_arena.PosX[dstDense] = _arena.PosX[srcDense];
 			_arena.PosY[dstDense] = _arena.PosY[srcDense];
+			_arena.PosZ[dstDense] = _arena.PosZ[srcDense];
 			_arena.BasePriority[dstDense] = _arena.BasePriority[srcDense];
 			_arena.CurrentPriority[dstDense] = _arena.CurrentPriority[srcDense];
 			_arena.StartTime[dstDense] = _arena.StartTime[srcDense];
@@ -697,13 +705,15 @@ namespace Nomad.Audio.Fmod.Private.Services
 			ushort categoryNumericId,
 			float x,
 			float y,
+			float z,
 			float basePriority )
 		{
 
-			Vector2 listener = _listenerService.ActiveListener;
+			Vector3 listener = _listenerService.ActiveListener;
 			float dx = x - listener.X;
 			float dy = y - listener.Y;
-			float distance = MathF.Sqrt( dx * dx + dy * dy );
+			float dz = z - listener.Z;
+			float distance = MathF.Sqrt( dx * dx + dy * dy + dz * dz );
 			float distanceFactor = _priorityCalculator.CalculateDistanceFactor( distance );
 
 			float priority = basePriority * _priorityScaleByCategoryId[categoryNumericId] * distanceFactor;

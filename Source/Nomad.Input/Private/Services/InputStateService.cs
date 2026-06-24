@@ -104,6 +104,13 @@ namespace Nomad.Input.Private.Services
 			GC.SuppressFinalize( this );
 		}
 
+		public void Clear()
+		{
+			new Span<byte>( _memory, (int)GetTotalBytes() ).Clear();
+			_mouseDelta = Vector2.Zero;
+			_mousePosition = Vector2.Zero;
+		}
+
 		/*
 		===============
 		GetPressedWords
@@ -296,6 +303,14 @@ namespace Nomad.Input.Private.Services
 		private static long PadBytes( long size, long alignment )
 		{
 			return (size + alignment - 1) & ~(alignment - 1);
+		}
+
+		private static long GetTotalBytes()
+		{
+			long pressedBytes = PadBytes( sizeof( ulong ) * DEVICE_SLOT_COUNT * WORDS_PER_DEVICE, Core.Constants.WORDSIZE );
+			long axis1DBytes = PadBytes( sizeof( float ) * DEVICE_SLOT_COUNT * CONTROL_COUNT, Core.Constants.WORDSIZE );
+			long axis2DBytes = PadBytes( sizeof( float ) * 2 * DEVICE_SLOT_COUNT * CONTROL_COUNT, Core.Constants.WORDSIZE );
+			return pressedBytes + axis1DBytes + axis2DBytes;
 		}
 	};
 };

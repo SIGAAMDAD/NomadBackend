@@ -44,6 +44,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		public readonly nint* InstancePtr;
 		public readonly float* PosX;
 		public readonly float* PosY;
+		public readonly float* PosZ;
 		public readonly float* BasePriority;
 		public readonly float* CurrentPriority;
 		public readonly float* StartTime;
@@ -73,6 +74,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			totalBytes += PadBytes( sizeof( nint ) * capacity, alignment ); // InstancePtr
 			totalBytes += PadBytes( sizeof( float ) * capacity, alignment ); // PosX
 			totalBytes += PadBytes( sizeof( float ) * capacity, alignment ); // PosY
+			totalBytes += PadBytes( sizeof( float ) * capacity, alignment ); // PosZ
 			totalBytes += PadBytes( sizeof( float ) * capacity, alignment ); // BasePriority
 			totalBytes += PadBytes( sizeof( float ) * capacity, alignment ); // CurrentPriority
 			totalBytes += PadBytes( sizeof( float ) * capacity, alignment ); // StartTime
@@ -100,7 +102,8 @@ namespace Nomad.Audio.Fmod.Private.Services
 			InstancePtr = (nint*)((byte*)Generation + PadBytes( sizeof( uint ) * capacity, alignment ));
 			PosX = (float*)((byte*)InstancePtr + PadBytes( sizeof( nint ) * capacity, alignment ));
 			PosY = (float*)((byte*)PosX + PadBytes( sizeof( float ) * capacity, alignment ));
-			BasePriority = (float*)((byte*)PosY + PadBytes( sizeof( float ) * capacity, alignment ));
+			PosZ = (float*)((byte*)PosY + PadBytes( sizeof( float ) * capacity, alignment ));
+			BasePriority = (float*)((byte*)PosZ + PadBytes( sizeof( float ) * capacity, alignment ));
 			CurrentPriority = (float*)((byte*)BasePriority + PadBytes( sizeof( float ) * capacity, alignment ));
 			StartTime = (float*)((byte*)CurrentPriority + PadBytes( sizeof( float ) * capacity, alignment ));
 			LastStolenTime = (float*)((byte*)StartTime + PadBytes( sizeof( float ) * capacity, alignment ));

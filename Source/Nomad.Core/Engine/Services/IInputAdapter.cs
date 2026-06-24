@@ -26,7 +26,7 @@ namespace Nomad.Core.Engine.Services
     public interface IInputAdapter
     {
         /// <summary>
-        /// 
+        ///
         /// </summary>
         [Event("Nomad.Core.Input")]
         [EventPayload("Stick", typeof(GamepadStick), Order = 1)]
@@ -36,7 +36,7 @@ namespace Nomad.Core.Engine.Services
         IGameEvent<GamepadAxisEventArgs> GamepadAxis { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         [Event("Nomad.Core.Input")]
         [EventPayload("Button", typeof(GamepadButton), Order = 1)]
@@ -46,7 +46,7 @@ namespace Nomad.Core.Engine.Services
         IGameEvent<GamepadButtonEventArgs> GamepadButton { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         [Event("Nomad.Core.Input")]
         [EventPayload("KeyNum", typeof(KeyNum), Order = 1)]
@@ -55,7 +55,7 @@ namespace Nomad.Core.Engine.Services
         IGameEvent<KeyboardEventArgs> Keyboard { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         [Event("Nomad.Core.Input")]
         [EventPayload("Button", typeof(MouseButton), Order = 1)]
@@ -64,16 +64,16 @@ namespace Nomad.Core.Engine.Services
         IGameEvent<MouseButtonEventArgs> MouseButton { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         [Event("Nomad.Core.Input")]
         [EventPayload("TimeStamp", typeof(long), Order = 1)]
-        [EventPayload("RelativeX", typeof(int), Order = 2)]
-        [EventPayload("RelativeY", typeof(int), Order = 3)]
+        [EventPayload("RelativeX", typeof(float), Order = 2)]
+        [EventPayload("RelativeY", typeof(float), Order = 3)]
         IGameEvent<MouseMotionEventArgs> MouseMotion { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         [Event("Nomad.Core.Input")]
         [EventPayload("TimeStamp", typeof(long), Order = 1)]

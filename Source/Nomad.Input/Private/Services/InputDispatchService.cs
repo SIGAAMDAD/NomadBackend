@@ -54,17 +54,17 @@ namespace Nomad.Input.Private.Services
 			switch ( action.ValueType ) {
 				case InputValueType.Button:
 					GetButtonEvent( slot, actionId ).Publish(
-						new ButtonActionEventArgs( actionId, action.Phase, action.ButtonValue, action.TimeStamp )
+						new ButtonActionEventArgs( actionId, action.Phase, action.ButtonValue, action.TimeStamp, action.DeviceSlot, action.LocalSlot )
 					);
 					break;
 				case InputValueType.Float:
 					GetFloatEvent( slot, actionId ).Publish(
-						new FloatActionEventArgs( actionId, action.Phase, action.FloatValue, action.TimeStamp )
+						new FloatActionEventArgs( actionId, action.Phase, action.FloatValue, action.TimeStamp, action.DeviceSlot, action.LocalSlot )
 					);
 					break;
 				case InputValueType.Vector2:
 					GetAxisEvent( slot, actionId ).Publish(
-						new AxisActionEventArgs( actionId, action.Phase, action.Vector2Value, action.TimeStamp )
+						new AxisActionEventArgs( actionId, action.Phase, action.Vector2Value, action.TimeStamp, action.DeviceSlot, action.LocalSlot )
 					);
 					break;
 				default:

@@ -27,6 +27,8 @@ namespace Nomad.Input.Interfaces
         [EventPayload("Phase", typeof(InputActionPhase), Order = 2)]
         [EventPayload("Value", typeof(bool), Order = 3)]
         [EventPayload("TimeStamp", typeof(long), Order = 4)]
+        [EventPayload("DeviceSlot", typeof(InputDeviceSlot), Order = 5)]
+        [EventPayload("LocalSlot", typeof(int), Order = 6)]
         IGameEvent<ButtonActionEventArgs> ButtonAction { get; }
 
         [Event("Nomad.Input")]
@@ -34,6 +36,8 @@ namespace Nomad.Input.Interfaces
         [EventPayload("Phase", typeof(InputActionPhase), Order = 2)]
         [EventPayload("Value", typeof(float), Order = 3)]
         [EventPayload("TimeStamp", typeof(long), Order = 4)]
+        [EventPayload("DeviceSlot", typeof(InputDeviceSlot), Order = 5)]
+        [EventPayload("LocalSlot", typeof(int), Order = 6)]
         IGameEvent<FloatActionEventArgs> FloatAction { get; }
 
         [Event("Nomad.Input")]
@@ -41,6 +45,8 @@ namespace Nomad.Input.Interfaces
         [EventPayload("Phase", typeof(InputActionPhase), Order = 2)]
         [EventPayload("Value", typeof(Vector2), Order = 3)]
         [EventPayload("TimeStamp", typeof(long), Order = 4)]
+        [EventPayload("DeviceSlot", typeof(InputDeviceSlot), Order = 5)]
+        [EventPayload("LocalSlot", typeof(int), Order = 6)]
         IGameEvent<AxisActionEventArgs> AxisAction { get; }
     }
 }

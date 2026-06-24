@@ -24,7 +24,7 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects
 		public readonly string EventId;
 		public readonly ushort EventNumericId;
 		public readonly ushort CategoryId;
-		public readonly Vector2 Position;
+		public readonly Vector3 Position;
 		public readonly float BasePriority;
 		public readonly float CurrentPriority;
 		public readonly float StartTimeSeconds;
@@ -38,7 +38,7 @@ namespace Nomad.Audio.Fmod.Private.ValueObjects
 			string eventId,
 			ushort eventNumericId,
 			ushort categoryId,
-			Vector2 position,
+			Vector3 position,
 			float basePriority,
 			float currentPriority,
 			float startTimeSeconds,

@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-The Nomad MPLv2 Source Code
+The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
 
 This Source Code Form is subject to the terms of the Mozilla Public
@@ -14,71 +14,96 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
-using Nomad.Core.Compatibility.Guards;
+using System.Runtime.CompilerServices;
 
 namespace Nomad.Core.Util
 {
     /// <summary>
-    /// A memory-efficient data structure for storing and manipulating a set of boolean values.
+    /// Dynamic heap-backed packed bitset. Best for long-lived reusable instances.
     /// </summary>
-    /// <remarks>
-    /// This class uses an array of 64-bit unsigned integers to store bits, allowing efficient storage and manipulation of large bitsets.
-    /// Each ulong can store 64 boolean values, making this structure ideal for scenarios where you need to track many boolean flags with minimal memory overhead.
-    /// </remarks>
     public sealed class PackedBitSet
     {
         private readonly ulong[] _words;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PackedBitSet"/> class with the specified bit capacity.
-        /// </summary>
-        /// <param name="bitCount">The number of bits to store. Must be positive.</param>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="bitCount"/> is negative or zero.</exception>
+        public readonly int BitCount;
+        public readonly int WordCount;
+
         public PackedBitSet(int bitCount)
         {
-            RangeGuard.ThrowIfNegativeOrZero(bitCount, nameof(bitCount));
-            _words = new ulong[(bitCount + 63) >> 6];
+            if (bitCount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bitCount), bitCount, "Bit count must be positive.");
+            }
+
+            BitCount = bitCount;
+            WordCount = (int)(((uint)bitCount + 63U) >> 6);
+            _words = new ulong[WordCount];
         }
 
-        /// <summary>
-        /// Gets the value of the bit at the specified index.
-        /// </summary>
-        /// <param name="index">The index of the bit to retrieve.</param>
-        /// <returns>True if the bit is set; otherwise, false.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Get(int index)
         {
-            int word = index >> 6;
-            int bit = index & 63;
-            return (_words[word] & (1UL << bit)) != 0;
+            PackedBitSetDebug.CheckIndex(index, BitCount);
+            return (_words[index >> 6] & (1UL << (index & 63))) != 0;
         }
 
-        /// <summary>
-        /// Sets or clears the bit at the specified index.
-        /// </summary>
-        /// <param name="index">The index of the bit to modify.</param>
-        /// <param name="value">True to set the bit; false to clear it.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Set(int index, bool value)
         {
-            int word = index >> 6;
-            int bit = index & 63;
-            ulong mask = 1UL << bit;
+            PackedBitSetDebug.CheckIndex(index, BitCount);
+
+            ref ulong word = ref _words[index >> 6];
+            ulong mask = 1UL << (index & 63);
 
             if (value)
             {
-                _words[word] |= mask;
+                word |= mask;
             }
             else
             {
-                _words[word] &= ~mask;
+                word &= ~mask;
             }
         }
 
-        /// <summary>
-        /// Clears all bits in the bitset, setting them to false.
-        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetBit(int index)
+        {
+            PackedBitSetDebug.CheckIndex(index, BitCount);
+            _words[index >> 6] |= 1UL << (index & 63);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ClearBit(int index)
+        {
+            PackedBitSetDebug.CheckIndex(index, BitCount);
+            _words[index >> 6] &= ~(1UL << (index & 63));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Toggle(int index)
+        {
+            PackedBitSetDebug.CheckIndex(index, BitCount);
+            _words[index >> 6] ^= 1UL << (index & 63);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
-            Array.Clear(_words, 0, _words.Length);
+            Array.Clear(_words, 0, WordCount);
+        }
+
+        public void Fill()
+        {
+            for (int i = 0; i < WordCount; i++)
+            {
+                _words[i] = ulong.MaxValue;
+            }
+
+            int usedBitsInLastWord = BitCount & 63;
+            if (usedBitsInLastWord != 0)
+            {
+                _words[WordCount - 1] &= (1UL << usedBitsInLastWord) - 1UL;
+            }
         }
     }
 }

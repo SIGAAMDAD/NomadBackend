@@ -92,8 +92,17 @@ namespace Nomad.Save.Private.Services
 			ArgumentGuard.ThrowIfNull( cvarSystem, nameof( cvarSystem ) );
 			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
 
-			_saveBegin = eventFactory.GetEvent<SaveBeginEventArgs>( SaveBeginEventArgs.Name, SaveBeginEventArgs.NameSpace );
-			_loadBegin = eventFactory.GetEvent<LoadBeginEventArgs>( LoadBeginEventArgs.Name, LoadBeginEventArgs.NameSpace );
+			_saveBegin = eventFactory
+				.GetEvent<SaveBeginEventArgs>(
+					SaveBeginEventArgs.Name,
+					SaveBeginEventArgs.NameSpace
+				);
+
+			_loadBegin = eventFactory
+				.GetEvent<LoadBeginEventArgs>(
+					LoadBeginEventArgs.Name,
+					LoadBeginEventArgs.NameSpace
+				);
 
 			_vfs = fileSystem ?? throw new ArgumentNullException( nameof( fileSystem ) );
 			_category = logger.CreateCategory( nameof( Nomad.Save ), LogLevel.Info, true );
@@ -124,19 +133,22 @@ namespace Nomad.Save.Private.Services
 		/// </summary>
 		public void Dispose()
 		{
-			if ( !_isDisposed ) {
-				_readerService?.Dispose();
-				_writerService?.Dispose();
-				_backupService?.Dispose();
-				_slotRepository?.Dispose();
-				_category?.Dispose();
-
-				_autoSaveEnabled.ValueChanged.Unsubscribe( OnAutoSaveEnabledChanged );
-				_autoSaveInterval.ValueChanged.Unsubscribe( OnAutoSaveIntervalChanged );
-
-				_saveBegin?.Dispose();
-				_loadBegin?.Dispose();
+			if ( _isDisposed ) {
+				return;
 			}
+
+			_readerService?.Dispose();
+			_writerService?.Dispose();
+			_backupService?.Dispose();
+			_slotRepository?.Dispose();
+			_category?.Dispose();
+
+			_autoSaveEnabled.ValueChanged.Unsubscribe( OnAutoSaveEnabledChanged );
+			_autoSaveInterval.ValueChanged.Unsubscribe( OnAutoSaveIntervalChanged );
+
+			_saveBegin?.Dispose();
+			_loadBegin?.Dispose();
+
 			GC.SuppressFinalize( this );
 			_isDisposed = true;
 		}

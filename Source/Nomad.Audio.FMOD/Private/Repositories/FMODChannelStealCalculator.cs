@@ -105,12 +105,13 @@ namespace Nomad.Audio.Fmod.Private.Services
 		/// <param name="newPriority"></param>
 		/// <param name="category"></param>
 		/// <returns></returns>
-		public float CalculateStealScore( float currentTime, in Vector2 listenerPos, FMODChannel candidate, float newPriority, SoundCategory category )
+		public float CalculateStealScore( float currentTime, in Vector3 listenerPos, FMODChannel candidate, float newPriority, SoundCategory category )
 		{
-			Vector2 pos = candidate.Instance.Position;
+			Vector3 pos = candidate.Instance.Position;
 			float dx = pos.X - listenerPos.X;
 			float dy = pos.Y - listenerPos.Y;
-			float distance = MathF.Sqrt( dx * dx + dy * dy );
+			float dz = pos.Z - listenerPos.Z;
+			float distance = MathF.Sqrt( dx * dx + dy * dy + dz * dz );
 
 			float priorityDiff = newPriority - candidate.CurrentPriority;
 			float age = currentTime - candidate.StartTimeSeconds;

@@ -22,6 +22,6 @@ namespace Nomad.Audio.Interfaces
     /// </summary>
     public interface IListener
     {
-        Vector2 Position { get; }
+        Vector3 Position { get; }
     }
 }

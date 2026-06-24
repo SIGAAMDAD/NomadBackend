@@ -25,6 +25,8 @@ namespace Nomad.Input.Private.ValueObjects
 		public readonly InternString ActionId;
 		public readonly int ActionIndex;
 		public readonly long TimeStamp;
+		public readonly InputDeviceSlot DeviceSlot;
+		public readonly int LocalSlot;
 
 		public readonly Vector2 Vector2Value;
 		public readonly float FloatValue;
@@ -40,6 +42,8 @@ namespace Nomad.Input.Private.ValueObjects
 			InputValueType valueType,
 			InputActionPhase phase,
 			long timeStamp,
+			InputDeviceSlot deviceSlot = InputDeviceSlot.Keyboard,
+			int localSlot = 0,
 			bool buttonValue = default,
 			float floatValue = default,
 			Vector2 vector2Value = default
@@ -48,6 +52,8 @@ namespace Nomad.Input.Private.ValueObjects
 			ActionId = actionId;
 			ActionIndex = actionIndex;
 			TimeStamp = timeStamp;
+			DeviceSlot = deviceSlot;
+			LocalSlot = localSlot;
 			Vector2Value = vector2Value;
 			FloatValue = floatValue;
 			ValueType = valueType;

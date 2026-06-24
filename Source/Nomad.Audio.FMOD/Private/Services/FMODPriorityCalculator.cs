@@ -118,17 +118,18 @@ namespace Nomad.Audio.Fmod.Private.Services
 		/// <returns></returns>
 		public float CalculateActualPriority(
 			float startTime,
-			Vector2 position,
+			Vector3 position,
 			float basePriority,
 			SoundCategory category,
 			float? lastTimePlayed,
 			int consecutiveStealCount
 		 )
 		{
-			Vector2 listener = _listenerService.ActiveListener;
+			Vector3 listener = _listenerService.ActiveListener;
 			float dx = position.X - listener.X;
 			float dy = position.Y - listener.Y;
-			float distance = MathF.Sqrt( dx * dx + dy * dy );
+			float dz = position.Z - listener.Z;
+			float distance = MathF.Sqrt( dx * dx + dy * dy + dz * dz );
 
 			float priority = basePriority * category.Config.PriorityScale * CalculateDistanceFactor( distance );
 

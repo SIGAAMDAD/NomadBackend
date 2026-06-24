@@ -140,8 +140,8 @@ namespace Nomad.EngineUtils.Godot.Private
 					_mouseMotionEvent.Publish(
 						new MouseMotionEventArgs(
 							now,
-							(int)mouseMotion.Relative.X,
-							(int)mouseMotion.Relative.Y
+							mouseMotion.ScreenRelative.X,
+							mouseMotion.ScreenRelative.Y
 						)
 					);
 					_mousePositionChangedEvent.Publish(

@@ -1,6 +1,6 @@
 /*
 ===========================================================================
-The Nomad MPLv2 Source Code
+The Nomad Framework
 Copyright (C) 2025-2026 Noah Van Til
 
 This Source Code Form is subject to the terms of the Mozilla Public
@@ -17,18 +17,14 @@ using System.Numerics;
 
 namespace Nomad.Audio.Fmod.Private
 {
-	internal static class Vector2Extensions
+	internal static class Vector3Extensions
 	{
-		public static FMOD.ATTRIBUTES_3D Make3D( this Vector2 vector )
+		public static FMOD.ATTRIBUTES_3D Make3D( this Vector3 vector )
 		{
 			return new FMOD.ATTRIBUTES_3D {
-				position = new FMOD.VECTOR { x = vector.X, y = 0.0f, z = vector.Y },
+				position = new FMOD.VECTOR { x = vector.X, y = vector.Y, z = vector.Z },
 				velocity = new FMOD.VECTOR { x = 0.0f, y = 0.0f, z = 0.0f },
-
-				// Listener / emitter facing "out of the screen"
 				forward = new FMOD.VECTOR { x = 0.0f, y = 0.0f, z = -1.0f },
-
-				// Because screen-space Y grows downward
 				up = new FMOD.VECTOR { x = 0.0f, y = 1.0f, z = 0.0f }
 			};
 		}

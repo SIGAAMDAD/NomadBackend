@@ -34,7 +34,7 @@ namespace Nomad.Audio.Fmod.Private.Entities
 
 	internal sealed class FMODEmitter : IAudioEmitter
 	{
-		public Vector2 Position {
+		public Vector3 Position {
 			get => _position;
 			set {
 				_position = value;
@@ -44,7 +44,7 @@ namespace Nomad.Audio.Fmod.Private.Entities
 				}
 			}
 		}
-		private Vector2 _position = Vector2.Zero;
+		private Vector3 _position = Vector3.Zero;
 
 		public float Volume {
 			get => _volume;

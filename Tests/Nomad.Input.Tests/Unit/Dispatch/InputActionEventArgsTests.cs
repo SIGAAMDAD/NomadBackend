@@ -29,7 +29,7 @@ namespace Nomad.Input.Tests
         [Test]
         public void ButtonActionEventArgs_ExposeConstructorValues()
         {
-            var args = new ButtonActionEventArgs(new InternString("player.jump"), InputActionPhase.Started, true, 123);
+            var args = new ButtonActionEventArgs(new InternString("player.jump"), InputActionPhase.Started, true, 123, InputDeviceSlot.Gamepad1, 1);
 
             using (Assert.EnterMultipleScope())
             {
@@ -37,13 +37,15 @@ namespace Nomad.Input.Tests
                 Assert.That(args.Phase, Is.EqualTo(InputActionPhase.Started));
                 Assert.That(args.Value, Is.True);
                 Assert.That(args.TimeStamp, Is.EqualTo(123));
+                Assert.That(args.DeviceSlot, Is.EqualTo(InputDeviceSlot.Gamepad1));
+                Assert.That(args.LocalSlot, Is.EqualTo(1));
             }
         }
 
         [Test]
         public void FloatActionEventArgs_ExposeConstructorValues()
         {
-            var args = new FloatActionEventArgs(new InternString("player.throttle"), InputActionPhase.Performed, 0.75f, 456);
+            var args = new FloatActionEventArgs(new InternString("player.throttle"), InputActionPhase.Performed, 0.75f, 456, InputDeviceSlot.Gamepad2, 2);
 
             using (Assert.EnterMultipleScope())
             {
@@ -51,6 +53,8 @@ namespace Nomad.Input.Tests
                 Assert.That(args.Phase, Is.EqualTo(InputActionPhase.Performed));
                 Assert.That(args.Value, Is.EqualTo(0.75f));
                 Assert.That(args.TimeStamp, Is.EqualTo(456));
+                Assert.That(args.DeviceSlot, Is.EqualTo(InputDeviceSlot.Gamepad2));
+                Assert.That(args.LocalSlot, Is.EqualTo(2));
             }
         }
 
@@ -58,7 +62,7 @@ namespace Nomad.Input.Tests
         public void AxisActionEventArgs_ExposeConstructorValues()
         {
             Vector2 value = new(2.0f, -3.0f);
-            var args = new AxisActionEventArgs(new InternString("camera.look"), InputActionPhase.Canceled, value, 789);
+            var args = new AxisActionEventArgs(new InternString("camera.look"), InputActionPhase.Canceled, value, 789, InputDeviceSlot.Mouse, 0);
 
             using (Assert.EnterMultipleScope())
             {
@@ -66,6 +70,8 @@ namespace Nomad.Input.Tests
                 Assert.That(args.Phase, Is.EqualTo(InputActionPhase.Canceled));
                 Assert.That(args.Value, Is.EqualTo(value));
                 Assert.That(args.TimeStamp, Is.EqualTo(789));
+                Assert.That(args.DeviceSlot, Is.EqualTo(InputDeviceSlot.Mouse));
+                Assert.That(args.LocalSlot, Is.EqualTo(0));
             }
         }
     }

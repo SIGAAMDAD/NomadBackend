@@ -14,7 +14,6 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,15 +79,11 @@ namespace Nomad.Save.Private.Services
 		public SaveWriterService( SaveConfig config, AtomicWriterService atomicWriter, SlotRepository slotRepository, IFileSystem fileSystem, ILoggerService logger )
 		{
 			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
-			ArgumentGuard.ThrowIfNull( fileSystem, nameof( fileSystem ) );
-			ArgumentGuard.ThrowIfNull( slotRepository, nameof( slotRepository ) );
-			ArgumentGuard.ThrowIfNull( config, nameof( config ) );
-			ArgumentGuard.ThrowIfNull( atomicWriter, nameof( atomicWriter ) );
 
-			_slotRepository = slotRepository;
-			_fileSystem = fileSystem;
-			_config = config;
-			_atomicWriter = atomicWriter;
+			_slotRepository = slotRepository ?? throw new ArgumentNullException( nameof( slotRepository ) );
+			_fileSystem = fileSystem ?? throw new ArgumentNullException( nameof( fileSystem ) );
+			_config = config ?? throw new ArgumentNullException( nameof( config ) );
+			_atomicWriter = atomicWriter ?? throw new ArgumentNullException( nameof( atomicWriter ) );
 
 			_category = logger.CreateCategory( nameof( SaveWriterService ), LogLevel.Info, true );
 		}
@@ -103,13 +98,15 @@ namespace Nomad.Save.Private.Services
 		/// </summary>
 		public void Dispose()
 		{
-			if ( !_isDisposed ) {
-				_category?.Dispose();
-				_slotRepository?.Dispose();
-				_writer?.Dispose();
+			if ( _isDisposed ) {
+				return;
 			}
-			GC.SuppressFinalize( this );
+
+			_category?.Dispose();
+			_writer?.Dispose();
+
 			_isDisposed = true;
+			GC.SuppressFinalize( this );
 		}
 
 		/*

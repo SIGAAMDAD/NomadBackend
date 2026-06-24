@@ -17,6 +17,7 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Nomad.Core.Input;
+using Nomad.Input.Interfaces;
 using Nomad.Input.Private.Repositories;
 using Nomad.Input.Private.ValueObjects;
 using Nomad.Input.ValueObjects;
@@ -37,11 +38,12 @@ namespace Nomad.Input.Private.Services
 	internal sealed class ActionResolverService
 	{
 		private const int RESOLVED_ACTION_BUFFER_RING_SIZE = 8;
+		private const int MAX_LOCAL_SLOTS = IInputDeviceSlotService.MaxLocalSlots;
 
 		private readonly CompiledBindingRepository _compiledBindings;
 		private readonly InputStateService _stateService;
 
-		private InputActionPhase[] _phaseByAction = Array.Empty<InputActionPhase>();
+		private InputActionPhase[] _phaseByActionAndLocalSlot = Array.Empty<InputActionPhase>();
 		private int[] _slotGeneration = Array.Empty<int>();
 		private int[] _touchedSlots = Array.Empty<int>();
 
@@ -65,7 +67,12 @@ namespace Nomad.Input.Private.Services
 			_stateService = stateService ?? throw new ArgumentNullException( nameof( stateService ) );
 		}
 
-		public ReadOnlySpan<ResolvedAction> ResolveMatchesNonAlloc( CompiledBindingGraph graph, BindingMatchSet matches, long timeStamp )
+		public void ResetPhases()
+		{
+			Array.Fill( _phaseByActionAndLocalSlot, InputActionPhase.Count );
+		}
+
+		public ReadOnlySpan<ResolvedAction> ResolveMatchesNonAlloc( CompiledBindingGraph graph, BindingMatchSet matches, long timeStamp, InputDeviceSlot deviceSlot = InputDeviceSlot.Keyboard, int localSlot = 0 )
 		{
 			BeginPass( graph.Actions.Length );
 
@@ -89,10 +96,10 @@ namespace Nomad.Input.Private.Services
 				);
 			}
 
-			return MaterializeResolvedActions( graph, timeStamp );
+			return MaterializeResolvedActions( graph, timeStamp, deviceSlot, localSlot );
 		}
 
-		public ReadOnlySpan<ResolvedAction> ResolveKeyboardCompositesNonAlloc( CompiledBindingGraph graph, uint activeContextMask, InputScheme? activeScheme, long timeStamp )
+		public ReadOnlySpan<ResolvedAction> ResolveKeyboardCompositesNonAlloc( CompiledBindingGraph graph, uint activeContextMask, InputScheme? activeScheme, long timeStamp, InputDeviceSlot deviceSlot = InputDeviceSlot.Keyboard, int localSlot = 0 )
 		{
 			BeginPass( graph.Actions.Length );
 
@@ -149,7 +156,7 @@ namespace Nomad.Input.Private.Services
 				);
 			}
 
-			return MaterializeResolvedActions( graph, timeStamp );
+			return MaterializeResolvedActions( graph, timeStamp, deviceSlot, localSlot );
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -207,7 +214,7 @@ namespace Nomad.Input.Private.Services
 			_bestVector2Value[actionSlot] = vector2Value;
 		}
 
-		private ReadOnlySpan<ResolvedAction> MaterializeResolvedActions( CompiledBindingGraph graph, long timeStamp )
+		private ReadOnlySpan<ResolvedAction> MaterializeResolvedActions( CompiledBindingGraph graph, long timeStamp, InputDeviceSlot deviceSlot, int localSlot )
 		{
 			ResolvedAction[] resolvedActionBuffer = GetResolvedActionBuffer( _touchedCount );
 
@@ -223,7 +230,7 @@ namespace Nomad.Input.Private.Services
 					_ => false
 				};
 
-				if ( !TryResolvePhase( slot, isActive, out var phase ) ) {
+				if ( !TryResolvePhase( slot, localSlot, isActive, out var phase ) ) {
 					continue;
 				}
 
@@ -233,6 +240,8 @@ namespace Nomad.Input.Private.Services
 					valueType: valueType,
 					phase: phase,
 					timeStamp: timeStamp,
+					deviceSlot: deviceSlot,
+					localSlot: localSlot,
 					buttonValue: _bestButtonValue[slot],
 					floatValue: _bestFloatValue[slot],
 					vector2Value: _bestVector2Value[slot]
@@ -243,20 +252,21 @@ namespace Nomad.Input.Private.Services
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
-		private bool TryResolvePhase( int actionSlot, bool isActive, out InputActionPhase phase )
+		private bool TryResolvePhase( int actionSlot, int localSlot, bool isActive, out InputActionPhase phase )
 		{
-			InputActionPhase previousPhase = _phaseByAction[actionSlot];
+			int phaseIndex = GetPhaseIndex( actionSlot, localSlot );
+			InputActionPhase previousPhase = _phaseByActionAndLocalSlot[phaseIndex];
 			bool wasActive = previousPhase is InputActionPhase.Started or InputActionPhase.Performed;
 
 			if ( isActive ) {
 				phase = wasActive ? InputActionPhase.Performed : InputActionPhase.Started;
-				_phaseByAction[actionSlot] = phase;
+				_phaseByActionAndLocalSlot[phaseIndex] = phase;
 				return true;
 			}
 
 			if ( wasActive ) {
 				phase = InputActionPhase.Canceled;
-				_phaseByAction[actionSlot] = phase;
+				_phaseByActionAndLocalSlot[phaseIndex] = phase;
 				return true;
 			}
 
@@ -415,13 +425,14 @@ namespace Nomad.Input.Private.Services
 
 		private void EnsureActionCapacity( int actionCount )
 		{
-			if ( _phaseByAction.Length >= actionCount ) {
+			int phaseCount = actionCount * MAX_LOCAL_SLOTS;
+			if ( _phaseByActionAndLocalSlot.Length >= phaseCount ) {
 				return;
 			}
 
-			int previousLength = _phaseByAction.Length;
-			Array.Resize( ref _phaseByAction, actionCount );
-			Array.Fill( _phaseByAction, InputActionPhase.Count, previousLength, actionCount - previousLength );
+			int previousLength = _phaseByActionAndLocalSlot.Length;
+			Array.Resize( ref _phaseByActionAndLocalSlot, phaseCount );
+			Array.Fill( _phaseByActionAndLocalSlot, InputActionPhase.Count, previousLength, phaseCount - previousLength );
 			Array.Resize( ref _slotGeneration, actionCount );
 			Array.Resize( ref _touchedSlots, actionCount );
 
@@ -432,6 +443,12 @@ namespace Nomad.Input.Private.Services
 			Array.Resize( ref _bestFloatValue, actionCount );
 			Array.Resize( ref _bestVector2Value, actionCount );
 			Array.Resize( ref _bestValueType, actionCount );
+		}
+
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		private static int GetPhaseIndex( int actionSlot, int localSlot )
+		{
+			return actionSlot * MAX_LOCAL_SLOTS + localSlot;
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]

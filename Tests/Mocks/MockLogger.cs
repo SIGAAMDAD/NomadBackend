@@ -38,7 +38,10 @@ public class MockLogger : ILoggerService
 
     public void Dispose()
     {
-        // DISPOSAL GOES HERE
+        if ( _isDisposed )
+        {
+            return;
+        }
         GC.SuppressFinalize(this);
         _isDisposed = true;
     }

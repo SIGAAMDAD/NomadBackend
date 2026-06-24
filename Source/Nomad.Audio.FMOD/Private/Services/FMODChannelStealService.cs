@@ -13,7 +13,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 	// float CalculateActualPriority(
 	//     float startTime,
 	//     string id,
-	//     Vector2 position,
+	//     Vector3 position,
 	//     float basePriority,
 	//     SoundCategory category,
 	//     Func<string, (bool found, float value)> lastPlayLookup,
@@ -75,7 +75,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		public float CalculateActualPriority(
 			float startTime,
 			string eventId,
-			Vector2 position,
+			Vector3 position,
 			float basePriority,
 			SoundCategory category ) {
 			return _priorityCalculator.CalculateActualPriority(
@@ -97,7 +97,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 		}
 
 		public void UpdatePriorities( FMODChannelTracker tracker ) {
-			Vector2 listenerPosition = _listenerService.ActiveListener;
+			Vector3 listenerPosition = _listenerService.ActiveListener;
 
 			for ( int i = 0; i < tracker.ActiveCount; i++ ) {
 				FMODChannel channel = tracker.GetActiveChannel( i );
@@ -107,7 +107,7 @@ namespace Nomad.Audio.Fmod.Private.Repositories {
 				}
 
 				float distanceFactor = _priorityCalculator.CalculateDistanceFactor(
-					Vector2.Distance( channel.Instance.Position, listenerPosition ) );
+					Vector3.Distance( channel.Instance.Position, listenerPosition ) );
 
 				channel.Volume = distanceFactor;
 				channel.CurrentPriority = channel.BasePriority * channel.Category.Config.PriorityScale * distanceFactor;

@@ -52,6 +52,8 @@ namespace Nomad.Logger.Private
 		private readonly ConcurrentQueue<string> _messageQueue = new ConcurrentQueue<string>();
 		private readonly MessageBuilder _builder;
 
+		private bool _isDisposed = false;
+
 		/*
 		===============
 		LoggerCategory
@@ -87,7 +89,14 @@ namespace Nomad.Logger.Private
 		/// </summary>
 		public void Dispose()
 		{
+			if ( _isDisposed ) {
+				return;
+			}
+
 			_sinks.Clear();
+
+			GC.SuppressFinalize( this );
+			_isDisposed = true;
 		}
 
 		/*

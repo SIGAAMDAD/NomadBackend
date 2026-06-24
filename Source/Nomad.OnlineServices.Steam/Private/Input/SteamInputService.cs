@@ -437,7 +437,7 @@ namespace Nomad.OnlineServices.Steam.Private.Input
 					? previous ? InputActionPhase.Performed : InputActionPhase.Started
 					: InputActionPhase.Canceled;
 
-				PublishButton( binding.ActionId, phase, current, timeStamp );
+				PublishButton( inputHandle, binding.ActionId, phase, current, timeStamp );
 
 				if ( current ) {
 					_digitalStates[stateKey] = true;
@@ -471,7 +471,7 @@ namespace Nomad.OnlineServices.Steam.Private.Input
 					? previousActive ? InputActionPhase.Performed : InputActionPhase.Started
 					: InputActionPhase.Canceled;
 
-				PublishFloat( binding.ActionId, phase, currentActive ? currentValue : 0.0f, timeStamp );
+				PublishFloat( inputHandle, binding.ActionId, phase, currentActive ? currentValue : 0.0f, timeStamp );
 
 				if ( currentActive ) {
 					_floatStates[stateKey] = currentValue;
@@ -502,7 +502,7 @@ namespace Nomad.OnlineServices.Steam.Private.Input
 					? previousActive ? InputActionPhase.Performed : InputActionPhase.Started
 					: InputActionPhase.Canceled;
 
-				PublishAxis( binding.ActionId, phase, currentActive ? currentValue : Vector2.Zero, timeStamp );
+				PublishAxis( inputHandle, binding.ActionId, phase, currentActive ? currentValue : Vector2.Zero, timeStamp );
 
 				if ( currentActive ) {
 					_axisStates[stateKey] = currentValue;
@@ -576,19 +576,40 @@ namespace Nomad.OnlineServices.Steam.Private.Input
 			return handle;
 		}
 
-		private void PublishButton( InternString actionId, InputActionPhase phase, bool value, long timeStamp )
+		private void PublishButton( InputHandle_t inputHandle, InternString actionId, InputActionPhase phase, bool value, long timeStamp )
 		{
-			GetButtonEvent( actionId ).Publish( new ButtonActionEventArgs( actionId, phase, value, timeStamp ) );
+			InputDeviceSlot deviceSlot = ResolveDeviceSlot( inputHandle );
+			GetButtonEvent( actionId ).Publish( new ButtonActionEventArgs( actionId, phase, value, timeStamp, deviceSlot, ResolveDefaultLocalSlot( deviceSlot ) ) );
 		}
 
-		private void PublishFloat( InternString actionId, InputActionPhase phase, float value, long timeStamp )
+		private void PublishFloat( InputHandle_t inputHandle, InternString actionId, InputActionPhase phase, float value, long timeStamp )
 		{
-			GetFloatEvent( actionId ).Publish( new FloatActionEventArgs( actionId, phase, value, timeStamp ) );
+			InputDeviceSlot deviceSlot = ResolveDeviceSlot( inputHandle );
+			GetFloatEvent( actionId ).Publish( new FloatActionEventArgs( actionId, phase, value, timeStamp, deviceSlot, ResolveDefaultLocalSlot( deviceSlot ) ) );
 		}
 
-		private void PublishAxis( InternString actionId, InputActionPhase phase, Vector2 value, long timeStamp )
+		private void PublishAxis( InputHandle_t inputHandle, InternString actionId, InputActionPhase phase, Vector2 value, long timeStamp )
 		{
-			GetAxisEvent( actionId ).Publish( new AxisActionEventArgs( actionId, phase, value, timeStamp ) );
+			InputDeviceSlot deviceSlot = ResolveDeviceSlot( inputHandle );
+			GetAxisEvent( actionId ).Publish( new AxisActionEventArgs( actionId, phase, value, timeStamp, deviceSlot, ResolveDefaultLocalSlot( deviceSlot ) ) );
+		}
+
+		private InputDeviceSlot ResolveDeviceSlot( InputHandle_t inputHandle )
+		{
+			return _slotByHandle.TryGetValue( inputHandle, out InputDeviceSlot deviceSlot )
+				? deviceSlot
+				: InputDeviceSlot.Gamepad0;
+		}
+
+		private static int ResolveDefaultLocalSlot( InputDeviceSlot deviceSlot )
+		{
+			return deviceSlot switch {
+				InputDeviceSlot.Gamepad0 => 0,
+				InputDeviceSlot.Gamepad1 => 1,
+				InputDeviceSlot.Gamepad2 => 2,
+				InputDeviceSlot.Gamepad3 => 3,
+				_ => 0
+			};
 		}
 
 		private IGameEvent<ButtonActionEventArgs> GetButtonEvent( InternString actionId )

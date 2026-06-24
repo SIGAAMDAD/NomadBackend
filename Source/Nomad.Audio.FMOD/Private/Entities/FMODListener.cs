@@ -31,7 +31,7 @@ namespace Nomad.Audio.Fmod.Private.Entities
 
 	internal sealed class FMODListener : IListener
 	{
-		public Vector2 Position {
+		public Vector3 Position {
 			get => _position;
 			set {
 				if ( _position == value ) {
@@ -41,7 +41,7 @@ namespace Nomad.Audio.Fmod.Private.Entities
 				_system.setListenerAttributes( _listenerIndex, value.Make3D() );
 			}
 		}
-		private Vector2 _position = Vector2.Zero;
+		private Vector3 _position = Vector3.Zero;
 
 		private readonly int _listenerIndex;
 		private readonly FMOD.Studio.System _system;

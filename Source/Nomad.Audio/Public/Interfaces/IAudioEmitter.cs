@@ -23,7 +23,7 @@ namespace Nomad.Audio.Interfaces
     /// </summary>
     public interface IAudioEmitter
     {
-        Vector2 Position { get; set; }
+        Vector3 Position { get; set; }
         float Volume { get; set; }
         float Pitch { get; set; }
         string Category { get; }

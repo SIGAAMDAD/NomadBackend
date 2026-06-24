@@ -38,5 +38,5 @@ namespace Nomad.Save.Interfaces
         /// <returns></returns>
         bool LoadObject<T>(ISaveReaderService reader, T value)
             where T : notnull;
-    };
-};
+    }
+}

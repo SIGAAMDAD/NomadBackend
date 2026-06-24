@@ -31,14 +31,14 @@ namespace Nomad.Audio.Interfaces
         /// <summary>
         ///
         /// </summary>
-        Vector2 ActiveListener { get; }
+        Vector3 ActiveListener { get; }
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="listenerIndex"></param>
         /// <param name="position"></param>
-        void SetListenerPosition(int listenerIndex, Vector2 position);
+        void SetListenerPosition(int listenerIndex, Vector3 position);
 
         /// <summary>
         ///

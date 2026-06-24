@@ -97,15 +97,15 @@ namespace Nomad.Save.Private.Repositories
 				return;
 			}
 
-			_category.Dispose();
+			_category?.Dispose();
 
 			_fileWatcher.Changed -= OnSaveFileChanged;
 			_fileWatcher.Deleted -= OnSaveFileChanged;
 			_fileWatcher.Renamed -= OnSaveFileChanged;
 			_fileWatcher.Dispose();
 
-			GC.SuppressFinalize( this );
 			_isDisposed = true;
+			GC.SuppressFinalize( this );
 		}
 
 		/*

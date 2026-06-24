@@ -48,7 +48,6 @@ namespace Nomad.Save.Private.Services
 		private readonly SaveConfig _config;
 
 		private readonly IFileSystem _fileSystem;
-
 		private readonly ILoggerCategory _category;
 
 		private bool _isDisposed = false;
@@ -69,9 +68,10 @@ namespace Nomad.Save.Private.Services
 		{
 			_slotRepository = slotRepository ?? throw new ArgumentNullException( nameof( slotRepository ) );
 			_fileSystem = fileSystem ?? throw new ArgumentNullException( nameof( fileSystem ) );
+			_config = config ?? throw new ArgumentNullException( nameof( config ) );
+
 			_sections = new ConcurrentDictionary<string, SaveSectionReader>();
 
-			_config = config ?? throw new ArgumentNullException( nameof( config ) );
 			_category = logger.CreateCategory( nameof( SaveReaderService ), LogLevel.Info, true );
 		}
 
@@ -85,9 +85,12 @@ namespace Nomad.Save.Private.Services
 		/// </summary>
 		public void Dispose()
 		{
-			if ( !_isDisposed ) {
-				_category?.Dispose();
+			if ( _isDisposed ) {
+				return;
 			}
+
+			_category?.Dispose();
+
 			GC.SuppressFinalize( this );
 			_isDisposed = true;
 		}
