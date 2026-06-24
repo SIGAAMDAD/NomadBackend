@@ -51,7 +51,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		protected ILoggerService Logger { get; }
 		protected IGameEvent<TArgs> EventData { get; }
 
-		protected bool IsDisposed { get; private set; } = false;
+		protected bool isDisposed { get; private set; } = false;
 
 		/*
 		===============
@@ -59,7 +59,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="eventData"></param>
 		/// <param name="logger"></param>
@@ -82,14 +82,14 @@ namespace Nomad.Events.Private.SubscriptionSets
 		/// </summary>
 		public void Dispose()
 		{
-			if ( IsDisposed ) {
+			if ( isDisposed ) {
 				return;
 			}
 
 			Logger?.PrintLine( $"Releasing subscription set for event {EventData.DebugName}..." );
 			OnDispose();
 
-			IsDisposed = true;
+			isDisposed = true;
 			GC.SuppressFinalize( this );
 		}
 
@@ -114,7 +114,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		protected void ThrowIfDisposed()
 		{
-			StateGuard.ThrowIfDisposed( IsDisposed, this );
+			StateGuard.ThrowIfDisposed( isDisposed, this );
 		}
 
 		/*
@@ -203,7 +203,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		public abstract void Pump( in TArgs args );
 
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="args"></param>
 		/// <param name="ct"></param>
@@ -219,7 +219,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="subscriptions"></param>
 		/// <param name="subscriptionCount"></param>
@@ -316,7 +316,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <param name="index"></param>
@@ -350,7 +350,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <param name="index"></param>
@@ -373,7 +373,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback"></param>
 		/// <param name="index"></param>
@@ -382,6 +382,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		protected EventHandlerException? InvokeCallback( EventCallback<TArgs> callback, int index, in TArgs args )
 		{
 			EventHandlerException? failure = null;
+
 			try {
 				callback.Invoke( in args );
 			} catch ( Exception ex ) {
@@ -403,6 +404,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 					throw failure;
 				}
 			}
+
 			return failure;
 		}
 
@@ -412,7 +414,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="failures"></param>
 		/// <exception cref="EventPublishException"></exception>

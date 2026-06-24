@@ -70,10 +70,13 @@ namespace Nomad.Events.Private
 		/// </summary>
 		public void Dispose()
 		{
-			if ( !_isDisposed ) {
-				UnsubscribeAll();
-				_eventFactory.RemoveGroup( this );
+			if ( _isDisposed ) {
+				return;
 			}
+
+			UnsubscribeAll();
+			_eventFactory.RemoveGroup( this );
+
 			GC.SuppressFinalize( this );
 			_isDisposed = true;
 		}

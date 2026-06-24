@@ -60,13 +60,15 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public bool Equals( EventKey other )
-			=> _hashCode == other._hashCode;
+		{
+			return _hashCode == other._hashCode;
+		}
 
 		/*
 		===============
@@ -74,12 +76,14 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public override int GetHashCode()
-			=> _hashCode;
+		{
+			return _hashCode;
+		}
 
 		/*
 		===============
@@ -87,12 +91,14 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public override bool Equals( object? obj )
-			=> obj is EventKey key && Equals( key );
-	}
+		{
+			return obj is EventKey key && Equals( key );
+		}
+	};
 };

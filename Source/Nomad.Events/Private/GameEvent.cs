@@ -98,7 +98,7 @@ namespace Nomad.Events.Private
 		/// <exception cref="ArgumentException">Thrown if name is null or empty.</exception>
 		internal GameEvent( InternString nameSpace, InternString name, ILoggerService logger, EventFlags flags )
 		{
-			ArgumentGuard.ThrowIfNullOrEmpty( name );
+			ArgumentGuard.ThrowIfNullOrEmpty( name, nameof( name ) );
 
 			_nameSpace = nameSpace;
 			_name = name;
@@ -132,7 +132,7 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		public void Dispose()
 		{
@@ -149,7 +149,7 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="other"></param>
 		/// <returns></returns>
@@ -165,7 +165,7 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="eventArgs"></param>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -184,7 +184,7 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="eventArgs"></param>
 		/// <param name="ct"></param>
@@ -201,14 +201,14 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback">The lambda or method to call when the event is triggered.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public ISubscriptionHandle Subscribe( EventCallback<TArgs> callback )
 		{
-			ArgumentGuard.ThrowIfNull( callback );
+			ArgumentGuard.ThrowIfNull( callback, nameof( callback ) );
 			return new SubscriptionHandle<TArgs>( _subscriptions, callback );
 		}
 
@@ -218,14 +218,14 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback">The lambda or method to call when the event is triggered.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public ISubscriptionHandle SubscribeAsync( AsyncEventCallback<TArgs> callback )
 		{
-			ArgumentGuard.ThrowIfNull( callback );
+			ArgumentGuard.ThrowIfNull( callback, nameof( callback ) );
 			return new AsyncSubscriptionHandle<TArgs>( _subscriptions, callback );
 		}
 
@@ -235,14 +235,14 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback">The lambda or method to remove from the subscription list.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public void Unsubscribe( EventCallback<TArgs> callback )
 		{
-			ArgumentGuard.ThrowIfNull( callback );
+			ArgumentGuard.ThrowIfNull( callback, nameof( callback ) );
 			_subscriptions.RemoveSubscription( callback );
 		}
 
@@ -252,14 +252,14 @@ namespace Nomad.Events.Private
 		===============
 		*/
 		/// <summary>
-		/// 
+		///
 		/// </summary>
 		/// <param name="callback">The lambda or method to remove from the subscription list.</param>
 		/// <exception cref="ArgumentNullException">Thrown if <paramref name="callback"/> is null.</exception>
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		public void UnsubscribeAsync( AsyncEventCallback<TArgs> callback )
 		{
-			ArgumentGuard.ThrowIfNull( callback );
+			ArgumentGuard.ThrowIfNull( callback, nameof( callback ) );
 			_subscriptions.RemoveSubscriptionAsync( callback );
 		}
 	};

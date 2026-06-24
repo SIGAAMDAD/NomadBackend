@@ -15,6 +15,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.Compatibility.Guards;
@@ -84,7 +85,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		public override bool AddSubscription( EventCallback<TArgs> callback )
 		{
 			ThrowIfDisposed();
-			ArgumentGuard.ThrowIfNull( callback );
+			ArgumentGuard.ThrowIfNull( callback, nameof( callback ) );
 
 			if ( ContainsCallback( callback, out _ ) ) {
 				Logger?.PrintWarning( $"LockFreeSubscriptionSet.AddSubscription: subscription for callback '{callback.Method.Name}' already exists!" );
@@ -124,7 +125,7 @@ namespace Nomad.Events.Private.SubscriptionSets
 		public override bool RemoveSubscription( EventCallback<TArgs> callback )
 		{
 			ThrowIfDisposed();
-			ArgumentGuard.ThrowIfNull( callback );
+			ArgumentGuard.ThrowIfNull( callback, nameof( callback ) );
 
 			if ( !ContainsCallback( callback, out int index ) ) {
 				Logger?.PrintWarning( $"LockFreeSubscriptionSet.RemoveSubscription: no such existing subscription for callback '{callback.Method.Name}'." );
@@ -163,20 +164,54 @@ namespace Nomad.Events.Private.SubscriptionSets
 		public override void Pump( in TArgs args )
 		{
 			ThrowIfDisposed();
+			if ( _genericSubscriptions.Count == 0 ) {
+				return;
+			}
 
 			List<EventHandlerException>? failures = null;
 
-			for ( int i = 0; i < _genericSubscriptions.Count; i++ ) {
-				var callback = _genericSubscriptions[i];
-				var ex = InvokeCallback( callback, i, in args );
-				if ( ex != null ) {
-					failures ??= new();
-					failures.Add( ex );
-				}
+			int count = _genericSubscriptions.Count;
+			switch ( count ) {
+				case 1:
+					PumpEvent( _genericSubscriptions[0], 0, in args, failures );
+					break;
+
+				case 2:
+					PumpEvent( _genericSubscriptions[0], 0, in args, failures );
+					PumpEvent( _genericSubscriptions[1], 1, in args, failures );
+					break;
+
+				case 3:
+					PumpEvent( _genericSubscriptions[0], 0, in args, failures );
+					PumpEvent( _genericSubscriptions[1], 1, in args, failures );
+					PumpEvent( _genericSubscriptions[2], 2, in args, failures );
+					break;
+
+				case 4:
+					PumpEvent( _genericSubscriptions[0], 0, in args, failures );
+					PumpEvent( _genericSubscriptions[1], 1, in args, failures );
+					PumpEvent( _genericSubscriptions[2], 2, in args, failures );
+					PumpEvent( _genericSubscriptions[3], 3, in args, failures );
+					break;
+
+				default:
+					for ( int i = 0; i < count; i++ ) {
+						PumpEvent( _genericSubscriptions[i], i, in args, failures );
+					}
+					break;
 			}
 
 			IncrementPublishCount();
 			CheckAggregateException( failures );
+		}
+
+		private void PumpEvent( EventCallback<TArgs> callback, int index, in TArgs args, List<EventHandlerException> failures )
+		{
+			var ex = InvokeCallback( callback, index, in args );
+			if ( ex != null ) {
+				failures ??= new();
+				failures.Add( ex );
+			}
 		}
 
 		/*
