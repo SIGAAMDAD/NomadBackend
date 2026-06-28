@@ -45,13 +45,16 @@ namespace Nomad.Input.Private.Services
 	///
 	/// </summary>
 
-	internal sealed class InputSystem : IInputSystem
+	internal sealed class InputSystem : IInputSystem, IInputContextControlService
 	{
 		public InputScheme Mode => _mode;
-		private readonly InputScheme _mode;
+		private InputScheme _mode = InputScheme.KeyboardAndMouse;
 
 		public uint ContextMask => _contextMask;
-		private readonly uint _contextMask = 0xFFFFFFFF;
+		private uint _contextMask = uint.MaxValue;
+
+		public InputScheme? ActiveScheme => _filterByScheme ? _mode : null;
+		private bool _filterByScheme = true;
 
 		private readonly BindRepository _bindRepository;
 		private readonly BindingMatcherService _matcherService;
@@ -113,6 +116,7 @@ namespace Nomad.Input.Private.Services
 
 			registry.AddSingleton( _bindResolver );
 			registry.AddSingleton( _rebindService );
+			registry.AddSingleton<IInputContextControlService>( this );
 			registry.AddSingleton<IInputDeviceSlotService>( _deviceSlotService );
 			registry.AddSingleton<IInputSnapshotService>( _stateService );
 
@@ -188,10 +192,10 @@ namespace Nomad.Input.Private.Services
 			_stateService.SetPressed( InputDeviceSlot.Keyboard, keyEvent.KeyNum.ToControlId(), keyEvent.Pressed );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
-			BindingMatchSet matches = _matcherService.MatchKeyboard( graph, in keyEvent, _contextMask, _mode );
+			BindingMatchSet matches = _matcherService.MatchKeyboard( graph, in keyEvent, _contextMask, ActiveScheme );
 
 			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, keyEvent.TimeStamp, InputDeviceSlot.Keyboard, localSlot ) );
-			DispatchResolved( graph, _actionResolverService.ResolveKeyboardCompositesNonAlloc( graph, _contextMask, _mode, keyEvent.TimeStamp, InputDeviceSlot.Keyboard, localSlot ) );
+			DispatchResolved( graph, _actionResolverService.ResolveKeyboardCompositesNonAlloc( graph, _contextMask, ActiveScheme, keyEvent.TimeStamp, InputDeviceSlot.Keyboard, localSlot ) );
 		}
 
 		/*
@@ -212,7 +216,7 @@ namespace Nomad.Input.Private.Services
 			_stateService.SetPressed( InputDeviceSlot.Mouse, mouseButtonEvent.Button.ToControlId(), mouseButtonEvent.Pressed );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
-			BindingMatchSet matches = _matcherService.MatchMouseButton( graph, in mouseButtonEvent, _contextMask, _mode );
+			BindingMatchSet matches = _matcherService.MatchMouseButton( graph, in mouseButtonEvent, _contextMask, ActiveScheme );
 
 			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, mouseButtonEvent.TimeStamp, InputDeviceSlot.Mouse, localSlot ) );
 		}
@@ -235,7 +239,7 @@ namespace Nomad.Input.Private.Services
 			_stateService.AddMouseDelta( new Vector2( mouseMotionEvent.RelativeX, mouseMotionEvent.RelativeY ) );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
-			BindingMatchSet matches = _matcherService.MatchMouseDelta( graph, _contextMask, _mode );
+			BindingMatchSet matches = _matcherService.MatchMouseDelta( graph, _contextMask, ActiveScheme );
 
 			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, mouseMotionEvent.TimeStamp, InputDeviceSlot.Mouse, localSlot ) );
 		}
@@ -258,7 +262,7 @@ namespace Nomad.Input.Private.Services
 			_stateService.SetMousePosition( new Vector2( mousePositionChangedEvent.PositionX, mousePositionChangedEvent.PositionY ) );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
-			BindingMatchSet matches = _matcherService.MatchMouseDelta( graph, _contextMask, _mode );
+			BindingMatchSet matches = _matcherService.MatchMouseDelta( graph, _contextMask, ActiveScheme );
 
 			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, mousePositionChangedEvent.TimeStamp, InputDeviceSlot.Mouse, localSlot ) );
 		}
@@ -282,7 +286,7 @@ namespace Nomad.Input.Private.Services
 			_stateService.SetPressed( deviceSlot, gamepadButtonEvent.Button.ToControlId(), gamepadButtonEvent.Pressed );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
-			BindingMatchSet matches = _matcherService.MatchGamepadButton( graph, in gamepadButtonEvent, _contextMask, _mode );
+			BindingMatchSet matches = _matcherService.MatchGamepadButton( graph, in gamepadButtonEvent, _contextMask, ActiveScheme );
 
 			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, gamepadButtonEvent.TimeStamp, deviceSlot, localSlot ) );
 		}
@@ -308,7 +312,7 @@ namespace Nomad.Input.Private.Services
 			_stateService.SetAxis2D( deviceSlot, controlId, gamepadAxisEvent.Value );
 
 			CompiledBindingGraph graph = _compiledBindings.Current;
-			BindingMatchSet matches = _matcherService.MatchGamepadAxis( graph, deviceSlot, controlId, _contextMask, _mode );
+			BindingMatchSet matches = _matcherService.MatchGamepadAxis( graph, deviceSlot, controlId, _contextMask, ActiveScheme );
 
 			DispatchResolved( graph, _actionResolverService.ResolveMatchesNonAlloc( graph, matches, gamepadAxisEvent.TimeStamp, deviceSlot, localSlot ) );
 		}
@@ -341,6 +345,41 @@ namespace Nomad.Input.Private.Services
 		private void RecompileBindings()
 		{
 			_compilerService.CompileIntoRepository( _bindRepository.GetAllBindings() );
+		}
+
+		public void SetActiveScheme( InputScheme? scheme )
+		{
+			if ( scheme.HasValue ) {
+				_mode = scheme.Value;
+				_filterByScheme = true;
+			} else {
+				_filterByScheme = false;
+			}
+
+			_actionResolverService.ResetPhases();
+		}
+
+		public void SetContextMask( uint contextMask )
+		{
+			_contextMask = contextMask;
+			_actionResolverService.ResetPhases();
+		}
+
+		public void EnableContext( uint contextMask )
+		{
+			_contextMask |= contextMask;
+			_actionResolverService.ResetPhases();
+		}
+
+		public void DisableContext( uint contextMask )
+		{
+			_contextMask &= ~contextMask;
+			_actionResolverService.ResetPhases();
+		}
+
+		public void ResetContexts()
+		{
+			SetContextMask( uint.MaxValue );
 		}
 
 		private bool TryGetLocalSlot( InputDeviceSlot deviceSlot, out int localSlot )

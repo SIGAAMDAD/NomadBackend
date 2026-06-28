@@ -14,6 +14,9 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Linq;
+using System.IO;
+using System.Collections.Generic;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using Nomad.Core.Compatibility.Guards;

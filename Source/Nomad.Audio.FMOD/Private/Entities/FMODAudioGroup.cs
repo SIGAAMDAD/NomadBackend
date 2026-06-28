@@ -37,7 +37,7 @@ namespace Nomad.Audio.Fmod.Private.Entities
 		public float Volume {
 			get => _volume;
 			set {
-				_volume = Math.Clamp( MathF.Pow( 10.0f, ((value * 100.0f) - 80.0f) / 20.0f ), 0.0f, 1.0f );
+				_volume = Math.Clamp( value, 0.0f, 100.0f ) * 0.01f;
 				_bus.setVolume( _volume );
 			}
 		}

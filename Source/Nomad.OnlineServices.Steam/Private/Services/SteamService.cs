@@ -68,7 +68,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 
 		public IMatchMakingService Matchmaking {
 			get {
-				_matchMakingService ??= new SteamMatchMakingService( _lobbyService.Repository, _cvarSystem, _logger );
+				_matchMakingService ??= new SteamMatchMakingService( _lobbyService.Repository, _cvarSystem, _logger, _eventFactory );
 				return _matchMakingService;
 			}
 		}

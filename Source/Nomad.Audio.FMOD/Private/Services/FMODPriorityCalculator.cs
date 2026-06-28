@@ -46,7 +46,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 		private readonly ISubscriptionHandle _distanceFalloffStartEvent;
 		private readonly ISubscriptionHandle _distanceFalloffEndEvent;
-		private readonly ISubscriptionHandle _distanceWeightEvent;
+		private readonly ISubscriptionHandle _frequencyPenaltyEvent;
 
 		private readonly IListenerService _listenerService;
 
@@ -77,7 +77,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 			var frequencyPenalty = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.FREQUENCY_PENALTY );
 			_frequencyPenalty = frequencyPenalty.Value;
-			frequencyPenalty.ValueChanged.Subscribe( OnFrequencyPenaltyValueChanged );
+			_frequencyPenaltyEvent = frequencyPenalty.ValueChanged.Subscribe( OnFrequencyPenaltyValueChanged );
 
 			RecomputeDistanceRange();
 		}
@@ -95,7 +95,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			if ( !_isDisposed ) {
 				_distanceFalloffStartEvent?.Dispose();
 				_distanceFalloffEndEvent?.Dispose();
-				_distanceWeightEvent?.Dispose();
+				_frequencyPenaltyEvent?.Dispose();
 			}
 			GC.SuppressFinalize( this );
 			_isDisposed = true;

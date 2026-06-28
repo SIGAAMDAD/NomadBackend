@@ -45,6 +45,11 @@ namespace Nomad.EngineUtils.Settings.Interfaces
         /// <summary>
         ///
         /// </summary>
+        float MasterVolume { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
         float MusicVolume { get; set; }
 
         /// <summary>

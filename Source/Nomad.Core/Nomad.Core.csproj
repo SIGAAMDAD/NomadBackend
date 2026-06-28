@@ -4,6 +4,7 @@
     <UseNomadSourceGenerators>true</UseNomadSourceGenerators>
     <EnableEventDebug>true</EnableEventDebug>
     <IsNomadStandardLibraryProject>true</IsNomadStandardLibraryProject>
+    <NoWarn>$(NoWarn);CA1502</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

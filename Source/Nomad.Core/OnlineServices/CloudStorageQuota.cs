@@ -16,14 +16,21 @@ of merchantability, fitness for a particular purpose and noninfringement.
 namespace Nomad.Core.OnlineServices
 {
     /// <summary>
-    /// 
+    /// Describes the storage quota reported by an online cloud storage provider.
     /// </summary>
     public readonly struct CloudStorageQuota
     {
-        public int TotalBytes { get; }
-        public int AvailableBytes { get; }
+        /// <summary>
+        /// Total bytes available to the application.
+        /// </summary>
+        public long TotalBytes { get; }
 
-        public CloudStorageQuota(int totalBytes, int availableBytes)
+        /// <summary>
+        /// Remaining bytes available to the application.
+        /// </summary>
+        public long AvailableBytes { get; }
+
+        public CloudStorageQuota(long totalBytes, long availableBytes)
         {
             TotalBytes = totalBytes;
             AvailableBytes = availableBytes;

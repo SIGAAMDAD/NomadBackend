@@ -46,6 +46,11 @@ namespace Nomad.EngineUtils.Settings.ValueObjects
         /// <summary>
         ///
         /// </summary>
+        public float MasterVolume { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
         public float MusicVolume { get; set; }
 
         /// <summary>

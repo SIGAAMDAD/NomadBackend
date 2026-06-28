@@ -24,7 +24,9 @@ using Nomad.Audio.Fmod.Private.ValueObjects;
 using Nomad.Audio.Fmod.ValueObjects;
 using Nomad.Audio.Interfaces;
 using Nomad.Core;
+using Nomad.Core.Collections;
 using Nomad.Core.CVars;
+using Nomad.Core.Events;
 using Nomad.Core.Logger;
 using Nomad.CVars;
 using Nomad.ResourceCache;
@@ -51,40 +53,12 @@ namespace Nomad.Audio.Fmod.Private.Services
 		private readonly IListenerService _listenerService;
 		private readonly IResourceCacheService<IAudioResource, string> _eventRepository;
 		private readonly FMODPriorityCalculator _priorityCalculator;
-		private readonly FMODChannelStealCalculator _stealCalculator;
 		private readonly FMOD.Studio.EVENT_CALLBACK _finishedCallback;
 		private readonly ConcurrentQueue<nint> _finishedInstances = new ConcurrentQueue<nint>();
 
 		private readonly int _capacity;
-		private readonly int[] _slotToDense;
-		private readonly int[] _denseToSlot;
-		private readonly int[] _freeSlots;
-		private readonly uint[] _slotGeneration;
 		private int _freeTop;
 		private int _denseCount;
-
-		/*
-		// Dense hot SoA
-		private readonly nint[] _instancePtr;
-		private readonly float[] _arena.PosX;
-		private readonly float[] _arena.PosY;
-		private readonly float[] _arena.PosZ;
-		private readonly float[] _arena.BasePriority;
-		private readonly float[] _arena.CurrentPriority;
-		private readonly float[] _arena.StartTime;
-		private readonly float[] _arena.LastStolenTime;
-		private readonly float[] _arena.Volume;
-		private readonly float[] _arena.UserVolume;
-		private readonly float[] _arena.Pitch;
-		private readonly float[] _arena.Attenuation;
-		private readonly ushort[] _arena.EventId;
-		private readonly ushort[] _arena.CategoryId;
-		private readonly byte[] _arena.Flags;
-
-		// Stable-slot category intrusive list
-		private readonly int[] _arena.SlotNextInCategory;
-		private readonly int[] _arena.SlotPrevInCategory;
-		*/
 
 		private readonly FMODChannelStorage _arena;
 
@@ -115,9 +89,14 @@ namespace Nomad.Audio.Fmod.Private.Services
 		private readonly InstanceToSlotMap _instanceToSlot;
 		private readonly ICVar<int> _maxChannels;
 		private readonly ICVar<int> _maxActiveChannels;
+		private readonly ISubscriptionHandle _maxActiveChannelsChanged;
+		private ISubscriptionHandle _minTimeBetweenChannelStealsChanged;
+		private ISubscriptionHandle _distanceWeightChanged;
+		private ISubscriptionHandle _volumeWeightChanged;
 
 		private float _elapsedSeconds;
-		private float _effectsVolume;
+		private float _distanceWeight;
+		private float _volumeWeight;
 		private float _minTimeBetweenChannelSteals;
 		private bool _isDisposed;
 
@@ -134,7 +113,6 @@ namespace Nomad.Audio.Fmod.Private.Services
 			_listenerService = listenerService;
 			_eventRepository = fmodSystem.EventRepository;
 			_priorityCalculator = new FMODPriorityCalculator( cvarSystem, listenerService );
-			_stealCalculator = new FMODChannelStealCalculator( cvarSystem, _priorityCalculator );
 			BusRepository = new FMODBusRepository( fmodSystem );
 
 			_maxChannels = cvarSystem.GetCVarOrThrow<int>( Constants.CVars.EngineUtils.Audio.MAX_CHANNELS );
@@ -148,43 +126,16 @@ namespace Nomad.Audio.Fmod.Private.Services
 			}
 
 			_capacity = _maxChannels.Value;
-			_slotToDense = new int[_capacity];
-			_denseToSlot = new int[_capacity];
-			_freeSlots = new int[_capacity];
-			_slotGeneration = new uint[_capacity];
-			//			_arena.SlotNextInCategory = new int[_capacity];
-			//			_arena.SlotPrevInCategory = new int[_capacity];
-
-			Array.Fill( _slotToDense, INVALID_INDEX );
-			//			Array.Fill( _arena.SlotNextInCategory, INVALID_INDEX );
-			//			Array.Fill( _arena.SlotPrevInCategory, INVALID_INDEX );
-
-			for ( int i = 0; i < _capacity; i++ ) {
-				_freeSlots[i] = _capacity - 1 - i;
-			}
-			_freeTop = _capacity;
-
-			/*
-			_instancePtr = new nint[_capacity];
-			_arena.PosX = new float[_capacity];
-			_arena.PosY = new float[_capacity];
-			_arena.PosZ = new float[_capacity];
-			_arena.BasePriority = new float[_capacity];
-			_arena.CurrentPriority = new float[_capacity];
-			_arena.StartTime = new float[_capacity];
-			_arena.LastStolenTime = new float[_capacity];
-			_arena.Volume = new float[_capacity];
-			_arena.EventId = new ushort[_capacity];
-			_arena.CategoryId = new ushort[_capacity];
-			_arena.Flags = new byte[_capacity];
-			_arena.UserVolume = new float[_capacity];
-			_arena.Pitch = new float[_capacity];
-			_arena.Attenuation = new float[_capacity];
-			*/
-
 			_arena = new FMODChannelStorage( _capacity );
+
+			new Span<int>( _arena.SlotToDense, _arena.Capacity ).Fill( INVALID_INDEX );
 			new Span<int>( _arena.SlotNextInCategory, _arena.Capacity ).Fill( INVALID_INDEX );
 			new Span<int>( _arena.SlotPrevInCategory, _arena.Capacity ).Fill( INVALID_INDEX );
+
+			for ( int i = 0; i < _capacity; i++ ) {
+				_arena.FreeSlots[i] = _capacity - 1 - i;
+			}
+			_freeTop = _capacity;
 
 			_eventNames = new string[16];
 			_categoryNames = new string[16];
@@ -205,7 +156,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			_log = logger.CreateCategory( "FMODChannelService", LogLevel.Debug, true );
 
 			InitConfig( cvarSystem );
-			_maxActiveChannels.ValueChanged.Subscribe( OnMaxActiveChannelsValueChanged );
+			_maxActiveChannelsChanged = _maxActiveChannels.ValueChanged.Subscribe( OnMaxActiveChannelsValueChanged );
 		}
 
 		public void Dispose()
@@ -218,6 +169,11 @@ namespace Nomad.Audio.Fmod.Private.Services
 				ForceStopDense( dense, false );
 			}
 
+			_maxActiveChannelsChanged?.Dispose();
+			_minTimeBetweenChannelStealsChanged?.Dispose();
+			_distanceWeightChanged?.Dispose();
+			_volumeWeightChanged?.Dispose();
+			_priorityCalculator?.Dispose();
 			_arena?.Dispose();
 
 			_isDisposed = true;
@@ -261,14 +217,13 @@ namespace Nomad.Audio.Fmod.Private.Services
 			FMODEventResource resource = CreateSoundInstance( eventName );
 			resource.CreateInstance( out var instance );
 			instance.Position = position;
-			instance.Volume = _effectsVolume * 0.1f;
 			FMODValidator.ValidateCall( instance.SetFinishedCallback( _finishedCallback ) );
 			FMODValidator.ValidateCall( instance.Start() );
 
-			uint generation = ++_slotGeneration[slot];
+			uint generation = ++_arena.Generation[slot];
 			int dense = _denseCount++;
-			_slotToDense[slot] = dense;
-			_denseToSlot[dense] = slot;
+			_arena.SlotToDense[slot] = dense;
+			_arena.DenseToSlot[dense] = slot;
 
 			nint instanceHandle = (nint)instance;
 			_arena.InstancePtr[dense] = instanceHandle;
@@ -286,6 +241,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			_arena.UserVolume[dense] = 1.0f;
 			_arena.Pitch[dense] = 1.0f;
 			_arena.Attenuation[dense] = 1.0f;
+			instance.Volume = CalculateInstanceVolume( dense );
 
 			_instanceToSlot.Set( instanceHandle, slot );
 			LinkSlotIntoCategory( slot, categoryNumericId );
@@ -315,7 +271,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			if ( (uint)slot >= (uint)_capacity ) {
 				return false;
 			}
-			return _slotGeneration[slot] == handle.Generation && _slotToDense[slot] != INVALID_INDEX;
+			return _arena.Generation[slot] == handle.Generation && _arena.SlotToDense[slot] != INVALID_INDEX;
 		}
 
 		public bool TryStopChannel( FMODChannelHandle handle, bool wasStolen = false )
@@ -334,7 +290,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 				return false;
 			}
 
-			int dense = _slotToDense[handle.Slot];
+			int dense = _arena.SlotToDense[handle.Slot];
 			ushort ev = _arena.EventId[dense];
 			ushort cat = _arena.CategoryId[dense];
 			bool playing = IsInstancePlaying( _arena.InstancePtr[dense] );
@@ -364,10 +320,10 @@ namespace Nomad.Audio.Fmod.Private.Services
 			if ( (uint)slot >= (uint)_capacity ) {
 				return false;
 			}
-			if ( _slotGeneration[slot] != handle.Generation ) {
+			if ( _arena.Generation[slot] != handle.Generation ) {
 				return false;
 			}
-			dense = _slotToDense[slot];
+			dense = _arena.SlotToDense[slot];
 			return dense != INVALID_INDEX;
 		}
 
@@ -399,7 +355,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 			var instance = new FMOD.Studio.EventInstance( _arena.InstancePtr[dense] );
 			if ( instance.isValid() ) {
-				instance.setVolume( volume );
+				instance.setVolume( CalculateInstanceVolume( dense ) );
 			}
 			return true;
 		}
@@ -433,7 +389,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 			}
 
 			if ( _freeTop > 0 ) {
-				return _freeSlots[--_freeTop];
+				return _arena.FreeSlots[--_freeTop];
 			}
 
 			return StealBestCandidate( now, incomingPriority, incomingCategoryId );
@@ -473,8 +429,8 @@ namespace Nomad.Audio.Fmod.Private.Services
 			}
 
 			ushort stolenEventId = _arena.EventId[bestDense];
-			int reusedSlot = _denseToSlot[bestDense];
-			ForceStopDense( bestDense, true );
+			int reusedSlot = _arena.DenseToSlot[bestDense];
+			ForceStopDense( bestDense, true, false );
 			RecordSteal( stolenEventId );
 			return reusedSlot;
 		}
@@ -483,7 +439,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 		{
 			while ( _finishedInstances.TryDequeue( out nint instanceHandle ) ) {
 				if ( _instanceToSlot.TryGet( instanceHandle, out int slot ) ) {
-					if ( _slotToDense[slot] != INVALID_INDEX ) {
+					if ( _arena.SlotToDense[slot] != INVALID_INDEX ) {
 						ForceStopSlot( slot, false );
 					}
 				}
@@ -520,8 +476,6 @@ namespace Nomad.Audio.Fmod.Private.Services
 			float lx = listener.X;
 			float ly = listener.Y;
 			float lz = listener.Z;
-			float globalFxVolume = _effectsVolume * 0.1f;
-
 			for ( int dense = 0; dense < _denseCount; dense++ ) {
 				nint ptr = _arena.InstancePtr[dense];
 				if ( !IsInstancePlaying( ptr ) ) {
@@ -541,8 +495,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 					distanceFactor;
 
 				var instance = new FMOD.Studio.EventInstance( ptr );
-
-				instance.setVolume( globalFxVolume * distanceFactor );
+				instance.setVolume( CalculateInstanceVolume( dense ) );
 			}
 		}
 
@@ -576,7 +529,7 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 			while ( slot != INVALID_INDEX ) {
 				int next = _arena.SlotNextInCategory[slot];
-				int dense = _slotToDense[slot];
+				int dense = _arena.SlotToDense[slot];
 				if ( dense != INVALID_INDEX ) {
 					if ( (_arena.Flags[dense] & FLAG_ESSENTIAL) == 0 && IsInstancePlaying( _arena.InstancePtr[dense] ) ) {
 						float prio = _arena.CurrentPriority[dense];
@@ -594,15 +547,15 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 		private void ForceStopSlot( int slot, bool wasStolen )
 		{
-			int dense = _slotToDense[slot];
+			int dense = _arena.SlotToDense[slot];
 			if ( dense != INVALID_INDEX ) {
 				ForceStopDense( dense, wasStolen );
 			}
 		}
 
-		private void ForceStopDense( int dense, bool wasStolen )
+		private void ForceStopDense( int dense, bool wasStolen, bool returnSlotToFreeList = true )
 		{
-			int slot = _denseToSlot[dense];
+			int slot = _arena.DenseToSlot[dense];
 			ushort cat = _arena.CategoryId[dense];
 
 			if ( wasStolen ) {
@@ -612,6 +565,9 @@ namespace Nomad.Audio.Fmod.Private.Services
 			nint instanceHandle = _arena.InstancePtr[dense];
 			var instance = new FMOD.Studio.EventInstance( instanceHandle );
 			if ( instance.isValid() ) {
+				instance.setCallback( null );
+				instance.stop( FMOD.Studio.STOP_MODE.IMMEDIATE );
+				instance.release();
 				instance.clearHandle();
 			}
 
@@ -640,16 +596,18 @@ namespace Nomad.Audio.Fmod.Private.Services
 			_arena.Pitch[lastDense] = 0.0f;
 			_arena.Attenuation[lastDense] = 0.0f;
 
-			_slotToDense[slot] = INVALID_INDEX;
-			_freeSlots[_freeTop++] = slot;
+			_arena.SlotToDense[slot] = INVALID_INDEX;
+			if ( returnSlotToFreeList ) {
+				_arena.FreeSlots[_freeTop++] = slot;
+			}
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
 		private void MoveDense( int srcDense, int dstDense )
 		{
-			int movedSlot = _denseToSlot[srcDense];
-			_denseToSlot[dstDense] = movedSlot;
-			_slotToDense[movedSlot] = dstDense;
+			int movedSlot = _arena.DenseToSlot[srcDense];
+			_arena.DenseToSlot[dstDense] = movedSlot;
+			_arena.SlotToDense[movedSlot] = dstDense;
 
 			_arena.InstancePtr[dstDense] = _arena.InstancePtr[srcDense];
 			_arena.PosX[dstDense] = _arena.PosX[srcDense];
@@ -735,25 +693,35 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 		private float CalculateStealScore( int dense, float now, float incomingPriority, ushort incomingCategoryId )
 		{
-			// You can substitute your exact existing steal formula here.
-			// This shape is intentionally simple and branch-light.
 			float age = now - _arena.StartTime[dense];
-			float score = incomingPriority - _arena.CurrentPriority[dense];
+			float ageFactor = age >= 5.0f ? 1.0f : age * 0.2f;
+			float distanceFactor = 1.0f - _arena.Attenuation[dense];
+			float volumeFactor = 1.0f - _arena.Volume[dense];
+
+			float score =
+				(incomingPriority - _arena.CurrentPriority[dense]) * 2.0f +
+				ageFactor * 0.5f +
+				distanceFactor * _distanceWeight +
+				volumeFactor * _volumeWeight;
 
 			if ( _arena.CategoryId[dense] == incomingCategoryId ) {
-				score += 0.05f;
+				score *= 0.5f;
 			}
-			if ( age > 0.25f ) {
-				score += 0.05f;
-			}
-			if ( age > 0.50f ) {
-				score += 0.05f;
-			}
-			if ( age > 1.00f ) {
-				score += 0.05f;
+
+			float timeSinceLastStolen = now - _arena.LastStolenTime[dense];
+			if ( timeSinceLastStolen < 1.0f ) {
+				score *= timeSinceLastStolen;
 			}
 
 			return score;
+		}
+
+		[MethodImpl( MethodImplOptions.AggressiveInlining )]
+		private float CalculateInstanceVolume( int dense )
+		{
+			float volume = _arena.UserVolume[dense] * _arena.Attenuation[dense];
+			_arena.Volume[dense] = Math.Clamp( volume, 0.0f, 1.0f );
+			return _arena.Volume[dense];
 		}
 
 		[MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -786,8 +754,12 @@ namespace Nomad.Audio.Fmod.Private.Services
 		private static bool IsInstancePlaying( nint instanceHandle )
 		{
 			var instance = new FMOD.Studio.EventInstance( instanceHandle );
-			instance.getPlaybackState( out var state );
-			return instance.isValid() && state == FMOD.Studio.PLAYBACK_STATE.PLAYING;
+			if ( !instance.isValid() ) {
+				return false;
+			}
+
+			FMOD.RESULT result = instance.getPlaybackState( out var state );
+			return result == FMOD.RESULT.OK && state == FMOD.Studio.PLAYBACK_STATE.PLAYING;
 		}
 
 		private ushort GetOrCreateEventId( string eventName )
@@ -856,13 +828,17 @@ namespace Nomad.Audio.Fmod.Private.Services
 
 		private void InitConfig( ICVarSystemService cvarSystem )
 		{
-			var effectsVolume = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.EFFECTS_VOLUME );
-			_effectsVolume = effectsVolume.Value;
-			effectsVolume.ValueChanged.Subscribe( OnEffectsVolumeChanged );
-
 			var minTimeBetweenChannelSteals = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.MIN_TIME_BETWEEN_CHANNEL_STEALS );
 			_minTimeBetweenChannelSteals = minTimeBetweenChannelSteals.Value;
-			minTimeBetweenChannelSteals.ValueChanged.Subscribe( OnMinTimeBetweenChannelStealsValueChanged );
+			_minTimeBetweenChannelStealsChanged = minTimeBetweenChannelSteals.ValueChanged.Subscribe( OnMinTimeBetweenChannelStealsValueChanged );
+
+			var distanceWeight = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.DISTANCE_WEIGHT );
+			_distanceWeight = distanceWeight.Value;
+			_distanceWeightChanged = distanceWeight.ValueChanged.Subscribe( OnDistanceWeightValueChanged );
+
+			var volumeWeight = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.VOLUME_WEIGHT );
+			_volumeWeight = volumeWeight.Value;
+			_volumeWeightChanged = volumeWeight.ValueChanged.Subscribe( OnVolumeWeightValueChanged );
 		}
 
 		private void OnMaxActiveChannelsValueChanged( in CVarValueChangedEventArgs<int> args )
@@ -876,14 +852,19 @@ namespace Nomad.Audio.Fmod.Private.Services
 			}
 		}
 
-		private void OnEffectsVolumeChanged( in CVarValueChangedEventArgs<float> args )
-		{
-			_effectsVolume = args.NewValue;
-		}
-
 		private void OnMinTimeBetweenChannelStealsValueChanged( in CVarValueChangedEventArgs<float> args )
 		{
 			_minTimeBetweenChannelSteals = args.NewValue;
+		}
+
+		private void OnDistanceWeightValueChanged( in CVarValueChangedEventArgs<float> args )
+		{
+			_distanceWeight = args.NewValue;
+		}
+
+		private void OnVolumeWeightValueChanged( in CVarValueChangedEventArgs<float> args )
+		{
+			_volumeWeight = args.NewValue;
 		}
 
 		private FMOD.RESULT SoundFinishedCallback( FMOD.Studio.EVENT_CALLBACK_TYPE type, nint instance, IntPtr parameters )

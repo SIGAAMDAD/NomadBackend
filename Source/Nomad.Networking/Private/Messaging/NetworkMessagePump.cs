@@ -30,7 +30,7 @@ namespace Nomad.Networking.Private.Messaging
 		private readonly INetworkTransport _transport;
 		private readonly INetworkMessageRegistry _registry;
 		private readonly NetworkRpcBus _rpcBus;
-		private readonly NetworkEventBus _eventBus;
+		private readonly NetworkEventBus? _eventBus;
 		private readonly INetworkDiagnostics? _diagnostics;
 		private readonly byte[] _receiveBuffer = new byte[MAX_PACKET_SIZE];
 
@@ -70,6 +70,10 @@ namespace Nomad.Networking.Private.Messaging
 						_rpcBus.Enqueue( packet.From, messageId, payload );
 						break;
 					case NetworkMessageKind.Event:
+						if ( _eventBus == null ) {
+							_diagnostics?.RecordPacketDropped();
+							break;
+						}
 						_eventBus.Enqueue( packet.From, messageId, payload );
 						break;
 					default:
@@ -78,7 +82,7 @@ namespace Nomad.Networking.Private.Messaging
 				}
 			}
 
-			_eventBus.Pump();
+			_eventBus?.Pump();
 			_rpcBus.Pump();
 		}
 	}

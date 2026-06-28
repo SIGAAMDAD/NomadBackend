@@ -68,6 +68,7 @@ namespace Nomad.Networking
             );
             _transport = new NetworkTransport( _sessionService );
             _authority = new NetworkAuthority();
+            _authority.AddRule(new HostAuthoritativeRule());
 
             _rpcBus = new NetworkRpcBus( _messageRegistry, _serializer, _transport, _authority );
             _eventBus = new NetworkEventBus( _messageRegistry, _serializer, _transport, _authority );

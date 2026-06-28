@@ -93,18 +93,19 @@ namespace Nomad.Input.Private.Services
 					throw new Exception( $"Bindings file '{filePath}' is missing a 'Bindings' property." );
 				}
 
+				Dictionary<string, uint> contextSchema = ParseContextSchema( document.RootElement );
 				var actionIndices = new Dictionary<string, int>( StringComparer.Ordinal );
 				var actions = new List<ActionBuilder>();
 
 				switch ( bindingsElement.ValueKind ) {
 					case JsonValueKind.Array:
 						foreach ( var actionElement in bindingsElement.EnumerateArray() ) {
-							ParseActionDefinition( actionElement, actionIndices, actions );
+							ParseActionDefinition( actionElement, actionIndices, actions, contextSchema );
 						}
 						break;
 					case JsonValueKind.Object:
 						foreach ( var actionProperty in bindingsElement.EnumerateObject() ) {
-							ParseActionDefinition( actionProperty.Value, actionIndices, actions, actionProperty.Name );
+							ParseActionDefinition( actionProperty.Value, actionIndices, actions, contextSchema, actionProperty.Name );
 						}
 						break;
 					default:
@@ -135,12 +136,19 @@ namespace Nomad.Input.Private.Services
 		/// <param name="actions"></param>
 		/// <param name="fallbackName"></param>
 		/// <exception cref="Exception"></exception>
-		private static void ParseActionDefinition( JsonElement actionElement, Dictionary<string, int> actionIndices, List<ActionBuilder> actions, string? fallbackName = null )
+		private static void ParseActionDefinition(
+			JsonElement actionElement,
+			Dictionary<string, int> actionIndices,
+			List<ActionBuilder> actions,
+			IReadOnlyDictionary<string, uint> contextSchema,
+			string? fallbackName = null
+		)
 		{
 			string name = GetRequiredString( actionElement, "Name", fallbackName );
 			string id = GetRequiredString( actionElement, "Id", fallbackName );
 			InputValueType valueType = JsonLoader.GetRequired<InputValueType>( actionElement, "ValueType" );
 			InputScheme scheme = JsonLoader.GetRequired<InputScheme>( actionElement, "Scheme" );
+			uint actionContextMask = ParseContextMask( actionElement, contextSchema, uint.MaxValue );
 
 			if ( !JsonLoader.TryGetProperty( actionElement, "Bindings", out JsonElement bindingsElement ) && !JsonLoader.TryGetProperty( actionElement, "Binding", out bindingsElement ) ) {
 				throw new Exception( $"Binding action '{id}' is missing a binding payload." );
@@ -156,7 +164,7 @@ namespace Nomad.Input.Private.Services
 
 			if ( bindingsElement.ValueKind == JsonValueKind.Array ) {
 				foreach ( JsonElement bindingElement in bindingsElement.EnumerateArray() ) {
-					actions[actionIndex].Bindings.Add( ParseBindingDefinition( bindingElement, scheme ) );
+					actions[actionIndex].Bindings.Add( ParseBindingDefinition( bindingElement, scheme, contextSchema, actionContextMask ) );
 				}
 				return;
 			}
@@ -165,7 +173,7 @@ namespace Nomad.Input.Private.Services
 				throw new Exception( $"Binding action '{id}' has an invalid binding payload." );
 			}
 
-			actions[actionIndex].Bindings.Add( ParseBindingDefinition( bindingsElement, scheme ) );
+			actions[actionIndex].Bindings.Add( ParseBindingDefinition( bindingsElement, scheme, contextSchema, actionContextMask ) );
 		}
 
 		/*
@@ -180,7 +188,12 @@ namespace Nomad.Input.Private.Services
 		/// <param name="scheme"></param>
 		/// <returns></returns>
 		/// <exception cref="Exception"></exception>
-		private static InputBindingDefinition ParseBindingDefinition( JsonElement bindingElement, InputScheme scheme )
+		private static InputBindingDefinition ParseBindingDefinition(
+			JsonElement bindingElement,
+			InputScheme scheme,
+			IReadOnlyDictionary<string, uint> contextSchema,
+			uint actionContextMask
+		)
 		{
 			InputBindingKind kind = JsonLoader.TryGetProperty( bindingElement, "Kind", out JsonElement kindElement )
 				? JsonLoader.Read<InputBindingKind>( kindElement, "Kind" )
@@ -188,7 +201,10 @@ namespace Nomad.Input.Private.Services
 
 			InputBindingDefinition definition = new InputBindingDefinition {
 				Scheme = scheme,
-				Kind = kind
+				Kind = kind,
+				Priority = JsonLoader.GetOptional<int>( bindingElement, "Priority", 0 ),
+				ConsumesInput = JsonLoader.GetOptional<bool>( bindingElement, "ConsumesInput", false ),
+				ContextMask = ParseContextMask( bindingElement, contextSchema, actionContextMask )
 			};
 
 			switch ( kind ) {
@@ -215,6 +231,104 @@ namespace Nomad.Input.Private.Services
 			}
 
 			return definition;
+		}
+
+		private static Dictionary<string, uint> ParseContextSchema( JsonElement rootElement )
+		{
+			var schema = new Dictionary<string, uint>( StringComparer.OrdinalIgnoreCase );
+
+			if ( JsonLoader.TryGetProperty( rootElement, "ContextSchema", out JsonElement schemaElement ) ) {
+				ParseContextSchemaElement( schemaElement, schema );
+			}
+			if ( JsonLoader.TryGetProperty( rootElement, "Contexts", out JsonElement contextsElement ) ) {
+				ParseContextSchemaElement( contextsElement, schema );
+			}
+
+			return schema;
+		}
+
+		private static void ParseContextSchemaElement( JsonElement schemaElement, Dictionary<string, uint> schema )
+		{
+			if ( schemaElement.ValueKind != JsonValueKind.Object ) {
+				throw new Exception( "Input context schema must be an object." );
+			}
+
+			foreach ( JsonProperty property in schemaElement.EnumerateObject() ) {
+				schema[property.Name] = ParseContextSchemaValue( property.Value );
+			}
+		}
+
+		private static uint ParseContextSchemaValue( JsonElement valueElement )
+		{
+			if ( valueElement.ValueKind == JsonValueKind.Number ) {
+				int bitIndex = valueElement.GetInt32();
+				if ( bitIndex < 0 || bitIndex > 31 ) {
+					throw new Exception( "Input context bit index must be between 0 and 31." );
+				}
+				return 1u << bitIndex;
+			}
+
+			if ( valueElement.ValueKind == JsonValueKind.String ) {
+				string value = valueElement.GetString()!;
+				if ( value.StartsWith( "0x", StringComparison.OrdinalIgnoreCase ) ) {
+					return Convert.ToUInt32( value[2..], 16 );
+				}
+				if ( uint.TryParse( value, out uint mask ) ) {
+					return mask;
+				}
+			}
+
+			throw new Exception( "Input context schema values must be bit indices or numeric masks." );
+		}
+
+		private static uint ParseContextMask( JsonElement element, IReadOnlyDictionary<string, uint> contextSchema, uint fallbackMask )
+		{
+			uint mask = fallbackMask;
+
+			if ( JsonLoader.TryGetProperty( element, "ContextMask", out JsonElement maskElement ) ) {
+				mask = ParseContextMaskValue( maskElement, contextSchema );
+			}
+			if ( JsonLoader.TryGetProperty( element, "Context", out JsonElement contextElement ) ) {
+				mask = ParseContextMaskValue( contextElement, contextSchema );
+			}
+			if ( JsonLoader.TryGetProperty( element, "Contexts", out JsonElement contextsElement ) ) {
+				mask = ParseContextMaskValue( contextsElement, contextSchema );
+			}
+
+			return mask;
+		}
+
+		private static uint ParseContextMaskValue( JsonElement element, IReadOnlyDictionary<string, uint> contextSchema )
+		{
+			switch ( element.ValueKind ) {
+				case JsonValueKind.Number:
+					return element.GetUInt32();
+				case JsonValueKind.String:
+					return ResolveContextToken( element.GetString()!, contextSchema );
+				case JsonValueKind.Array: {
+						uint mask = 0;
+						foreach ( JsonElement item in element.EnumerateArray() ) {
+							mask |= ParseContextMaskValue( item, contextSchema );
+						}
+						return mask;
+					}
+				default:
+					throw new Exception( "Input context masks must be numbers, strings, or arrays." );
+			}
+		}
+
+		private static uint ResolveContextToken( string token, IReadOnlyDictionary<string, uint> contextSchema )
+		{
+			if ( contextSchema.TryGetValue( token, out uint mask ) ) {
+				return mask;
+			}
+			if ( token.StartsWith( "0x", StringComparison.OrdinalIgnoreCase ) ) {
+				return Convert.ToUInt32( token[2..], 16 );
+			}
+			if ( uint.TryParse( token, out mask ) ) {
+				return mask;
+			}
+			throw new Exception( $"Unknown input context '{token}'." );
 		}
 
 		/*

@@ -38,14 +38,20 @@ namespace Nomad.Audio.Fmod.Private.Repositories
 
 	internal sealed class FMODAudioGroupRepository : IDisposable
 	{
+		private const string MASTER_BUS_NAME = "bus:/";
+
 		private readonly ConcurrentDictionary<string, IAudioGroup> _groups = new();
 		private readonly FMOD.Studio.System _system;
 
+		private readonly IAudioGroup _masterGroup;
 		private readonly IAudioGroup _musicGroup;
 		private readonly IAudioGroup _soundEffectsGroup;
 
+		private readonly ISubscriptionHandle _onMasterVolumeChanged;
 		private readonly ISubscriptionHandle _onSoundEffectsVolumeChanged;
+		private readonly ISubscriptionHandle _onSoundEffectsOnChanged;
 		private readonly ISubscriptionHandle _onMusicVolumeChanged;
+		private readonly ISubscriptionHandle _onMusicOnChanged;
 
 		private readonly ILoggerCategory _category;
 
@@ -66,25 +72,33 @@ namespace Nomad.Audio.Fmod.Private.Repositories
 			_system = system;
 			_category = category;
 
+			var masterVolume = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.MASTER_VOLUME );
+			_onMasterVolumeChanged = masterVolume.ValueChanged.Subscribe( OnMasterVolumeChanged );
+
 			var soundEffectsVolume = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.EFFECTS_VOLUME );
-			soundEffectsVolume.ValueChanged.Subscribe( OnSoundEffectsVolumeChanged );
+			_onSoundEffectsVolumeChanged = soundEffectsVolume.ValueChanged.Subscribe( OnSoundEffectsVolumeChanged );
 
 			var soundEffectsOn = cvarSystem.GetCVarOrThrow<bool>( Constants.CVars.EngineUtils.Audio.EFFECTS_ON );
-			soundEffectsOn.ValueChanged.Subscribe( OnSoundEffectsOnChanged );
+			_onSoundEffectsOnChanged = soundEffectsOn.ValueChanged.Subscribe( OnSoundEffectsOnChanged );
 
 			var musicVolume = cvarSystem.GetCVarOrThrow<float>( Constants.CVars.EngineUtils.Audio.MUSIC_VOLUME );
-			musicVolume.ValueChanged.Subscribe( OnMusicVolumeChanged );
+			_onMusicVolumeChanged = musicVolume.ValueChanged.Subscribe( OnMusicVolumeChanged );
 
 			var musicOn = cvarSystem.GetCVarOrThrow<bool>( Constants.CVars.EngineUtils.Audio.MUSIC_ON );
-			musicOn.ValueChanged.Subscribe( OnMusicOnChanged );
+			_onMusicOnChanged = musicOn.ValueChanged.Subscribe( OnMusicOnChanged );
+
+			_masterGroup = FindGroup( MASTER_BUS_NAME );
+			_masterGroup.Volume = masterVolume.Value;
 
 			var musicGroupName = cvarSystem.GetCVarOrThrow<string>( Constants.CVars.EngineUtils.Audio.AUDIO_MUSIC_BUS_GROUP_NAME ).Value;
 			_musicGroup = FindGroup( musicGroupName );
 			_musicGroup.Volume = musicVolume.Value;
+			_musicGroup.Muted = !musicOn.Value;
 
 			var soundEffectsGroupName = cvarSystem.GetCVarOrThrow<string>( Constants.CVars.EngineUtils.Audio.AUDIO_SOUND_EFFECTS_BUS_GROUP_NAME ).Value;
 			_soundEffectsGroup = FindGroup( soundEffectsGroupName );
 			_soundEffectsGroup.Volume = soundEffectsVolume.Value;
+			_soundEffectsGroup.Muted = !soundEffectsOn.Value;
 		}
 
 		/*
@@ -98,8 +112,11 @@ namespace Nomad.Audio.Fmod.Private.Repositories
 		public void Dispose()
 		{
 			if ( !_isDisposed ) {
+				_onMasterVolumeChanged?.Dispose();
 				_onMusicVolumeChanged?.Dispose();
+				_onMusicOnChanged?.Dispose();
 				_onSoundEffectsVolumeChanged?.Dispose();
+				_onSoundEffectsOnChanged?.Dispose();
 			}
 			GC.SuppressFinalize( this );
 			_isDisposed = true;
@@ -121,8 +138,23 @@ namespace Nomad.Audio.Fmod.Private.Repositories
 				_category.PrintLine( $"Fetching bus group '{name}'..." );
 				FMODValidator.ValidateCall( _system.getBus( name, out var bus ) );
 				group = new FMODAudioGroup( bus, name );
+				_groups[name] = group;
 			}
 			return group;
+		}
+
+		/*
+		===============
+		OnMasterVolumeChanged
+		===============
+		*/
+		/// <summary>
+		///
+		/// </summary>
+		/// <param name="args"></param>
+		private void OnMasterVolumeChanged( in CVarValueChangedEventArgs<float> args )
+		{
+			_masterGroup.Volume = args.NewValue;
 		}
 
 		/*

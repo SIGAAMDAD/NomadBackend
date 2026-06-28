@@ -15,6 +15,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.Compatibility.Guards;
@@ -28,10 +29,6 @@ using Nomad.OnlineServices.Steam.Private.Util;
 using Nomad.OnlineServices.Steam.Private.ValueObjects;
 using Steamworks;
 
-#if !NET10_0_OR_GREATER
-using System.Buffers;
-#endif
-
 namespace Nomad.OnlineServices.Steam.Private.Services
 {
 	/*
@@ -42,23 +39,21 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 	===================================================================================
 	*/
 	/// <summary>
-	///
+	/// Steam lobby search and quickplay matchmaking service.
 	/// </summary>
 
 	internal sealed class SteamMatchMakingService : IMatchMakingService
 	{
-		private readonly List<LobbyInfo> _lobbies = new();
-
 		private readonly SteamAsyncCallResultDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>> _lobbyMatchList;
 		private CancellationTokenSource? _cancellationToken = null;
 
 		private readonly ILoggerCategory _category;
 		private readonly SteamLobbyRepository _repository;
 
-		private DateTime _lastFetchTime = DateTime.UtcNow;
-		private readonly int _lobbyUpdateInterval = 0;
+		private DateTime _lastFetchTime = DateTime.MinValue;
+		private readonly int _lobbyUpdateInterval;
 
-		private ServerRange _lastRange = ServerRange.LAN;
+		private ServerRange _lastRange = ServerRange.Count;
 
 		public bool IsSearching => _activeRequest != null;
 
@@ -66,13 +61,13 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		private MatchMakingInfo? _activeRequest = null;
 
 		public IGameEvent<SearchResultsUpdatedEventArgs> SearchResultsUpdated => _searchResultsUpdated;
-		private readonly IGameEvent<SearchResultsUpdatedEventArgs> _searchResultsUpdated = default;
+		private readonly IGameEvent<SearchResultsUpdatedEventArgs> _searchResultsUpdated;
 
 		public IGameEvent<MatchFoundEventArgs> MatchFound => _matchFound;
-		private readonly IGameEvent<MatchFoundEventArgs> _matchFound = default;
+		private readonly IGameEvent<MatchFoundEventArgs> _matchFound;
 
 		public IGameEvent<MatchMakingFailedEventArgs> MatchMakingFailed => _matchMakingFailed;
-		private readonly IGameEvent<MatchMakingFailedEventArgs> _matchMakingFailed = default;
+		private readonly IGameEvent<MatchMakingFailedEventArgs> _matchMakingFailed;
 
 		private bool _isDisposed = false;
 
@@ -82,26 +77,43 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		///
+		/// Creates a Steam matchmaking service.
 		/// </summary>
 		/// <param name="repository"></param>
 		/// <param name="cvarSystem"></param>
 		/// <param name="logger"></param>
-		/// <exception cref="ArgumentNullException"></exception>
-		public SteamMatchMakingService( SteamLobbyRepository repository, ICVarSystemService cvarSystem, ILoggerService logger )
+		/// <param name="eventFactory"></param>
+		public SteamMatchMakingService(
+			SteamLobbyRepository repository,
+			ICVarSystemService cvarSystem,
+			ILoggerService logger,
+			IGameEventRegistryService eventFactory
+		)
 		{
 			ArgumentGuard.ThrowIfNull( cvarSystem, nameof( cvarSystem ) );
 			ArgumentGuard.ThrowIfNull( logger, nameof( logger ) );
+			ArgumentGuard.ThrowIfNull( eventFactory, nameof( eventFactory ) );
 
 			_repository = repository ?? throw new ArgumentNullException( nameof( repository ) );
 
-			_lobbyMatchList = new SteamAsyncCallResultDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>>( _category );
 			_category = logger.CreateCategory( nameof( SteamMatchMakingService ), LogLevel.Info, true );
-
-			_lastRange = ServerRange.Count;
+			_lobbyMatchList = new SteamAsyncCallResultDispatcher<LobbyMatchList_t, ICollection<SteamLobbyData>>( _category );
 
 			ICVar<int> lobbyUpdateInterval = cvarSystem.GetCVarOrThrow<int>( Constants.CVars.LOBBY_UDDATE_INTERVAL );
 			_lobbyUpdateInterval = lobbyUpdateInterval.Value;
+
+			_searchResultsUpdated = eventFactory.GetEvent<SearchResultsUpdatedEventArgs>(
+				SearchResultsUpdatedEventArgs.Name,
+				SearchResultsUpdatedEventArgs.NameSpace
+			);
+			_matchFound = eventFactory.GetEvent<MatchFoundEventArgs>(
+				MatchFoundEventArgs.Name,
+				MatchFoundEventArgs.NameSpace
+			);
+			_matchMakingFailed = eventFactory.GetEvent<MatchMakingFailedEventArgs>(
+				MatchMakingFailedEventArgs.Name,
+				MatchMakingFailedEventArgs.NameSpace
+			);
 		}
 
 		/*
@@ -110,16 +122,19 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		///
+		/// Disposes matchmaking resources.
 		/// </summary>
 		public void Dispose()
 		{
-			if ( !_isDisposed ) {
-				_category?.Dispose();
-				_cancellationToken?.Dispose();
-
-				_lobbyMatchList?.Dispose();
+			if ( _isDisposed ) {
+				return;
 			}
+
+			_cancellationToken?.Cancel();
+			_cancellationToken?.Dispose();
+			_lobbyMatchList.Dispose();
+			_category.Dispose();
+
 			GC.SuppressFinalize( this );
 			_isDisposed = true;
 		}
@@ -129,35 +144,33 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		SearchLobbies
 		===============
 		*/
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="info"></param>
-		/// <param name="ct"></param>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public async Task<IReadOnlyList<LobbyInfo>> SearchLobbies( MatchMakingInfo info, CancellationToken ct = default )
 		{
+			ThrowIfDisposed();
+			ArgumentGuard.ThrowIfNull( info, nameof( info ) );
+
+			_cancellationToken?.Dispose();
 			_cancellationToken = CancellationTokenSource.CreateLinkedTokenSource( ct );
-			ct.ThrowIfCancellationRequested();
+			CancellationToken linkedToken = _cancellationToken.Token;
+			linkedToken.ThrowIfCancellationRequested();
 
 			_activeRequest = info;
 
-			// fetch the lobby list if we haven't updated for a while, or if we just don't have anything
-			bool needRefresh = (DateTime.UtcNow - _lastFetchTime).TotalMilliseconds > _lobbyUpdateInterval
-							|| _lastRange != info.Range
-							|| _repository.Lobbies.Count == 0;
-			if ( needRefresh ) {
-				await RequestLobbyListAsync( info.Range, ct );
-			}
+			try {
+				bool needRefresh = (DateTime.UtcNow - _lastFetchTime).TotalMilliseconds > _lobbyUpdateInterval
+								|| _lastRange != info.Range
+								|| _repository.Lobbies.Count == 0;
+				if ( needRefresh ) {
+					await RequestLobbyListAsync( info, linkedToken ).ConfigureAwait( false );
+				}
 
-			ICollection<SteamLobbyData> steamLobbies = _repository.Lobbies;
-			List<LobbyInfo> lobbies = new List<LobbyInfo>( steamLobbies.Count );
-			foreach ( var lobby in steamLobbies ) {
-				lobbies.Add( lobby.Info );
+				IReadOnlyList<LobbyInfo> lobbies = FilterAndRankLobbies( _repository.Lobbies, info );
+				_searchResultsUpdated.Publish( new SearchResultsUpdatedEventArgs() );
+				return lobbies;
+			} finally {
+				_activeRequest = null;
 			}
-			_activeRequest = null;
-
-			return lobbies;
 		}
 
 		/*
@@ -165,51 +178,15 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		FindBestLobby
 		===============
 		*/
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="info"></param>
-		/// <param name="ct"></param>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public async Task<LobbyInfo?> FindBestLobby( MatchMakingInfo info, CancellationToken ct = default )
 		{
+			ThrowIfDisposed();
+			ArgumentGuard.ThrowIfNull( info, nameof( info ) );
+
+			IReadOnlyList<LobbyInfo> lobbies = await SearchLobbies( info, ct ).ConfigureAwait( false );
 			ct.ThrowIfCancellationRequested();
-
-			var lobbies = await SearchLobbies( info, ct );
-			ct.ThrowIfCancellationRequested();
-
-#if NET10_0_OR_GREATER
-			Span<int> scores = stackalloc int[lobbies.Count];
-			scores.Clear();
-#else
-			int[] scores = ArrayPool<int>.Shared.Rent( lobbies.Count );
-			Array.Fill( scores, 0 );
-#endif
-
-			for ( int i = 0; i < lobbies.Count; i++ ) {
-				ct.ThrowIfCancellationRequested();
-
-				LobbyInfo lobby = lobbies[i];
-
-				foreach ( var gameMode in info.GameModes ) {
-					if ( lobby.GameMode.Equals( gameMode, StringComparison.InvariantCulture ) ) {
-						scores[i] += 5;
-						break;
-					}
-				}
-				foreach ( var map in info.Maps ) {
-					if ( lobby.Map.Equals( map, StringComparison.InvariantCulture ) ) {
-						scores[i] += 5;
-						break;
-					}
-				}
-			}
-
-#if !NET10_0_OR_GREATER
-			ArrayPool<int>.Shared.Return( scores );
-#endif
-
-			return null;
+			return lobbies.Count > 0 ? lobbies[0] : null;
 		}
 
 		/*
@@ -217,19 +194,18 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		StartQuickPlay
 		===============
 		*/
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="info"></param>
-		/// <param name="ct"></param>
-		/// <returns></returns>
+		/// <inheritdoc />
 		public async Task<bool> StartQuickPlay( MatchMakingInfo info, CancellationToken ct = default )
 		{
-			LobbyInfo? lobby = await FindBestLobby( info, ct );
+			ThrowIfDisposed();
+
+			LobbyInfo? lobby = await FindBestLobby( info, ct ).ConfigureAwait( false );
 			if ( lobby == null ) {
 				_matchMakingFailed.Publish( new MatchMakingFailedEventArgs() );
 				return false;
 			}
+
+			_matchFound.Publish( new MatchFoundEventArgs( lobby.Id.Value ) );
 			return true;
 		}
 
@@ -238,40 +214,48 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		Cancel
 		===============
 		*/
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="ct"></param>
-		/// <returns></returns>
-		public async Task Cancel( CancellationToken ct = default )
+		/// <inheritdoc />
+		public Task Cancel( CancellationToken ct = default )
 		{
-			_cancellationToken.Cancel();
+			ThrowIfDisposed();
+			ct.ThrowIfCancellationRequested();
+
+			_cancellationToken?.Cancel();
 			_activeRequest = null;
+			return Task.CompletedTask;
 		}
 
 		/*
 		===============
-		RequestLobbyList
+		RequestLobbyListAsync
 		===============
 		*/
 		/// <summary>
-		///
+		/// Requests and caches a fresh Steam lobby list.
 		/// </summary>
-		/// <param name="range"></param>
+		/// <param name="info"></param>
 		/// <param name="ct"></param>
 		/// <returns></returns>
-		private async Task<ICollection<SteamLobbyData>> RequestLobbyListAsync( ServerRange range, CancellationToken ct = default )
+		private async Task<ICollection<SteamLobbyData>> RequestLobbyListAsync( MatchMakingInfo info, CancellationToken ct = default )
 		{
 			return await _lobbyMatchList.Invoke(
 				steamCall: () => {
-					ELobbyDistanceFilter distanceFilter = range switch {
-						ServerRange.LAN => ELobbyDistanceFilter.k_ELobbyDistanceFilterClose,
-						ServerRange.Region => ELobbyDistanceFilter.k_ELobbyDistanceFilterDefault,
-						ServerRange.Continental => ELobbyDistanceFilter.k_ELobbyDistanceFilterFar,
-						ServerRange.NoLimit => ELobbyDistanceFilter.k_ELobbyDistanceFilterWorldwide,
-						_ => throw new ArgumentOutOfRangeException( nameof( range ) )
-					};
-					SteamMatchmaking.AddRequestLobbyListDistanceFilter( distanceFilter );
+					SteamMatchmaking.AddRequestLobbyListDistanceFilter( GetDistanceFilter( info.Range ) );
+					SteamMatchmaking.AddRequestLobbyListFilterSlotsAvailable( 1 );
+					SteamMatchmaking.AddRequestLobbyListResultCountFilter( 50 );
+
+					if ( info.FriendsOnly ) {
+						SteamMatchmaking.AddRequestLobbyListStringFilter(
+							nameof( LobbyInfo.Visibility ),
+							LobbyVisibility.FriendsOnly.ToString(),
+							ELobbyComparison.k_ELobbyComparisonEqual
+						);
+					}
+
+					ApplyFirstStringFilter( nameof( LobbyInfo.Map ), info.Maps );
+					ApplyFirstStringFilter( nameof( LobbyInfo.GameMode ), info.GameModes );
+					ApplyMetadataFilters( info.Metadata );
+
 					return SteamMatchmaking.RequestLobbyList();
 				},
 				resultFactory: result => {
@@ -279,14 +263,142 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 						CSteamID lobbyId = SteamMatchmaking.GetLobbyByIndex( i );
 						_repository.AddLobby( new SteamLobbyKey( lobbyId, Guid.NewGuid() ) );
 					}
-					// remove lobbies that haven't been seen recently
+
 					_repository.RemoveStaleLobbies();
-					_lastRange = range;
+					_lastRange = info.Range;
 					_lastFetchTime = DateTime.UtcNow;
 					return _repository.Lobbies;
 				},
 				ct
+			).ConfigureAwait( false );
+		}
+
+		private static ELobbyDistanceFilter GetDistanceFilter( ServerRange range )
+		{
+			return range switch {
+				ServerRange.LAN => ELobbyDistanceFilter.k_ELobbyDistanceFilterClose,
+				ServerRange.Region => ELobbyDistanceFilter.k_ELobbyDistanceFilterDefault,
+				ServerRange.Continental => ELobbyDistanceFilter.k_ELobbyDistanceFilterFar,
+				ServerRange.NoLimit => ELobbyDistanceFilter.k_ELobbyDistanceFilterWorldwide,
+				_ => throw new ArgumentOutOfRangeException( nameof( range ) )
+			};
+		}
+
+		private static void ApplyFirstStringFilter( string key, IReadOnlyList<string>? values )
+		{
+			if ( values == null || values.Count == 0 ) {
+				return;
+			}
+
+			SteamMatchmaking.AddRequestLobbyListStringFilter(
+				key,
+				values[0],
+				ELobbyComparison.k_ELobbyComparisonEqual
 			);
+		}
+
+		private static void ApplyMetadataFilters( IReadOnlyDictionary<string, string>? metadata )
+		{
+			if ( metadata == null ) {
+				return;
+			}
+
+			foreach ( var pair in metadata ) {
+				SteamMatchmaking.AddRequestLobbyListStringFilter(
+					pair.Key,
+					pair.Value,
+					ELobbyComparison.k_ELobbyComparisonEqual
+				);
+			}
+		}
+
+		private static IReadOnlyList<LobbyInfo> FilterAndRankLobbies( ICollection<SteamLobbyData> source, MatchMakingInfo info )
+		{
+			return source
+				.Select( lobby => lobby.Info )
+				.Where( lobby => IsMatch( lobby, info ) )
+				.OrderByDescending( lobby => ScoreLobby( lobby, info ) )
+				.ToArray();
+		}
+
+		private static bool IsMatch( LobbyInfo lobby, MatchMakingInfo info )
+		{
+			if ( lobby.MaxPlayers > 0 && lobby.PlayerCount >= lobby.MaxPlayers ) {
+				return false;
+			}
+			if ( info.FriendsOnly && lobby.Visibility != LobbyVisibility.FriendsOnly ) {
+				return false;
+			}
+			if ( info.Maps != null && info.Maps.Count > 0 && !ContainsOrdinalIgnoreCase( info.Maps, lobby.Map ) ) {
+				return false;
+			}
+			if ( info.GameModes != null && info.GameModes.Count > 0 && !ContainsOrdinalIgnoreCase( info.GameModes, lobby.GameMode ) ) {
+				return false;
+			}
+			if ( !MetadataMatches( lobby.Metadata, info.Metadata ) ) {
+				return false;
+			}
+
+			return true;
+		}
+
+		private static bool MetadataMatches( IReadOnlyDictionary<string, string>? lobbyMetadata, IReadOnlyDictionary<string, string>? requestMetadata )
+		{
+			if ( requestMetadata == null || requestMetadata.Count == 0 ) {
+				return true;
+			}
+			if ( lobbyMetadata == null ) {
+				return false;
+			}
+
+			foreach ( var pair in requestMetadata ) {
+				if ( !lobbyMetadata.TryGetValue( pair.Key, out string? value )
+					|| !string.Equals( value, pair.Value, StringComparison.OrdinalIgnoreCase ) ) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		private static int ScoreLobby( LobbyInfo lobby, MatchMakingInfo info )
+		{
+			int score = 0;
+			if ( ContainsOrdinalIgnoreCase( info.Maps, lobby.Map ) ) {
+				score += 50;
+			}
+			if ( ContainsOrdinalIgnoreCase( info.GameModes, lobby.GameMode ) ) {
+				score += 50;
+			}
+			if ( lobby.MaxPlayers > 0 ) {
+				score += Math.Max( 0, lobby.MaxPlayers - lobby.PlayerCount );
+			}
+			if ( lobby.Visibility == LobbyVisibility.Public ) {
+				score += 1;
+			}
+			return score;
+		}
+
+		private static bool ContainsOrdinalIgnoreCase( IReadOnlyList<string>? values, string? candidate )
+		{
+			if ( values == null || values.Count == 0 || candidate == null ) {
+				return false;
+			}
+
+			for ( int i = 0; i < values.Count; i++ ) {
+				if ( string.Equals( values[i], candidate, StringComparison.OrdinalIgnoreCase ) ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		private void ThrowIfDisposed()
+		{
+			if ( _isDisposed ) {
+				throw new ObjectDisposedException( nameof( SteamMatchMakingService ) );
+			}
 		}
 	};
 };

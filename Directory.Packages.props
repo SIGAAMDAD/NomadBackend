@@ -2,7 +2,6 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageVersion Include="Benchly" Version="0.7.0" />
@@ -13,19 +12,16 @@
     <PackageVersion Include="NUnit" Version="4.4.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.11.2" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
-
-    <PackageVersion Include="Godot.NET.Sdk" Version="4.6.2" />
-    <PackageVersion Include="Godot.SourceGenerators" Version="4.6.2" />
-    <PackageVersion Include="GodotSharp" Version="4.6.2" />
-
+    <PackageVersion Include="Godot.NET.Sdk" Version="4.7.0" />
+    <PackageVersion Include="Godot.SourceGenerators" Version="4.7.0" />
+    <PackageVersion Include="GodotSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.103" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.5" />
     <PackageVersion Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
-
-    <PackageVersion Include="System.Collections.Immutable" Version="10.0.5" />
+    <PackageVersion Include="System.Collections.Immutable" Version="10.0.9" />
     <PackageVersion Include="System.IO.Compression" Version="4.3.0" />
-    <PackageVersion Include="System.IO.Hashing" Version="10.0.5" />
-    <PackageVersion Include="System.Text.Json" Version="10.0.5" />
+    <PackageVersion Include="System.IO.Hashing" Version="10.0.9" />
+    <PackageVersion Include="System.Text.Json" Version="10.0.9" />
   </ItemGroup>
 </Project>

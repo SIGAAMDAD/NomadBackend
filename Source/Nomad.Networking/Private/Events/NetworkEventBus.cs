@@ -120,7 +120,7 @@ namespace Nomad.Networking.Private.Events
 			}
 
 			try {
-				bool sent = _transport.Broadcast( buffer.Buffer, mode );
+				bool sent = _transport.Broadcast( buffer.Span, mode );
 				if ( sent ) {
 					_diagnostics?.RecordPacketSent( buffer.Length );
 				}
@@ -152,7 +152,7 @@ namespace Nomad.Networking.Private.Events
 			}
 
 			try {
-				bool sent = _transport.SendToHost( buffer.Buffer, mode );
+				bool sent = _transport.SendToHost( buffer.Span, mode );
 				if ( sent ) {
 					_diagnostics?.RecordPacketSent( buffer.Length );
 				}
@@ -185,7 +185,7 @@ namespace Nomad.Networking.Private.Events
 			}
 
 			try {
-				bool sent = _transport.SendToPeer( peerId, buffer.Buffer, mode );
+				bool sent = _transport.SendToPeer( peerId, buffer.Span, mode );
 				if ( sent ) {
 					_diagnostics?.RecordPacketSent( buffer.Length );
 				}

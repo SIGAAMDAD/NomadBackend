@@ -353,7 +353,7 @@ namespace Nomad.Networking.Private.Rpc
 		private void Dispatch( InboundRpc inbound )
 		{
 			try {
-				if ( _invokersById.TryGetValue( inbound.MessageId, out IRpcInvoker? invoker ) ) {
+				if ( !_invokersById.TryGetValue( inbound.MessageId, out IRpcInvoker? invoker ) ) {
 					_diagnostics?.RecordUnknownMessageId();
 					return;
 				}

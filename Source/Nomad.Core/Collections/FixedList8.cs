@@ -21,7 +21,7 @@ using System.Runtime.CompilerServices;
 namespace Nomad.Core.Collections
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public sealed class FixedList8<T> : IDisposable
@@ -30,6 +30,7 @@ namespace Nomad.Core.Collections
 
         private int _count;
         private T[]? _heap;
+
 #if NET8_0_OR_GREATER
         [InlineArray(InlineCapacity)]
         private struct InlineBuffer
@@ -65,17 +66,17 @@ namespace Nomad.Core.Collections
 #endif
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public int Count => _count;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public int Capacity => _heap?.Length ?? InlineCapacity;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
@@ -99,7 +100,7 @@ namespace Nomad.Core.Collections
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="item"></param>
         public void Add(T item)
@@ -123,7 +124,7 @@ namespace Nomad.Core.Collections
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public void Clear()
         {
@@ -146,7 +147,7 @@ namespace Nomad.Core.Collections
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="item"></param>
         /// <param name="comparer"></param>
@@ -168,7 +169,7 @@ namespace Nomad.Core.Collections
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="index"></param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
@@ -195,7 +196,7 @@ namespace Nomad.Core.Collections
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public void Dispose()
         {
@@ -212,7 +213,7 @@ namespace Nomad.Core.Collections
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="newCapacity"></param>
         private void MoveInlineToHeap(int newCapacity)
@@ -228,7 +229,7 @@ namespace Nomad.Core.Collections
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="requiredCapacity"></param>
         private void GrowHeap(int requiredCapacity)

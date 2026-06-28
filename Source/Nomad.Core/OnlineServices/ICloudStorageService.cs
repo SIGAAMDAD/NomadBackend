@@ -14,6 +14,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Nomad.Core.FileSystem.Streams;
@@ -30,6 +31,33 @@ namespace Nomad.Core.OnlineServices
         /// Indicates whether the service supports cloud storage.
         /// </summary>
         bool SupportsCloudStorage { get; }
+
+        /// <summary>
+        /// Indicates whether cloud storage is currently enabled and usable for the active user/application.
+        /// </summary>
+        bool IsCloudStorageEnabled { get; }
+
+        /// <summary>
+        /// Gets the current provider quota when the provider exposes one.
+        /// </summary>
+        /// <param name="ct"></param>
+        /// <returns>The reported quota, or null when unavailable.</returns>
+        Task<CloudStorageQuota?> GetQuotaAsync(CancellationToken ct = default);
+
+        /// <summary>
+        /// Lists known cloud storage files.
+        /// </summary>
+        /// <param name="ct"></param>
+        /// <returns>Provider-relative file metadata.</returns>
+        Task<IReadOnlyList<CloudStorageFileInfo>> ListFilesAsync(CancellationToken ct = default);
+
+        /// <summary>
+        /// Gets metadata for a cloud storage file.
+        /// </summary>
+        /// <param name="path">Provider-relative path of the file.</param>
+        /// <param name="ct"></param>
+        /// <returns>The file metadata, or null when it does not exist.</returns>
+        Task<CloudStorageFileInfo?> GetFileInfoAsync(string path, CancellationToken ct = default);
 
         /// <summary>
         /// Checks if a file exists in cloud storage.

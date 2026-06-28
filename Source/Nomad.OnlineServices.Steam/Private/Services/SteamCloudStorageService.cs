@@ -15,6 +15,7 @@ of merchantability, fitness for a particular purpose and noninfringement.
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -25,6 +26,7 @@ using Nomad.Core.FileSystem.Streams;
 using Nomad.Core.Logger;
 using Nomad.Core.Memory.Buffers;
 using Nomad.Core.OnlineServices;
+using Nomad.OnlineServices.Steam.Private.Util;
 using Steamworks;
 
 namespace Nomad.OnlineServices.Steam.Private.Services
@@ -37,7 +39,7 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 	===================================================================================
 	*/
 	/// <summary>
-	///
+	/// Steam Remote Storage backed cloud storage service.
 	/// </summary>
 
 	internal sealed class SteamCloudStorageService : ICloudStorageService
@@ -45,23 +47,12 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		private static bool IsEnabled => SteamRemoteStorage.IsCloudEnabledForApp() && SteamRemoteStorage.IsCloudEnabledForAccount();
 
 		public bool SupportsCloudStorage => true;
+		public bool IsCloudStorageEnabled => IsEnabled;
 
-		public struct CloudFile
-		{
-			public int Size { get; set; }
-			public DateTime CloudAccessTime { get; set; }
-			public DateTime LocalAccessTime { get; set; }
-		};
-
-		private readonly ConcurrentDictionary<string, CloudFile> _cloudFiles = new ConcurrentDictionary<string, CloudFile>();
-
-		private readonly IFileSystem _fileSystem;
+		private readonly ConcurrentDictionary<string, CloudStorageFileInfo> _cloudFiles = new ConcurrentDictionary<string, CloudStorageFileInfo>();
 
 		private readonly ILoggerCategory _category;
-
-		private readonly CallResult<RemoteStorageLocalFileChange_t> _fileChangeResult;
-		private readonly CallResult<RemoteStorageFileWriteAsyncComplete_t> _fileWriteAsyncComplete;
-		private readonly CallResult<RemoteStorageFileReadAsyncComplete_t> _fileReadAsyncComplete;
+		private readonly Callback<RemoteStorageLocalFileChange_t> _fileChangeCallback;
 
 		private bool _isDisposed = false;
 
@@ -74,18 +65,16 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		/// Creates a new SteamCloudStorageService instance.
 		/// </summary>
 		/// <param name="logger">The logger service to use for logging.</param>
-		/// <param name="fileSystem"></param>
+		/// <param name="fileSystem">The framework file system. Kept in the constructor for service factory compatibility.</param>
 		public SteamCloudStorageService( ILoggerService logger, IFileSystem fileSystem )
 		{
 			ArgumentGuard.ThrowIfNull( logger );
 			ArgumentGuard.ThrowIfNull( fileSystem );
 
 			_category = logger.CreateCategory( nameof( SteamCloudStorageService ), LogLevel.Info, true );
-			_fileSystem = fileSystem;
+			_fileChangeCallback = Callback<RemoteStorageLocalFileChange_t>.Create( OnFileChange );
 
-			_fileChangeResult = CallResult<RemoteStorageLocalFileChange_t>.Create( OnFileChange );
-
-			InitializeCloudFileCache();
+			RefreshCloudFileCache();
 		}
 
 		/*
@@ -94,16 +83,215 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		///
+		/// Disposes Steam callback registrations and logging resources.
 		/// </summary>
 		public void Dispose()
 		{
-			if ( !_isDisposed ) {
-				_fileChangeResult?.Dispose();
-				_category?.Dispose();
+			if ( _isDisposed ) {
+				return;
 			}
+
+			_fileChangeCallback.Dispose();
+			_category.Dispose();
+
 			GC.SuppressFinalize( this );
 			_isDisposed = true;
+		}
+
+		/*
+		===============
+		GetQuotaAsync
+		===============
+		*/
+		/// <inheritdoc />
+		public Task<CloudStorageQuota?> GetQuotaAsync( CancellationToken ct = default )
+		{
+			ThrowIfDisposed();
+			ct.ThrowIfCancellationRequested();
+
+			if ( !IsEnabled || !SteamRemoteStorage.GetQuota( out ulong totalBytes, out ulong availableBytes ) ) {
+				return Task.FromResult<CloudStorageQuota?>( null );
+			}
+
+			return Task.FromResult<CloudStorageQuota?>(
+				new CloudStorageQuota( ClampUInt64ToInt64( totalBytes ), ClampUInt64ToInt64( availableBytes ) )
+			);
+		}
+
+		/*
+		===============
+		ListFilesAsync
+		===============
+		*/
+		/// <inheritdoc />
+		public Task<IReadOnlyList<CloudStorageFileInfo>> ListFilesAsync( CancellationToken ct = default )
+		{
+			ThrowIfDisposed();
+			ct.ThrowIfCancellationRequested();
+
+			RefreshCloudFileCache();
+
+			IReadOnlyList<CloudStorageFileInfo> files = _cloudFiles.Values
+				.OrderBy( file => file.Path, StringComparer.Ordinal )
+				.ToArray();
+
+			return Task.FromResult( files );
+		}
+
+		/*
+		===============
+		GetFileInfoAsync
+		===============
+		*/
+		/// <inheritdoc />
+		public Task<CloudStorageFileInfo?> GetFileInfoAsync( string path, CancellationToken ct = default )
+		{
+			ThrowIfDisposed();
+			ct.ThrowIfCancellationRequested();
+
+			string fileName = NormalizeCloudPath( path );
+			if ( !SteamRemoteStorage.FileExists( fileName ) ) {
+				_cloudFiles.TryRemove( fileName, out _ );
+				return Task.FromResult<CloudStorageFileInfo?>( null );
+			}
+
+			if ( _cloudFiles.TryGetValue( fileName, out CloudStorageFileInfo info ) ) {
+				return Task.FromResult<CloudStorageFileInfo?>( info );
+			}
+
+			info = GetSteamFileInfo( fileName );
+			_cloudFiles[fileName] = info;
+			return Task.FromResult<CloudStorageFileInfo?>( info );
+		}
+
+		/*
+		===============
+		FileExistsAsync
+		===============
+		*/
+		/// <inheritdoc />
+		public Task<bool> FileExistsAsync( string path, CancellationToken ct = default )
+		{
+			ThrowIfDisposed();
+			ct.ThrowIfCancellationRequested();
+
+			string fileName = NormalizeCloudPath( path );
+			bool exists = IsEnabled && SteamRemoteStorage.FileExists( fileName );
+			if ( !exists ) {
+				_cloudFiles.TryRemove( fileName, out _ );
+			}
+
+			return Task.FromResult( exists );
+		}
+
+		/*
+		===============
+		OpenReadAsync
+		===============
+		*/
+		/// <inheritdoc />
+		public async Task<IFileReadStream> OpenReadAsync( string path, CancellationToken ct = default )
+		{
+			ThrowIfDisposed();
+			ct.ThrowIfCancellationRequested();
+			EnsureEnabled();
+
+			string fileName = NormalizeCloudPath( path );
+			if ( !SteamRemoteStorage.FileExists( fileName ) ) {
+				throw new FileNotFoundException( $"Steam cloud file '{fileName}' does not exist.", fileName );
+			}
+
+			int fileSize = SteamRemoteStorage.GetFileSize( fileName );
+			if ( fileSize < 0 ) {
+				throw new IOException( $"Steam returned an invalid size for cloud file '{fileName}'." );
+			}
+
+			byte[] data = new byte[fileSize];
+			if ( fileSize > 0 ) {
+				SteamAPICall_t readCall = SteamRemoteStorage.FileReadAsync( fileName, 0, (uint)fileSize );
+				RemoteStorageFileReadAsyncComplete_t result = await AwaitSteamCallAsync<RemoteStorageFileReadAsyncComplete_t>(
+					readCall,
+					nameof( SteamRemoteStorage.FileReadAsync ),
+					ct
+				).ConfigureAwait( false );
+
+				ThrowIfOperationFailed( result.m_eResult, $"read cloud file '{fileName}'" );
+
+				if ( !SteamRemoteStorage.FileReadAsyncComplete( result.m_hFileReadAsync, data, result.m_cubRead ) ) {
+					throw new IOException( $"Steam failed to complete async read for cloud file '{fileName}'." );
+				}
+
+				if ( result.m_cubRead < data.Length ) {
+					Array.Resize( ref data, (int)result.m_cubRead );
+				}
+			}
+
+			_cloudFiles[fileName] = GetSteamFileInfo( fileName );
+			return new SteamCloudReadStream( fileName, data );
+		}
+
+		/*
+		===============
+		WriteAsync
+		===============
+		*/
+		/// <inheritdoc />
+		public async Task WriteAsync( string path, IBufferHandle data, CancellationToken ct = default )
+		{
+			ThrowIfDisposed();
+			ArgumentGuard.ThrowIfNull( data );
+			ct.ThrowIfCancellationRequested();
+			EnsureEnabled();
+
+			string fileName = NormalizeCloudPath( path );
+			byte[] buffer = data.ToArray();
+
+			SteamAPICall_t writeCall = SteamRemoteStorage.FileWriteAsync( fileName, buffer, (uint)buffer.Length );
+			RemoteStorageFileWriteAsyncComplete_t result = await AwaitSteamCallAsync<RemoteStorageFileWriteAsyncComplete_t>(
+				writeCall,
+				nameof( SteamRemoteStorage.FileWriteAsync ),
+				ct
+			).ConfigureAwait( false );
+
+			ThrowIfOperationFailed( result.m_eResult, $"write cloud file '{fileName}'" );
+
+			_cloudFiles[fileName] = GetSteamFileInfo( fileName );
+		}
+
+		/*
+		===============
+		DeleteAsync
+		===============
+		*/
+		/// <inheritdoc />
+		public Task<bool> DeleteAsync( string path, CancellationToken ct = default )
+		{
+			ThrowIfDisposed();
+			ct.ThrowIfCancellationRequested();
+			EnsureEnabled();
+
+			string fileName = NormalizeCloudPath( path );
+			bool deleted = SteamRemoteStorage.FileDelete( fileName );
+			if ( deleted ) {
+				_cloudFiles.TryRemove( fileName, out _ );
+			}
+
+			return Task.FromResult( deleted );
+		}
+
+		/*
+		===============
+		SyncAsync
+		===============
+		*/
+		/// <inheritdoc />
+		public Task SyncAsync( CancellationToken ct = default )
+		{
+			ThrowIfDisposed();
+			ct.ThrowIfCancellationRequested();
+
+			RefreshCloudFileCache();
+			return Task.CompletedTask;
 		}
 
 		/*
@@ -112,160 +300,240 @@ namespace Nomad.OnlineServices.Steam.Private.Services
 		===============
 		*/
 		/// <summary>
-		///
+		/// Refreshes the metadata cache when Steam reports local remote-storage changes.
 		/// </summary>
-		/// <param name="pCallback"></param>
-		/// <param name="bIOFailure"></param>
-		private void OnFileChange( RemoteStorageLocalFileChange_t pCallback, bool bIOFailure )
+		/// <param name="callback"></param>
+		private void OnFileChange( RemoteStorageLocalFileChange_t callback )
 		{
-		}
+			_ = callback;
 
-		/*
-		===============
-		InitializeCloudFileCache
-		===============
-		*/
-		/// <summary>
-		///
-		/// </summary>
-		private void InitializeCloudFileCache()
-		{
-			int fileCount = SteamRemoteStorage.GetFileCount();
+			int changeCount = SteamRemoteStorage.GetLocalFileChangeCount();
+			for ( int i = 0; i < changeCount; i++ ) {
+				string fileName = SteamRemoteStorage.GetLocalFileChange(
+					i,
+					out ERemoteStorageLocalFileChange change,
+					out ERemoteStorageFilePathType pathType
+				);
 
-			for ( int i = 0; i < fileCount; i++ ) {
-				string fileName = SteamRemoteStorage.GetFileNameAndSize( i, out int fileSize );
+				if ( pathType != ERemoteStorageFilePathType.k_ERemoteStorageFilePathType_APIFilename || string.IsNullOrWhiteSpace( fileName ) ) {
+					continue;
+				}
 
-				DateTime cloudAccessTimestamp = DateTime.FromFileTimeUtc( SteamRemoteStorage.GetFileTimestamp( fileName ) );
-				FileInfo info = new FileInfo( fileName );
+				if ( change == ERemoteStorageLocalFileChange.k_ERemoteStorageLocalFileChange_FileDeleted ) {
+					_cloudFiles.TryRemove( fileName, out _ );
+					continue;
+				}
 
-				_cloudFiles.TryAdd( fileName, new CloudFile { CloudAccessTime = cloudAccessTimestamp, LocalAccessTime = info.LastAccessTimeUtc, Size = fileSize } );
-				_category.PrintLine( $"SteamCloudStorage.InitializeCloudFileCache: found file '{fileName}'" );
-			}
-		}
-
-		public async Task<CloudFile[]> ListFilesAsync( CancellationToken ct = default )
-		{
-			ct.ThrowIfCancellationRequested();
-			return _cloudFiles.Values.ToArray();
-		}
-
-		/*
-		===============
-		FileExists
-		===============
-		*/
-		/// <summary>
-		/// Checks if a file exists in cloud storage.
-		/// </summary>
-		/// <param name="fileName"></param>
-		/// <param name="ct"></param>
-		/// <returns></returns>
-		public async Task<bool> FileExists( string fileName, CancellationToken ct = default )
-		{
-			ct.ThrowIfCancellationRequested();
-			return _cloudFiles.ContainsKey( fileName );
-		}
-
-		/*
-		===============
-		ResolveConflict
-		===============
-		*/
-		/// <summary>
-		///
-		/// </summary>
-		/// <param name="fileName"></param>
-		/// <returns></returns>
-		public async ValueTask ResolveConflict( string fileName )
-		{
-			if ( !_cloudFiles.TryGetValue( fileName, out var cloudFile ) ) {
-				_category.PrintError( $"No such cloud file named '{fileName}'!" );
-				return;
-			}
-
-			IBufferHandle localFile = await _fileSystem.LoadFileAsync( fileName );
-
-
-		}
-
-		/*
-		===============
-		Synchronize
-		===============
-		*/
-		/// <summary>
-		/// Synchronizes local files with cloud storage.
-		/// </summary>
-		/// <returns></returns>
-		public async ValueTask Synchronize()
-		{
-			if ( !IsEnabled ) {
-				_category.PrintWarning( "Cloud storage is not enabled for this application." );
-				return;
-			}
-
-			int fileCount = SteamRemoteStorage.GetFileCount();
-			for ( int i = 0; i < fileCount; i++ ) {
-				string name = SteamRemoteStorage.GetFileNameAndSize( i, out int fileSize );
-				if ( _cloudFiles.TryGetValue( name, out CloudFile cloudFile ) ) {
-					// exists, resolve the conflict
-				} else {
-					// doesn't exist, download a local copy
+				if ( change == ERemoteStorageLocalFileChange.k_ERemoteStorageLocalFileChange_FileUpdated && SteamRemoteStorage.FileExists( fileName ) ) {
+					_cloudFiles[fileName] = GetSteamFileInfo( fileName );
 				}
 			}
+
+			RefreshCloudFileCache();
 		}
 
 		/*
 		===============
-		WriteFile
+		RefreshCloudFileCache
 		===============
 		*/
 		/// <summary>
-		///
+		/// Rebuilds cached Steam Remote Storage metadata.
+		/// </summary>
+		private void RefreshCloudFileCache()
+		{
+			_cloudFiles.Clear();
+
+			if ( !IsEnabled ) {
+				_category.PrintWarning( "Steam cloud storage is not enabled for this application or account." );
+				return;
+			}
+
+			int fileCount = SteamRemoteStorage.GetFileCount();
+			for ( int i = 0; i < fileCount; i++ ) {
+				string fileName = SteamRemoteStorage.GetFileNameAndSize( i, out _ );
+				if ( string.IsNullOrWhiteSpace( fileName ) ) {
+					continue;
+				}
+
+				_cloudFiles[fileName] = GetSteamFileInfo( fileName );
+				_category.PrintLine( $"SteamCloudStorage: found cloud file '{fileName}'." );
+			}
+		}
+
+		/*
+		===============
+		GetSteamFileInfo
+		===============
+		*/
+		/// <summary>
+		/// Gets a provider-neutral metadata snapshot for a Steam cloud file.
 		/// </summary>
 		/// <param name="fileName"></param>
 		/// <returns></returns>
-		public async ValueTask WriteFile( string fileName )
+		private static CloudStorageFileInfo GetSteamFileInfo( string fileName )
 		{
-			using var buffer = await _fileSystem.LoadFileAsync( fileName );
-			SteamRemoteStorage.FileWriteAsync( fileName, buffer.ToArray(), (uint)buffer.Length );
+			int fileSize = SteamRemoteStorage.GetFileSize( fileName );
+			long timestamp = SteamRemoteStorage.GetFileTimestamp( fileName );
+			DateTimeOffset? lastModified = timestamp > 0 ? DateTimeOffset.FromUnixTimeSeconds( timestamp ) : null;
 
-			await Synchronize();
+			return new CloudStorageFileInfo(
+				fileName,
+				fileSize,
+				lastModified,
+				SteamRemoteStorage.FilePersisted( fileName )
+			);
 		}
 
-		public ValueTask<bool> FileExists( string fileName )
+		/*
+		===============
+		AwaitSteamCallAsync
+		===============
+		*/
+		/// <summary>
+		/// Converts a Steam CallResult into a task.
+		/// </summary>
+		/// <typeparam name="TCallback"></typeparam>
+		/// <param name="call"></param>
+		/// <param name="operationName"></param>
+		/// <param name="ct"></param>
+		/// <returns></returns>
+		private static Task<TCallback> AwaitSteamCallAsync<TCallback>( SteamAPICall_t call, string operationName, CancellationToken ct )
+			where TCallback : struct
 		{
-			throw new NotImplementedException();
+			ct.ThrowIfCancellationRequested();
+			SteamApiGuard.ThrowIfInvalidCall( call, operationName );
+
+			TaskCompletionSource<TCallback> tcs = new TaskCompletionSource<TCallback>(
+				TaskCreationOptions.RunContinuationsAsynchronously
+			);
+
+			CallResult<TCallback>? callResult = null;
+			CancellationTokenRegistration registration = default;
+
+			CallResult<TCallback>.APIDispatchDelegate callback = ( result, ioFailure ) => {
+				registration.Dispose();
+				callResult?.Dispose();
+
+				if ( ioFailure ) {
+					tcs.TrySetException( new IOException( $"{operationName} failed with Steam IO failure." ) );
+					return;
+				}
+
+				tcs.TrySetResult( result );
+			};
+
+			callResult = CallResult<TCallback>.Create( callback );
+			if ( ct.CanBeCanceled ) {
+				registration = ct.Register( () => {
+					callResult.Cancel();
+					callResult.Dispose();
+					tcs.TrySetCanceled( ct );
+				} );
+			}
+
+			callResult.Set( call, callback );
+			return tcs.Task;
 		}
 
-		public ValueTask ResolveConflict( string fileName, IBufferHandle localData, IBufferHandle cloudData )
+		/*
+		===============
+		ThrowIfOperationFailed
+		===============
+		*/
+		/// <summary>
+		/// Converts a Steam operation result into a framework exception.
+		/// </summary>
+		/// <param name="result"></param>
+		/// <param name="operationDescription"></param>
+		/// <exception cref="IOException"></exception>
+		private static void ThrowIfOperationFailed( EResult result, string operationDescription )
 		{
-			throw new NotImplementedException();
+			if ( result.IsSuccess() ) {
+				return;
+			}
+
+			throw new IOException( $"Steam failed to {operationDescription}: {result.ToDiagnosticString()}" );
 		}
 
-		public Task<bool> FileExistsAsync( string path, CancellationToken ct = default )
+		/*
+		===============
+		EnsureEnabled
+		===============
+		*/
+		/// <summary>
+		/// Ensures the active Steam user and app can use remote storage.
+		/// </summary>
+		/// <exception cref="InvalidOperationException"></exception>
+		private static void EnsureEnabled()
 		{
-			throw new NotImplementedException();
+			if ( !IsEnabled ) {
+				throw new InvalidOperationException( "Steam cloud storage is not enabled for this application or account." );
+			}
 		}
 
-		public Task<IFileReadStream> OpenReadAsync( string path, CancellationToken ct = default )
+		/*
+		===============
+		ThrowIfDisposed
+		===============
+		*/
+		/// <summary>
+		/// Guards public methods after disposal.
+		/// </summary>
+		private void ThrowIfDisposed()
 		{
-			throw new NotImplementedException();
+			if ( _isDisposed ) {
+				throw new ObjectDisposedException( nameof( SteamCloudStorageService ) );
+			}
 		}
 
-		public Task WriteAsync( string path, IBufferHandle data, CancellationToken ct = default )
+		/*
+		===============
+		NormalizeCloudPath
+		===============
+		*/
+		/// <summary>
+		/// Normalizes a portable provider-relative cloud path.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		private static string NormalizeCloudPath( string path )
 		{
-			throw new NotImplementedException();
+			if ( path == null ) {
+				throw new ArgumentNullException( nameof( path ) );
+			}
+
+			string normalized = path.Trim().Replace( '\\', '/' );
+			if ( normalized.Length == 0 ) {
+				throw new ArgumentException( "Cloud storage path cannot be empty.", nameof( path ) );
+			}
+
+			if ( Path.IsPathRooted( normalized ) || normalized.StartsWith( "/", StringComparison.Ordinal ) ) {
+				throw new ArgumentException( "Cloud storage paths must be provider-relative.", nameof( path ) );
+			}
+
+			string[] segments = normalized.Split( '/' );
+			for ( int i = 0; i < segments.Length; i++ ) {
+				string segment = segments[i];
+				if ( segment.Length == 0 || segment == "." || segment == ".." ) {
+					throw new ArgumentException( "Cloud storage paths cannot contain empty, current, or parent segments.", nameof( path ) );
+				}
+			}
+
+			return normalized;
 		}
 
-		public Task<bool> DeleteAsync( string path, CancellationToken ct = default )
-		{
-			throw new NotImplementedException();
-		}
-
-		public Task SyncAsync( CancellationToken ct = default )
-		{
-			throw new NotImplementedException();
-		}
+		/*
+		===============
+		ClampUInt64ToInt64
+		===============
+		*/
+		/// <summary>
+		/// Clamps Steam unsigned quota values to the framework's signed size type.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		private static long ClampUInt64ToInt64( ulong value )
+			=> value > long.MaxValue ? long.MaxValue : (long)value;
 	};
 };

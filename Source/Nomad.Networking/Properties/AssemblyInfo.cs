@@ -23,3 +23,4 @@ using System.Runtime.CompilerServices;
 	VersionPatch = 0
 )]
 [assembly: InternalsVisibleTo( "Nomad.Networking.Tests" )]
+[assembly: InternalsVisibleTo( "Nomad.Tests" )]

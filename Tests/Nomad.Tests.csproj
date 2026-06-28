@@ -37,6 +37,7 @@
     <ProjectReference Include="..\Source\Nomad.Save\Nomad.Save.csproj" />
     <ProjectReference Include="..\Source\Nomad.Events\Nomad.Events.csproj" />
     <ProjectReference Include="..\Source\Nomad.Input\Nomad.Input.csproj" />
+    <ProjectReference Include="..\Source\Nomad.Networking\Nomad.Networking.csproj" />
     <ProjectReference Include="..\Source\Nomad.OnlineServices.Steam\Nomad.OnlineServices.Steam.csproj" />
   </ItemGroup>
 

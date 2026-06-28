@@ -116,10 +116,10 @@ namespace Nomad.Input.Private.Services
 					);
 
 					int scoreBase = ComputeScoreBase(
-						priority: 0,
+						priority: bindingDef.Priority,
 						modifierCount: modifierCount,
 						exactScheme: true,
-						consumesInput: false
+						consumesInput: bindingDef.ConsumesInput
 					);
 
 					var binding = new CompiledBinding(
@@ -129,10 +129,10 @@ namespace Nomad.Input.Private.Services
 						valueType: action.ValueType,
 						kind: bindingDef.Kind,
 						scheme: bindingDef.Scheme,
-						priority: 0,
+						priority: bindingDef.Priority,
 						scoreBase: scoreBase,
-						consumesInput: false,
-						contextMask: 0xFFFFFFFF,
+						consumesInput: bindingDef.ConsumesInput,
+						contextMask: bindingDef.ContextMask,
 						modifierMask0: modifierMask0,
 						modifierMask1: modifierMask1,
 						modifierMask2: modifierMask2,

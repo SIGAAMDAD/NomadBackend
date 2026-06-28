@@ -58,6 +58,9 @@ namespace Nomad.EngineUtils.Settings.Services
             var maxChannels = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.MAX_ACTIVE_CHANNELS);
             maxChannels.Value = config.MaxChannels;
 
+            var masterVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.MASTER_VOLUME);
+            masterVolume.Value = config.MasterVolume;
+
             var musicVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.MUSIC_VOLUME);
             musicVolume.Value = config.MusicVolume;
 
@@ -81,6 +84,7 @@ namespace Nomad.EngineUtils.Settings.Services
             OutputDeviceIndex = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.OUTPUT_DEVICE_INDEX).Value,
             SpeakerMode = cvarSystem.GetCVarOrThrow<SpeakerMode>(Core.Constants.CVars.EngineUtils.Audio.SPEAKER_MODE).Value,
             MaxChannels = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.MAX_ACTIVE_CHANNELS).Value,
+            MasterVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.MASTER_VOLUME).Value,
             MusicVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.MUSIC_VOLUME).Value,
             SoundEffectsVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.EFFECTS_VOLUME).Value,
             MusicOn = cvarSystem.GetCVarOrThrow<bool>(Core.Constants.CVars.EngineUtils.Audio.MUSIC_ON).Value,
@@ -97,6 +101,7 @@ namespace Nomad.EngineUtils.Settings.Services
             OutputDeviceIndex = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.OUTPUT_DEVICE_INDEX).DefaultValue,
             SpeakerMode = cvarSystem.GetCVarOrThrow<SpeakerMode>(Core.Constants.CVars.EngineUtils.Audio.SPEAKER_MODE).DefaultValue,
             MaxChannels = cvarSystem.GetCVarOrThrow<int>(Core.Constants.CVars.EngineUtils.Audio.MAX_ACTIVE_CHANNELS).DefaultValue,
+            MasterVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.MASTER_VOLUME).DefaultValue,
             MusicVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.MUSIC_VOLUME).DefaultValue,
             SoundEffectsVolume = cvarSystem.GetCVarOrThrow<float>(Core.Constants.CVars.EngineUtils.Audio.EFFECTS_VOLUME).DefaultValue,
             MusicOn = cvarSystem.GetCVarOrThrow<bool>(Core.Constants.CVars.EngineUtils.Audio.MUSIC_ON).DefaultValue,

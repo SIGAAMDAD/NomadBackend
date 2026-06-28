@@ -55,6 +55,9 @@ namespace Nomad.Input.Extensions
             {
                 Scheme = binding.Scheme,
                 Kind = binding.Kind,
+                Priority = binding.Priority,
+                ConsumesInput = binding.ConsumesInput,
+                ContextMask = binding.ContextMask,
                 Button = binding.Button.Clone(),
                 Axis1D = binding.Axis1D.Clone(),
                 Axis1DComposite = binding.Axis1DComposite.Clone(),
@@ -82,7 +85,11 @@ namespace Nomad.Input.Extensions
                 return false;
             }
 
-            if (left.Scheme != right.Scheme || left.Kind != right.Kind)
+            if (left.Scheme != right.Scheme
+                || left.Kind != right.Kind
+                || left.Priority != right.Priority
+                || left.ConsumesInput != right.ConsumesInput
+                || left.ContextMask != right.ContextMask)
             {
                 return false;
             }

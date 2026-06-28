@@ -27,6 +27,9 @@ namespace Nomad.Input.ValueObjects
 
         public InputScheme Scheme { get; set; }
         public InputBindingKind Kind { get; set; }
+        public int Priority { get; set; }
+        public bool ConsumesInput { get; set; }
+        public uint ContextMask { get; set; } = uint.MaxValue;
 
         public ButtonBinding Button = default;
         public Axis1DBinding Axis1D = default;

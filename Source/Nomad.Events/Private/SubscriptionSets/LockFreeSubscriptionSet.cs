@@ -164,48 +164,18 @@ namespace Nomad.Events.Private.SubscriptionSets
 		public override void Pump( in TArgs args )
 		{
 			ThrowIfDisposed();
-			if ( _genericSubscriptions.Count == 0 ) {
-				return;
-			}
 
 			List<EventHandlerException>? failures = null;
 
-			int count = _genericSubscriptions.Count;
-			switch ( count ) {
-				case 1:
-					PumpEvent( _genericSubscriptions[0], 0, in args, failures );
-					break;
-
-				case 2:
-					PumpEvent( _genericSubscriptions[0], 0, in args, failures );
-					PumpEvent( _genericSubscriptions[1], 1, in args, failures );
-					break;
-
-				case 3:
-					PumpEvent( _genericSubscriptions[0], 0, in args, failures );
-					PumpEvent( _genericSubscriptions[1], 1, in args, failures );
-					PumpEvent( _genericSubscriptions[2], 2, in args, failures );
-					break;
-
-				case 4:
-					PumpEvent( _genericSubscriptions[0], 0, in args, failures );
-					PumpEvent( _genericSubscriptions[1], 1, in args, failures );
-					PumpEvent( _genericSubscriptions[2], 2, in args, failures );
-					PumpEvent( _genericSubscriptions[3], 3, in args, failures );
-					break;
-
-				default:
-					for ( int i = 0; i < count; i++ ) {
-						PumpEvent( _genericSubscriptions[i], i, in args, failures );
-					}
-					break;
+			for ( int i = 0; i < _genericSubscriptions.Count; i++ ) {
+				PumpEvent( _genericSubscriptions[i], i, in args, ref failures );
 			}
 
 			IncrementPublishCount();
 			CheckAggregateException( failures );
 		}
 
-		private void PumpEvent( EventCallback<TArgs> callback, int index, in TArgs args, List<EventHandlerException> failures )
+		private void PumpEvent( EventCallback<TArgs> callback, int index, in TArgs args, ref List<EventHandlerException> failures )
 		{
 			var ex = InvokeCallback( callback, index, in args );
 			if ( ex != null ) {

@@ -114,7 +114,10 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 				Map = SteamMatchmaking.GetLobbyData( _id, nameof( LobbyInfo.Map ) ),
 				GameMode = SteamMatchmaking.GetLobbyData( _id, nameof( LobbyInfo.GameMode ) ),
 				OwnerId = (ulong)SteamMatchmaking.GetLobbyOwner( _id ),
-				PlayerCount = SteamMatchmaking.GetNumLobbyMembers( _id )
+				MaxPlayers = SteamMatchmaking.GetLobbyMemberLimit( _id ),
+				PlayerCount = SteamMatchmaking.GetNumLobbyMembers( _id ),
+				Visibility = ParseVisibility( SteamMatchmaking.GetLobbyData( _id, nameof( LobbyInfo.Visibility ) ) ),
+				Metadata = GetMetadata( _id )
 			};
 			_lastSeenTime = DateTime.UtcNow;
 		}
@@ -136,8 +139,34 @@ namespace Nomad.OnlineServices.Steam.Private.ValueObjects
 				Map = SteamMatchmaking.GetLobbyData( id, nameof( LobbyInfo.Map ) ),
 				GameMode = SteamMatchmaking.GetLobbyData( id, nameof( LobbyInfo.GameMode ) ),
 				MaxPlayers = SteamMatchmaking.GetLobbyMemberLimit( id ),
-				OwnerId = (ulong)SteamMatchmaking.GetLobbyOwner( id )
+				OwnerId = (ulong)SteamMatchmaking.GetLobbyOwner( id ),
+				PlayerCount = SteamMatchmaking.GetNumLobbyMembers( id ),
+				Visibility = ParseVisibility( SteamMatchmaking.GetLobbyData( id, nameof( LobbyInfo.Visibility ) ) ),
+				Metadata = GetMetadata( id )
 			};
+		}
+
+		private static LobbyVisibility ParseVisibility( string value )
+		{
+			return Enum.TryParse( value, ignoreCase: true, out LobbyVisibility visibility )
+				? visibility
+				: LobbyVisibility.Public;
+		}
+
+		private static IReadOnlyDictionary<string, string> GetMetadata( CSteamID id )
+		{
+			int count = SteamMatchmaking.GetLobbyDataCount( id );
+			var metadata = new Dictionary<string, string>( count, StringComparer.Ordinal );
+
+			for ( int i = 0; i < count; i++ ) {
+				string key = string.Empty;
+				string value = string.Empty;
+				if ( SteamMatchmaking.GetLobbyDataByIndex( id, i, out key, 255, out value, 4096 ) ) {
+					metadata[key] = value;
+				}
+			}
+
+			return metadata;
 		}
 	};
 };

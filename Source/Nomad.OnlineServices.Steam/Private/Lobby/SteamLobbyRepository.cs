@@ -118,7 +118,10 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 		public void AddLobby( SteamLobbyKey id )
 		{
 			if ( !_lobbyList.TryGetValue( id, out SteamLobbyData? value ) ) {
-				_lobbyList.TryAdd( id, new SteamLobbyData( id.Id, SteamLobbyData.GetInfo( id.Id ), id.Guid ) );
+				var lobby = new SteamLobbyData( id.Id, SteamLobbyData.GetInfo( id.Id ), id.Guid );
+				_idToSteam[id.Guid] = id.Id;
+				_steamId64ToId[id.Id] = id.Guid;
+				_lobbyList.TryAdd( id, lobby );
 			} else {
 				lock ( value ) {
 					value.Update();
@@ -215,7 +218,10 @@ namespace Nomad.OnlineServices.Steam.Private.Lobby
 				}
 			}
 			for ( int i = 0; i < toRemove.Count; i++ ) {
-				_lobbyList.TryRemove( toRemove[i], out _ );
+				if ( _lobbyList.TryRemove( toRemove[i], out _ ) ) {
+					_idToSteam.TryRemove( toRemove[i].Guid, out _ );
+					_steamId64ToId.TryRemove( toRemove[i].Id, out _ );
+				}
 			}
 		}
 	};
