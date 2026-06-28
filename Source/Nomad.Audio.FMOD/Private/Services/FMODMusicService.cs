@@ -14,7 +14,6 @@ of merchantability, fitness for a particular purpose and noninfringement.
 */
 
 using System;
-using System.Collections.Generic;
 using Nomad.Audio.Fmod.Private.Entities;
 using Nomad.Audio.Fmod.Private.ValueObjects;
 using Nomad.Audio.Interfaces;
@@ -44,7 +43,6 @@ namespace Nomad.Audio.Fmod.Private.Services
 		private readonly FMODChannelResource _queuedTheme;
 
 		private readonly IResourceCacheService<IAudioResource, string> _eventRepository;
-		private readonly Queue<FMODChannel> _loopingTracks = new Queue<FMODChannel>();
 
 		/*
 		===============
